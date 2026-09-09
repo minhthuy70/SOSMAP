@@ -1,0 +1,11 @@
+.DS_Store
+# Ignore lock acquired by Libre office
+.~lock*
+
+.vscode
+dataset-generation-scripts/output/*
+# Large GIS SQL files
+dataset-generation-scripts/resources/gis/exported/*.sql
+mysql/gis/*ImportData_gis.sql
+postgresql/gis/*ImportData_gis.sql
+sqlserver/gis/*ImportData_gis.sql

@@ -1,0 +1,194 @@
+package dataset_writer
+
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"time"
+
+	sapnhapmodels "github.com/thanglequoc-vn-provinces/v2/internal/sapnhap_bando/model"
+	"github.com/thanglequoc-vn-provinces/v2/internal/vn_provinces_tmp/model"
+)
+
+type MssqlDatasetFileWriter struct {
+	OutputFilePath string
+}
+
+// region insert statement
+const insertAdministrativeRegionTemplateMsSql string = "INSERT INTO administrative_regions(id,name,name_en,code_name,code_name_en) VALUES(%d,N'%s',N'%s',N'%s',N'%s');"
+
+// administrative_unit insert_statement
+const insertAdministrativeUnitMsSqlTemplate string = "INSERT INTO administrative_units(id,full_name,full_name_en,short_name,short_name_en,code_name,code_name_en) VALUES(%d,N'%s',N'%s',N'%s',N'%s',N'%s',N'%s');"
+
+// province insert statement
+const insertProvinceValueMsSqlTemplate string = "('%s',N'%s',N'%s',N'%s',N'%s','%s',%d)"
+const insertProvinceWardValueMsSqlTemplate string = "('%s',N'%s',N'%s',N'%s',N'%s','%s','%s',%d)"
+
+// GIS section
+const insertMssqlGISProvinceTemplate string = "INSERT INTO gis_provinces(province_code, gis_server_id, area_km2, bbox, geom) VALUES ('%s','%s',%f,geometry::STGeomFromText('%s', 4326),geometry::STGeomFromText('%s', 4326));"
+const insertMssqlGISWardTemplate string = "INSERT INTO gis_wards(ward_code, gis_server_id, area_km2, bbox, geom) VALUES"
+const insertMssqlGISWardValueTemplate string = "('%s','%s',%f,geometry::STGeomFromText('%s', 4326),geometry::STGeomFromText('%s', 4326))"
+
+func (w *MssqlDatasetFileWriter) WriteToFile(
+	regions []model.AdministrativeRegion,
+	administrativeUnits []model.AdministrativeUnit,
+	provinces []model.Province,
+	wards []model.Ward) error {
+
+	fileTimeSuffix := getFileTimeSuffix()
+	outputFilePath := fmt.Sprintf(w.OutputFilePath, fileTimeSuffix)
+
+	fileMsSql, err := os.OpenFile(outputFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal("Unable to write to file", err)
+		panic(err)
+	}
+
+	dataWriterMsSql := bufio.NewWriter(fileMsSql)
+	dataWriterMsSql.WriteString("/* === Vietnamese Provinces Database Dataset for Microsoft SQL Server === */\n")
+	dataWriterMsSql.WriteString(fmt.Sprintf("/* Created at:  %s */\n", time.Now().Format(time.RFC1123Z)))
+	dataWriterMsSql.WriteString("/* Reference: https://github.com/ThangLeQuoc/vietnamese-provinces-database */\n")
+	dataWriterMsSql.WriteString("/* =============================================== */\n\n")
+
+	dataWriterMsSql.WriteString("-- DATA for administrative_regions --\n")
+	for _, r := range regions {
+		insertLineMsSql := fmt.Sprintf(insertAdministrativeRegionTemplateMsSql,
+			r.Id, r.Name, r.NameEn, r.CodeName, r.CodeNameEn)
+		dataWriterMsSql.WriteString(insertLineMsSql + "\n")
+	}
+	dataWriterMsSql.WriteString("-- ----------------------------------\n\n")
+
+	dataWriterMsSql.WriteString("-- DATA for administrative_units --\n")
+
+	for _, u := range administrativeUnits {
+		insertLineMsSql := fmt.Sprintf(insertAdministrativeUnitMsSqlTemplate,
+			u.Id, u.FullName, u.FullNameEn, u.ShortName, u.ShortNameEn, u.CodeName, u.CodeNameEn)
+		dataWriterMsSql.WriteString(insertLineMsSql + "\n")
+	}
+	dataWriterMsSql.WriteString("-- ----------------------------------\n\n")
+
+	// variable to generate batch insert statement
+	counter := 0
+	isAppending := false
+
+	dataWriterMsSql.WriteString("-- DATA for provinces --\n")
+	for i, p := range provinces {
+		if !isAppending {
+			dataWriterMsSql.WriteString(insertProvinceTemplate + "\n")
+		}
+		dataWriterMsSql.WriteString(
+			fmt.Sprintf(insertProvinceValueMsSqlTemplate, p.Code, escapeSingleQuote(p.Name), escapeSingleQuote(p.NameEn), escapeSingleQuote(p.FullName),
+				escapeSingleQuote(p.FullNameEn), p.CodeName, p.AdministrativeUnitId))
+		counter++
+
+		// the batch insert statement batch reach limit, break and create a new batch insert statement
+		if counter == batchInsertItemSize || i == len(provinces)-1 {
+			isAppending = false
+			dataWriterMsSql.WriteString(";\n\n")
+			counter = 0 // reset counter
+		} else {
+			dataWriterMsSql.WriteString(",\n")
+			isAppending = true
+		}
+	}
+	dataWriterMsSql.WriteString("-- ----------------------------------\n\n")
+
+	dataWriterMsSql.WriteString("-- DATA for wards --\n")
+	counter = 0
+	isAppending = false
+	for i, w := range wards {
+		if !isAppending {
+			dataWriterMsSql.WriteString(insertWardTemplate + "\n")
+		}
+		dataWriterMsSql.WriteString(
+			fmt.Sprintf(insertProvinceWardValueMsSqlTemplate, w.Code, escapeSingleQuote(w.Name), escapeSingleQuote(w.NameEn), escapeSingleQuote(w.FullName),
+				escapeSingleQuote(w.FullNameEn), w.CodeName, w.ProvinceCode, w.AdministrativeUnitId))
+		counter++
+
+		// the batch insert statement batch reach limit, break and create a new batch insert statement
+		if counter == batchInsertItemSize || i == len(wards)-1 {
+			isAppending = false
+			dataWriterMsSql.WriteString(";\n\n")
+			counter = 0 // reset counter
+		} else {
+			dataWriterMsSql.WriteString(",\n")
+			isAppending = true
+		}
+	}
+	dataWriterMsSql.WriteString("-- ----------------------------------\n")
+	dataWriterMsSql.WriteString("-- END OF SCRIPT FILE --\n")
+	dataWriterMsSql.Flush()
+	fileMsSql.Close()
+
+	return nil
+}
+
+func (w *MssqlDatasetFileWriter) WriteGISDataToFile(sapNhapProvincesGIS []sapnhapmodels.SapNhapProvinceGIS, sapNhapWardsGIS []sapnhapmodels.SapNhapWardGIS) error {
+	fileTimeSuffix := getFileTimeSuffix()
+
+	gisOutputFolderPath := "./output/gis"
+	err := os.MkdirAll(gisOutputFolderPath, os.ModePerm)
+	if err != nil {
+		log.Fatal("Unable to create output folder", err)
+		return err
+	}
+
+	mssqlGISFilePath := fmt.Sprintf(gisOutputFolderPath+"/mssql_ImportData_gis_%s.sql", fileTimeSuffix)
+	mssqlGISFile, err := os.OpenFile(mssqlGISFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal("Unable to write to file", err)
+		return err
+	}
+	defer mssqlGISFile.Close()
+
+	mssqlScriptDataWriter := bufio.NewWriter(mssqlGISFile)
+	mssqlScriptDataWriter.WriteString("/* === Vietnamese Provinces Database GIS Dataset for Microsoft SQL Server === */\n")
+	mssqlScriptDataWriter.WriteString(fmt.Sprintf("/* Created at:  %s */\n", time.Now().Format(time.RFC1123Z)))
+	mssqlScriptDataWriter.WriteString("/* Reference: https://github.com/ThangLeQuoc/vietnamese-provinces-database */\n")
+	mssqlScriptDataWriter.WriteString("/* =============================================== */\n\n")
+
+	mssqlScriptDataWriter.WriteString("-- DATA for gis_provinces --\n")
+	for _, p := range sapNhapProvincesGIS {
+		vnProvinceCode := p.SapNhapSiteProvince.VNProvinceCode
+		areaKm2, err := parseEuropeanFloat(p.SapNhapSiteProvince.DienTichKm2)
+		if err != nil {
+			log.Panicf("Unable to parse area km2 for province %s, value: %s", vnProvinceCode, p.SapNhapSiteProvince.DienTichKm2)
+		}
+		mssqlInsertLine := fmt.Sprintf(insertMssqlGISProvinceTemplate+"\n",
+			vnProvinceCode, p.GISServerID, areaKm2, p.BBoxWKT, p.GeomWKT)
+		mssqlScriptDataWriter.WriteString(mssqlInsertLine)
+	}
+	mssqlScriptDataWriter.WriteString("-- ----------------------------------\n\n")
+
+	mssqlScriptDataWriter.WriteString("-- DATA for gis_wards --\n")
+	counter := 0
+	isAppending := false
+
+	for i, w := range sapNhapWardsGIS {
+		if !isAppending {
+			mssqlScriptDataWriter.WriteString(insertMssqlGISWardTemplate + "\n")
+		}
+		
+		vnWardCode := w.SapNhapSiteWard.VNWardCode
+		mssqlInsertLine := fmt.Sprintf(insertMssqlGISWardValueTemplate,
+			vnWardCode, w.GISServerID, w.SapNhapSiteWard.DienTichKm2, w.BBoxWKT, w.GeomWKT)
+		mssqlScriptDataWriter.WriteString(mssqlInsertLine)
+		counter++
+
+		// the batch insert statement batch reach limit, break and create a new batch insert statement
+		if counter == batchInsertItemSize || i == len(sapNhapWardsGIS)-1 {
+			isAppending = false
+			mssqlScriptDataWriter.WriteString(";\n\nGO\n\n")
+			counter = 0 // reset counter
+		} else {
+			mssqlScriptDataWriter.WriteString(",\n")
+			isAppending = true
+		}
+	}
+	mssqlScriptDataWriter.WriteString("-- ----------------------------------\n\n")
+	mssqlScriptDataWriter.WriteString("-- END OF SCRIPT FILE --\n")
+	mssqlScriptDataWriter.Flush()
+
+	return nil
+}

@@ -1,0 +1,19 @@
+{
+  "name": "bando-gis-scraper",
+  "version": "1.0.0",
+  "main": "src/main.ts",
+  "description": "Playwright scraper for Vietnamese administrative GIS data",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.54.2",
+    "@types/node": "^24.1.0",
+    "ts-node": "^10.9.2"
+  },
+  "scripts": {
+    "dev": "ts-node src/main.ts",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed"
+  }
+}
