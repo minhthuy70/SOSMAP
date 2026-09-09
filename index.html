@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>SOS Map</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+  <!-- Thanh menu -->
+  <header class="navbar">
+    <h1>SOS MAP</h1>
+    <nav>
+      <a href="#">Trang chủ</a>
+      <a href="#">Bản đồ</a>
+      <a href="#">Phản ánh</a>
+      <a href="#">Giới thiệu</a>
+    </nav>
+  </header>
+
+  <!-- Nội dung chính -->
+  <main class="container">
+    <div id="map"></div>
+    <aside class="sidebar">
+      <h2>Tình trạng giao thông</h2>
+      <p><span class="live">LIVE</span> Cập nhật: <span id="time"></span></p>
+      <div id="status">Dữ liệu đang cập nhật...</div>
+    </aside>
+  </main>
+  
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

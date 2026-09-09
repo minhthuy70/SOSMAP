@@ -1,0 +1,49 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body, html {
+  height: 100%;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #005BAC;
+  color: white;
+  padding: 10px 20px;
+}
+
+.navbar nav a {
+  color: white;
+  margin-left: 15px;
+  text-decoration: none;
+}
+
+.container {
+  display: flex;
+  height: calc(100vh - 60px); /* Trừ chiều cao navbar */
+}
+
+#map {
+  flex: 3;
+  height: 100%;
+}
+
+.sidebar {
+  flex: 1;
+  background: #f7f7f7;
+  padding: 20px;
+  border-left: 1px solid #ddd;
+  overflow-y: auto;
+}
+
+.live {
+  color: red;
+  font-weight: bold;
+}
+
