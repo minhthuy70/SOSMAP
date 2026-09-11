@@ -1,0 +1,276 @@
+DANH SACH TINH NANG CHI TIET CHO HE THONG SOSMAP
+He thong ban do tiep nhan va hien thi phan anh su co giao thong
+================================================================================
+
+QUY UOC
+[x] - Tinh nang da co trong phien ban hien tai
+[ ] - Tinh nang de xuat hoac can tiep tuc phat trien
+
+1. GIAO DIEN TONG QUAN (USER INTERFACE)
+
+1.1. Thanh dieu huong (Navigation Bar)
+[x] - Hien thi ten he thong SOS MAP
+[x] - Hien thi lien ket Trang chu
+[x] - Hien thi lien ket Ban do
+[x] - Hien thi lien ket Phan anh
+[x] - Hien thi lien ket Gioi thieu
+[ ] - Dieu huong den dung khu vuc noi dung khi chon lien ket
+[ ] - Hien thi muc dang duoc chon trong thanh dieu huong
+[ ] - Hien thi menu rut gon tren thiet bi di dong
+
+1.2. Bo cuc man hinh
+[x] - Hien thi ban do o khu vuc noi dung chinh
+[x] - Hien thi thanh ben thong tin tinh trang giao thong
+[x] - Chia khu vuc ban do va thanh ben theo ty le dien tich
+[x] - Thanh ben co kha nang cuon khi noi dung vuot qua chieu cao man hinh
+[ ] - Bo cuc dap ung cho dien thoai, may tinh bang va may tinh
+[ ] - Che do toan man hinh cho ban do
+[ ] - Dieu chinh kich thuoc thanh ben bang thao tac keo tha
+
+================================================================================
+
+2. BAN DO TUONG TAC (INTERACTIVE MAP)
+
+2.1. Nen ban do
+[x] - Khoi tao ban do bang thu vien Leaflet
+[x] - Hien thi nen ban do OpenStreetMap
+[x] - Dat vi tri mac dinh tai Thanh pho Ho Chi Minh
+[x] - Dat muc phong mac dinh cho khu vuc Thanh pho Ho Chi Minh
+[x] - Hien thi thong tin ban quyen va nguon du lieu ban do
+[ ] - Ho tro chuyen doi giua ban do duong pho va anh ve tinh
+[ ] - Ho tro nhieu nha cung cap ban do
+[ ] - Hien thi du lieu ban do khi mat ket noi mang
+
+2.2. Dieu khien ban do
+[ ] - Phong to va thu nho ban do
+[ ] - Di chuyen ban do bang chuot va thao tac cam ung
+[ ] - Xac dinh vi tri hien tai cua nguoi dung
+[ ] - Dua ban do ve vi tri hien tai
+[ ] - Tim kiem dia diem, dia chi hoac toa do
+[ ] - Loc su co theo loai, muc do va thoi gian
+[ ] - Hien thi chu giai cho cac ky hieu tren ban do
+[ ] - Do khoang cach giua hai vi tri
+
+2.3. Hien thi diem su co
+[x] - Hien thi marker tren ban do cho mot su co mau
+[x] - Hien thi popup khi nguoi dung chon marker
+[x] - Hien thi noi dung thong bao su co trong popup
+[ ] - Phan loai marker theo loai su co giao thong
+[ ] - Dung mau sac khac nhau cho tung loai su co
+[ ] - Hien thi nhieu marker tu danh sach su co
+[ ] - Gom nhom cac marker gan nhau khi thu nho ban do
+[ ] - Cap nhat marker theo du lieu moi ma khong can tai lai trang
+
+================================================================================
+
+3. THEO DOI TINH TRANG GIAO THONG (TRAFFIC STATUS)
+
+3.1. Thong tin cap nhat
+[x] - Hien thi tieu de Tinh trang giao thong
+[x] - Hien thi nhan LIVE cho khu vuc du lieu cap nhat
+[x] - Hien thi thoi gian cap nhat hien tai
+[x] - Cap nhat thoi gian hien thi moi giay
+[x] - Hien thi thong bao khi du lieu dang duoc cap nhat
+[ ] - Hien thi thoi diem cap nhat cuoi cung cua du lieu giao thong
+[ ] - Hien thi trang thai ket noi den nguon du lieu
+[ ] - Hien thi thong bao loi khi khong the tai du lieu
+
+3.2. Muc do giao thong
+[ ] - Hien thi muc do giao thong theo khu vuc
+[ ] - Phan loai luu thong binh thuong, dong, un tac va nguy hiem
+[ ] - Hien thi mau sac tuong ung voi tung muc do
+[ ] - Hien thi toc do di chuyen trung binh
+[ ] - Hien thi thoi gian di chuyen uoc tinh
+[ ] - Hien thi cac tuyen duong dang bi han che luu thong
+[ ] - Hien thi canh bao khi phat hien un tac bat thuong
+
+================================================================================
+
+4. TIEP NHAN PHAN ANH SU CO (INCIDENT REPORTING)
+
+4.1. Tao phan anh
+[ ] - Mo form phan anh tu muc Phan anh tren thanh dieu huong
+[ ] - Chon loai su co: o ga, tai nan, ngap nuoc, vat can, ket xe hoac su co khac
+[ ] - Nhap tieu de va noi dung phan anh
+[ ] - Chon vi tri su co tren ban do
+[ ] - Lay vi tri su co tu GPS cua thiet bi
+[ ] - Tai anh minh chung cho phan anh
+[ ] - Tai video minh chung cho phan anh
+[ ] - Nhap thong tin lien he cua nguoi phan anh
+[ ] - Gui phan anh den he thong
+[ ] - Kiem tra du lieu bat buoc truoc khi gui
+[ ] - Hien thi ma so phan anh sau khi gui thanh cong
+
+4.2. Quan ly phan anh cua nguoi dung
+[ ] - Hien thi danh sach phan anh da gui
+[ ] - Xem chi tiet mot phan anh
+[ ] - Theo doi trang thai xu ly phan anh
+[ ] - Cho phep bo sung thong tin cho phan anh
+[ ] - Cho phep chinh sua phan anh khi chua duoc tiep nhan
+[ ] - Cho phep huy phan anh
+[ ] - Hien thi lich su thay doi trang thai phan anh
+[ ] - Gui thong bao khi phan anh duoc tiep nhan hoac xu ly
+
+4.3. Xac minh phan anh
+[ ] - Danh dau phan anh trung lap
+[ ] - Danh dau phan anh khong hop le
+[ ] - Danh dau phan anh da duoc xac minh
+[ ] - Hien thi muc do tin cay cua phan anh
+[ ] - Cho phep nguoi dung bo sung anh hoac thong tin xac minh
+[ ] - Luu vet nguoi va thoi diem xac minh
+
+================================================================================
+
+5. CANH BAO SU CO VA THONG BAO (ALERTS & NOTIFICATIONS)
+
+5.1. Canh bao tren ban do
+[ ] - Hien thi canh bao su co gan vi tri nguoi dung
+[ ] - Hien thi canh bao su co nghiem trong
+[ ] - Hien thi pham vi anh huong cua su co
+[ ] - Hien thi thoi gian du kien ket thuc su co
+[ ] - Cho phep dong hoac an canh bao da xem
+
+5.2. Kenh thong bao
+[ ] - Hien thi thong bao trong ung dung
+[ ] - Gui thong bao day den thiet bi
+[ ] - Gui thong bao qua email
+[ ] - Cau hinh loai thong bao muon nhan
+[ ] - Cau hinh ban kinh khu vuc muon theo doi
+[ ] - Cau hinh khung gio khong nhan thong bao
+
+================================================================================
+
+6. TAI KHOAN VA PHAN QUYEN (ACCOUNT & ACCESS CONTROL)
+
+6.1. Tai khoan nguoi dung
+[ ] - Dang ky tai khoan bang email va mat khau
+[ ] - Dang nhap vao he thong
+[ ] - Dang xuat khoi he thong
+[ ] - Khoi phuc mat khau qua email
+[ ] - Cap nhat thong tin ca nhan
+[ ] - Cap nhat so dien thoai va email
+[ ] - Xoa tai khoan nguoi dung
+
+6.2. Phan quyen
+[ ] - Vai tro nguoi xem ban do
+[ ] - Vai tro nguoi gui phan anh
+[ ] - Vai tro nhan vien tiep nhan va xu ly
+[ ] - Vai tro quan tri vien
+[ ] - Gioi han thao tac theo vai tro
+[ ] - Luu nhat ky dang nhap va thao tac quan tri
+
+================================================================================
+
+7. QUAN TRI DU LIEU SU CO (INCIDENT ADMINISTRATION)
+
+7.1. Danh sach va xu ly
+[ ] - Hien thi danh sach phan anh theo trang
+[ ] - Tim kiem phan anh theo tu khoa
+[ ] - Loc phan anh theo loai su co
+[ ] - Loc phan anh theo muc do uu tien
+[ ] - Loc phan anh theo trang thai
+[ ] - Loc phan anh theo khoang thoi gian
+[ ] - Xem chi tiet vi tri va minh chung
+[ ] - Tiep nhan phan anh
+[ ] - Phan cong nguoi xu ly
+[ ] - Cap nhat trang thai xu ly
+[ ] - Them ghi chu noi bo
+[ ] - Dong phan anh sau khi hoan tat
+
+7.2. Bao cao va thong ke
+[ ] - Thong ke tong so phan anh
+[ ] - Thong ke phan anh theo loai su co
+[ ] - Thong ke phan anh theo khu vuc
+[ ] - Thong ke phan anh theo trang thai
+[ ] - Thong ke thoi gian xu ly trung binh
+[ ] - Hien thi bieu do xu huong su co theo thoi gian
+[ ] - Xuat danh sach phan anh ra CSV hoac Excel
+[ ] - Xuat bao cao theo khoang thoi gian
+
+================================================================================
+
+8. DU LIEU DIA LY VA TICH HOP (GEOLOCATION & INTEGRATION)
+
+8.1. Du lieu vi tri
+[x] - Hien thi toa do vi tri tren ban do
+[ ] - Chuyen doi toa do thanh dia chi
+[ ] - Luu vi tri theo he toa do thong nhat
+[ ] - Kiem tra toa do nam trong pham vi Viet Nam
+[ ] - Hien thi ten duong, phuong va quan tu toa do
+
+8.2. Ket noi nguon du lieu
+[ ] - Ket noi API du lieu giao thong theo thoi gian thuc
+[ ] - Dong bo danh sach su co tu he thong ben ngoai
+[ ] - Tiep nhan du lieu tu camera giao thong
+[ ] - Tiep nhan du lieu tu tram quan trac
+[ ] - Kiem tra tinh hop le va do tre cua du lieu
+[ ] - Ghi log loi khi dong bo that bai
+
+================================================================================
+
+9. TRAI NGHIEM DI DONG VA KHA NANG TIEP CAN (MOBILE & ACCESSIBILITY)
+
+9.1. Thiet bi di dong
+[ ] - Hien thi ban do phu hop voi man hinh nho
+[ ] - Toi uu thao tac cham tren ban do
+[ ] - Hien thi nut gui phan anh de thao tac nhanh
+[ ] - Cho phep su dung camera tren thiet bi
+[ ] - Cho phep su dung GPS tren thiet bi
+[ ] - Cai dat he thong nhu mot ung dung web (PWA)
+[ ] - Hien thi noi dung co ban khi mang cham hoac mat ket noi
+
+9.2. Kha nang tiep can
+[ ] - Ho tro dieu huong bang ban phim
+[ ] - Ho tro trinh doc man hinh
+[ ] - Them nhan mo ta cho cac nut dieu khien ban do
+[ ] - Dam bao tuong phan mau sac phu hop
+[ ] - Hien thi thong bao loi ro rang cho nguoi dung
+[ ] - Ho tro kich thuoc chu lon hon
+
+================================================================================
+
+10. AN TOAN, HIEU NANG VA VAN HANH (SECURITY & OPERATIONS)
+
+10.1. An toan du lieu
+[ ] - Ma hoa mat khau nguoi dung
+[ ] - Kiem tra va lam sach du lieu dau vao
+[ ] - Gioi han so lan gui phan anh trong mot khoang thoi gian
+[ ] - Gioi han dung luong tep dinh kem
+[ ] - Bao ve API bang co che xac thuc
+[ ] - An thong tin ca nhan khoi nguoi dung khong co quyen
+[ ] - Sao luu du lieu dinh ky
+
+10.2. Hieu nang va giam sat
+[ ] - Tai lazy-loading cac marker ngoai pham vi hien thi
+[ ] - Phan trang danh sach phan anh
+[ ] - Cache du lieu ban do va cau hinh
+[ ] - Ghi nhan thoi gian phan hoi cua API
+[ ] - Giam sat loi phia trinh duyet va may chu
+[ ] - Hien thi trang thai he thong
+[ ] - Kiem thu tu dong cac luong gui va xu ly phan anh
+
+================================================================================
+
+11. HUONG PHAT TRIEN DE XUAT (FUTURE ROADMAP)
+
+[ ] - Xay dung backend va co so du lieu cho phan anh
+[ ] - Xay dung API quan ly su co giao thong
+[ ] - Ket noi nguon du lieu giao thong thoi gian thuc
+[ ] - Hoan thien trang Phan anh cho nguoi dan
+[ ] - Hoan thien trang Quan tri cho co quan xu ly
+[ ] - Bo sung dang nhap va phan quyen
+[ ] - Bo sung thong bao theo khu vuc
+[ ] - Bo sung thong ke va bao cao
+[ ] - Phat trien giao dien responsive va ung dung PWA
+
+================================================================================
+
+12. TOM TAT PHIEN BAN HIEN TAI
+
+- He thong dang co giao dien SOS MAP voi thanh dieu huong co ban.
+- Ban do Leaflet duoc hien thi tren nen OpenStreetMap.
+- Ban do dat mac dinh tai khu vuc Thanh pho Ho Chi Minh.
+- He thong dang co mot marker mau cho su co o ga hoac chuong ngai vat.
+- Popup cua marker hien thi noi dung thong bao su co.
+- Thanh ben hien thi trang thai giao thong va thoi gian cap nhat theo giay.
+- Cac chuc nang luu tru, gui phan anh, tai khoan, thong bao va quan tri la phan de xuat phat trien tiep.
