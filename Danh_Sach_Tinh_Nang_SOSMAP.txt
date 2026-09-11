@@ -274,3 +274,460 @@ QUY UOC
 - Popup cua marker hien thi noi dung thong bao su co.
 - Thanh ben hien thi trang thai giao thong va thoi gian cap nhat theo giay.
 - Cac chuc nang luu tru, gui phan anh, tai khoan, thong bao va quan tri la phan de xuat phat trien tiep.
+
+================================================================================
+
+13. QUAN LY SU CO DA RUI RO (MULTI-HAZARD INCIDENTS)
+
+13.1. Phan loai su co
+[ ] - Bao, ap thap nhiet doi va gio manh
+[ ] - Lu lut, lu quet va nuoc dang
+[ ] - Sat lo dat, sat lo bo song va bo bien
+[ ] - Dong dat, song than va rung chan
+[ ] - Han han, xam nhap man va thieu nuoc
+[ ] - Chay rung, chay nha va no
+[ ] - Tai nan giao thong va su co cong trinh
+[ ] - Dich benh, o dich va nguy co lay nhiem
+[ ] - O nhiem khong khi, nguon nuoc va hoa chat doc hai
+[ ] - Nang nong cuc doan, ret dam ret hai va loc xoay
+[ ] - Mat dien, mat nuoc, mat song va su co ha tang
+[ ] - Su co tau thuyen, hang hai va khu vuc bien dao
+[ ] - Su co an ninh, mat tich va tre em gap nguy hiem
+[ ] - Su co khac do nguoi dung hoac co quan khai bao
+
+13.2. Ho so su co
+[ ] - Tao ma su co duy nhat
+[ ] - Gan su co voi mot hoac nhieu toa do
+[ ] - Ve vung anh huong tren ban do
+[ ] - Ghi nhan thoi diem bat dau va cap nhat
+[ ] - Gan cap do nghiem trong tu cap 1 den cap 5
+[ ] - Gan trang thai moi, dang xu ly, tam kiem soat va ket thuc
+[ ] - Ghi nhan nguon tin va muc do tin cay
+[ ] - Lien ket cac phan anh trung tam su co
+[ ] - Luu anh, video, am thanh va tep dinh kem
+[ ] - Luu lich su dien bien cua su co
+[ ] - Hien thi ban do nhiet cac diem co nguy co cao
+[ ] - Cho phep co quan co tham quyen xac nhan thong tin chinh thuc
+
+================================================================================
+
+14. CANH BAO SOM VA DU BAO (EARLY WARNING)
+
+14.1. Nguon du lieu canh bao
+[ ] - Tiep nhan ban tin khi tuong va thien tai chinh thuc
+[ ] - Tiep nhan du lieu muc nuoc song, ho dap va tram mua
+[ ] - Tiep nhan du lieu canh bao sat lo
+[ ] - Tiep nhan du lieu dong dat va rung chan
+[ ] - Tiep nhan du lieu chat luong khong khi
+[ ] - Tiep nhan du lieu nhiet do, han han va xam nhap man
+[ ] - Tiep nhan du lieu ve dich benh tu co quan y te
+[ ] - Hien thi thoi diem cap nhat va do tre cua tung nguon
+[ ] - Kiem tra cheo nhieu nguon du lieu
+[ ] - Danh dau thong tin chua duoc xac minh
+
+14.2. Phat hanh canh bao
+[ ] - Tao ban tin canh bao theo khu vuc
+[ ] - Chon muc do va mau sac canh bao
+[ ] - Chon doi tuong can nhan canh bao
+[ ] - Dat thoi gian bat dau va het han canh bao
+[ ] - Gui canh bao theo dia gioi tinh, huyen, xa
+[ ] - Gui canh bao theo vung ban kinh hoac polygon
+[ ] - Canh bao song ngu Viet-Anh
+[ ] - Ho tro noi dung ngan cho SMS va noi dung day du tren web
+[ ] - Yeu cau nguoi dung xac nhan da nhan canh bao
+[ ] - Gui lai canh bao neu nguoi dung chua xac nhan
+[ ] - Luu lich su phat hanh, sua va thu hoi canh bao
+[ ] - Hien thi ban tin da het han de tra cuu
+
+14.3. Huong dan hanh dong
+[ ] - Huong dan so tan truoc bao lu va sat lo
+[ ] - Huong dan phong tranh dien giat khi ngap lu
+[ ] - Huong dan khong di qua cau, ham va vung nuoc chay xiết
+[ ] - Huong dan phong chay chua chay va thoat nan
+[ ] - Huong dan xu ly khi dong dat hoac rung chan
+[ ] - Huong dan phong tranh nang nong va mat nuoc
+[ ] - Huong dan phong lay nhiem trong vung dich
+[ ] - Hien thi danh sach so dien thoai khan cap theo tinh thanh
+[ ] - Hien thi noi dung co the truy cap nhanh khi mang yeu
+
+================================================================================
+
+15. BAO LU, SAT LO VA SO TAN (FLOOD & EVACUATION)
+
+15.1. Ban do nguy co
+[ ] - Hien thi vung ngap theo muc nuoc uoc tinh
+[ ] - Hien thi huong dong chay va diem nguy hiem
+[ ] - Hien thi vung co nguy co lu quet
+[ ] - Hien thi vung co nguy co sat lo
+[ ] - Hien thi muc nuoc tai tram quan trac
+[ ] - Hien thi ho dap, cau, ham va tuyen duong xung yeu
+[ ] - Hien thi vung an toan va vung cam vao
+[ ] - So sanh ban do hien tai voi ban do ngap lich su
+[ ] - Hien thi du bao ngap theo moc thoi gian
+
+15.2. Ke hoach so tan
+[ ] - Tao phuong an so tan cho tung khu dan cu
+[ ] - Hien thi diem tap ket va noi tru an
+[ ] - Hien thi tuyen so tan an toan
+[ ] - Tinh tuyen duong tranh vung ngap va sat lo
+[ ] - Hien thi duong di cho nguoi di bo
+[ ] - Hien thi duong di cho xe cuu ho
+[ ] - Cap nhat tuyen duong bi chan theo thoi gian thuc
+[ ] - Hien thi suc chua con lai cua diem tru an
+[ ] - Danh dau diem tru an da day
+[ ] - Hien thi nha ve sinh, nuoc sach, dien va y te tai diem tru an
+[ ] - Tao danh sach nguoi can so tan theo ho gia dinh
+[ ] - Xac nhan nguoi da den diem tru an
+[ ] - Ho tro dang ky nhu cau dua don
+
+================================================================================
+
+16. DIEU PHOI CUU HO CUU NAN (SEARCH & RESCUE)
+
+16.1. Yeu cau cuu ho
+[ ] - Gui yeu cau cuu ho khan cap trong mot thao tac
+[ ] - Tu dong gui toa do GPS kem sai so vi tri
+[ ] - Chon loai yeu cau: mac ket, bi thuong, mat tich, can y te
+[ ] - Nhap so nguoi dang gap nan
+[ ] - Danh dau co tre em, nguoi gia, nguoi khuyet tat hoac phu nu mang thai
+[ ] - Nhap mo ta nguy co va kha nang tiep can
+[ ] - Gui anh, video hoac tin nhan thoai khi co mang
+[ ] - Tao ma yeu cau va hien thi trang thai xu ly
+[ ] - Cho phep cap nhat vi tri theo thoi gian thuc
+[ ] - Cho phep nguoi than gui yeu cau thay
+[ ] - Huy yeu cau khi da an toan
+
+16.2. Trung tam dieu phoi
+[ ] - Tiep nhan va xep hang yeu cau theo muc do khan cap
+[ ] - Hien thi ban do toan bo yeu cau dang mo
+[ ] - Phan cong doi cuu ho gan nhat
+[ ] - Phan cong theo nang luc: y te, duoi nuoc, leo nui, PCCC
+[ ] - Theo doi trang thai doi cuu ho va phuong tien
+[ ] - Tinh tuyen duong an toan cho doi cuu ho
+[ ] - Tao kenh lien lac voi nguoi yeu cau
+[ ] - Chuyen tiep yeu cau cho 112, 113, 114, 115 hoac co quan dia phuong
+[ ] - Ghi nhan thoi diem tiep nhan, xuat phat va hoan tat
+[ ] - Canh bao yeu cau qua han chua co nguoi xu ly
+[ ] - Luu bien ban va hinh anh sau cuu ho
+
+16.3. Mang luoi tinh nguyen
+[ ] - Dang ky tinh nguyen vien theo khu vuc
+[ ] - Xac minh danh tinh va ky nang tinh nguyen vien
+[ ] - Khai bao phuong tien va vat tu co the ho tro
+[ ] - Bat/tat trang thai san sang ho tro
+[ ] - Nhan nhiem vu tu trung tam dieu phoi
+[ ] - Check-in va check-out tai nhiem vu
+[ ] - Chia se vi tri cua doi tinh nguyen theo pham vi can thiet
+[ ] - Danh gia an toan sau khi ket thuc nhiem vu
+
+================================================================================
+
+17. CUNG CAP CUU TRO VA HAU CAN (RELIEF & LOGISTICS)
+
+17.1. Tiep nhan nhu cau
+[ ] - Tao yeu cau luong thuc, nuoc uong va sua cho tre em
+[ ] - Tao yeu cau thuoc, vat tu y te va do bao ho
+[ ] - Tao yeu cau quan ao, chan man va do dung ca nhan
+[ ] - Tao yeu cau xu ly nuoc, may phat dien va nhien lieu
+[ ] - Tao yeu cau thuyen, xe tai va phuong tien cuu ho
+[ ] - Nhap so luong, don vi tinh va thoi han can
+[ ] - Gan nhu cau voi ho gia dinh, diem tru an hoac dia phuong
+[ ] - Xac nhan nhu cau boi can bo hoac to chuc uy tin
+[ ] - Theo doi nhu cau da dap ung va con thieu
+
+17.2. Kho va phan phoi
+[ ] - Tao danh sach kho hang va diem tiep nhan
+[ ] - Theo doi ton kho theo loai hang va han su dung
+[ ] - Tiep nhan phieu nhap va phieu xuat
+[ ] - Gan lo hang voi nha tai tro va nguon kinh phi
+[ ] - Tao ke hoach phan phoi theo muc do uu tien
+[ ] - Theo doi xe van chuyen va trang thai giao hang
+[ ] - Xac nhan ban giao tai diem nhan
+[ ] - Ghi nhan mat mat, hong hong hoac het han
+[ ] - Canh bao ton kho thap
+[ ] - Bao cao luong hang da cap phat
+
+17.3. Quyen gop minh bach
+[ ] - Tao chien dich quyen gop theo su co va dia ban
+[ ] - Hien thi muc tieu va so tien da tiep nhan
+[ ] - Ho tro chuyen khoan, QR va cong thanh toan hop le
+[ ] - Tao ma giao dich va bien nhan
+[ ] - Cong khai danh sach khoan thu theo chinh sach bao mat
+[ ] - Cong khai khoan chi theo hang muc
+[ ] - Cho phep tai bao cao kiem ke
+[ ] - Phat hien giao dich bat thuong va yeu cau doi soat
+[ ] - Cam ket khong tu y keu goi tien neu chua duoc phe duyet
+
+================================================================================
+
+18. DICH BENH VA KIEM SOAT LAY NHIEM (PUBLIC HEALTH)
+
+18.1. Thong tin dich te
+[ ] - Hien thi ban do ca nghi ngo, ca xac nhan va diem dich
+[ ] - Hien thi muc do canh bao theo khu vuc
+[ ] - Hien thi thoi diem cap nhat va nguon du lieu y te
+[ ] - Hien thi khuyen cao phong benh chinh thuc
+[ ] - Hien thi khu vuc co bien phap han che tam thoi
+[ ] - Hien thi diem tiem chung va co so y te
+[ ] - Hien thi diem xet nghiem va diem phat thuoc
+[ ] - Hien thi thong tin ve muoi, con trung hoac vat chu trung gian
+[ ] - Phan biet du lieu da xac minh va tin chua kiem chung
+
+18.2. Yeu cau y te va cach ly
+[ ] - Dang ky tu danh gia trieu chung theo huong dan y te
+[ ] - Gui yeu cau tu van y te tu xa
+[ ] - Gui yeu cau xe cap cuu hoac chuyen vien
+[ ] - Dang ky diem cach ly tap trung
+[ ] - Dang ky cach ly tai nha theo quy dinh dia phuong
+[ ] - Khai bao so nguoi trong cung ho va nguoi tiep xuc gan
+[ ] - Theo doi thoi gian cach ly theo huong dan cua co quan y te
+[ ] - Nhac do than nhiet va cap nhat trieu chung
+[ ] - Dat lich lay mau, xet nghiem va tai kham
+[ ] - Yeu cau giao thuoc va luong thuc cho nguoi cach ly
+[ ] - Bao cao tinh trang khan cap trong thoi gian cach ly
+[ ] - Chuyen thong tin y te toi co quan co tham quyen theo phap luat
+
+18.3. Bao ve du lieu suc khoe
+[ ] - Thu thap toi thieu thong tin can thiet
+[ ] - Tach thong tin dinh danh khoi du lieu thong ke
+[ ] - Chi hien thi du lieu suc khoe cho vai tro duoc cap quyen
+[ ] - Ghi log moi lan truy cap ho so y te
+[ ] - Cho phep nguoi dung xem lich su su dung du lieu
+[ ] - Cho phep rut lai dong y khi phap luat cho phep
+[ ] - Tu dong xoa hoac an danh du lieu het thoi han luu tru
+
+================================================================================
+
+19. Y TE KHAN CAP VA HO TRO NGUOI YEU THE (EMERGENCY CARE)
+
+19.1. Dinh vi dich vu y te
+[ ] - Hien thi benh vien, tram y te va phong kham gan nhat
+[ ] - Hien thi co so co cap cuu 24/7
+[ ] - Hien thi co so co kha nang tiep nhan tre em
+[ ] - Hien thi co so co khoa san, ngoai, nhi va truyen nhiem
+[ ] - Hien thi diem cap phat thuoc va oxy
+[ ] - Hien thi suc chua va kha nang tiep nhan cap nhat
+[ ] - Chi duong toi co so y te bang tuyen phu hop
+
+19.2. Nhu cau dac thu
+[ ] - Danh dau nguoi cao tuoi song mot minh
+[ ] - Danh dau nguoi khuyet tat can ho tro tiep can
+[ ] - Danh dau phu nu mang thai va tre so sinh
+[ ] - Danh dau nguoi benh man tinh can thuoc dinh ky
+[ ] - Danh dau nguoi can may tho, loc than hoac oxy
+[ ] - Tao danh sach uu tien ho tro khi so tan
+[ ] - Yeu cau nguoi ho tro ngon ngu ky hieu
+[ ] - Ho tro thong dich vien va tai lieu de hieu
+
+================================================================================
+
+20. CHAY NO, CỨU HOA VA SU CO CONG TRINH (FIRE & INFRASTRUCTURE)
+
+20.1. Phan anh chay no
+[ ] - Bao chay, no, khoi doc hoac ro ri khi gas
+[ ] - Chon loai cong trinh va muc do nguy hiem
+[ ] - Hien thi vi tri truc tiep cho luc luong PCCC
+[ ] - Nhap so nguoi mac ket va huong tiep can
+[ ] - Gui hinh anh dam chay neu an toan
+[ ] - Hien thi huong gio va khu vuc co nguy co lan
+[ ] - Canh bao nguoi dan trong vung ban kinh
+
+20.2. Su co ha tang
+[ ] - Bao dut cap dien, ro ri dien va cot dien do
+[ ] - Bao vo duong ong nuoc va thieu nuoc sinh hoat
+[ ] - Bao hong cau, duong, de, cong va tram bom
+[ ] - Bao cay do, bien bao do va vat can nguy hiem
+[ ] - Bao su co tram phat song va mat lien lac
+[ ] - Phan cong don vi quan ly ha tang
+[ ] - Theo doi thoi gian khac phuc
+
+================================================================================
+
+21. GIAO THONG, HAN CHE DI CHUYEN VA MOI TRUONG (PUBLIC SAFETY)
+
+21.1. To chuc giao thong khan cap
+[ ] - Hien thi duong cam, duong mot chieu tam thoi va diem chan
+[ ] - Hien thi tuyen uu tien cho xe cuu thuong va cuu hoa
+[ ] - Hien thi diem ket xe do so tan
+[ ] - Hien thi tram xang, tram sac va diem sua xe con hoat dong
+[ ] - Hien thi diem tau, pha, cau phao va ben xe thay the
+[ ] - Phat hanh huong dan tranh di vao vung nguy hiem
+
+21.2. Moi truong va an toan cong dong
+[ ] - Canh bao chat luong khong khi va bui min
+[ ] - Canh bao o nhiem nguon nuoc
+[ ] - Bao cao tran dau, hoa chat va chat thai nguy hai
+[ ] - Hien thi khu vuc khong khi khong an toan
+[ ] - Hien thi diem cap nuoc sach va nha ve sinh cong cong
+[ ] - Bao cao dong vat nguy hiem hoac dong vat bi anh huong
+[ ] - Theo doi nhiet do va chi so nguy co nang nong
+
+================================================================================
+
+22. NGUOI MAT TICH VA KET NOI GIA DINH (MISSING PERSONS)
+
+[ ] - Tao thong bao tim nguoi mat tich
+[ ] - Nhap dac diem nhan dang va anh theo quy dinh
+[ ] - Gan vi tri nhin thay cuoi cung
+[ ] - Chon muc do khan cap va nguy co suc khoe
+[ ] - Tiep nhan thong tin nhin thay tu cong dong
+[ ] - Xac minh thong tin truoc khi phat hanh cong khai
+[ ] - An thong tin nhay cam cua tre em va nguoi de bi ton thuong
+[ ] - Danh dau da tim thay va thong bao cho nguoi lien quan
+[ ] - Luu lich su cap nhat va nguon tin
+
+================================================================================
+
+23. CONG DONG, THONG TIN VA PHAN ANH (COMMUNITY)
+
+23.1. Kenh tiep nhan cong dong
+[ ] - Gui phan anh khong can tao tai khoan trong truong hop khan cap
+[ ] - Gui tin nhan van ban, am thanh va hinh anh
+[ ] - Tiep nhan phan anh qua SMS, Zalo OA hoac tong dai
+[ ] - Ho tro tieng Viet co dau va tieng dan toc khi co nguon luc
+[ ] - Hien thi muc do uu tien de nguoi dan chon dung
+[ ] - Cho phep phan anh an danh trong truong hop nhay cam
+[ ] - Bao ve nguoi bao tin va han che lo vi tri nhay cam
+
+23.2. Xac minh va chong tin sai
+[ ] - Danh dau tin chua xac minh
+[ ] - Yeu cau nhieu nguon doc lap xac nhan
+[ ] - Phat hien phan anh trung lap va spam
+[ ] - Phat hien hinh anh hoac video da cu neu co the
+[ ] - Hien thi dinh chinh khi thong tin sai
+[ ] - Luu bang chung va lich su chinh sua
+[ ] - Phan quyen nguoi duoc phep phat hanh thong tin chinh thuc
+[ ] - Khong tu dong ket luan nguyen nhan khi chua co xac minh
+
+================================================================================
+
+24. QUAN TRI DIA PHUONG VA LIEN CO QUAN (GOVERNANCE)
+
+[ ] - Quan ly danh sach tinh, huyen, xa va thon
+[ ] - Quan ly ranh gioi hanh chinh va vung phu trach
+[ ] - Gan co quan dau moi cho tung loai su co
+[ ] - Gan ca truc va kenh lien lac khan cap
+[ ] - Quan ly mau van ban va quy trinh xu ly
+[ ] - Tao nhiem vu lien co quan
+[ ] - Chuyen giao su co giua cac cap
+[ ] - Theo doi cam ket thoi gian phan hoi
+[ ] - Bao cao su co vuot qua cap co so
+[ ] - Hien thi dashboard cho tinh, huyen va xa
+[ ] - Phan quyen truy cap theo dia ban
+[ ] - Ho tro che do dien tap va du lieu gia lap
+
+================================================================================
+
+25. QUAN LY PHUONG AN VA DIEN TAP (PLANNING & DRILLS)
+
+[ ] - Tao kich ban bao lu, dich benh, chay no va dong dat
+[ ] - Tao danh sach nhiem vu theo kich ban
+[ ] - Dat thoi gian, dia ban va luc luong tham gia
+[ ] - Mo phong ban tin canh bao
+[ ] - Mo phong so tan va tiep nhan cuu ho
+[ ] - Ghi nhan thoi gian phan hoi cua tung don vi
+[ ] - Cham diem muc do san sang
+[ ] - Tao bao cao rut kinh nghiem
+[ ] - Luu phien ban phuong an
+[ ] - Khong hien thi nham du lieu dien tap ra moi truong that
+
+================================================================================
+
+26. OFFLINE, MANG YEU VA KENH DU PHONG (RESILIENT ACCESS)
+
+[ ] - Tai truoc ban do khu vuc co nguy co
+[ ] - Luu cac so dien thoai khan cap tren thiet bi
+[ ] - Luu huong dan so cuu va phong tranh khi offline
+[ ] - Luu ban do diem tru an khi offline
+[ ] - Tao phan anh offline va dong bo khi co mang
+[ ] - Xep hang du lieu can dong bo theo muc do khan cap
+[ ] - Hien thi ro thoi diem du lieu offline duoc tao
+[ ] - Gui yeu cau qua SMS khi khong co du lieu di dong
+[ ] - Ho tro may chu du phong va sao luu lien vung
+[ ] - Hien thi trang thai mat ket noi cho nguoi dung
+[ ] - Khong bao thanh cong khi yeu cau chua den he thong
+
+================================================================================
+
+27. BAO MAT, QUYEN RIENG TU VA DAO DUC (PRIVACY & SAFETY)
+
+[ ] - Ma hoa du lieu nhay cam khi truyen va khi luu
+[ ] - Xac thuc da yeu to cho tai khoan quan tri
+[ ] - Phan quyen toi thieu theo nhiem vu
+[ ] - An toa do chinh xac cua nguoi de bi ton thuong khi cong khai
+[ ] - An thong tin benh nhan khoi ban do cong cong
+[ ] - Khong hien thi danh sach nguoi cach ly cho cong dong
+[ ] - Yeu cau dong y khi thu thap du lieu suc khoe va vi tri
+[ ] - Cho phep rut lai dong y theo quy dinh
+[ ] - Luu nhat ky truy cap, sua va xuat du lieu
+[ ] - Canh bao khi nguoi dung sap chia se du lieu nhay cam
+[ ] - Sao luu, phuc hoi va kiem tra tinh toan ven du lieu
+[ ] - Co quy trinh xu ly yeu cau xoa du lieu
+[ ] - Co co che bao cao lo hong bao mat
+[ ] - Kiem thu xam nhap va kiem thu tai nan dinh ky
+
+================================================================================
+
+28. BAO CAO, DO LUONG VA MINH BACH (REPORTING)
+
+[ ] - Bao cao so luong su co theo loai va dia ban
+[ ] - Bao cao thoi gian phat hien, phan hoi va khac phuc
+[ ] - Bao cao so nguoi duoc cuu ho
+[ ] - Bao cao nhu cau cuu tro da tiep nhan va da dap ung
+[ ] - Bao cao ton kho theo diem cuu tro
+[ ] - Bao cao luong nguoi den va roi diem tru an
+[ ] - Bao cao ca benh, nhu cau cach ly va luong xu ly
+[ ] - Bao cao tuyen so tan bi chan va da mo lai
+[ ] - Bao cao phan anh trung lap, sai hoac chua xac minh
+[ ] - Bieu do theo ngay, tuan, thang va mua thien tai
+[ ] - Tai bao cao CSV, Excel, PDF va ban do
+[ ] - Cong khai chi so tong hop ma khong lo du lieu ca nhan
+[ ] - Tao bang dieu khien cho lanh dao va don vi hien truong
+
+================================================================================
+
+29. TICH HOP HE SINH THAI KHAN CAP (EMERGENCY INTEGRATIONS)
+
+[ ] - Tich hop tong dai khan cap va he thong dieu phoi
+[ ] - Tich hop ban tin khi tuong thuy van
+[ ] - Tich hop tram do mua, muc nuoc va camera
+[ ] - Tich hop co so y te va he thong tiem chung
+[ ] - Tich hop he thong PCCC va cuu nan cuu ho
+[ ] - Tich hop SMS gateway va email gateway
+[ ] - Tich hop ban do va du lieu dia chinh
+[ ] - Tich hop thanh toan va doi soat quyen gop
+[ ] - Tich hop thiet bi IoT va tram canh bao
+[ ] - Cung cap API cho co quan, to chuc va ung dung doi tac
+[ ] - Quan ly khoa API va gioi han luu luong
+[ ] - Co co che thu hoi ket noi khi doi tac vi pham
+
+================================================================================
+
+30. QUAN LY VAN HANH VA CHAT LUONG (OPERATIONS)
+
+[ ] - Phan cong ca truc 24/7
+[ ] - Hien thi hang doi yeu cau can xu ly
+[ ] - Canh bao yeu cau khong duoc phan hoi dung han
+[ ] - Theo doi tinh trang may chu va API
+[ ] - Theo doi do tre cua canh bao khan cap
+[ ] - Ghi nhan loi va tu dong tao su co van hanh
+[ ] - Sao luu du lieu theo lich
+[ ] - Kiem tra khoi phuc tu ban sao luu
+[ ] - Kiem tra suc chiu tai khi co nhieu nguoi gui yeu cau
+[ ] - Kiem thu kha nang truy cap tren thiet bi cu
+[ ] - Quan ly phien ban noi dung huong dan
+[ ] - Dao tao va cap quyen cho nhan vien
+[ ] - Luu tai lieu quy trinh va danh sach lien lac
+
+================================================================================
+
+31. NGUYEN TAC VAN HANH CAN UU TIEN
+
+- SOSMAP la cong cu ho tro phan loai, ket noi va dieu phoi; khong thay the tong dai va co quan cuu ho chinh thuc.
+- Moi canh bao ve thien tai va dich benh phai uu tien nguon chinh thuc, hien ro nguon va thoi diem cap nhat.
+- Yeu cau nguy hiem den tinh mang phai duoc huong dan lien he ngay tong dai khan cap phu hop trong khi gui thong tin cho he thong.
+- Du lieu suc khoe, vi tri nguoi gap nan va thong tin tre em phai mac dinh o che do rieng tu.
+- He thong phai phan biet ro du lieu truc tiep, du lieu uoc tinh, du lieu dien tap va thong tin chua xac minh.
+- Moi thao tac phat hanh canh bao, phan cong cuu ho va cap phat cuu tro phai co nguoi chiu trach nhiem va lich su kiem tra.
+- Khi mat mang, he thong phai thong bao trung thuc trang thai tiep nhan va khong tao cam giac da gui thanh cong neu chua dong bo.
+
