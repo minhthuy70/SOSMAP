@@ -3612,6 +3612,251 @@ initializeAdminPanel = function() {
   updateAllAdminData();
 };
 
+// Accessibility Features
+// Font size controls
+document.getElementById('fontSmall').addEventListener('click', function() {
+  document.documentElement.className = 'font-small';
+  announceToScreenReader('Font size set to small');
+});
+
+document.getElementById('fontMedium').addEventListener('click', function() {
+  document.documentElement.className = 'font-medium';
+  announceToScreenReader('Font size set to medium');
+});
+
+document.getElementById('fontLarge').addEventListener('click', function() {
+  document.documentElement.className = 'font-large';
+  announceToScreenReader('Font size set to large');
+});
+
+document.getElementById('fontXLarge').addEventListener('click', function() {
+  document.documentElement.className = 'font-xlarge';
+  announceToScreenReader('Font size set to extra large');
+});
+
+// Toggle accessibility panel
+document.getElementById('accessibilityToggle').addEventListener('click', function() {
+  var controls = document.getElementById('fontSizeControls');
+  controls.classList.toggle('active');
+
+  if (controls.classList.contains('active')) {
+    announceToScreenReader('Accessibility options opened');
+  } else {
+    announceToScreenReader('Accessibility options closed');
+  }
+});
+
+// Announce to screen readers via ARIA live region
+function announceToScreenReader(message) {
+  var liveRegion = document.getElementById('ariaLiveRegion');
+  if (liveRegion) {
+    liveRegion.textContent = message;
+    // Clear after announcement
+    setTimeout(function() {
+      liveRegion.textContent = '';
+    }, 1000);
+  }
+}
+
+// Keyboard navigation improvements
+// Add keyboard support for map controls
+document.querySelectorAll('.map-control-btn').forEach(function(btn) {
+  btn.setAttribute('tabindex', '0');
+  btn.setAttribute('role', 'button');
+  btn.setAttribute('aria-label', btn.title || 'Map control');
+
+  btn.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      btn.click();
+    }
+  });
+});
+
+// Add keyboard support for incident markers
+function addKeyboardSupportToMarkers() {
+  var markers = document.querySelectorAll('.leaflet-marker-icon');
+  markers.forEach(function(marker) {
+    marker.setAttribute('tabindex', '0');
+    marker.setAttribute('role', 'button');
+    marker.setAttribute('aria-label', 'Incident marker');
+
+    marker.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        // Trigger click to open popup
+        marker.click();
+      }
+    });
+  });
+}
+
+// Add ARIA labels to form elements
+document.querySelectorAll('input, select, textarea').forEach(function(element) {
+  if (!element.getAttribute('aria-label') && !element.getAttribute('aria-labelledby')) {
+    var label = document.querySelector('label[for="' + element.id + '"]');
+    if (label) {
+      element.setAttribute('aria-labelledby', label.id);
+    }
+  }
+});
+
+// Add ARIA labels to buttons without text
+document.querySelectorAll('button').forEach(function(btn) {
+  if (!btn.textContent.trim() && !btn.getAttribute('aria-label')) {
+    var icon = btn.querySelector('svg');
+    if (icon) {
+      var title = btn.getAttribute('title');
+      if (title) {
+        btn.setAttribute('aria-label', title);
+      }
+    }
+  }
+});
+
+// High contrast mode toggle
+var highContrastMode = false;
+function toggleHighContrast() {
+  highContrastMode = !highContrastMode;
+  document.body.classList.toggle('high-contrast', highContrastMode);
+
+  if (highContrastMode) {
+    announceToScreenReader('High contrast mode enabled');
+  } else {
+    announceToScreenReader('High contrast mode disabled');
+  }
+}
+
+// Add high contrast button to accessibility controls
+var highContrastBtn = document.createElement('button');
+highContrastBtn.className = 'font-size-btn';
+highContrastBtn.setAttribute('aria-label', 'Toggle high contrast mode');
+highContrastBtn.setAttribute('title', 'High contrast');
+highContrastBtn.innerHTML = '◐';
+highContrastBtn.addEventListener('click', toggleHighContrast);
+document.getElementById('fontSizeControls').appendChild(highContrastBtn);
+
+// Touch-friendly improvements for mobile
+function optimizeForTouch() {
+  // Increase tap targets on mobile
+  if ('ontouchstart' in window) {
+    document.body.classList.add('touch-device');
+
+    // Prevent double-tap zoom on buttons
+    document.querySelectorAll('button, a').forEach(function(element) {
+      element.addEventListener('touchstart', function() {}, { passive: true });
+    });
+  }
+}
+
+// Initialize touch optimization
+optimizeForTouch();
+
+// Add swipe gesture support for mobile panels
+function addSwipeGestures() {
+  var sidebar = document.querySelector('.sidebar');
+  if (!sidebar) return;
+
+  var touchStartX = 0;
+  var touchEndX = 0;
+
+  sidebar.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  sidebar.addEventListener('touchend', function(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  }, { passive: true });
+
+  function handleSwipe() {
+    var swipeThreshold = 50;
+    var diff = touchStartX - touchEndX;
+
+    if (Math.abs(diff) > swipeThreshold) {
+      if (diff > 0) {
+        // Swipe left - close sidebar on mobile
+        if (window.innerWidth <= 768) {
+          sidebar.classList.add('hidden');
+          announceToScreenReader('Sidebar closed');
+        }
+      } else {
+        // Swipe right - open sidebar on mobile
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('hidden');
+          announceToScreenReader('Sidebar opened');
+        }
+      }
+    }
+  }
+}
+
+// Initialize swipe gestures
+addSwipeGestures();
+
+// Add haptic feedback for mobile devices
+function hapticFeedback() {
+  if ('vibrate' in navigator) {
+    navigator.vibrate(10);
+  }
+}
+
+// Add haptic feedback to important buttons
+document.querySelectorAll('.btn-primary, .map-control-btn').forEach(function(btn) {
+  btn.addEventListener('click', hapticFeedback);
+});
+
+// Screen reader announcements for dynamic content
+function announceIncidentUpdate(incidentId, action) {
+  var message = 'Incident ' + incidentId + ' has been ' + action;
+  announceToScreenReader(message);
+}
+
+// Add loading state announcements
+function announceLoadingState(isLoading, message) {
+  if (isLoading) {
+    announceToScreenReader(message || 'Loading content');
+  }
+}
+
+// Error announcement for screen readers
+function announceError(errorMessage) {
+  announceToScreenReader('Error: ' + errorMessage);
+}
+
+// Save accessibility preferences to localStorage
+function saveAccessibilityPreferences() {
+  var preferences = {
+    fontSize: document.documentElement.className,
+    highContrast: highContrastMode
+  };
+  localStorage.setItem('accessibilityPreferences', JSON.stringify(preferences));
+}
+
+// Load accessibility preferences from localStorage
+function loadAccessibilityPreferences() {
+  var saved = localStorage.getItem('accessibilityPreferences');
+  if (saved) {
+    var preferences = JSON.parse(saved);
+    if (preferences.fontSize) {
+      document.documentElement.className = preferences.fontSize;
+    }
+    if (preferences.highContrast) {
+      highContrastMode = true;
+      document.body.classList.add('high-contrast');
+    }
+  }
+}
+
+// Save preferences when changed
+document.getElementById('fontSmall').addEventListener('click', saveAccessibilityPreferences);
+document.getElementById('fontMedium').addEventListener('click', saveAccessibilityPreferences);
+document.getElementById('fontLarge').addEventListener('click', saveAccessibilityPreferences);
+document.getElementById('fontXLarge').addEventListener('click', saveAccessibilityPreferences);
+
+// Load preferences on page load
+loadAccessibilityPreferences();
+
 // Check quiet hours
 function isInQuietHours() {
   var now = new Date();

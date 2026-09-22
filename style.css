@@ -175,6 +175,14 @@ body, html {
   border: none;
   cursor: pointer;
   padding: 5px;
+  touch-action: manipulation;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.mobile-menu-btn:focus {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 .mobile-menu-btn span {
@@ -183,6 +191,10 @@ body, html {
   background-color: white;
   margin: 3px 0;
   transition: 0.3s;
+}
+
+.mobile-menu-btn:hover span {
+  background-color: #e3f2fd;
 }
 
 /* Container */
@@ -2059,6 +2071,265 @@ body, html {
   color: #856404;
 }
 
+/* Accessibility Features */
+/* Focus indicators for keyboard navigation */
+*:focus {
+  outline: 2px solid #005BAC;
+  outline-offset: 2px;
+}
+
+button:focus, a:focus, input:focus, select:focus, textarea:focus {
+  outline: 2px solid #005BAC;
+  outline-offset: 2px;
+}
+
+/* Skip to main content link for screen readers */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #005BAC;
+  color: white;
+  padding: 8px;
+  z-index: 100;
+  transition: top 0.3s;
+}
+
+.skip-to-content:focus {
+  top: 0;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  * {
+    border: 1px solid #000;
+  }
+
+  .btn {
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Font size controls */
+.font-size-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 1000;
+  display: none;
+}
+
+.font-size-controls.active {
+  display: flex;
+  gap: 8px;
+}
+
+.font-size-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.font-size-btn:hover {
+  background: #f8f9fa;
+}
+
+.font-size-btn:focus {
+  outline: 2px solid #005BAC;
+}
+
+/* Root font size variables for scaling */
+:root {
+  --base-font-size: 16px;
+}
+
+html {
+  font-size: var(--base-font-size);
+}
+
+html.font-small {
+  --base-font-size: 14px;
+}
+
+html.font-medium {
+  --base-font-size: 16px;
+}
+
+html.font-large {
+  --base-font-size: 18px;
+}
+
+html.font-xlarge {
+  --base-font-size: 20px;
+}
+
+/* ARIA live regions for screen readers */
+.aria-live {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Improved color contrast for better readability */
+.text-high-contrast {
+  color: #000;
+}
+
+.bg-high-contrast {
+  background: #fff;
+}
+
+/* Touch-friendly tap targets */
+.btn, .auth-btn, .nav-link, .map-control-btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 12px 16px;
+}
+
+@media (max-width: 768px) {
+  .btn, .auth-btn, .nav-link {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
+
+/* Landscape orientation support for mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .navbar {
+    padding: 8px 15px;
+  }
+
+  .navbar h1 {
+    font-size: 1.2rem;
+  }
+
+  .sidebar {
+    padding: 8px;
+  }
+}
+
+/* Accessibility toggle button */
+.accessibility-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #005BAC;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  z-index: 9999;
+  transition: all 0.3s;
+}
+
+.accessibility-toggle:hover {
+  background: #004a91;
+  transform: scale(1.1);
+}
+
+.accessibility-toggle:focus {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Main content identifier */
+#main-content {
+  position: relative;
+}
+
+/* High contrast mode */
+body.high-contrast {
+  background: #000;
+  color: #fff;
+}
+
+body.high-contrast .navbar {
+  background: #000;
+  border-bottom: 2px solid #fff;
+}
+
+body.high-contrast .sidebar {
+  background: #000;
+  border-left: 2px solid #fff;
+}
+
+body.high-contrast .btn {
+  background: #000;
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+body.high-contrast .btn-primary {
+  background: #fff;
+  color: #000;
+}
+
+body.high-contrast .map-control-btn {
+  background: #000;
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast textarea {
+  background: #000;
+  color: #fff;
+  border: 2px solid #fff;
+}
+
+/* Touch device optimizations */
+.touch-device .btn,
+.touch-device .map-control-btn {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+.touch-device .sidebar {
+  touch-action: pan-y;
+}
+
+.sidebar.hidden {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar.hidden {
+    display: none;
+  }
+}
+
 /* Content Sections */
 .content-section {
   display: none;
@@ -2787,6 +3058,21 @@ body, html {
     flex-direction: column;
     text-align: center;
   }
+
+  /* Mobile-friendly map popup adjustments */
+  .leaflet-popup-content {
+    max-width: 250px;
+    font-size: 14px;
+  }
+
+  .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+  }
+
+  .leaflet-container a.leaflet-popup-close-button {
+    padding: 8px 12px;
+    font-size: 20px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2862,6 +3148,32 @@ body, html {
   .user-dropdown {
     right: 0;
     min-width: 180px;
+  }
+
+  /* Extra small screen optimizations */
+  .accessibility-toggle {
+    width: 40px;
+    height: 40px;
+    bottom: 10px;
+    right: 10px;
+  }
+
+  .font-size-controls {
+    bottom: 60px;
+    right: 10px;
+  }
+
+  .stats-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .incident-table {
+    font-size: 12px;
+  }
+
+  .incident-table th,
+  .incident-table td {
+    padding: 8px 4px;
   }
 }
 

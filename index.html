@@ -2,12 +2,39 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SOS MAP - Hệ thống bản đồ tiếp nhận và hiển thị phản ánh sự cố giao thông">
   <title>SOS Map</title>
   <link rel="stylesheet" href="style.css">
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
+  <!-- Skip to main content for accessibility -->
+  <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
+  <!-- ARIA live region for screen readers -->
+  <div class="aria-live" aria-live="polite" aria-atomic="true" id="ariaLiveRegion"></div>
+
+  <!-- Font size controls -->
+  <div class="font-size-controls" id="fontSizeControls">
+    <button class="font-size-btn" id="fontSmall" aria-label="Font size small" title="Small font">A-</button>
+    <button class="font-size-btn" id="fontMedium" aria-label="Font size medium" title="Medium font">A</button>
+    <button class="font-size-btn" id="fontLarge" aria-label="Font size large" title="Large font">A+</button>
+    <button class="font-size-btn" id="fontXLarge" aria-label="Font size extra large" title="Extra large font">A++</button>
+  </div>
+
+  <!-- Accessibility toggle button -->
+  <button class="accessibility-toggle" id="accessibilityToggle" aria-label="Toggle accessibility options" title="Accessibility options">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M12 8v8"></path>
+      <path d="M8 12h8"></path>
+    </svg>
+  </button>
+
+  <!-- Main content -->
+  <div id="main-content">
   <!-- Thanh menu -->
   <header class="navbar">
     <div class="navbar-header">
@@ -1169,7 +1196,8 @@
       </div>
     </div>
   </main>
-  
+  </div> <!-- End main-content -->
+
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="script.js"></script>
