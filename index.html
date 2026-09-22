@@ -258,12 +258,158 @@
           </div>
         </div>
 
+        <!-- Alerts Panel -->
+        <div class="alerts-panel" id="alertsPanel">
+          <h3>Cảnh báo sự cố</h3>
+          <div class="alerts-list" id="alertsList">
+            <div class="empty-state">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <p>Không có cảnh báo nào</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications Panel -->
+        <div class="notifications-panel" id="notificationsPanel">
+          <h3>Thông báo</h3>
+          <div class="notification-settings">
+            <button class="settings-btn" id="notificationSettings">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+              Cài đặt thông báo
+            </button>
+          </div>
+          <div class="notifications-list" id="notificationsList">
+            <div class="empty-state">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+              <p>Không có thông báo nào</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
             <span class="error-icon">❌</span>
             <span class="error-message" id="errorMessage">Lỗi kết nối</span>
             <button class="error-close" id="errorClose">×</button>
+          </div>
+        </div>
+
+        <!-- Alert Notification Popup -->
+        <div class="alert-popup" id="alertPopup" style="display: none;">
+          <div class="alert-popup-content">
+            <div class="alert-popup-header">
+              <span class="alert-icon" id="alertIcon">🚨</span>
+              <span class="alert-title" id="alertTitle">Cảnh báo</span>
+              <button class="alert-popup-close" id="alertPopupClose">×</button>
+            </div>
+            <div class="alert-popup-body">
+              <p id="alertMessage">Nội dung cảnh báo</p>
+              <div class="alert-meta">
+                <span id="alertLocation">Vị trí</span> •
+                <span id="alertTime">Thời gian</span>
+              </div>
+            </div>
+            <div class="alert-popup-actions">
+              <button class="btn btn-primary" id="alertViewDetails">Xem chi tiết</button>
+              <button class="btn btn-secondary" id="alertDismiss">Đóng</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notification Settings Modal -->
+        <div class="modal" id="notificationSettingsModal" style="display: none;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>Cài đặt thông báo</h3>
+              <button class="modal-close" id="closeSettingsModal">×</button>
+            </div>
+            <div class="modal-body">
+              <div class="settings-section">
+                <h4>Kênh thông báo</h4>
+                <div class="setting-item">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="enableInApp" checked>
+                    <span>Thông báo trong ứng dụng</span>
+                  </label>
+                </div>
+                <div class="setting-item">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="enablePush" checked>
+                    <span>Thông báo đẩy (Push notifications)</span>
+                  </label>
+                </div>
+                <div class="setting-item">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="enableEmail">
+                    <span>Thông báo qua email</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h4>Khu vực theo dõi</h4>
+                <div class="setting-item">
+                  <label for="notificationRadius">Bán kính cảnh báo (km)</label>
+                  <input type="range" id="notificationRadius" min="1" max="50" value="10">
+                  <span id="radiusValue">10 km</span>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h4>Khung giờ không nhận thông báo</h4>
+                <div class="setting-item">
+                  <label for="quietHoursStart">Bắt đầu</label>
+                  <input type="time" id="quietHoursStart" value="22:00">
+                </div>
+                <div class="setting-item">
+                  <label for="quietHoursEnd">Kết thúc</label>
+                  <input type="time" id="quietHoursEnd" value="07:00">
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <h4>Loại sự cố cảnh báo</h4>
+                <div class="setting-item">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="alertTaiNan" checked>
+                    <span>Tai nạn giao thông</span>
+                  </label>
+                </div>
+                <div class="setting-item">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="alertNgapNuoc" checked>
+                    <span>Ngập nước</span>
+                  </label>
+                </div>
+                <div class="setting-item">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="alertChayNo" checked>
+                    <span>Cháy nổ</span>
+                  </label>
+                </div>
+                <div class="setting-item">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="alertKhac" checked>
+                    <span>Sự cố khác</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" id="saveSettings">Lưu cài đặt</button>
+              <button class="btn btn-secondary" id="cancelSettings">Hủy</button>
+            </div>
           </div>
         </div>
       </aside>

@@ -1328,47 +1328,455 @@ if ('Notification' in window && Notification.permission === 'default') {
 // Start status update simulation
 simulateReportStatusUpdates();
 
-// Verification System
-function showVerificationDialog(reportId) {
-  var report = incidentReports.find(function(r) {
-    return r.id === reportId;
+// Alerts and Notifications System
+var alerts = [];
+var notifications = [];
+var notificationSettings = {
+  inApp: true,
+  push: true,
+  email: false,
+  radius: 10, // km
+  quietHoursStart: '22:00',
+  quietHoursEnd: '07:00',
+  alertTypes: {
+    tainan: true,
+    ngapnuoc: true,
+    chayno: true,
+    khac: true
+  }
+};
+
+// Create alert
+function createAlert(type, title, message, location, severity = 'normal') {
+  var alert = {
+    id: 'ALERT-' + Date.now(),
+    type: type,
+    title: title,
+    message: message,
+    location: location,
+    severity: severity,
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 3600000).toISOString(), // 1 hour
+    dismissed: false,
+    viewed: false
+  };
+
+  alerts.push(alert);
+  updateAlertsList();
+
+  // Show popup for critical alerts
+  if (severity === 'critical') {
+    showAlertPopup(alert);
+  }
+
+  // Create notification
+  createNotification(title, message, type);
+
+  return alert;
+}
+
+// Update alerts list
+function updateAlertsList() {
+  var alertsList = document.getElementById('alertsList');
+
+  // Filter out expired and dismissed alerts
+  var activeAlerts = alerts.filter(function(alert) {
+    return new Date(alert.expiresAt) > new Date() && !alert.dismissed;
   });
 
-  if (report) {
-    var verificationOptions = prompt('Chọn trạng thái xác minh:\n1. Đã xác minh\n2. Chưa xác minh\n3. Trùng lặp\n4. Không hợp lệ\n\nNhập số (1-4):');
+  if (activeAlerts.length === 0) {
+    alertsList.innerHTML = '<div class="empty-state">' +
+                          '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>' +
+                          '<p>Không có cảnh báo nào</p>' +
+                          '</div>';
+    showAlertAreas();
+    return;
+  }
 
-    if (verificationOptions) {
-      var statusMap = {
-        '1': 'verified',
-        '2': 'unverified',
-        '3': 'duplicate',
-        '4': 'invalid'
-      };
+  alertsList.innerHTML = activeAlerts.map(function(alert) {
+    var severityClass = alert.severity === 'critical' ? 'critical' : '';
+    var createdTime = new Date(alert.createdAt);
+    var formattedTime = createdTime.toLocaleTimeString('vi-VN');
 
-      var status = statusMap[verificationOptions];
-      if (status) {
-        report.verification = {
-          status: status,
-          verifiedAt: new Date().toISOString(),
-          verifiedBy: 'user',
-          reliabilityLevel: status === 'verified' ? 'high' : status === 'unverified' ? 'medium' : 'low'
-        };
+    return '<div class="alert-item ' + severityClass + '" data-id="' + alert.id + '">' +
+           '<div class="alert-item-content">' +
+           '<div class="alert-item-title">' + alert.title + '</div>' +
+           '<div class="alert-item-meta">' +
+           '<span>' + formattedTime + '</span> • ' +
+           '<span>' + alert.location + '</span>' +
+           '</div>' +
+           '<div class="alert-item-description">' + alert.message + '</div>' +
+           '</div>' +
+           '<div class="alert-item-actions">' +
+           '<button onclick="viewAlertDetails(\'' + alert.id + '\')">Chi tiết</button>' +
+           '<button onclick="dismissAlert(\'' + alert.id + '\')">Đóng</button>' +
+           '</div>' +
+           '</div>';
+  }).join('');
 
-        // Add to status history
-        report.statusHistory = report.statusHistory || [];
-        report.statusHistory.push({
-          status: 'verified',
-          verificationStatus: status,
-          timestamp: new Date().toISOString(),
-          note: 'Đã xác minh bởi người dùng'
-        });
+  showAlertAreas();
+}
 
-        updateReportsList();
-        alert('Đã cập nhật trạng thái xác minh!');
-      }
+// Show alert popup
+function showAlertPopup(alert) {
+  var popup = document.getElementById('alertPopup');
+  var alertIcon = document.getElementById('alertIcon');
+  var alertTitle = document.getElementById('alertTitle');
+  var alertMessage = document.getElementById('alertMessage');
+  var alertLocation = document.getElementById('alertLocation');
+  var alertTime = document.getElementById('alertTime');
+
+  var iconMap = {
+    'tainan': '🚗',
+    'ngapnuoc': '🌊',
+    'chayno': '🔥',
+    'khac': '⚠️'
+  };
+
+  alertIcon.textContent = iconMap[alert.type] || '⚠️';
+  alertTitle.textContent = alert.title;
+  alertMessage.textContent = alert.message;
+  alertLocation.textContent = alert.location;
+  alertTime.textContent = new Date(alert.createdAt).toLocaleTimeString('vi-VN');
+
+  popup.style.display = 'block';
+
+  // Auto-hide after 10 seconds
+  setTimeout(function() {
+    if (popup.style.display === 'block') {
+      popup.style.display = 'none';
     }
+  }, 10000);
+}
+
+// Dismiss alert
+function dismissAlert(alertId) {
+  var alert = alerts.find(function(a) {
+    return a.id === alertId;
+  });
+
+  if (alert) {
+    alert.dismissed = true;
+    updateAlertsList();
   }
 }
+
+// View alert details
+function viewAlertDetails(alertId) {
+  var alert = alerts.find(function(a) {
+    return a.id === alertId;
+  });
+
+  if (alert) {
+    var details = 'Cảnh báo: ' + alert.title + '\n' +
+                 'Loại: ' + alert.type + '\n' +
+                 'Mô tả: ' + alert.message + '\n' +
+                 'Vị trí: ' + alert.location + '\n' +
+                 'Mức độ: ' + (alert.severity === 'critical' ? 'Nghiêm trọng' : 'Bình thường') + '\n' +
+                 'Thời gian: ' + new Date(alert.createdAt).toLocaleString('vi-VN') + '\n' +
+                 'Hết hạn: ' + new Date(alert.expiresAt).toLocaleString('vi-VN');
+
+    alert(details);
+  }
+}
+
+// Create notification
+function createNotification(title, message, type = 'info') {
+  if (!notificationSettings.inApp) return;
+
+  var notification = {
+    id: 'NOTIF-' + Date.now(),
+    title: title,
+    message: message,
+    type: type,
+    createdAt: new Date().toISOString(),
+    read: false
+  };
+
+  notifications.unshift(notification);
+  updateNotificationsList();
+
+  // Browser notification
+  if (notificationSettings.push && 'Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, {
+      body: message,
+      icon: '/favicon.ico'
+    });
+  }
+
+  return notification;
+}
+
+// Update notifications list
+function updateNotificationsList() {
+  var notificationsList = document.getElementById('notificationsList');
+
+  if (notifications.length === 0) {
+    notificationsList.innerHTML = '<div class="empty-state">' +
+                                  '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>' +
+                                  '<p>Không có thông báo nào</p>' +
+                                  '</div>';
+    return;
+  }
+
+  notificationsList.innerHTML = notifications.map(function(notification) {
+    var readClass = notification.read ? '' : 'unread';
+    var createdTime = new Date(notification.createdAt);
+    var formattedTime = createdTime.toLocaleTimeString('vi-VN');
+
+    return '<div class="notification-item ' + readClass + '" data-id="' + notification.id + '">' +
+           '<div class="notification-item-content">' +
+           '<div class="notification-item-title">' + notification.title + '</div>' +
+           '<div class="notification-item-time">' + formattedTime + '</div>' +
+           '<div class="notification-item-message">' + notification.message + '</div>' +
+           '</div>' +
+           '<div class="notification-item-actions">' +
+           '<button onclick="markAsRead(\'' + notification.id + '\')">Đọc</button>' +
+           '<button onclick="deleteNotification(\'' + notification.id + '\')">Xóa</button>' +
+           '</div>' +
+           '</div>';
+  }).join('');
+}
+
+// Mark notification as read
+function markAsRead(notificationId) {
+  var notification = notifications.find(function(n) {
+    return n.id === notificationId;
+  });
+
+  if (notification) {
+    notification.read = true;
+    updateNotificationsList();
+  }
+}
+
+// Delete notification
+function deleteNotification(notificationId) {
+  var index = notifications.findIndex(function(n) {
+    return n.id === notificationId;
+  });
+
+  if (index !== -1) {
+    notifications.splice(index, 1);
+    updateNotificationsList();
+  }
+}
+
+// Alert popup controls
+document.getElementById('alertPopupClose').addEventListener('click', function() {
+  document.getElementById('alertPopup').style.display = 'none';
+});
+
+document.getElementById('alertDismiss').addEventListener('click', function() {
+  document.getElementById('alertPopup').style.display = 'none';
+});
+
+document.getElementById('alertViewDetails').addEventListener('click', function() {
+  // Get current alert details (simplified)
+  alert('Chi tiết cảnh báo sẽ được hiển thị trong phiên bản đầy đủ');
+  document.getElementById('alertPopup').style.display = 'none';
+});
+
+// Notification settings modal
+document.getElementById('notificationSettings').addEventListener('click', function() {
+  document.getElementById('notificationSettingsModal').style.display = 'flex';
+});
+
+document.getElementById('closeSettingsModal').addEventListener('click', function() {
+  document.getElementById('notificationSettingsModal').style.display = 'none';
+});
+
+document.getElementById('cancelSettings').addEventListener('click', function() {
+  document.getElementById('notificationSettingsModal').style.display = 'none';
+});
+
+document.getElementById('saveSettings').addEventListener('click', function() {
+  notificationSettings.inApp = document.getElementById('enableInApp').checked;
+  notificationSettings.push = document.getElementById('enablePush').checked;
+  notificationSettings.email = document.getElementById('enableEmail').checked;
+  notificationSettings.radius = parseInt(document.getElementById('notificationRadius').value);
+  notificationSettings.quietHoursStart = document.getElementById('quietHoursStart').value;
+  notificationSettings.quietHoursEnd = document.getElementById('quietHoursEnd').value;
+  notificationSettings.alertTypes.tainan = document.getElementById('alertTaiNan').checked;
+  notificationSettings.alertTypes.ngapnuoc = document.getElementById('alertNgapNuoc').checked;
+  notificationSettings.alertTypes.chayno = document.getElementById('alertChayNo').checked;
+  notificationSettings.alertTypes.khac = document.getElementById('alertKhac').checked;
+
+  document.getElementById('notificationSettingsModal').style.display = 'none';
+  alert('Đã lưu cài đặt thông báo!');
+});
+
+// Radius slider update
+document.getElementById('notificationRadius').addEventListener('input', function() {
+  document.getElementById('radiusValue').textContent = this.value + ' km';
+});
+
+// Simulate alerts based on incidents
+function simulateAlerts() {
+  setInterval(function() {
+    if (incidentData.length > 0 && Math.random() < 0.3) { // 30% chance
+      var randomIncident = incidentData[Math.floor(Math.random() * incidentData.length)];
+
+      var alertTypes = {
+        'tainan': { title: 'Tai nạn giao thông', severity: 'critical' },
+        'ngapnuoc': { title: 'Ngập nước', severity: 'normal' },
+        'oga': { title: 'Ổ gà nguy hiểm', severity: 'normal' },
+        'vatcan': { title: 'Vật cản đường', severity: 'normal' },
+        'kexe': { title: 'Kẹt xe nghiêm trọng', severity: 'normal' }
+      };
+
+      var alertInfo = alertTypes[randomIncident.type] || alertTypes['khac'];
+
+      // Check if this alert type is enabled
+      if (notificationSettings.alertTypes[randomIncident.type] || notificationSettings.alertTypes.khac) {
+        createAlert(
+          randomIncident.type,
+          alertInfo.title,
+          'Phát hiện ' + alertInfo.title.toLowerCase() + ' tại khu vực ' + randomIncident.name,
+          randomIncident.name,
+          alertInfo.severity
+        );
+      }
+    }
+  }, 60000); // Check every minute
+}
+
+// Simulate general notifications
+function simulateNotifications() {
+  setInterval(function() {
+    if (Math.random() < 0.2) { // 20% chance
+      var notificationTypes = [
+        { title: 'Cập nhật hệ thống', message: 'Hệ thống đã được cập nhật phiên bản mới' },
+        { title: 'Cảnh báo thời tiết', message: 'Dự báo mưa lớn trong vài giờ tới' },
+        { title: 'Thông báo bảo trì', message: 'Hệ thống sẽ bảo trì vào 23:00' },
+        { title: 'Sự cố mới', message: 'Có ' + Math.floor(Math.random() * 5) + ' sự cố mới được báo cáo' }
+      ];
+
+      var randomNotif = notificationTypes[Math.floor(Math.random() * notificationTypes.length)];
+      createNotificationWithQuietCheck(randomNotif.title, randomNotif.message);
+    }
+  }, 90000); // Check every 90 seconds
+}
+
+// Proximity-based alerts
+function checkProximityAlerts() {
+  if (!currentLocation) return;
+
+  incidentData.forEach(function(incident) {
+    var incidentLatLng = L.latLng(incident.lat, incident.lng);
+    var userLatLng = L.latLng(currentLocation.lat, currentLocation.lng);
+    var distance = userLatLng.distanceTo(incidentLatLng) / 1000; // Convert to km
+
+    if (distance <= notificationSettings.radius) {
+      // Check if alert type is enabled
+      if (notificationSettings.alertTypes[incident.type] || notificationSettings.alertTypes.khac) {
+        var alertTypes = {
+          'tainan': { title: 'Tai nạn gần bạn', severity: 'critical' },
+          'ngapnuoc': { title: 'Ngập nước gần bạn', severity: 'normal' },
+          'oga': { title: 'Ổ gà gần bạn', severity: 'normal' },
+          'vatcan': { title: 'Vật cản gần bạn', severity: 'normal' },
+          'kexe': { title: 'Kẹt xe gần bạn', severity: 'normal' }
+        };
+
+        var alertInfo = alertTypes[incident.type] || alertTypes['khac'];
+
+        // Check if alert already exists for this incident
+        var existingAlert = alerts.find(function(a) {
+          return a.location === incident.name && a.type === incident.type;
+        });
+
+        if (!existingAlert) {
+          createAlert(
+            incident.type,
+            alertInfo.title,
+            'Cách ' + distance.toFixed(1) + ' km - ' + incident.name,
+            incident.name,
+            alertInfo.severity
+          );
+        }
+      }
+    }
+  });
+}
+
+// Run proximity check periodically
+setInterval(function() {
+  if (currentLocation) {
+    checkProximityAlerts();
+  }
+}, 30000); // Check every 30 seconds
+
+// Add alert area circles to map for visualization
+function showAlertAreas() {
+  // Remove existing alert circles
+  map.eachLayer(function(layer) {
+    if (layer instanceof L.Circle && layer.options.isAlertArea) {
+      map.removeLayer(layer);
+    }
+  });
+
+  // Add circles for active alerts
+  alerts.forEach(function(alert) {
+    if (!alert.dismissed && new Date(alert.expiresAt) > new Date()) {
+      // Find corresponding incident
+      var incident = incidentData.find(function(i) {
+        return i.name === alert.location;
+      });
+
+      if (incident) {
+        var color = alert.severity === 'critical' ? '#e74c3c' : '#f39c12';
+        L.circle([incident.lat, incident.lng], {
+          radius: notificationSettings.radius * 1000, // Convert km to meters
+          color: color,
+          fillColor: color,
+          fillOpacity: 0.1,
+          weight: 2,
+          isAlertArea: true
+        }).addTo(map).bindPopup(alert.title);
+      }
+    }
+  });
+}
+
+// Check quiet hours
+function isInQuietHours() {
+  var now = new Date();
+  var currentTime = now.getHours() * 60 + now.getMinutes();
+
+  var startParts = notificationSettings.quietHoursStart.split(':');
+  var endParts = notificationSettings.quietHoursEnd.split(':');
+
+  var startMinutes = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+  var endMinutes = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
+
+  if (startMinutes < endMinutes) {
+    return currentTime >= startMinutes && currentTime < endMinutes;
+  } else {
+    // Handle overnight quiet hours (e.g., 22:00 to 07:00)
+    return currentTime >= startMinutes || currentTime < endMinutes;
+  }
+}
+
+// Create notification with quiet hours check
+function createNotificationWithQuietCheck(title, message, type) {
+  if (!isInQuietHours()) {
+    createNotification(title, message, type);
+  }
+}
+
+// Override createAlert to use quiet hours check for notifications
+var originalCreateAlert = createAlert;
+createAlert = function(type, title, message, location, severity) {
+  originalCreateAlert(type, title, message, location, severity);
+};
+
+// Start alert and notification simulations
+simulateAlerts();
+simulateNotifications();
+
+// Initialize alerts and notifications lists
+updateAlertsList();
+updateNotificationsList();
 
 // Supplement Information
 function supplementReport(reportId) {
