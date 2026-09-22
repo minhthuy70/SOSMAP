@@ -22,6 +22,7 @@
       <a href="#home" class="nav-link active" data-section="home">Trang chủ</a>
       <a href="#map" class="nav-link" data-section="map">Bản đồ</a>
       <a href="#report" class="nav-link" data-section="report">Phản ánh</a>
+      <a href="#admin" class="nav-link admin-only" data-section="admin" style="display: none;">Quản trị</a>
       <a href="#about" class="nav-link" data-section="about">Giới thiệu</a>
     </nav>
     <div class="auth-section" id="authSection">
@@ -661,6 +662,107 @@
           </div>
         </div>
       </div>
+
+      <!-- Incident Detail Modal (Admin) -->
+      <div class="modal" id="incidentDetailModal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+          <div class="modal-header">
+            <h3>Chi tiết sự cố</h3>
+            <button class="modal-close" id="closeIncidentDetailModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="incident-detail-admin" id="incidentDetailContent">
+              <!-- Content will be dynamically loaded -->
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" id="closeIncidentDetailModalBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assignment Modal -->
+      <div class="modal" id="assignmentModal" style="display: none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Phân công xử lý</h3>
+            <button class="modal-close" id="closeAssignmentModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label>Chọn nhân viên:</label>
+              <div class="staff-list" id="staffList">
+                <div class="staff-item" data-staff-id="staff-1">
+                  <div class="staff-avatar">N</div>
+                  <div class="staff-info">
+                    <div class="staff-name">Nguyễn Văn B</div>
+                    <div class="staff-role">Nhân viên xử lý</div>
+                  </div>
+                </div>
+                <div class="staff-item" data-staff-id="staff-2">
+                  <div class="staff-avatar">T</div>
+                  <div class="staff-info">
+                    <div class="staff-name">Trần Thị C</div>
+                    <div class="staff-role">Nhân viên xử lý</div>
+                  </div>
+                </div>
+                <div class="staff-item" data-staff-id="staff-3">
+                  <div class="staff-avatar">L</div>
+                  <div class="staff-info">
+                    <div class="staff-name">Lê Văn D</div>
+                    <div class="staff-role">Nhân viên xử lý</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="assignmentPriority">Mức độ ưu tiên:</label>
+              <select id="assignmentPriority">
+                <option value="low">Thấp</option>
+                <option value="medium" selected>Trung bình</option>
+                <option value="high">Cao</option>
+                <option value="urgent">Khẩn cấp</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="assignmentDeadline">Hạn chờ xử lý:</label>
+              <input type="datetime-local" id="assignmentDeadline">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" id="confirmAssignment">Xác nhận phân công</button>
+            <button class="btn btn-secondary" id="cancelAssignment">Hủy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Update Modal -->
+      <div class="modal" id="statusUpdateModal" style="display: none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Cập nhật trạng thái</h3>
+            <button class="modal-close" id="closeStatusUpdateModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="newStatus">Trạng thái mới:</label>
+              <select id="newStatus">
+                <option value="pending">Chờ xử lý</option>
+                <option value="processing">Đang xử lý</option>
+                <option value="resolved">Đã giải quyết</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="statusNote">Ghi chú:</label>
+              <textarea id="statusNote" rows="3" placeholder="Nhập ghi chú về trạng thái mới..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" id="confirmStatusUpdate">Cập nhật</button>
+            <button class="btn btn-secondary" id="cancelStatusUpdate">Hủy</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Trang Phản ánh -->
@@ -859,6 +961,188 @@
         <h3>Liên hệ:</h3>
         <p>Email: contact@sosmap.vn</p>
         <p>Hotline: 1900 xxxx</p>
+      </div>
+    </div>
+
+    <!-- Trang Quản trị -->
+    <div id="admin-section" class="content-section">
+      <div class="page-content">
+        <h2>Quản trị sự cố</h2>
+
+        <!-- Admin Dashboard -->
+        <div class="admin-dashboard">
+          <!-- Statistics Cards -->
+          <div class="stats-cards">
+            <div class="stat-card">
+              <div class="stat-icon total">📊</div>
+              <div class="stat-info">
+                <div class="stat-value" id="totalIncidents">0</div>
+                <div class="stat-label">Tổng sự cố</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon pending">⏳</div>
+              <div class="stat-info">
+                <div class="stat-value" id="pendingIncidents">0</div>
+                <div class="stat-label">Chờ xử lý</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon processing">🔄</div>
+              <div class="stat-info">
+                <div class="stat-value" id="processingIncidents">0</div>
+                <div class="stat-label">Đang xử lý</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon resolved">✅</div>
+              <div class="stat-info">
+                <div class="stat-value" id="resolvedIncidents">0</div>
+                <div class="stat-label">Đã giải quyết</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filters and Search -->
+          <div class="admin-controls">
+            <div class="search-box">
+              <input type="text" id="adminSearch" placeholder="Tìm kiếm theo từ khóa...">
+              <button id="adminSearchBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
+            </div>
+            <div class="filter-controls">
+              <select id="filterType">
+                <option value="">Tất cả loại</option>
+                <option value="oga">Ổ gà</option>
+                <option value="tainan">Tai nạn</option>
+                <option value="ngapnuoc">Ngập nước</option>
+                <option value="vatcan">Vật cản</option>
+                <option value="kexe">Kẹt xe</option>
+              </select>
+              <select id="filterSeverity">
+                <option value="">Tất cả mức độ</option>
+                <option value="thap">Thấp</option>
+                <option value="trungbinh">Trung bình</option>
+                <option value="cao">Cao</option>
+              </select>
+              <select id="filterStatus">
+                <option value="">Tất cả trạng thái</option>
+                <option value="pending">Chờ xử lý</option>
+                <option value="processing">Đang xử lý</option>
+                <option value="resolved">Đã giải quyết</option>
+              </select>
+              <select id="filterDateRange">
+                <option value="">Tất cả thời gian</option>
+                <option value="today">Hôm nay</option>
+                <option value="week">Tuần này</option>
+                <option value="month">Tháng này</option>
+              </select>
+              <button class="btn btn-primary" id="applyFilters">Áp dụng</button>
+              <button class="btn btn-secondary" id="resetFilters">Đặt lại</button>
+            </div>
+          </div>
+
+          <!-- Incident List -->
+          <div class="incident-list-container">
+            <div class="list-header">
+              <h3>Danh sách sự cố</h3>
+              <div class="list-actions">
+                <button class="btn btn-secondary" id="exportCSV">Xuất CSV</button>
+                <button class="btn btn-secondary" id="exportExcel">Xuất Excel</button>
+              </div>
+            </div>
+            <div class="incident-table-wrapper">
+              <table class="incident-table">
+                <thead>
+                  <tr>
+                    <th>Mã số</th>
+                    <th>Tiêu đề</th>
+                    <th>Loại</th>
+                    <th>Mức độ</th>
+                    <th>Trạng thái</th>
+                    <th>Người tạo</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="incidentTableBody">
+                  <tr>
+                    <td colspan="8" class="no-data">Không có dữ liệu</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination">
+              <button class="pagination-btn" id="prevPage" disabled>Trước</button>
+              <span class="page-info">Trang <span id="currentPage">1</span> / <span id="totalPages">1</span></span>
+              <button class="pagination-btn" id="nextPage" disabled>Sau</button>
+              <select id="pageSize" class="page-size-select">
+                <option value="10">10/trang</option>
+                <option value="25">25/trang</option>
+                <option value="50">50/trang</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Statistics Charts -->
+          <div class="statistics-charts">
+            <div class="chart-section">
+              <h3>Thống kê theo loại sự cố</h3>
+              <div class="chart-container" id="typeChart">
+                <div class="chart-placeholder">
+                  <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                  <p>Biểu đồ thống kê</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-section">
+              <h3>Thống kê theo khu vực</h3>
+              <div class="chart-container" id="areaChart">
+                <div class="chart-placeholder">
+                  <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                    <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path>
+                  </svg>
+                  <p>Biểu đồ khu vực</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-section">
+              <h3>Xu hướng theo thời gian</h3>
+              <div class="chart-container" id="trendChart">
+                <div class="chart-placeholder">
+                  <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                    <polyline points="22 12 18 12 15 12 9 12 5 12 2 12"></polyline>
+                  </svg>
+                  <p>Biểu đồ xu hướng</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-section">
+              <h3>Thống kê xử lý</h3>
+              <div class="chart-container" id="processingChart">
+                <div class="chart-placeholder">
+                  <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  <p>Biểu đồ xử lý</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>

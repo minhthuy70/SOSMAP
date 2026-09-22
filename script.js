@@ -370,6 +370,18 @@ navLinks.forEach(link => {
       if (reportSection) {
         reportSection.classList.add('active');
       }
+    } else if (sectionName === 'admin') {
+      // Check permission
+      if (!hasPermission('process_incident') && !hasPermission('manage_system')) {
+        alert('Bạn không có quyền truy cập trang quản trị');
+        return;
+      }
+
+      const adminSection = document.getElementById('admin-section');
+      if (adminSection) {
+        adminSection.classList.add('active');
+        initializeAdminPanel();
+      }
     } else if (sectionName === 'about') {
       const aboutSection = document.getElementById('about-section');
       if (aboutSection) {
@@ -2265,6 +2277,865 @@ setInterval(checkSessionExpiry, 60000);
 if (currentUser) {
   currentUser.lastLogin = new Date().toISOString();
 }
+
+// Admin System for Incident Management
+var adminPagination = {
+  currentPage: 1,
+  pageSize: 10,
+  totalItems: 0,
+  totalPages: 1
+};
+
+var adminFilters = {
+  search: '',
+  type: '',
+  severity: '',
+  status: '',
+  dateRange: ''
+};
+
+var adminStaff = [
+  { id: 'staff-1', name: 'Nguyễn Văn B', role: 'Nhân viên xử lý', avatar: 'N' },
+  { id: 'staff-2', name: 'Trần Thị C', role: 'Nhân viên xử lý', avatar: 'T' },
+  { id: 'staff-3', name: 'Lê Văn D', role: 'Nhân viên xử lý', avatar: 'L' }
+];
+
+// Update admin UI based on role
+function updateAdminUI() {
+  var adminLink = document.querySelector('[data-section="admin"]');
+  if (adminLink) {
+    if (hasPermission('process_incident') || hasPermission('manage_system')) {
+      adminLink.style.display = 'block';
+    } else {
+      adminLink.style.display = 'none';
+    }
+  }
+}
+
+// Update statistics
+function updateAdminStatistics() {
+  var totalIncidents = incidentReports.length;
+  var pendingIncidents = incidentReports.filter(function(r) {
+    return r.status === 'pending';
+  }).length;
+  var processingIncidents = incidentReports.filter(function(r) {
+    return r.status === 'processing';
+  }).length;
+  var resolvedIncidents = incidentReports.filter(function(r) {
+    return r.status === 'resolved';
+  }).length;
+
+  document.getElementById('totalIncidents').textContent = totalIncidents;
+  document.getElementById('pendingIncidents').textContent = pendingIncidents;
+  document.getElementById('processingIncidents').textContent = processingIncidents;
+  document.getElementById('resolvedIncidents').textContent = resolvedIncidents;
+}
+
+// Filter incidents
+function filterIncidents() {
+  var filtered = incidentReports;
+
+  // Search filter
+  if (adminFilters.search) {
+    var searchLower = adminFilters.search.toLowerCase();
+    filtered = filtered.filter(function(incident) {
+      return incident.title.toLowerCase().includes(searchLower) ||
+             incident.id.toLowerCase().includes(searchLower) ||
+             (incident.description && incident.description.toLowerCase().includes(searchLower));
+    });
+  }
+
+  // Type filter
+  if (adminFilters.type) {
+    filtered = filtered.filter(function(incident) {
+      return incident.type === adminFilters.type;
+    });
+  }
+
+  // Severity filter
+  if (adminFilters.severity) {
+    filtered = filtered.filter(function(incident) {
+      return incident.severity === adminFilters.severity;
+    });
+  }
+
+  // Status filter
+  if (adminFilters.status) {
+    filtered = filtered.filter(function(incident) {
+      return incident.status === adminFilters.status;
+    });
+  }
+
+  // Date range filter
+  if (adminFilters.dateRange) {
+    var now = new Date();
+    var startDate;
+
+    switch (adminFilters.dateRange) {
+      case 'today':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        break;
+      case 'week':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'month':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+    }
+
+    if (startDate) {
+      filtered = filtered.filter(function(incident) {
+        return new Date(incident.createdAt) >= startDate;
+      });
+    }
+  }
+
+  return filtered;
+}
+
+// Update incident table
+function updateIncidentTable() {
+  var filtered = filterIncidents();
+  adminPagination.totalItems = filtered.length;
+  adminPagination.totalPages = Math.ceil(adminPagination.totalItems / adminPagination.pageSize);
+
+  // Ensure current page is valid
+  if (adminPagination.currentPage > adminPagination.totalPages) {
+    adminPagination.currentPage = Math.max(1, adminPagination.totalPages);
+  }
+
+  var startIndex = (adminPagination.currentPage - 1) * adminPagination.pageSize;
+  var endIndex = startIndex + adminPagination.pageSize;
+  var pageData = filtered.slice(startIndex, endIndex);
+
+  var tableBody = document.getElementById('incidentTableBody');
+
+  if (pageData.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="8" class="no-data">Không có dữ liệu</td></tr>';
+  } else {
+    tableBody.innerHTML = pageData.map(function(incident) {
+      var typeNames = {
+        'oga': 'Ổ gà',
+        'tainan': 'Tai nạn',
+        'ngapnuoc': 'Ngập nước',
+        'vatcan': 'Vật cản',
+        'kexe': 'Kẹt xe',
+        'khac': 'Khác'
+      };
+
+      var severityNames = {
+        'thap': 'Thấp',
+        'trungbinh': 'Trung bình',
+        'cao': 'Cao'
+      };
+
+      var statusNames = {
+        'pending': 'Chờ xử lý',
+        'processing': 'Đang xử lý',
+        'resolved': 'Đã giải quyết'
+      };
+
+      var createdDate = new Date(incident.createdAt);
+      var formattedDate = createdDate.toLocaleDateString('vi-VN');
+
+      return '<tr>' +
+             '<td>' + incident.id + '</td>' +
+             '<td>' + incident.title + '</td>' +
+             '<td><span class="type-badge">' + (typeNames[incident.type] || incident.type) + '</span></td>' +
+             '<td><span class="severity-badge-admin ' + incident.severity + '">' + (severityNames[incident.severity] || incident.severity) + '</span></td>' +
+             '<td><span class="status-badge-admin ' + incident.status + '">' + (statusNames[incident.status] || incident.status) + '</span></td>' +
+             '<td>' + (incident.contact ? incident.contact.name : 'Ẩn danh') + '</td>' +
+             '<td>' + formattedDate + '</td>' +
+             '<td>' +
+             '<div class="action-buttons">' +
+             '<button onclick="viewIncidentDetailAdmin(\'' + incident.id + '\')" class="primary">Chi tiết</button>' +
+             (incident.status === 'pending' ? '<button onclick="assignIncident(\'' + incident.id + '\')">Phân công</button>' : '') +
+             '<button onclick="updateIncidentStatus(\'' + incident.id + '\')">Cập nhật</button>' +
+             (incident.status !== 'resolved' ? '<button onclick="closeIncident(\'' + incident.id + '\')" class="danger">Đóng</button>' : '') +
+             '</div>' +
+             '</td>' +
+             '</tr>';
+    }).join('');
+  }
+
+  // Update pagination info
+  document.getElementById('currentPage').textContent = adminPagination.currentPage;
+  document.getElementById('totalPages').textContent = adminPagination.totalPages;
+  document.getElementById('prevPage').disabled = adminPagination.currentPage === 1;
+  document.getElementById('nextPage').disabled = adminPagination.currentPage === adminPagination.totalPages;
+}
+
+// Apply filters
+document.getElementById('applyFilters').addEventListener('click', function() {
+  adminFilters.search = document.getElementById('adminSearch').value;
+  adminFilters.type = document.getElementById('filterType').value;
+  adminFilters.severity = document.getElementById('filterSeverity').value;
+  adminFilters.status = document.getElementById('filterStatus').value;
+  adminFilters.dateRange = document.getElementById('filterDateRange').value;
+
+  adminPagination.currentPage = 1;
+  updateIncidentTable();
+});
+
+// Reset filters
+document.getElementById('resetFilters').addEventListener('click', function() {
+  document.getElementById('adminSearch').value = '';
+  document.getElementById('filterType').value = '';
+  document.getElementById('filterSeverity').value = '';
+  document.getElementById('filterStatus').value = '';
+  document.getElementById('filterDateRange').value = '';
+
+  adminFilters = {
+    search: '',
+    type: '',
+    severity: '',
+    status: '',
+    dateRange: ''
+  };
+
+  adminPagination.currentPage = 1;
+  updateIncidentTable();
+});
+
+// Search on Enter key
+document.getElementById('adminSearch').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    document.getElementById('applyFilters').click();
+  }
+});
+
+// Pagination controls
+document.getElementById('prevPage').addEventListener('click', function() {
+  if (adminPagination.currentPage > 1) {
+    adminPagination.currentPage--;
+    updateIncidentTable();
+  }
+});
+
+document.getElementById('nextPage').addEventListener('click', function() {
+  if (adminPagination.currentPage < adminPagination.totalPages) {
+    adminPagination.currentPage++;
+    updateIncidentTable();
+  }
+});
+
+document.getElementById('pageSize').addEventListener('change', function() {
+  adminPagination.pageSize = parseInt(this.value);
+  adminPagination.currentPage = 1;
+  updateIncidentTable();
+});
+
+// View incident detail (admin)
+function viewIncidentDetailAdmin(incidentId) {
+  var incident = incidentReports.find(function(r) {
+    return r.id === incidentId;
+  });
+
+  if (incident) {
+    var typeNames = {
+      'oga': 'Ổ gà',
+      'tainan': 'Tai nạn',
+      'ngapnuoc': 'Ngập nước',
+      'vatcan': 'Vật cản',
+      'kexe': 'Kẹt xe',
+      'khac': 'Khác'
+    };
+
+    var severityNames = {
+      'thap': 'Thấp',
+      'trungbinh': 'Trung bình',
+      'cao': 'Cao'
+    };
+
+    var statusNames = {
+      'pending': 'Chờ xử lý',
+      'processing': 'Đang xử lý',
+      'resolved': 'Đã giải quyết'
+    };
+
+    var createdDate = new Date(incident.createdAt);
+    var formattedDate = createdDate.toLocaleString('vi-VN');
+
+    var detailContent = '<div class="detail-section-admin">' +
+                        '<h4>Thông tin chung</h4>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Mã số:</div>' +
+                        '<div class="detail-value-admin">' + incident.id + '</div>' +
+                        '</div>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Tiêu đề:</div>' +
+                        '<div class="detail-value-admin">' + incident.title + '</div>' +
+                        '</div>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Loại:</div>' +
+                        '<div class="detail-value-admin">' + (typeNames[incident.type] || incident.type) + '</div>' +
+                        '</div>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Mức độ:</div>' +
+                        '<div class="detail-value-admin">' + (severityNames[incident.severity] || incident.severity) + '</div>' +
+                        '</div>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Trạng thái:</div>' +
+                        '<div class="detail-value-admin">' + (statusNames[incident.status] || incident.status) + '</div>' +
+                        '</div>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Ngày tạo:</div>' +
+                        '<div class="detail-value-admin">' + formattedDate + '</div>' +
+                        '</div>' +
+                        '</div>' +
+
+                        '<div class="detail-section-admin">' +
+                        '<h4>Mô tả chi tiết</h4>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-value-admin">' + incident.description + '</div>' +
+                        '</div>' +
+                        '</div>' +
+
+                        '<div class="detail-section-admin">' +
+                        '<h4>Vị trí</h4>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Địa chỉ:</div>' +
+                        '<div class="detail-value-admin">' + (incident.location.address || 'Chưa có địa chỉ') + '</div>' +
+                        '</div>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Tọa độ:</div>' +
+                        '<div class="detail-value-admin">' + incident.location.lat.toFixed(6) + ', ' + incident.location.lng.toFixed(6) + '</div>' +
+                        '</div>' +
+                        '</div>' +
+
+                        '<div class="detail-section-admin">' +
+                        '<h4>Thông tin người gửi</h4>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Họ tên:</div>' +
+                        '<div class="detail-value-admin">' + (incident.contact ? incident.contact.name : (incident.anonymous ? 'Ẩn danh' : 'Chưa cung cấp')) + '</div>' +
+                        '</div>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">SĐT:</div>' +
+                        '<div class="detail-value-admin">' + (incident.contact ? incident.contact.phone : 'Chưa cung cấp') + '</div>' +
+                        '</div>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Email:</div>' +
+                        '<div class="detail-value-admin">' + (incident.contact ? incident.contact.email : 'Chưa cung cấp') + '</div>' +
+                        '</div>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Ẩn danh:</div>' +
+                        '<div class="detail-value-admin">' + (incident.anonymous ? 'Có' : 'Không') + '</div>' +
+                        '</div>' +
+                        '</div>' +
+
+                        '<div class="detail-section-admin">' +
+                        '<h4>Thông tin xử lý</h4>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Nhân viên:</div>' +
+                        '<div class="detail-value-admin">' + (incident.assignedTo ? incident.assignedTo.name : 'Chưa phân công') + '</div>' +
+                        '</div>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Mức độ ưu tiên:</div>' +
+                        '<div class="detail-value-admin">' + (incident.priority || 'Chưa đặt') + '</div>' +
+                        '</div>' +
+                        '<div class="detail-row-admin">' +
+                        '<div class="detail-label-admin">Hạn chờ:</div>' +
+                        '<div class="detail-value-admin">' + (incident.deadline ? new Date(incident.deadline).toLocaleString('vi-VN') : 'Chưa đặt') + '</div>' +
+                        '</div>' +
+                        '</div>' +
+
+                        '<div class="detail-section-admin">' +
+                        '<h4>Ghi chú</h4>' +
+                        '<div class="notes-section">' +
+                        '<div class="notes-list" id="incidentNotes">' +
+                        (incident.notes && incident.notes.length > 0 ?
+                          incident.notes.map(function(note) {
+                            return '<div class="note-item">' +
+                                   '<div class="note-time">' + new Date(note.timestamp).toLocaleString('vi-VN') + '</div>' +
+                                   '<div class="note-content">' + note.content + '</div>' +
+                                   '<div class="note-author">' + note.author + '</div>' +
+                                   '</div>';
+                          }).join('') :
+                          '<p style="color: #999; font-size: 13px;">Chưa có ghi chú nào</p>'
+                        ) +
+                        '</div>' +
+                        '<div class="add-note">' +
+                        '<textarea id="newNoteContent" placeholder="Thêm ghi chú mới..."></textarea>' +
+                        '<button onclick="addNote(\'' + incident.id + '\')">Thêm ghi chú</button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+
+                        '<div class="admin-actions">' +
+                        '<button class="btn btn-primary" onclick="assignIncident(\'' + incident.id + '\')">Phân công</button>' +
+                        '<button class="btn btn-primary" onclick="updateIncidentStatus(\'' + incident.id + '\')">Cập nhật trạng thái</button>' +
+                        (incident.status !== 'resolved' ? '<button class="btn btn-danger" onclick="closeIncident(\'' + incident.id + '\')">Đóng sự cố</button>' : '') +
+                        '</div>';
+
+    document.getElementById('incidentDetailContent').innerHTML = detailContent;
+    document.getElementById('incidentDetailModal').style.display = 'flex';
+  }
+}
+
+// Close incident detail modal
+document.getElementById('closeIncidentDetailModal').addEventListener('click', function() {
+  document.getElementById('incidentDetailModal').style.display = 'none';
+});
+
+document.getElementById('closeIncidentDetailModalBtn').addEventListener('click', function() {
+  document.getElementById('incidentDetailModal').style.display = 'none';
+});
+
+// Assignment functionality
+var currentAssignmentIncidentId = null;
+
+function assignIncident(incidentId) {
+  if (!hasPermission('process_incident')) {
+    alert('Bạn không có quyền phân công sự cố');
+    return;
+  }
+
+  currentAssignmentIncidentId = incidentId;
+  document.getElementById('assignmentModal').style.display = 'flex';
+
+  // Set default deadline to 24 hours from now
+  var defaultDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  document.getElementById('assignmentDeadline').value = defaultDeadline.toISOString().slice(0, 16);
+}
+
+document.getElementById('closeAssignmentModal').addEventListener('click', function() {
+  document.getElementById('assignmentModal').style.display = 'none';
+});
+
+document.getElementById('cancelAssignment').addEventListener('click', function() {
+  document.getElementById('assignmentModal').style.display = 'none';
+});
+
+// Staff selection
+document.querySelectorAll('.staff-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.staff-item').forEach(function(i) {
+      i.classList.remove('selected');
+    });
+    this.classList.add('selected');
+  });
+});
+
+document.getElementById('confirmAssignment').addEventListener('click', function() {
+  var selectedStaff = document.querySelector('.staff-item.selected');
+  if (!selectedStaff) {
+    alert('Vui lòng chọn nhân viên');
+    return;
+  }
+
+  var staffId = selectedStaff.getAttribute('data-staff-id');
+  var staff = adminStaff.find(function(s) {
+    return s.id === staffId;
+  });
+
+  var priority = document.getElementById('assignmentPriority').value;
+  var deadline = document.getElementById('assignmentDeadline').value;
+
+  var incident = incidentReports.find(function(r) {
+    return r.id === currentAssignmentIncidentId;
+  });
+
+  if (incident) {
+    incident.assignedTo = staff;
+    incident.priority = priority;
+    incident.deadline = deadline;
+    incident.status = 'processing';
+    incident.statusHistory = incident.statusHistory || [];
+    incident.statusHistory.push({
+      status: 'assigned',
+      timestamp: new Date().toISOString(),
+      note: 'Đã phân công cho ' + staff.name
+    });
+
+    logActivity('incident_assign', 'Phân công sự cố ' + currentAssignmentIncidentId + ' cho ' + staff.name);
+
+    updateIncidentTable();
+    updateAdminStatistics();
+    updateReportsList();
+
+    document.getElementById('assignmentModal').style.display = 'none';
+    alert('Đã phân công thành công!');
+  }
+});
+
+// Status update functionality
+var currentStatusIncidentId = null;
+
+function updateIncidentStatus(incidentId) {
+  if (!hasPermission('process_incident')) {
+    alert('Bạn không có quyền cập nhật trạng thái');
+    return;
+  }
+
+  currentStatusIncidentId = incidentId;
+  document.getElementById('statusUpdateModal').style.display = 'flex';
+
+  // Set current status
+  var incident = incidentReports.find(function(r) {
+    return r.id === incidentId;
+  });
+
+  if (incident) {
+    document.getElementById('newStatus').value = incident.status;
+  }
+}
+
+document.getElementById('closeStatusUpdateModal').addEventListener('click', function() {
+  document.getElementById('statusUpdateModal').style.display = 'none';
+});
+
+document.getElementById('cancelStatusUpdate').addEventListener('click', function() {
+  document.getElementById('statusUpdateModal').style.display = 'none';
+});
+
+document.getElementById('confirmStatusUpdate').addEventListener('click', function() {
+  var newStatus = document.getElementById('newStatus').value;
+  var note = document.getElementById('statusNote').value;
+
+  var incident = incidentReports.find(function(r) {
+    return r.id === currentStatusIncidentId;
+  });
+
+  if (incident) {
+    incident.status = newStatus;
+    incident.statusHistory = incident.statusHistory || [];
+    incident.statusHistory.push({
+      status: newStatus,
+      timestamp: new Date().toISOString(),
+      note: note || 'Cập nhật trạng thái'
+    });
+
+    logActivity('incident_status_update', 'Cập nhật trạng thái ' + currentStatusIncidentId + ' thành ' + newStatus);
+
+    updateIncidentTable();
+    updateAdminStatistics();
+    updateReportsList();
+
+    document.getElementById('statusUpdateModal').style.display = 'none';
+    document.getElementById('statusNote').value = '';
+
+    alert('Đã cập nhật trạng thái thành công!');
+  }
+});
+
+// Close incident
+function closeIncident(incidentId) {
+  if (!hasPermission('process_incident')) {
+    alert('Bạn không có quyền đóng sự cố');
+    return;
+  }
+
+  if (confirm('Bạn có chắc muốn đóng sự cố này?')) {
+    var incident = incidentReports.find(function(r) {
+      return r.id === incidentId;
+    });
+
+    if (incident) {
+      incident.status = 'resolved';
+      incident.statusHistory = incident.statusHistory || [];
+      incident.statusHistory.push({
+        status: 'resolved',
+        timestamp: new Date().toISOString(),
+        note: 'Đã đóng sự cố'
+      });
+
+      logActivity('incident_close', 'Đóng sự cố: ' + incidentId);
+
+      updateIncidentTable();
+      updateAdminStatistics();
+      updateReportsList();
+
+      alert('Đã đóng sự cố thành công!');
+    }
+  }
+}
+
+// Add note to incident
+function addNote(incidentId) {
+  var noteContent = document.getElementById('newNoteContent').value;
+
+  if (!noteContent.trim()) {
+    alert('Vui lòng nhập nội dung ghi chú');
+    return;
+  }
+
+  var incident = incidentReports.find(function(r) {
+    return r.id === incidentId;
+  });
+
+  if (incident) {
+    incident.notes = incident.notes || [];
+    incident.notes.push({
+      content: noteContent,
+      timestamp: new Date().toISOString(),
+      author: currentUser ? currentUser.name : 'Admin'
+    });
+
+    logActivity('incident_note', 'Thêm ghi chú cho sự cố: ' + incidentId);
+
+    // Refresh the notes display
+    viewIncidentDetailAdmin(incidentId);
+    document.getElementById('newNoteContent').value = '';
+
+    alert('Đã thêm ghi chú thành công!');
+  }
+}
+
+// Export functionality
+document.getElementById('exportCSV').addEventListener('click', function() {
+  exportToCSV();
+});
+
+document.getElementById('exportExcel').addEventListener('click', function() {
+  exportToExcel();
+});
+
+function exportToCSV() {
+  var filtered = filterIncidents();
+
+  if (filtered.length === 0) {
+    alert('Không có dữ liệu để xuất');
+    return;
+  }
+
+  var headers = ['Mã số', 'Tiêu đề', 'Loại', 'Mức độ', 'Trạng thái', 'Người tạo', 'Ngày tạo', 'Mô tả'];
+  var csvContent = headers.join(',') + '\n';
+
+  filtered.forEach(function(incident) {
+    var row = [
+      incident.id,
+      incident.title,
+      incident.type,
+      incident.severity,
+      incident.status,
+      incident.contact ? incident.contact.name : 'Ẩn danh',
+      new Date(incident.createdAt).toLocaleString('vi-VN'),
+      incident.description.replace(/,/g, ';') // Escape commas
+    ];
+    csvContent += row.join(',') + '\n';
+  });
+
+  var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  var link = document.createElement('a');
+  var url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'su_co_' + new Date().toISOString().slice(0, 10) + '.csv');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  logActivity('export_csv', 'Xuất CSV với ' + filtered.length + ' sự cố');
+}
+
+function exportToExcel() {
+  // Simulated Excel export (in real app, would use xlsx library)
+  var filtered = filterIncidents();
+
+  if (filtered.length === 0) {
+    alert('Không có dữ liệu để xuất');
+    return;
+  }
+
+  // Create a simple HTML table for Excel export
+  var tableContent = '<table>' +
+                      '<thead>' +
+                      '<tr>' +
+                      '<th>Mã số</th>' +
+                      '<th>Tiêu đề</th>' +
+                      '<th>Loại</th>' +
+                      '<th>Mức độ</th>' +
+                      '<th>Trạng thái</th>' +
+                      '<th>Người tạo</th>' +
+                      '<th>Ngày tạo</th>' +
+                      '<th>Mô tả</th>' +
+                      '</tr>' +
+                      '</thead>' +
+                      '<tbody>';
+
+  filtered.forEach(function(incident) {
+    tableContent += '<tr>' +
+                   '<td>' + incident.id + '</td>' +
+                   '<td>' + incident.title + '</td>' +
+                   '<td>' + incident.type + '</td>' +
+                   '<td>' + incident.severity + '</td>' +
+                   '<td>' + incident.status + '</td>' +
+                   '<td>' + (incident.contact ? incident.contact.name : 'Ẩn danh') + '</td>' +
+                   '<td>' + new Date(incident.createdAt).toLocaleString('vi-VN') + '</td>' +
+                   '<td>' + incident.description + '</td>' +
+                   '</tr>';
+  });
+
+  tableContent += '</tbody></table>';
+
+  var blob = new Blob([tableContent], { type: 'application/vnd.ms-excel' });
+  var link = document.createElement('a');
+  var url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'su_co_' + new Date().toISOString().slice(0, 10) + '.xls');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  logActivity('export_excel', 'Xuất Excel với ' + filtered.length + ' sự cố');
+}
+
+// Initialize admin panel
+function initializeAdminPanel() {
+  updateAdminUI();
+  updateAdminStatistics();
+  updateIncidentTable();
+}
+
+// Update role-based UI
+var originalUpdateUserInterface = updateUserInterface;
+updateUserInterface = function() {
+  originalUpdateUserInterface();
+  updateAdminUI();
+};
+
+// Update statistics charts
+function updateStatisticsCharts() {
+  // Type statistics
+  var typeStats = {};
+  incidentReports.forEach(function(incident) {
+    typeStats[incident.type] = (typeStats[incident.type] || 0) + 1;
+  });
+
+  var typeChart = document.getElementById('typeChart');
+  if (typeChart && Object.keys(typeStats).length > 0) {
+    var maxTypeCount = Math.max(...Object.values(typeStats));
+    typeChart.innerHTML = '<div class="simple-bar-chart">' +
+                           Object.keys(typeStats).map(function(type) {
+                             var typeNames = {
+                               'oga': 'Ổ gà',
+                               'tainan': 'Tai nạn',
+                               'ngapnuoc': 'Ngập nước',
+                               'vatcan': 'Vật cản',
+                               'kexe': 'Kẹt xe',
+                               'khac': 'Khác'
+                             };
+                             var percentage = (typeStats[type] / maxTypeCount) * 100;
+                             return '<div class="bar-item">' +
+                                    '<div class="bar-label">' + (typeNames[type] || type) + '</div>' +
+                                    '<div class="bar-container">' +
+                                    '<div class="bar-fill" style="width: ' + percentage + '%; background: #005BAC;"></div>' +
+                                    '</div>' +
+                                    '<div class="bar-value">' + typeStats[type] + '</div>' +
+                                    '</div>';
+                           }).join('') +
+                           '</div>';
+  }
+
+  // Severity statistics
+  var severityStats = {};
+  incidentReports.forEach(function(incident) {
+    severityStats[incident.severity] = (severityStats[incident.severity] || 0) + 1;
+  });
+
+  var areaChart = document.getElementById('areaChart');
+  if (areaChart && Object.keys(severityStats).length > 0) {
+    var maxSeverityCount = Math.max(...Object.values(severityStats));
+    areaChart.innerHTML = '<div class="simple-bar-chart">' +
+                           Object.keys(severityStats).map(function(severity) {
+                             var severityNames = {
+                               'thap': 'Thấp',
+                               'trungbinh': 'Trung bình',
+                               'cao': 'Cao'
+                             };
+                             var percentage = (severityStats[severity] / maxSeverityCount) * 100;
+                             var colors = {
+                               'thap': '#2ecc71',
+                               'trungbinh': '#f39c12',
+                               'cao': '#e74c3c'
+                             };
+                             return '<div class="bar-item">' +
+                                    '<div class="bar-label">' + (severityNames[severity] || severity) + '</div>' +
+                                    '<div class="bar-container">' +
+                                    '<div class="bar-fill" style="width: ' + percentage + '%; background: ' + (colors[severity] || '#999') + ';"></div>' +
+                                    '</div>' +
+                                    '<div class="bar-value">' + severityStats[severity] + '</div>' +
+                                    '</div>';
+                           }).join('') +
+                           '</div>';
+  }
+
+  // Status statistics (trend over time)
+  var statusStats = {
+    pending: incidentReports.filter(function(r) { return r.status === 'pending'; }).length,
+    processing: incidentReports.filter(function(r) { return r.status === 'processing'; }).length,
+    resolved: incidentReports.filter(function(r) { return r.status === 'resolved'; }).length
+  };
+
+  var trendChart = document.getElementById('trendChart');
+  if (trendChart) {
+    var maxStatusCount = Math.max(...Object.values(statusStats), 1);
+    trendChart.innerHTML = '<div class="simple-bar-chart">' +
+                          Object.keys(statusStats).map(function(status) {
+                            var statusNames = {
+                              'pending': 'Chờ xử lý',
+                              'processing': 'Đang xử lý',
+                              'resolved': 'Đã giải quyết'
+                            };
+                            var percentage = (statusStats[status] / maxStatusCount) * 100;
+                            var colors = {
+                              'pending': '#fff3cd',
+                              'processing': '#cce5ff',
+                              'resolved': '#d4edda'
+                            };
+                            return '<div class="bar-item">' +
+                                   '<div class="bar-label">' + (statusNames[status] || status) + '</div>' +
+                                   '<div class="bar-container">' +
+                                   '<div class="bar-fill" style="width: ' + percentage + '%; background: ' + (colors[status] || '#999') + ';"></div>' +
+                                   '</div>' +
+                                   '<div class="bar-value">' + statusStats[status] + '</div>' +
+                                   '</div>';
+                          }).join('') +
+                          '</div>';
+  }
+
+  // Processing time statistics
+  var processingChart = document.getElementById('processingChart');
+  if (processingChart) {
+    var avgProcessingTime = calculateAverageProcessingTime();
+    processingChart.innerHTML = '<div style="text-align: center;">' +
+                                 '<div style="font-size: 32px; font-weight: bold; color: #005BAC;">' + avgProcessingTime + '</div>' +
+                                 '<div style="font-size: 14px; color: #666;">phút trung bình</div>' +
+                                 '<div style="font-size: 12px; color: #999; margin-top: 8px;">Thời gian xử lý</div>' +
+                                 '</div>';
+  }
+}
+
+function calculateAverageProcessingTime() {
+  var processingTimes = [];
+
+  incidentReports.forEach(function(incident) {
+    if (incident.statusHistory && incident.statusHistory.length > 0) {
+      var createdTime = new Date(incident.createdAt);
+      var resolvedTime = new Date(incident.statusHistory[incident.statusHistory.length - 1].timestamp);
+      var processingHours = (resolvedTime - createdTime) / (1000 * 60 * 60);
+      processingTimes.push(processingHours);
+    }
+  });
+
+  if (processingTimes.length === 0) return '0';
+  return (processingTimes.reduce(function(a, b) { return a + b; }, 0) / processingTimes.length).toFixed(1);
+}
+
+// Update all admin data
+function updateAllAdminData() {
+  updateAdminStatistics();
+  updateIncidentTable();
+  updateStatisticsCharts();
+}
+
+// Initialize admin panel with all data
+var originalInitializeAdminPanel = initializeAdminPanel;
+initializeAdminPanel = function() {
+  updateAdminUI();
+  updateAllAdminData();
+};
 
 // Check quiet hours
 function isInQuietHours() {
