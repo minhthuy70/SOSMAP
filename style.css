@@ -9,6 +9,7 @@ body, html {
   height: 100%;
 }
 
+/* Navigation Bar */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -16,34 +17,297 @@ body, html {
   background: #005BAC;
   color: white;
   padding: 10px 20px;
+  position: relative;
 }
 
-.navbar nav a {
+.navbar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.navbar h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.navbar-nav {
+  display: flex;
+  gap: 15px;
+}
+
+.nav-link {
   color: white;
-  margin-left: 15px;
   text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+}
+
+/* Mobile Menu Button */
+.mobile-menu-btn {
+  display: none;
+  flex-direction: column;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.mobile-menu-btn span {
+  width: 25px;
+  height: 3px;
+  background-color: white;
+  margin: 3px 0;
+  transition: 0.3s;
+}
+
+/* Container */
 .container {
   display: flex;
-  height: calc(100vh - 60px); /* Trừ chiều cao navbar */
+  height: calc(100vh - 60px);
+  position: relative;
 }
 
+/* Map */
 #map {
   flex: 3;
   height: 100%;
+  min-width: 200px;
 }
 
+/* Resize Handle */
+.resize-handle {
+  width: 5px;
+  background: #ddd;
+  cursor: col-resize;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.resize-handle:hover {
+  background: #999;
+}
+
+/* Sidebar */
 .sidebar {
   flex: 1;
   background: #f7f7f7;
   padding: 20px;
   border-left: 1px solid #ddd;
   overflow-y: auto;
+  min-width: 250px;
+  max-width: 500px;
+  width: 300px;
 }
 
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.sidebar-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.fullscreen-btn {
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.fullscreen-btn:hover {
+  background: #e0e0e0;
+}
+
+.fullscreen-btn svg {
+  color: #666;
+}
+
+/* Live indicator */
 .live {
   color: red;
   font-weight: bold;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Content Sections */
+.content-section {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+.content-section.active {
+  display: flex;
+}
+
+.page-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-content h2 {
+  color: #005BAC;
+  margin-bottom: 20px;
+  font-size: 2rem;
+}
+
+.page-content h3 {
+  color: #333;
+  margin: 20px 0 10px 0;
+  font-size: 1.3rem;
+}
+
+.page-content p {
+  line-height: 1.6;
+  margin-bottom: 15px;
+  color: #555;
+}
+
+.page-content ul {
+  margin-left: 20px;
+  margin-bottom: 15px;
+}
+
+.page-content li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+  color: #555;
+}
+
+/* Fullscreen mode */
+.container.fullscreen-mode #map {
+  flex: 1;
+}
+
+.container.fullscreen-mode .sidebar {
+  display: none;
+}
+
+.container.fullscreen-mode .resize-handle {
+  display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px 15px;
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .navbar-nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #005BAC;
+    flex-direction: column;
+    padding: 10px 0;
+    gap: 0;
+  }
+
+  .navbar-nav.active {
+    display: flex;
+  }
+
+  .nav-link {
+    padding: 12px 20px;
+    border-radius: 0;
+  }
+
+  .container {
+    flex-direction: column;
+    height: calc(100vh - 120px);
+  }
+
+  #map {
+    flex: 1;
+    min-height: 50%;
+  }
+
+  .resize-handle {
+    height: 5px;
+    width: 100%;
+    cursor: row-resize;
+  }
+
+  .sidebar {
+    flex: 1;
+    min-width: 100%;
+    max-width: 100%;
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #ddd;
+  }
+
+  .page-content {
+    padding: 20px;
+  }
+
+  .page-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .page-content h3 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar h1 {
+    font-size: 1.2rem;
+  }
+
+  .sidebar {
+    padding: 15px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 1rem;
+  }
+
+  .page-content {
+    padding: 15px;
+  }
+
+  .page-content h2 {
+    font-size: 1.3rem;
+  }
+
+  .page-content h3 {
+    font-size: 1rem;
+  }
 }
 

@@ -10,23 +10,75 @@
 <body>
   <!-- Thanh menu -->
   <header class="navbar">
-    <h1>SOS MAP</h1>
-    <nav>
-      <a href="#">Trang chủ</a>
-      <a href="#">Bản đồ</a>
-      <a href="#">Phản ánh</a>
-      <a href="#">Giới thiệu</a>
+    <div class="navbar-header">
+      <h1>SOS MAP</h1>
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <nav class="navbar-nav" id="navbarNav">
+      <a href="#home" class="nav-link active" data-section="home">Trang chủ</a>
+      <a href="#map" class="nav-link" data-section="map">Bản đồ</a>
+      <a href="#report" class="nav-link" data-section="report">Phản ánh</a>
+      <a href="#about" class="nav-link" data-section="about">Giới thiệu</a>
     </nav>
   </header>
 
   <!-- Nội dung chính -->
   <main class="container">
-    <div id="map"></div>
-    <aside class="sidebar">
-      <h2>Tình trạng giao thông</h2>
-      <p><span class="live">LIVE</span> Cập nhật: <span id="time"></span></p>
-      <div id="status">Dữ liệu đang cập nhật...</div>
-    </aside>
+    <!-- Trang chủ / Bản đồ -->
+    <div id="home-section" class="content-section active">
+      <div id="map"></div>
+      <div class="resize-handle" id="resizeHandle"></div>
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <h2>Tình trạng giao thông</h2>
+          <button class="fullscreen-btn" id="fullscreenBtn" title="Chế độ toàn màn hình">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+            </svg>
+          </button>
+        </div>
+        <p><span class="live">LIVE</span> Cập nhật: <span id="time"></span></p>
+        <div id="status">Dữ liệu đang cập nhật...</div>
+      </aside>
+    </div>
+
+    <!-- Trang Phản ánh -->
+    <div id="report-section" class="content-section">
+      <div class="page-content">
+        <h2>Phản ánh sự cố giao thông</h2>
+        <p>Tính năng này đang được phát triển. Bạn sẽ có thể báo cáo các sự cố như:</p>
+        <ul>
+          <li>Ổ gà, hư hỏng đường sá</li>
+          <li>Tai nạn giao thông</li>
+          <li>Ngập nước</li>
+          <li>Vật cản</li>
+          <li>Kẹt xe</li>
+          <li>Các sự cố khác</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Trang Giới thiệu -->
+    <div id="about-section" class="content-section">
+      <div class="page-content">
+        <h2>Giới thiệu SOS MAP</h2>
+        <p>SOS MAP là hệ thống bản đồ tương tác giúp tiếp nhận và hiển thị phản ánh về sự cố giao thông.</p>
+        <h3>Tính năng chính:</h3>
+        <ul>
+          <li>Bản đồ tương tác thời gian thực</li>
+          <li>Hiển thị tình trạng giao thông</li>
+          <li>Phản ánh sự cố từ người dân</li>
+          <li>Cảnh báo và thông báo</li>
+        </ul>
+        <h3>Liên hệ:</h3>
+        <p>Email: contact@sosmap.vn</p>
+        <p>Hotline: 1900 xxxx</p>
+      </div>
+    </div>
   </main>
   
   <!-- Leaflet JS -->
