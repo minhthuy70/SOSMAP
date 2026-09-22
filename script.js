@@ -481,6 +481,227 @@ window.addEventListener('resize', function() {
   }
 });
 
+// Traffic Status Management
+var trafficStatus = {
+  connectionStatus: 'connecting', // connecting, connected, disconnected
+  lastUpdateTime: null,
+  trafficLevels: {
+    normal: 0,
+    congested: 0,
+    jammed: 0,
+    dangerous: 0
+  },
+  statistics: {
+    avgSpeed: 0,
+    travelTime: 0,
+    restrictedRoutes: 0
+  },
+  warnings: []
+};
+
+// Update connection status
+function updateConnectionStatus(status) {
+  trafficStatus.connectionStatus = status;
+
+  var statusDot = document.getElementById('statusDot');
+  var statusText = document.getElementById('statusText');
+
+  if (statusDot && statusText) {
+    statusDot.className = 'status-dot ' + status;
+
+    switch(status) {
+      case 'connected':
+        statusText.textContent = 'Đã kết nối';
+        break;
+      case 'disconnected':
+        statusText.textContent = 'Mất kết nối';
+        break;
+      case 'connecting':
+        statusText.textContent = 'Đang kết nối...';
+        break;
+    }
+  }
+}
+
+// Update last update time
+function updateLastUpdateTime() {
+  var lastUpdateTimeSpan = document.getElementById('lastUpdateTime');
+  if (lastUpdateTimeSpan) {
+    trafficStatus.lastUpdateTime = new Date();
+    lastUpdateTimeSpan.textContent = trafficStatus.lastUpdateTime.toLocaleTimeString('vi-VN');
+  }
+}
+
+// Update traffic levels
+function updateTrafficLevels() {
+  // Simulate traffic level data based on incidents
+  var totalIncidents = incidentData.length;
+
+  // Random distribution for simulation
+  trafficStatus.trafficLevels.normal = Math.floor(Math.random() * 5) + 3;
+  trafficStatus.trafficLevels.congested = Math.floor(Math.random() * 4) + 2;
+  trafficStatus.trafficLevels.jammed = Math.floor(Math.random() * 3) + 1;
+  trafficStatus.trafficLevels.dangerous = Math.floor(Math.random() * 2);
+
+  var total = trafficStatus.trafficLevels.normal +
+              trafficStatus.trafficLevels.congested +
+              trafficStatus.trafficLevels.jammed +
+              trafficStatus.trafficLevels.dangerous;
+
+  // Update UI
+  document.getElementById('normalCount').textContent = trafficStatus.trafficLevels.normal;
+  document.getElementById('congestedCount').textContent = trafficStatus.trafficLevels.congested;
+  document.getElementById('jammedCount').textContent = trafficStatus.trafficLevels.jammed;
+  document.getElementById('dangerousCount').textContent = trafficStatus.trafficLevels.dangerous;
+
+  // Update progress bars
+  if (total > 0) {
+    document.getElementById('normalFill').style.width = (trafficStatus.trafficLevels.normal / total * 100) + '%';
+    document.getElementById('congestedFill').style.width = (trafficStatus.trafficLevels.congested / total * 100) + '%';
+    document.getElementById('jammedFill').style.width = (trafficStatus.trafficLevels.jammed / total * 100) + '%';
+    document.getElementById('dangerousFill').style.width = (trafficStatus.trafficLevels.dangerous / total * 100) + '%';
+  }
+}
+
+// Update traffic statistics
+function updateTrafficStatistics() {
+  // Simulate statistics
+  trafficStatus.statistics.avgSpeed = Math.floor(Math.random() * 30) + 20; // 20-50 km/h
+  trafficStatus.statistics.travelTime = Math.floor(Math.random() * 20) + 10; // 10-30 minutes
+  trafficStatus.statistics.restrictedRoutes = Math.floor(Math.random() * 3); // 0-2 routes
+
+  // Update UI
+  document.getElementById('avgSpeed').textContent = trafficStatus.statistics.avgSpeed + ' km/h';
+  document.getElementById('travelTime').textContent = trafficStatus.statistics.travelTime + ' phút';
+  document.getElementById('restrictedRoutes').textContent = trafficStatus.statistics.restrictedRoutes + ' tuyến';
+}
+
+// Update traffic warnings
+function updateTrafficWarnings() {
+  trafficStatus.warnings = [];
+
+  // Generate warnings based on conditions
+  if (trafficStatus.trafficLevels.dangerous > 0) {
+    trafficStatus.warnings.push({
+      icon: '🚨',
+      text: 'Có ' + trafficStatus.trafficLevels.dangerous + ' điểm nguy hiểm cần chú ý'
+    });
+  }
+
+  if (trafficStatus.trafficLevels.jammed > 2) {
+    trafficStatus.warnings.push({
+      icon: '⚠️',
+      text: 'Ùn tắc nghiêm trọng tại ' + trafficStatus.trafficLevels.jammed + ' điểm'
+    });
+  }
+
+  if (trafficStatus.statistics.avgSpeed < 25) {
+    trafficStatus.warnings.push({
+      icon: '🐢',
+      text: 'Tốc độ trung bình thấp, lưu thông chậm'
+    });
+  }
+
+  // Update UI
+  var warningList = document.getElementById('warningList');
+  if (warningList) {
+    if (trafficStatus.warnings.length > 0) {
+      warningList.innerHTML = trafficStatus.warnings.map(function(warning) {
+        return '<div class="warning-item">' +
+               '<span class="warning-icon">' + warning.icon + '</span>' +
+               '<span class="warning-text">' + warning.text + '</span>' +
+               '</div>';
+      }).join('');
+    } else {
+      warningList.innerHTML = '<div class="warning-item">' +
+                             '<span class="warning-icon">✅</span>' +
+                             '<span class="warning-text">Không có cảnh báo nào</span>' +
+                             '</div>';
+    }
+  }
+}
+
+// Update overall status message
+function updateOverallStatus() {
+  var statusMessage = document.getElementById('statusMessage');
+  if (statusMessage) {
+    var totalIncidents = incidentData.length;
+    var totalTrafficIssues = trafficStatus.trafficLevels.normal +
+                            trafficStatus.trafficLevels.congested +
+                            trafficStatus.trafficLevels.jammed +
+                            trafficStatus.trafficLevels.dangerous;
+
+    if (trafficStatus.connectionStatus === 'disconnected') {
+      statusMessage.innerHTML = '<span style="color: #e74c3c;">❌ Mất kết nối đến máy chủ dữ liệu</span>';
+    } else if (trafficStatus.connectionStatus === 'connecting') {
+      statusMessage.innerHTML = '<span style="color: #f39c12;">⏳ Đang kết nối đến nguồn dữ liệu...</span>';
+    } else {
+      statusMessage.innerHTML = '✅ Đã cập nhật ' + totalIncidents + ' sự cố, ' +
+                               totalTrafficIssues + ' vấn đề giao thông - ' +
+                               'Tốc độ trung bình: ' + trafficStatus.statistics.avgSpeed + ' km/h';
+    }
+  }
+}
+
+// Show error notification
+function showErrorNotification(message) {
+  var errorNotification = document.getElementById('errorNotification');
+  var errorMessage = document.getElementById('errorMessage');
+
+  if (errorNotification && errorMessage) {
+    errorMessage.textContent = message;
+    errorNotification.style.display = 'block';
+
+    // Auto-hide after 5 seconds
+    setTimeout(function() {
+      errorNotification.style.display = 'none';
+    }, 5000);
+  }
+}
+
+// Close error notification
+document.getElementById('errorClose').addEventListener('click', function() {
+  var errorNotification = document.getElementById('errorNotification');
+  if (errorNotification) {
+    errorNotification.style.display = 'none';
+  }
+});
+
+// Simulate connection status changes
+function simulateConnectionStatus() {
+  // Start with connecting
+  updateConnectionStatus('connecting');
+
+  // Simulate successful connection after 2 seconds
+  setTimeout(function() {
+    updateConnectionStatus('connected');
+    updateLastUpdateTime();
+  }, 2000);
+
+  // Simulate occasional disconnection
+  setInterval(function() {
+    if (Math.random() < 0.1) { // 10% chance of disconnection
+      updateConnectionStatus('disconnected');
+      showErrorNotification('Mất kết nối đến máy chủ. Đang thử kết nối lại...');
+
+      // Reconnect after 3 seconds
+      setTimeout(function() {
+        updateConnectionStatus('connected');
+        updateLastUpdateTime();
+      }, 3000);
+    }
+  }, 30000); // Check every 30 seconds
+}
+
+// Update all traffic status information
+function updateAllTrafficStatus() {
+  updateTrafficLevels();
+  updateTrafficStatistics();
+  updateTrafficWarnings();
+  updateOverallStatus();
+  updateLastUpdateTime();
+}
+
 // Simulate real-time updates
 function simulateRealTimeUpdates() {
   setInterval(function() {
@@ -495,13 +716,19 @@ function simulateRealTimeUpdates() {
     // Update markers without full reload
     addMarkers(incidentData);
 
-    // Update status message
-    var statusDiv = document.getElementById('status');
-    if (statusDiv) {
-      statusDiv.innerHTML = 'Đã cập nhật ' + incidentData.length + ' sự cố - Cập nhật lúc ' + new Date().toLocaleTimeString('vi-VN');
-    }
+    // Update all traffic status
+    updateAllTrafficStatus();
   }, 30000); // Update every 30 seconds
 }
 
-// Start real-time simulation
-simulateRealTimeUpdates();
+// Initialize traffic status
+function initializeTrafficStatus() {
+  simulateConnectionStatus();
+  updateAllTrafficStatus();
+  simulateRealTimeUpdates();
+}
+
+// Start traffic status initialization
+setTimeout(function() {
+  initializeTrafficStatus();
+}, 100);

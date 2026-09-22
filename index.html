@@ -164,8 +164,108 @@
             </svg>
           </button>
         </div>
-        <p><span class="live">LIVE</span> Cập nhật: <span id="time"></span></p>
-        <div id="status">Dữ liệu đang cập nhật...</div>
+
+        <!-- Connection Status -->
+        <div class="connection-status">
+          <div class="status-indicator" id="connectionIndicator">
+            <span class="status-dot" id="statusDot"></span>
+            <span class="status-text" id="statusText">Đang kết nối...</span>
+          </div>
+          <div class="last-update">
+            <small>Cập nhật cuối: <span id="lastUpdateTime">--:--:--</span></small>
+          </div>
+        </div>
+
+        <!-- Live Time -->
+        <div class="live-time">
+          <p><span class="live">LIVE</span> Cập nhật: <span id="time"></span></p>
+        </div>
+
+        <!-- Overall Status -->
+        <div class="overall-status" id="overallStatus">
+          <div class="status-message" id="statusMessage">Dữ liệu đang cập nhật...</div>
+        </div>
+
+        <!-- Traffic Levels -->
+        <div class="traffic-levels">
+          <h3>Mức độ giao thông</h3>
+          <div class="traffic-level-item">
+            <div class="level-header">
+              <span class="level-name">Bình thường</span>
+              <span class="level-count" id="normalCount">0</span>
+            </div>
+            <div class="level-bar normal">
+              <div class="level-fill" id="normalFill" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="traffic-level-item">
+            <div class="level-header">
+              <span class="level-name">Đông</span>
+              <span class="level-count" id="congestedCount">0</span>
+            </div>
+            <div class="level-bar congested">
+              <div class="level-fill" id="congestedFill" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="traffic-level-item">
+            <div class="level-header">
+              <span class="level-name">Ùn tắc</span>
+              <span class="level-count" id="jammedCount">0</span>
+            </div>
+            <div class="level-bar jammed">
+              <div class="level-fill" id="jammedFill" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="traffic-level-item">
+            <div class="level-header">
+              <span class="level-name">Nguy hiểm</span>
+              <span class="level-count" id="dangerousCount">0</span>
+            </div>
+            <div class="level-bar dangerous">
+              <div class="level-fill" id="dangerousFill" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Traffic Statistics -->
+        <div class="traffic-stats">
+          <h3>Thống kê giao thông</h3>
+          <div class="stat-item">
+            <span class="stat-label">Tốc độ trung bình:</span>
+            <span class="stat-value" id="avgSpeed">-- km/h</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Thời gian di chuyển dự kiến:</span>
+            <span class="stat-value" id="travelTime">-- phút</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Tuyến đường hạn chế:</span>
+            <span class="stat-value" id="restrictedRoutes">0 tuyến</span>
+          </div>
+        </div>
+
+        <!-- Warnings -->
+        <div class="traffic-warnings" id="trafficWarnings">
+          <h3>Cảnh báo</h3>
+          <div class="warning-list" id="warningList">
+            <div class="warning-item">
+              <span class="warning-icon">⚠️</span>
+              <span class="warning-text">Không có cảnh báo nào</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error Notification -->
+        <div class="error-notification" id="errorNotification" style="display: none;">
+          <div class="error-content">
+            <span class="error-icon">❌</span>
+            <span class="error-message" id="errorMessage">Lỗi kết nối</span>
+            <button class="error-close" id="errorClose">×</button>
+          </div>
+        </div>
       </aside>
     </div>
 

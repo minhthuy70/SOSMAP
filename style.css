@@ -522,6 +522,308 @@ body, html {
   50% { opacity: 0.5; }
 }
 
+/* Connection Status */
+.connection-status {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ccc;
+  animation: blink 2s infinite;
+}
+
+.status-dot.connected {
+  background: #2ecc71;
+}
+
+.status-dot.disconnected {
+  background: #e74c3c;
+}
+
+.status-dot.connecting {
+  background: #f39c12;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-text {
+  font-size: 13px;
+  color: #555;
+  font-weight: 500;
+}
+
+.last-update {
+  font-size: 11px;
+  color: #999;
+}
+
+.last-update small {
+  color: #999;
+}
+
+/* Live Time */
+.live-time {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.live-time p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Overall Status */
+.overall-status {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.status-message {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* Traffic Levels */
+.traffic-levels {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.traffic-levels h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.traffic-level-item {
+  margin-bottom: 12px;
+}
+
+.traffic-level-item:last-child {
+  margin-bottom: 0;
+}
+
+.level-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.level-name {
+  font-size: 13px;
+  color: #555;
+  font-weight: 500;
+}
+
+.level-count {
+  font-size: 13px;
+  color: #333;
+  font-weight: bold;
+}
+
+.level-bar {
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.level-bar.normal {
+  background: #e8f5e9;
+}
+
+.level-bar.congested {
+  background: #fff3e0;
+}
+
+.level-bar.jammed {
+  background: #ffebee;
+}
+
+.level-bar.dangerous {
+  background: #fce4ec;
+}
+
+.level-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.level-bar.normal .level-fill {
+  background: #2ecc71;
+}
+
+.level-bar.congested .level-fill {
+  background: #f39c12;
+}
+
+.level-bar.jammed .level-fill {
+  background: #e74c3c;
+}
+
+.level-bar.dangerous .level-fill {
+  background: #9b59b6;
+}
+
+/* Traffic Statistics */
+.traffic-stats {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.traffic-stats h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #555;
+}
+
+.stat-value {
+  font-size: 13px;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Traffic Warnings */
+.traffic-warnings {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.traffic-warnings h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.warning-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.warning-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #fff3e0;
+  border-radius: 4px;
+  border-left: 3px solid #f39c12;
+}
+
+.warning-icon {
+  font-size: 16px;
+}
+
+.warning-text {
+  font-size: 12px;
+  color: #555;
+  flex: 1;
+}
+
+/* Error Notification */
+.error-notification {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-left: 4px solid #e74c3c;
+  z-index: 2000;
+  max-width: 350px;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.error-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.error-message {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+.error-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #999;
+  line-height: 1;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-close:hover {
+  color: #333;
+}
+
 /* Content Sections */
 .content-section {
   display: none;
@@ -637,6 +939,7 @@ body, html {
     width: 100%;
     border-left: none;
     border-top: 1px solid #ddd;
+    padding: 12px;
   }
 
   .page-content {
@@ -693,6 +996,26 @@ body, html {
     right: 60px;
     min-width: 180px;
   }
+
+  /* Mobile Sidebar Elements */
+  .traffic-levels,
+  .traffic-stats,
+  .traffic-warnings {
+    padding: 12px;
+  }
+
+  .traffic-levels h3,
+  .traffic-stats h3,
+  .traffic-warnings h3 {
+    font-size: 14px;
+  }
+
+  .error-notification {
+    top: 60px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
 }
 
 @media (max-width: 480px) {
@@ -701,7 +1024,7 @@ body, html {
   }
 
   .sidebar {
-    padding: 15px;
+    padding: 10px;
   }
 
   .sidebar-header h2 {
@@ -732,6 +1055,25 @@ body, html {
 
   .filter-content {
     min-width: 180px;
+  }
+
+  /* Compact sidebar elements */
+  .connection-status,
+  .live-time,
+  .overall-status {
+    padding: 10px;
+  }
+
+  .traffic-levels,
+  .traffic-stats,
+  .traffic-warnings {
+    padding: 10px;
+  }
+
+  .level-name,
+  .stat-label,
+  .warning-text {
+    font-size: 12px;
   }
 }
 
