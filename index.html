@@ -24,6 +24,46 @@
       <a href="#report" class="nav-link" data-section="report">Phản ánh</a>
       <a href="#about" class="nav-link" data-section="about">Giới thiệu</a>
     </nav>
+    <div class="auth-section" id="authSection">
+      <button class="auth-btn" id="loginBtn">Đăng nhập</button>
+      <button class="auth-btn" id="registerBtn">Đăng ký</button>
+    </div>
+    <div class="user-section" id="userSection" style="display: none;">
+      <div class="user-menu" id="userMenu">
+        <button class="user-menu-btn" id="userMenuBtn">
+          <span class="user-avatar" id="userAvatar">U</span>
+          <span class="user-name" id="userName">User</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <div class="user-dropdown" id="userDropdown">
+          <a href="#" class="dropdown-item" id="profileBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Hồ sơ
+          </a>
+          <a href="#" class="dropdown-item" id="settingsBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            Cài đặt
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="#" class="dropdown-item" id="logoutBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Đăng xuất
+          </a>
+        </div>
+      </div>
+    </div>
   </header>
 
   <!-- Nội dung chính -->
@@ -413,6 +453,214 @@
           </div>
         </div>
       </aside>
+
+      <!-- Login Modal -->
+      <div class="modal" id="loginModal" style="display: none;">
+        <div class="modal-content auth-modal">
+          <div class="modal-header">
+            <h3>Đăng nhập</h3>
+            <button class="modal-close" id="closeLoginModal">×</button>
+          </div>
+          <div class="modal-body">
+            <form id="loginForm">
+              <div class="form-group">
+                <label for="loginEmail">Email *</label>
+                <input type="email" id="loginEmail" name="email" required placeholder="email@example.com">
+              </div>
+              <div class="form-group">
+                <label for="loginPassword">Mật khẩu *</label>
+                <input type="password" id="loginPassword" name="password" required placeholder="********">
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="rememberMe">
+                  <span>Ghi nhớ đăng nhập</span>
+                </label>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Đăng nhập</button>
+              </div>
+              <div class="form-footer">
+                <a href="#" id="forgotPasswordBtn">Quên mật khẩu?</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Register Modal -->
+      <div class="modal" id="registerModal" style="display: none;">
+        <div class="modal-content auth-modal">
+          <div class="modal-header">
+            <h3>Đăng ký tài khoản</h3>
+            <button class="modal-close" id="closeRegisterModal">×</button>
+          </div>
+          <div class="modal-body">
+            <form id="registerForm">
+              <div class="form-group">
+                <label for="registerName">Họ tên *</label>
+                <input type="text" id="registerName" name="name" required placeholder="Nguyễn Văn A">
+              </div>
+              <div class="form-group">
+                <label for="registerEmail">Email *</label>
+                <input type="email" id="registerEmail" name="email" required placeholder="email@example.com">
+              </div>
+              <div class="form-group">
+                <label for="registerPhone">Số điện thoại</label>
+                <input type="tel" id="registerPhone" name="phone" placeholder="0901234567">
+              </div>
+              <div class="form-group">
+                <label for="registerPassword">Mật khẩu *</label>
+                <input type="password" id="registerPassword" name="password" required placeholder="********">
+              </div>
+              <div class="form-group">
+                <label for="registerConfirmPassword">Xác nhận mật khẩu *</label>
+                <input type="password" id="registerConfirmPassword" name="confirmPassword" required placeholder="********">
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="agreeTerms" required>
+                  <span>Tôi đồng ý với <a href="#" id="termsBtn">điều khoản sử dụng</a> và <a href="#" id="privacyBtn">chính sách bảo mật</a></span>
+                </label>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Đăng ký</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Forgot Password Modal -->
+      <div class="modal" id="forgotPasswordModal" style="display: none;">
+        <div class="modal-content auth-modal">
+          <div class="modal-header">
+            <h3>Khôi phục mật khẩu</h3>
+            <button class="modal-close" id="closeForgotPasswordModal">×</button>
+          </div>
+          <div class="modal-body">
+            <form id="forgotPasswordForm">
+              <div class="form-group">
+                <label for="forgotEmail">Email *</label>
+                <input type="email" id="forgotEmail" name="email" required placeholder="email@example.com">
+                <small>Nhập email để nhận liên kết khôi phục mật khẩu</small>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Gửi liên kết</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Modal -->
+      <div class="modal" id="profileModal" style="display: none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Hồ sơ người dùng</h3>
+            <button class="modal-close" id="closeProfileModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="profile-header">
+              <div class="profile-avatar-large" id="profileAvatarLarge">U</div>
+              <div class="profile-info">
+                <h4 id="profileName">User Name</h4>
+                <p id="profileEmail">user@example.com</p>
+                <span class="role-badge" id="profileRole">Người dùng</span>
+              </div>
+            </div>
+            <form id="profileForm">
+              <div class="settings-section">
+                <h4>Thông tin cá nhân</h4>
+                <div class="setting-item">
+                  <label for="profileNameInput">Họ tên</label>
+                  <input type="text" id="profileNameInput" name="name">
+                </div>
+                <div class="setting-item">
+                  <label for="profileEmailInput">Email</label>
+                  <input type="email" id="profileEmailInput" name="email" readonly>
+                </div>
+                <div class="setting-item">
+                  <label for="profilePhoneInput">Số điện thoại</label>
+                  <input type="tel" id="profilePhoneInput" name="phone">
+                </div>
+              </div>
+              <div class="settings-section">
+                <h4>Thay đổi mật khẩu</h4>
+                <div class="setting-item">
+                  <label for="currentPassword">Mật khẩu hiện tại</label>
+                  <input type="password" id="currentPassword" name="currentPassword">
+                </div>
+                <div class="setting-item">
+                  <label for="newPassword">Mật khẩu mới</label>
+                  <input type="password" id="newPassword" name="newPassword">
+                </div>
+                <div class="setting-item">
+                  <label for="confirmNewPassword">Xác nhận mật khẩu mới</label>
+                  <input type="password" id="confirmNewPassword" name="confirmNewPassword">
+                </div>
+              </div>
+              <div class="settings-section">
+                <h4>Vai trò & Quyền hạn</h4>
+                <div class="setting-item">
+                  <label>Vai trò hiện tại:</label>
+                  <span id="currentRole">Người dùng</span>
+                </div>
+                <div class="setting-item">
+                  <label>Quyền hạn:</label>
+                  <div id="userPermissions">
+                    <span class="permission-tag">Xem bản đồ</span>
+                    <span class="permission-tag">Gửi phản ánh</span>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" id="saveProfile">Lưu thay đổi</button>
+            <button class="btn btn-danger" id="deleteAccountBtn">Xóa tài khoản</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Modal -->
+      <div class="modal" id="settingsModal" style="display: none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Cài đặt tài khoản</h3>
+            <button class="modal-close" id="closeSettingsModalMain">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="settings-section">
+              <h4>Nhật ký hoạt động</h4>
+              <div class="activity-log" id="activityLog">
+                <div class="activity-item">
+                  <span class="activity-time">2024-01-15 10:30</span>
+                  <span class="activity-action">Đăng nhập từ IP 192.168.1.1</span>
+                </div>
+              </div>
+            </div>
+            <div class="settings-section">
+              <h4>Bảo mật</h4>
+              <div class="setting-item">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="twoFactorAuth">
+                  <span>Bảo mật hai lớp (2FA)</span>
+                </label>
+              </div>
+              <div class="setting-item">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="loginNotifications" checked>
+                  <span>Thông báo khi có đăng nhập mới</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" id="saveAccountSettings">Lưu cài đặt</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Trang Phản ánh -->

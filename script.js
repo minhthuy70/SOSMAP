@@ -914,6 +914,12 @@ document.getElementById('incidentVideo').addEventListener('change', function(e) 
 document.getElementById('incidentForm').addEventListener('submit', function(e) {
   e.preventDefault();
 
+  // Check permission
+  if (!hasPermission('create_incident')) {
+    alert('Bạn không có quyền tạo phản ánh sự cố');
+    return;
+  }
+
   // Validate required fields
   var requiredFields = ['incidentType', 'incidentTitle', 'incidentDescription', 'severity'];
   var isValid = true;
@@ -944,6 +950,7 @@ document.getElementById('incidentForm').addEventListener('submit', function(e) {
   // Create incident report object
   var report = {
     id: 'INC-' + Date.now(),
+    userId: currentUser ? currentUser.id : null,
     type: document.getElementById('incidentType').value,
     title: document.getElementById('incidentTitle').value,
     description: document.getElementById('incidentDescription').value,
@@ -980,6 +987,9 @@ document.getElementById('incidentForm').addEventListener('submit', function(e) {
 
   // Update map markers
   addMarkers(incidentData);
+
+  // Log activity
+  logActivity('incident_create', 'Tạo phản ánh: ' + report.id);
 
   // Show success message
   alert('Phản ánh đã được gửi thành công!\nMã số: ' + report.id + '\nChúng tôi sẽ xem xét và xử lý sớm nhất.');
@@ -1060,9 +1070,9 @@ function updateReportsList() {
            '</div>' +
            '<div class="report-item-actions">' +
            '<button onclick="viewReportDetail(\'' + report.id + '\')">Xem chi tiết</button>' +
-           (report.status === 'pending' ? '<button onclick="editReport(\'' + report.id + '\')">Chỉnh sửa</button>' : '') +
+           (report.status === 'pending' && hasPermission('edit_own_incident') ? '<button onclick="editReport(\'' + report.id + '\')">Chỉnh sửa</button>' : '') +
            (report.status === 'pending' ? '<button onclick="cancelReport(\'' + report.id + '\')">Hủy bỏ</button>' : '') +
-           '<button onclick="showVerificationDialog(\'' + report.id + '\')">Xác minh</button>' +
+           (hasPermission('verify_incident') ? '<button onclick="showVerificationDialog(\'' + report.id + '\')">Xác minh</button>' : '') +
            (report.status === 'pending' ? '<button onclick="supplementReport(\'' + report.id + '\')">Bổ sung</button>' : '') +
            '</div>' +
            '</div>' +
@@ -1738,6 +1748,524 @@ function showAlertAreas() {
   });
 }
 
+// Authentication System
+var currentUser = null;
+var users = [];
+var activityLog = [];
+
+// User roles and permissions
+var roles = {
+  viewer: {
+    name: 'Người xem',
+    permissions: ['view_map', 'view_incidents']
+  },
+  reporter: {
+    name: 'Người báo cáo',
+    permissions: ['view_map', 'view_incidents', 'create_incident', 'edit_own_incident']
+  },
+  staff: {
+    name: 'Nhân viên xử lý',
+    permissions: ['view_map', 'view_incidents', 'create_incident', 'edit_own_incident', 'process_incident', 'verify_incident']
+  },
+  admin: {
+    name: 'Quản trị viên',
+    permissions: ['view_map', 'view_incidents', 'create_incident', 'edit_own_incident', 'process_incident', 'verify_incident', 'manage_users', 'manage_system', 'view_analytics']
+  }
+};
+
+// Initialize with some demo users
+function initializeUsers() {
+  users = [
+    {
+      id: 'user-1',
+      name: 'Nguyễn Văn A',
+      email: 'user@example.com',
+      phone: '0901234567',
+      password: 'password123', // In real app, this would be hashed
+      role: 'reporter',
+      createdAt: new Date().toISOString(),
+      isActive: true
+    },
+    {
+      id: 'user-2',
+      name: 'Admin User',
+      email: 'admin@example.com',
+      phone: '0912345678',
+      password: 'admin123',
+      role: 'admin',
+      createdAt: new Date().toISOString(),
+      isActive: true
+    }
+  ];
+}
+
+// Check if user is logged in
+function checkAuthStatus() {
+  var savedUser = localStorage.getItem('currentUser');
+  if (savedUser) {
+    currentUser = JSON.parse(savedUser);
+    updateUserInterface();
+  }
+}
+
+// Update user interface based on auth status
+function updateUserInterface() {
+  var authSection = document.getElementById('authSection');
+  var userSection = document.getElementById('userSection');
+
+  if (currentUser) {
+    authSection.style.display = 'none';
+    userSection.style.display = 'block';
+
+    // Update user info
+    var userAvatar = document.getElementById('userAvatar');
+    var userName = document.getElementById('userName');
+
+    userAvatar.textContent = currentUser.name.charAt(0).toUpperCase();
+    userName.textContent = currentUser.name;
+  } else {
+    authSection.style.display = 'flex';
+    userSection.style.display = 'none';
+  }
+}
+
+// Login functionality
+document.getElementById('loginBtn').addEventListener('click', function() {
+  document.getElementById('loginModal').style.display = 'flex';
+});
+
+document.getElementById('closeLoginModal').addEventListener('click', function() {
+  document.getElementById('loginModal').style.display = 'none';
+});
+
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  var email = document.getElementById('loginEmail').value;
+  var password = document.getElementById('loginPassword').value;
+  var rememberMe = document.getElementById('rememberMe').checked;
+
+  // Find user
+  var user = users.find(function(u) {
+    return u.email === email && u.password === password && u.isActive;
+  });
+
+  if (user) {
+    currentUser = user;
+
+    // Save to localStorage if remember me is checked
+    if (rememberMe) {
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+
+    // Log activity
+    logActivity('login', 'Đăng nhập thành công');
+
+    updateUserInterface();
+    document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('loginForm').reset();
+
+    alert('Đăng nhập thành công! Xin chào ' + user.name);
+  } else {
+    alert('Email hoặc mật khẩu không đúng');
+  }
+});
+
+// Register functionality
+document.getElementById('registerBtn').addEventListener('click', function() {
+  document.getElementById('registerModal').style.display = 'flex';
+});
+
+document.getElementById('closeRegisterModal').addEventListener('click', function() {
+  document.getElementById('registerModal').style.display = 'none';
+});
+
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  var name = document.getElementById('registerName').value;
+  var email = document.getElementById('registerEmail').value;
+  var phone = document.getElementById('registerPhone').value;
+  var password = document.getElementById('registerPassword').value;
+  var confirmPassword = document.getElementById('registerConfirmPassword').value;
+  var agreeTerms = document.getElementById('agreeTerms').checked;
+
+  // Validation
+  if (password !== confirmPassword) {
+    alert('Mật khẩu xác nhận không khớp');
+    return;
+  }
+
+  if (password.length < 6) {
+    alert('Mật khẩu phải có ít nhất 6 ký tự');
+    return;
+  }
+
+  if (!agreeTerms) {
+    alert('Bạn phải đồng ý với điều khoản sử dụng');
+    return;
+  }
+
+  // Check if email already exists
+  var existingUser = users.find(function(u) {
+    return u.email === email;
+  });
+
+  if (existingUser) {
+    alert('Email này đã được sử dụng');
+    return;
+  }
+
+  // Create new user
+  var newUser = {
+    id: 'user-' + Date.now(),
+    name: name,
+    email: email,
+    phone: phone,
+    password: password, // In real app, this would be hashed
+    role: 'reporter', // Default role
+    createdAt: new Date().toISOString(),
+    isActive: true
+  };
+
+  users.push(newUser);
+
+  // Log activity
+  logActivity('register', 'Đăng ký tài khoản mới: ' + email);
+
+  document.getElementById('registerModal').style.display = 'none';
+  document.getElementById('registerForm').reset();
+
+  alert('Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.');
+});
+
+// Forgot password functionality
+document.getElementById('forgotPasswordBtn').addEventListener('click', function(e) {
+  e.preventDefault();
+  document.getElementById('loginModal').style.display = 'none';
+  document.getElementById('forgotPasswordModal').style.display = 'flex';
+});
+
+document.getElementById('closeForgotPasswordModal').addEventListener('click', function() {
+  document.getElementById('forgotPasswordModal').style.display = 'none';
+});
+
+document.getElementById('forgotPasswordForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  var email = document.getElementById('forgotEmail').value;
+
+  var user = users.find(function(u) {
+    return u.email === email;
+  });
+
+  if (user) {
+    // In real app, send email with reset link
+    alert('Đã gửi liên kết khôi phục mật khẩu đến email ' + email);
+    document.getElementById('forgotPasswordModal').style.display = 'none';
+    document.getElementById('forgotPasswordForm').reset();
+  } else {
+    alert('Email không tồn tại trong hệ thống');
+  }
+});
+
+// Logout functionality
+document.getElementById('logoutBtn').addEventListener('click', function(e) {
+  e.preventDefault();
+
+  if (confirm('Bạn có chắc muốn đăng xuất?')) {
+    logActivity('logout', 'Đăng xuất');
+
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    updateUserInterface();
+
+    alert('Đã đăng xuất thành công');
+  }
+});
+
+// User menu toggle
+document.getElementById('userMenuBtn').addEventListener('click', function() {
+  document.getElementById('userDropdown').classList.toggle('active');
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  var userMenu = document.getElementById('userMenu');
+  var userDropdown = document.getElementById('userDropdown');
+
+  if (!userMenu.contains(e.target)) {
+    userDropdown.classList.remove('active');
+  }
+});
+
+// Profile modal
+document.getElementById('profileBtn').addEventListener('click', function(e) {
+  e.preventDefault();
+  document.getElementById('userDropdown').classList.remove('active');
+  openProfileModal();
+});
+
+function openProfileModal() {
+  if (!currentUser) return;
+
+  // Populate profile data
+  document.getElementById('profileAvatarLarge').textContent = currentUser.name.charAt(0).toUpperCase();
+  document.getElementById('profileName').textContent = currentUser.name;
+  document.getElementById('profileEmail').textContent = currentUser.email;
+  document.getElementById('profileRole').textContent = roles[currentUser.role].name;
+
+  document.getElementById('profileNameInput').value = currentUser.name;
+  document.getElementById('profileEmailInput').value = currentUser.email;
+  document.getElementById('profilePhoneInput').value = currentUser.phone || '';
+  document.getElementById('currentRole').textContent = roles[currentUser.role].name;
+
+  // Update permissions display
+  var permissionsDiv = document.getElementById('userPermissions');
+  permissionsDiv.innerHTML = roles[currentUser.role].permissions.map(function(perm) {
+    var permNames = {
+      'view_map': 'Xem bản đồ',
+      'view_incidents': 'Xem sự cố',
+      'create_incident': 'Tạo sự cố',
+      'edit_own_incident': 'Sửa sự cố của mình',
+      'process_incident': 'Xử lý sự cố',
+      'verify_incident': 'Xác minh sự cố',
+      'manage_users': 'Quản lý người dùng',
+      'manage_system': 'Quản lý hệ thống',
+      'view_analytics': 'Xem thống kê'
+    };
+    return '<span class="permission-tag">' + (permNames[perm] || perm) + '</span>';
+  }).join('');
+
+  document.getElementById('profileModal').style.display = 'flex';
+}
+
+document.getElementById('closeProfileModal').addEventListener('click', function() {
+  document.getElementById('profileModal').style.display = 'none';
+});
+
+document.getElementById('saveProfile').addEventListener('click', function() {
+  if (!currentUser) return;
+
+  var name = document.getElementById('profileNameInput').value;
+  var phone = document.getElementById('profilePhoneInput').value;
+  var currentPassword = document.getElementById('currentPassword').value;
+  var newPassword = document.getElementById('newPassword').value;
+  var confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+  // Update basic info
+  if (name && name !== currentUser.name) {
+    currentUser.name = name;
+    logActivity('profile_update', 'Cập nhật tên: ' + name);
+  }
+
+  if (phone && phone !== currentUser.phone) {
+    currentUser.phone = phone;
+    logActivity('profile_update', 'Cập nhật số điện thoại: ' + phone);
+  }
+
+  // Update password if provided
+  if (currentPassword && newPassword) {
+    if (currentPassword !== currentUser.password) {
+      alert('Mật khẩu hiện tại không đúng');
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      alert('Mật khẩu mới không khớp');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      alert('Mật khẩu mới phải có ít nhất 6 ký tự');
+      return;
+    }
+
+    currentUser.password = newPassword;
+    logActivity('password_change', 'Thay đổi mật khẩu');
+  }
+
+  // Save to localStorage
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+  // Update user in users array
+  var userIndex = users.findIndex(function(u) {
+    return u.id === currentUser.id;
+  });
+  if (userIndex !== -1) {
+    users[userIndex] = currentUser;
+  }
+
+  updateUserInterface();
+  document.getElementById('profileModal').style.display = 'none';
+
+  alert('Đã lưu thay đổi thành công!');
+});
+
+// Delete account
+document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+  if (!currentUser) return;
+
+  if (confirm('Bạn có chắc muốn xóa tài khoản? Hành động này không thể hoàn tác.')) {
+    // Remove user from users array
+    var userIndex = users.findIndex(function(u) {
+      return u.id === currentUser.id;
+    });
+
+    if (userIndex !== -1) {
+      users.splice(userIndex, 1);
+    }
+
+    logActivity('account_delete', 'Xóa tài khoản: ' + currentUser.email);
+
+    currentUser = null;
+    localStorage.removeItem('currentUser');
+    updateUserInterface();
+
+    document.getElementById('profileModal').style.display = 'none';
+
+    alert('Tài khoản đã được xóa thành công');
+  }
+});
+
+// Settings modal
+document.getElementById('settingsBtn').addEventListener('click', function(e) {
+  e.preventDefault();
+  document.getElementById('userDropdown').classList.remove('active');
+  openSettingsModal();
+});
+
+function openSettingsModal() {
+  if (!currentUser) return;
+
+  // Populate activity log
+  var activityLogDiv = document.getElementById('activityLog');
+  var userActivities = activityLog.filter(function(log) {
+    return log.userId === currentUser.id;
+  }).slice(-10); // Last 10 activities
+
+  if (userActivities.length === 0) {
+    activityLogDiv.innerHTML = '<p style="color: #999; font-size: 13px;">Chưa có hoạt động nào</p>';
+  } else {
+    activityLogDiv.innerHTML = userActivities.map(function(log) {
+      var actionNames = {
+        'login': 'Đăng nhập',
+        'logout': 'Đăng xuất',
+        'register': 'Đăng ký',
+        'profile_update': 'Cập nhật hồ sơ',
+        'password_change': 'Thay đổi mật khẩu',
+        'account_delete': 'Xóa tài khoản'
+      };
+
+      return '<div class="activity-item">' +
+             '<span class="activity-time">' + new Date(log.timestamp).toLocaleString('vi-VN') + '</span>' +
+             '<span class="activity-action">' + (actionNames[log.action] || log.action) + ' - ' + log.details + '</span>' +
+             '</div>';
+    }).join('');
+  }
+
+  document.getElementById('settingsModal').style.display = 'flex';
+}
+
+document.getElementById('closeSettingsModalMain').addEventListener('click', function() {
+  document.getElementById('settingsModal').style.display = 'none';
+});
+
+document.getElementById('saveAccountSettings').addEventListener('click', function() {
+  var twoFactorAuth = document.getElementById('twoFactorAuth').checked;
+  var loginNotifications = document.getElementById('loginNotifications').checked;
+
+  // In real app, save these settings to user profile
+  logActivity('settings_update', 'Cập nhật cài đặt tài khoản');
+
+  document.getElementById('settingsModal').style.display = 'none';
+  alert('Đã lưu cài đặt thành công!');
+});
+
+// Activity logging
+function logActivity(action, details) {
+  var logEntry = {
+    userId: currentUser ? currentUser.id : null,
+    action: action,
+    details: details,
+    timestamp: new Date().toISOString(),
+    ipAddress: '192.168.1.' + Math.floor(Math.random() * 255) // Simulated IP
+  };
+
+  activityLog.push(logEntry);
+
+  // Keep only last 100 entries
+  if (activityLog.length > 100) {
+    activityLog = activityLog.slice(-100);
+  }
+}
+
+// Check permissions
+function hasPermission(permission) {
+  if (!currentUser) return false;
+  return roles[currentUser.role].permissions.includes(permission);
+}
+
+// Initialize authentication
+initializeUsers();
+checkAuthStatus();
+
+// Role-based UI updates
+function updateUIByRole() {
+  if (!currentUser) return;
+
+  var role = currentUser.role;
+
+  // Example: Hide certain features based on role
+  if (role === 'viewer') {
+    // Disable incident reporting
+    var reportLink = document.querySelector('[data-section="report"]');
+    if (reportLink) {
+      reportLink.style.display = 'none';
+    }
+  }
+
+  if (role === 'admin') {
+    // Show admin features
+    var adminFeatures = document.querySelectorAll('.admin-only');
+    adminFeatures.forEach(function(feature) {
+      feature.style.display = 'block';
+    });
+  }
+}
+
+// Update UI when user logs in
+var originalUpdateUserInterface = updateUserInterface;
+updateUserInterface = function() {
+  originalUpdateUserInterface();
+  updateUIByRole();
+};
+
+// Session management
+function checkSessionExpiry() {
+  if (currentUser) {
+    var loginTime = new Date(currentUser.lastLogin || currentUser.createdAt);
+    var now = new Date();
+    var sessionDuration = 24 * 60 * 60 * 1000; // 24 hours
+
+    if (now - loginTime > sessionDuration) {
+      // Session expired
+      currentUser = null;
+      localStorage.removeItem('currentUser');
+      updateUserInterface();
+      alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    }
+  }
+}
+
+// Check session expiry every minute
+setInterval(checkSessionExpiry, 60000);
+
+// Simulate login time for demo
+if (currentUser) {
+  currentUser.lastLogin = new Date().toISOString();
+}
+
 // Check quiet hours
 function isInQuietHours() {
   var now = new Date();
@@ -1792,7 +2320,7 @@ function supplementReport(reportId) {
       report.supplements.push({
         content: additionalInfo,
         timestamp: new Date().toISOString(),
-        addedBy: 'user'
+        addedBy: currentUser ? currentUser.id : 'anonymous'
       });
 
       // Add to status history
@@ -1802,6 +2330,8 @@ function supplementReport(reportId) {
         timestamp: new Date().toISOString(),
         note: 'Đã bổ sung thông tin'
       });
+
+      logActivity('incident_supplement', 'Bổ sung thông tin: ' + reportId);
 
       updateReportsList();
       alert('Đã thêm thông tin bổ sung!');
@@ -1813,11 +2343,28 @@ function supplementReport(reportId) {
 
 // Edit report (only for pending reports)
 function editReport(reportId) {
+  // Check permission
+  if (!hasPermission('edit_own_incident')) {
+    alert('Bạn không có quyền chỉnh sửa phản ánh');
+    return;
+  }
+
   var report = incidentReports.find(function(r) {
     return r.id === reportId;
   });
 
-  if (report && report.status === 'pending') {
+  if (!report) {
+    alert('Không tìm thấy phản ánh');
+    return;
+  }
+
+  // Check if user owns this report or has processing permissions
+  if (report.userId !== currentUser.id && !hasPermission('process_incident')) {
+    alert('Bạn chỉ có thể chỉnh sửa phản ánh của mình');
+    return;
+  }
+
+  if (report.status === 'pending') {
     var newTitle = prompt('Tiêu đề mới:', report.title);
     if (newTitle && newTitle.trim()) {
       report.title = newTitle;
@@ -1834,11 +2381,64 @@ function editReport(reportId) {
           note: 'Đã chỉnh sửa thông tin'
         });
 
+        logActivity('incident_edit', 'Chỉnh sửa phản ánh: ' + reportId);
+
         updateReportsList();
         alert('Đã cập nhật phản ánh!');
       }
     }
-  } else if (report && report.status !== 'pending') {
+  } else {
     alert('Chỉ có thể chỉnh sửa phản ánh đang chờ xử lý');
+  }
+}
+
+// Verification System
+function showVerificationDialog(reportId) {
+  // Check permission
+  if (!hasPermission('verify_incident')) {
+    alert('Bạn không có quyền xác minh phản ánh');
+    return;
+  }
+
+  var report = incidentReports.find(function(r) {
+    return r.id === reportId;
+  });
+
+  if (report) {
+    var verificationOptions = prompt('Chọn trạng thái xác minh:\n1. Đã xác minh\n2. Chưa xác minh\n3. Trùng lặp\n4. Không hợp lệ\n\nNhập số (1-4):');
+
+    if (verificationOptions) {
+      var statusMap = {
+        '1': 'verified',
+        '2': 'unverified',
+        '3': 'duplicate',
+        '4': 'invalid'
+      };
+
+      var status = statusMap[verificationOptions];
+      if (status) {
+        report.verification = {
+          status: status,
+          verifiedAt: new Date().toISOString(),
+          verifiedBy: currentUser ? currentUser.id : 'system',
+          verifiedByName: currentUser ? currentUser.name : 'System',
+          reliabilityLevel: status === 'verified' ? 'high' : status === 'unverified' ? 'medium' : 'low'
+        };
+
+        // Add to status history
+        report.statusHistory = report.statusHistory || [];
+        report.statusHistory.push({
+          status: 'verified',
+          verificationStatus: status,
+          timestamp: new Date().toISOString(),
+          note: 'Đã xác minh bởi ' + (currentUser ? currentUser.name : 'System')
+        });
+
+        logActivity('incident_verify', 'Xác minh phản ánh: ' + reportId + ' - ' + status);
+
+        updateReportsList();
+        alert('Đã cập nhật trạng thái xác minh!');
+      }
+    }
   }
 }
