@@ -228,7 +228,7 @@ document.querySelectorAll('.layer-option').forEach(function(option) {
 // Search functionality
 document.getElementById('searchBtn').addEventListener('click', performSearch);
 document.getElementById('searchInput').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') {
+  if (e.key === 'enter') {
     performSearch();
   }
 });
@@ -238,7 +238,7 @@ function performSearch() {
   if (!query) return;
 
   // Using Nominatim for geocoding
-  fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query) + '&limit=1')
+  fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query) + '&limit=1&addressdetails=1')
     .then(function(response) {
       return response.json();
     })
@@ -248,12 +248,20 @@ function performSearch() {
         var lat = parseFloat(result.lat);
         var lng = parseFloat(result.lon);
 
-        map.setView([lat, lng], 15);
+        // Check if location is in Vietnam
+        checkVietnamBoundary(lat, lng)
+          .then(function(isInVietnam) {
+            if (!isInVietnam) {
+              alert('Cảnh báo: Kết quả tìm kiếm có thể nằm ngoài Việt Nam');
+            }
 
-        L.marker([lat, lng])
-          .addTo(map)
-          .bindPopup(result.display_name)
-          .openPopup();
+            map.setView([lat, lng], 15);
+
+            L.marker([lat, lng])
+              .addTo(map)
+              .bindPopup(result.display_name)
+              .openPopup();
+          });
       } else {
         alert('Không tìm thấy địa điểm: ' + query);
       }
@@ -261,6 +269,107 @@ function performSearch() {
     .catch(function(error) {
       console.error('Search error:', error);
       alert('Lỗi khi tìm kiếm. Vui lòng thử lại.');
+    });
+}
+
+// Vietnam boundary check
+function checkVietnamBoundary(lat, lng) {
+  return new Promise(function(resolve) {
+    // Simplified Vietnam boundary check (approximate coordinates)
+    // Vietnam roughly spans from 8.18°N to 23.39°N and 102.14°E to 109.46°E
+    var minLat = 8.18;
+    var maxLat = 23.39;
+    var minLng = 102.14;
+    var maxLng = 109.46;
+
+    var isInVietnam = lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;
+    resolve(isInVietnam);
+  });
+}
+
+// Coordinate to address conversion (geocoding)
+function coordinatesToAddress(lat, lng) {
+  return fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&addressdetails=1')
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data) {
+      if (data && data.address) {
+        var address = data.address;
+        var formattedAddress = '';
+
+        if (address.road) {
+          formattedAddress += address.road;
+        }
+        if (address.suburb) {
+          formattedAddress += (formattedAddress ? ', ' : '') + address.suburb;
+        }
+        if (address.city) {
+          formattedAddress += (formattedAddress ? ', ' : '') + address.city;
+        }
+        if (address.state) {
+          formattedAddress += (formattedAddress ? ', ' : '') + address.state;
+        }
+        if (address.country) {
+          formattedAddress += (formattedAddress ? ', ' : '') + address.country;
+        }
+
+        return formattedAddress || data.display_name;
+      }
+      return null;
+    });
+}
+
+// Address to coordinates conversion (forward geocoding)
+function addressToCoordinates(address) {
+  return fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(address) + '&limit=1')
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data) {
+      if (data && data.length > 0) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon),
+          displayName: data[0].display_name
+        };
+      }
+      return null;
+    });
+}
+
+// Store coordinates in WGS84 coordinate system (standard for GPS)
+function storeCoordinatesWGS84(lat, lng) {
+  // Vietnam typically uses WGS84 for GPS data
+  return {
+    lat: lat,
+    lng: lng,
+    coordinateSystem: 'WGS84',
+    timestamp: new Date().toISOString()
+  };
+}
+
+// Display detailed address information (road, ward, district, city)
+function displayDetailedAddress(lat, lng) {
+  return fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng + '&addressdetails=1')
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data) {
+      if (data && data.address) {
+        var address = data.address;
+        var detailedInfo = {
+          road: address.road || null,
+          suburb: address.suburb || null,
+          city: address.city || null,
+          state: address.state || null,
+          country: address.country || null,
+          postcode: address.postcode || null
+        };
+
+        return detailedInfo;
+      }
+      return null;
     });
 }
 
@@ -765,14 +874,42 @@ document.getElementById('useCurrentLocation').addEventListener('click', function
         document.getElementById('latitude').value = currentLocation.lat.toFixed(6);
         document.getElementById('longitude').value = currentLocation.lng.toFixed(6);
 
-        // Reverse geocoding to get address
-        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + currentLocation.lat + '&lon=' + currentLocation.lng)
+        // Enhanced reverse geocoding with VN boundary check
+        checkVietnamBoundary(currentLocation.lat, currentLocation.lng)
+          .then(function(isInVietnam) {
+            if (!isInVietnam) {
+              alert('Cảnh báo: Vị trí hiện tại có thể nằm ngoài Việt Nam');
+            }
+
+            // Reverse geocoding to get detailed address
+            return fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + currentLocation.lat + '&lon=' + currentLocation.lng + '&addressdetails=1');
+          })
           .then(function(response) {
             return response.json();
           })
           .then(function(data) {
-            if (data && data.display_name) {
-              document.getElementById('address').value = data.display_name;
+            if (data && data.address) {
+              var address = data.address;
+              var formattedAddress = '';
+
+              // Format Vietnamese address
+              if (address.road) {
+                formattedAddress += address.road;
+              }
+              if (address.suburb) {
+                formattedAddress += (formattedAddress ? ', ' : '') + address.suburb;
+              }
+              if (address.city) {
+                formattedAddress += (formattedAddress ? ', ' : '') + address.city;
+              }
+              if (address.state) {
+                formattedAddress += (formattedAddress ? ', ' : '') + address.state;
+              }
+              if (address.country) {
+                formattedAddress += (formattedAddress ? ', ' : '') + address.country;
+              }
+
+              document.getElementById('address').value = formattedAddress || data.display_name;
             }
           })
           .catch(function() {
@@ -824,14 +961,34 @@ document.getElementById('selectOnMap').addEventListener('click', function() {
       document.getElementById('latitude').value = currentLocation.lat.toFixed(6);
       document.getElementById('longitude').value = currentLocation.lng.toFixed(6);
 
-      // Reverse geocoding
-      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + currentLocation.lat + '&lon=' + currentLocation.lng)
+      // Enhanced reverse geocoding with detailed address parsing
+      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + currentLocation.lat + '&lon=' + currentLocation.lng + '&addressdetails=1')
         .then(function(response) {
           return response.json();
         })
         .then(function(data) {
-          if (data && data.display_name) {
-            document.getElementById('address').value = data.display_name;
+          if (data && data.address) {
+            var address = data.address;
+            var formattedAddress = '';
+
+            // Format Vietnamese address
+            if (address.road) {
+              formattedAddress += address.road;
+            }
+            if (address.suburb) {
+              formattedAddress += (formattedAddress ? ', ' : '') + address.suburb;
+            }
+            if (address.city) {
+              formattedAddress += (formattedAddress ? ', ' : '') + address.city;
+            }
+            if (address.state) {
+              formattedAddress += (formattedAddress ? ', ' : '') + address.state;
+            }
+            if (address.country) {
+              formattedAddress += (formattedAddress ? ', ' : '') + address.country;
+            }
+
+            document.getElementById('address').value = formattedAddress || data.display_name;
           }
         })
         .catch(function() {
@@ -2221,6 +2378,324 @@ function hasPermission(permission) {
 // Initialize authentication
 initializeUsers();
 checkAuthStatus();
+
+// Data Source Integration System
+var dataSources = {
+  trafficAPI: {
+    name: 'API Giao thông',
+    url: 'https://api.traffic.example.com',
+    status: 'disconnected',
+    lastUpdate: null,
+    data: []
+  },
+  externalSystem: {
+    name: 'Hệ thống bên ngoài',
+    url: 'https://external.example.com/api',
+    status: 'disconnected',
+    lastUpdate: null,
+    data: []
+  },
+  cameraFeeds: {
+    name: 'Camera giao thông',
+    urls: [
+      'https://camera1.example.com/stream',
+      'https://camera2.example.com/stream'
+    ],
+    status: 'disconnected',
+    lastUpdate: null,
+    data: []
+  },
+  monitoringStations: {
+    name: 'Trạm quan trắc',
+    urls: [
+      'https://station1.example.com/api',
+      'https://station2.example.com/api'
+    ],
+    status: 'disconnected',
+    lastUpdate: null,
+    data: []
+  }
+};
+
+// Connect to traffic API
+function connectToTrafficAPI() {
+  return new Promise(function(resolve, reject) {
+    // Simulated connection
+    setTimeout(function() {
+      dataSources.trafficAPI.status = 'connected';
+      dataSources.trafficAPI.lastUpdate = new Date().toISOString();
+
+      // Simulate receiving traffic data
+      dataSources.trafficAPI.data = [
+        { id: 'traffic-1', location: 'Quận 1', speed: 25, status: 'congested', timestamp: new Date().toISOString() },
+        { id: 'traffic-2', location: 'Quận 2', speed: 35, status: 'normal', timestamp: new Date().toISOString() },
+        { id: 'traffic-3', location: 'Quận 3', speed: 15, status: 'jammed', timestamp: new Date().toISOString() }
+      ];
+
+      logActivity('data_source_connect', 'Kết nối API giao thông thành');
+      resolve(dataSources.data);
+    }, 2000);
+  });
+}
+
+// Sync incidents from external system
+function syncFromExternalSystem() {
+  return new Promise(function(resolve, reject) {
+    setTimeout(function() {
+      dataSources.externalSystem.status = 'connected';
+      dataSources.externalSystem.lastUpdate = new Date().toISOString();
+
+      // Simulate receiving external incident data
+      dataSources.externalSystem.data = [
+        { id: 'ext-1', type: 'tainan', location: 'Đường Nguyễn Văn Linh', status: 'processing', timestamp: new Date().toISOString() },
+        { id: 'ext-2', type: 'ngapnuoc', location: 'Đường Hà Nội', status: 'pending', timestamp: new Date().toISOString() }
+      ];
+
+      // Merge with local incidents
+      dataSources.externalSystem.data.forEach(function(externalIncident) {
+        var exists = incidentData.find(function(local) {
+          return local.id === externalIncident.id;
+        });
+
+        if (!exists) {
+          incidentData.push({
+            id: externalIncident.id,
+            type: externalIncident.type,
+            name: externalIncident.location,
+            lat: 10.7769 + (Math.random() - 0.5) * 0.01,
+            lng: 106.7009 + (Math.random() - 0.5) * 0.01,
+            severity: 'trungbinh'
+          });
+        }
+      });
+
+      addMarkers(incidentData);
+      logActivity('data_sync', 'Đồng bộ sự cố từ hệ thống bên ngoài');
+      resolve(dataSources.externalSystem.data);
+    }, 3000);
+  });
+}
+
+// Receive data from traffic cameras
+function receiveCameraData() {
+  return new Promise(function(resolve, reject) {
+    setTimeout(function() {
+      dataSources.cameraFeeds.status = 'connected';
+      dataSources.cameraFeeds.lastUpdate = new Date().toISOString();
+
+      // Simulate camera data
+      dataSources.cameraFeeds.data = [
+        { cameraId: 'cam-1', location: 'Ngã tư tưồng', status: 'active', vehicleCount: 15, timestamp: new Date().toISOString() },
+        { cameraId: 'cam-2', location: 'Hàng Xanh', status: 'active', vehicleCount: 8, timestamp: new Date().toISOString() }
+      ];
+
+      logActivity('camera_connect', 'Kết nối camera giao thông thành');
+      resolve(dataSources.cameraFeeds.data);
+    }, 2500);
+  });
+}
+
+// Receive data from monitoring stations
+function receiveStationData() {
+  return new Promise(function(resolve, reject) {
+    setTimeout(function() {
+      dataSources.monitoringStations.status = 'connected';
+      dataSources.monitoringStations.lastUpdate = new Date().toISOString();
+
+      // Simulate station data
+      dataSources.monitoringStations.data = [
+        { stationId: 'station-1', location: 'Bến xe Miền Đông', waterLevel: 1.2, rainfall: 5.5, timestamp: new Date().toISOString() },
+        { stationId: 'station-2', location: 'Bến xe Tân Bình', waterLevel: 0.8, rainfall: 3.2, timestamp: new Date().toISOString() }
+      ];
+
+      logActivity('station_connect', 'Kết nối trạm quan trắc thành');
+      resolve(dataSources.monitoringStations.data);
+    }, 2800);
+  });
+}
+
+// Validate data integrity
+function validateDataIntegrity(data, source) {
+  var validationResults = {
+    isValid: true,
+    errors: [],
+    warnings: []
+  };
+
+  // Check required fields
+  if (!data || !Array.isArray(data)) {
+    validationResults.isValid = false;
+    validationResults.errors.push('Dữ liệu không hợp lệ');
+    return validationResults;
+  }
+
+  // Check data freshness
+  var now = new Date();
+  data.forEach(function(item) {
+    if (item.timestamp) {
+      var dataAge = now - new Date(item.timestamp);
+      if (dataAge > 3600000) { // 1 hour old
+        validationResults.warnings.push('Dữ liệu cũ: ' + item.id);
+      }
+    }
+  });
+
+  // Check for duplicates
+  var ids = data.map(function(item) { return item.id; });
+  var uniqueIds = new Set(ids);
+  if (ids.length !== uniqueIds.size) {
+    validationResults.warnings.push('Phát hiện dữ liệu trùng lặp');
+  }
+
+  // Source-specific validation
+  if (source === 'trafficAPI') {
+    data.forEach(function(item) {
+      if (!item.location || !item.speed || !item.status) {
+        validationResults.isValid = false;
+        validationResults.errors.push('Thiếu thông tin bắt buộc: ' + item.id);
+      }
+    });
+  }
+
+  if (source === 'cameraFeeds') {
+    data.forEach(function(item) {
+      if (!item.cameraId || !item.location || !item.status) {
+        validationResults.isValid = false;
+        validationResults.errors.push('Thiếu thông tin camera: ' + item.cameraId);
+      }
+    });
+  }
+
+  if (source === 'monitoringStations') {
+    data.forEach(function(item) {
+      if (!item.stationId || !item.location) {
+        validationResults.isValid = false;
+        validationResults.errors.push('Thiếu thông tin trạm: ' + item.stationId);
+      }
+    });
+  }
+
+  return validationResults;
+}
+
+// Log data errors
+function logDataError(source, error) {
+  var errorLog = {
+    source: source,
+    error: error,
+    timestamp: new Date().toISOString(),
+    ipAddress: '192.168.1.' + Math.floor(Math.random() * 255)
+  };
+
+  // In real app, this would be sent to server
+  console.error('Data source error:', errorLog);
+  logActivity('data_error', 'Lỗi nguồn dữ liệu ' + source + ': ' + error);
+}
+
+// Initialize data source connections
+function initializeDataSources() {
+  if (hasPermission('manage_system')) {
+    // Connect to all data sources
+    connectToTrafficAPI()
+      .then(function() {
+        console.log('Traffic API connected');
+      })
+      .catch(function(error) {
+        logDataError('trafficAPI', error);
+      });
+
+    syncFromExternalSystem()
+      .then(function() {
+        console.log('External system synced');
+      })
+      .catch(function(error) {
+        logDataError('externalSystem', error);
+      });
+
+    receiveCameraData()
+      .then(function() {
+        console.log('Camera feeds connected');
+      })
+      .catch(function(error) {
+        logDataError('cameraFeeds', error);
+      });
+
+    receiveStationData()
+      .then(function() {
+        console.log('Monitoring stations connected');
+      })
+      .catch(function(error) {
+        logDataError('monitoringStations', error);
+      });
+  }
+}
+
+// Periodic data refresh
+function startDataRefresh() {
+  setInterval(function() {
+    if (dataSources.trafficAPI.status === 'connected') {
+      // Refresh traffic data
+      dataSources.trafficAPI.lastUpdate = new Date().toISOString();
+      logActivity('data_refresh', 'Làm mới dữ liệu giao thông');
+    }
+
+    if (dataSources.externalSystem.status === 'connected') {
+      // Sync external data
+      syncFromExternalSystem()
+        .then(function() {
+          console.log('External data refreshed');
+        })
+        .catch(function(error) {
+          logDataError('externalSystem', error);
+        });
+    }
+  }, 60000); // Refresh every minute
+}
+
+// Show data source status in sidebar
+function updateDataSourceStatus() {
+  var statusDiv = document.getElementById('status');
+  if (statusDiv) {
+    var connectedSources = Object.values(dataSources).filter(function(source) {
+      return source.status === 'connected';
+    }).length;
+
+    var totalSources = Object.keys(dataSources).length;
+
+    if (connectedSources === totalSources) {
+      statusDiv.innerHTML = '✅ Tất cả nguồn dữ liệu đã kết nối';
+    } else if (connectedSources > 0) {
+      statusDiv.innerHTML = '⚠️ ' + connectedSources + '/' + totalSources + ' nguồn dữ liệu đã kết nối';
+    } else {
+      statusDiv.innerHTML = '❌ Không có nguồn dữ liệu nào kết nối';
+    }
+  }
+
+  // Update data sources panel
+  var dataSourcesList = document.getElementById('dataSourcesList');
+  if (dataSourcesList) {
+    dataSourcesList.innerHTML = Object.keys(dataSources).map(function(key) {
+      var source = dataSources[key];
+      var statusClass = source.status;
+      var statusText = source.status === 'connected' ? 'Đã kết nối' :
+                       source.status === 'connecting' ? 'Đang kết nối' : 'Ngắt kết nối';
+
+      return '<div class="data-source-item">' +
+             '<div class="data-source-name">' + source.name + '</div>' +
+             '<div class="data-source-status ' + statusClass + '">' + statusText + '</div>' +
+             '</div>';
+    }).join('');
+  }
+}
+
+// Initialize data sources when user logs in as admin
+var originalInitializeAdminPanel = initializeAdminPanel;
+initializeAdminPanel = function() {
+  originalInitializeAdminPanel();
+  initializeDataSources();
+  startDataRefresh();
+  updateDataSourceStatus();
+};
 
 // Role-based UI updates
 function updateUIByRole() {

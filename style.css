@@ -2001,6 +2001,64 @@ body, html {
   flex: 1;
 }
 
+/* Data Sources Panel */
+.data-sources-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.data-sources-panel h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.data-sources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.data-source-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.data-source-name {
+  font-size: 13px;
+  color: #333;
+  font-weight: 500;
+}
+
+.data-source-status {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.data-source-status.connected {
+  background: #d4edda;
+  color: #155724;
+}
+
+.data-source-status.disconnected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.data-source-status.connecting {
+  background: #fff3cd;
+  color: #856404;
+}
+
 /* Content Sections */
 .content-section {
   display: none;
@@ -2692,7 +2750,8 @@ body, html {
   .traffic-stats,
   .traffic-warnings,
   .alerts-panel,
-  .notifications-panel {
+  .notifications-panel,
+  .data-sources-panel {
     padding: 12px;
   }
 
@@ -2700,7 +2759,8 @@ body, html {
   .traffic-stats h3,
   .traffic-warnings h3,
   .alerts-panel h3,
-  .notifications-panel h3 {
+  .notifications-panel h3,
+  .data-sources-panel h3 {
     font-size: 14px;
   }
 
