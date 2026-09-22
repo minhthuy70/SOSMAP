@@ -732,3 +732,705 @@ function initializeTrafficStatus() {
 setTimeout(function() {
   initializeTrafficStatus();
 }, 100);
+
+// Incident Reporting System
+var incidentReports = [];
+var currentLocation = null;
+
+// Use current location
+document.getElementById('useCurrentLocation').addEventListener('click', function() {
+  if (navigator.geolocation) {
+    this.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg> Đang lấy vị trí...';
+    this.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        currentLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+
+        document.getElementById('latitude').value = currentLocation.lat.toFixed(6);
+        document.getElementById('longitude').value = currentLocation.lng.toFixed(6);
+
+        // Reverse geocoding to get address
+        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + currentLocation.lat + '&lon=' + currentLocation.lng)
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(data) {
+            if (data && data.display_name) {
+              document.getElementById('address').value = data.display_name;
+            }
+          })
+          .catch(function() {
+            // Address lookup failed, but coordinates are set
+          });
+
+        // Reset button
+        var btn = document.getElementById('useCurrentLocation');
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg> Đã lấy vị trí';
+        btn.disabled = false;
+      },
+      function(error) {
+        alert('Không thể lấy vị trí: ' + error.message);
+        var btn = document.getElementById('useCurrentLocation');
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg> Sử dụng vị trí hiện tại';
+        btn.disabled = false;
+      }
+    );
+  } else {
+    alert('Trình duyệt không hỗ trợ định vị');
+  }
+});
+
+// Select location on map
+document.getElementById('selectOnMap').addEventListener('click', function() {
+  // Switch to map view
+  var homeSection = document.getElementById('home-section');
+  var reportSection = document.getElementById('report-section');
+
+  if (homeSection && reportSection) {
+    reportSection.classList.remove('active');
+    homeSection.classList.add('active');
+
+    // Update navigation
+    document.querySelectorAll('.nav-link').forEach(function(link) {
+      link.classList.remove('active');
+      if (link.getAttribute('data-section') === 'map') {
+        link.classList.add('active');
+      }
+    });
+
+    // Enable map click for location selection
+    map.once('click', function(e) {
+      currentLocation = {
+        lat: e.latlng.lat,
+        lng: e.latlng.lng
+      };
+
+      document.getElementById('latitude').value = currentLocation.lat.toFixed(6);
+      document.getElementById('longitude').value = currentLocation.lng.toFixed(6);
+
+      // Reverse geocoding
+      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + currentLocation.lat + '&lon=' + currentLocation.lng)
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(data) {
+          if (data && data.display_name) {
+            document.getElementById('address').value = data.display_name;
+          }
+        })
+        .catch(function() {
+          // Address lookup failed
+        });
+
+      // Add temporary marker
+      L.marker([currentLocation.lat, currentLocation.lng])
+        .addTo(map)
+        .bindPopup('Vị trí đã chọn')
+        .openPopup();
+
+      // Switch back to report form
+      setTimeout(function() {
+        homeSection.classList.remove('active');
+        reportSection.classList.add('active');
+
+        document.querySelectorAll('.nav-link').forEach(function(link) {
+          link.classList.remove('active');
+          if (link.getAttribute('data-section') === 'report') {
+            link.classList.add('active');
+          }
+        });
+      }, 1000);
+    });
+
+    alert('Click trên bản đồ để chọn vị trí sự cố');
+  }
+});
+
+// Image upload preview
+document.getElementById('incidentImage').addEventListener('change', function(e) {
+  var preview = document.getElementById('imagePreview');
+  preview.innerHTML = '';
+
+  var files = Array.from(e.target.files).slice(0, 5); // Max 5 images
+
+  files.forEach(function(file, index) {
+    if (file.type.startsWith('image/')) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var div = document.createElement('div');
+        div.className = 'file-preview-item';
+        div.innerHTML = '<img src="' + e.target.result + '" alt="Preview">' +
+                       '<button type="button" class="remove-file" data-index="' + index + '" data-type="image">×</button>';
+        preview.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Add remove functionality
+  preview.querySelectorAll('.remove-file').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      this.parentElement.remove();
+    });
+  });
+});
+
+// Video upload preview
+document.getElementById('incidentVideo').addEventListener('change', function(e) {
+  var preview = document.getElementById('videoPreview');
+  preview.innerHTML = '';
+
+  var file = e.target.files[0];
+  if (file && file.type.startsWith('video/')) {
+    if (file.size > 50 * 1024 * 1024) { // 50MB limit
+      alert('Video quá lớn. Vui lòng chọn video dưới 50MB');
+      this.value = '';
+      return;
+    }
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var div = document.createElement('div');
+      div.className = 'file-preview-item';
+      div.innerHTML = '<video src="' + e.target.result + '" controls></video>' +
+                     '<button type="button" class="remove-file" data-type="video">×</button>';
+      preview.appendChild(div);
+
+      // Add remove functionality
+      div.querySelector('.remove-file').addEventListener('click', function() {
+        div.remove();
+        document.getElementById('incidentVideo').value = '';
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// Form submission
+document.getElementById('incidentForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  // Validate required fields
+  var requiredFields = ['incidentType', 'incidentTitle', 'incidentDescription', 'severity'];
+  var isValid = true;
+
+  requiredFields.forEach(function(fieldId) {
+    var field = document.getElementById(fieldId);
+    if (!field.value.trim()) {
+      field.style.borderColor = '#e74c3c';
+      isValid = false;
+    } else {
+      field.style.borderColor = '#ddd';
+    }
+  });
+
+  // Validate location
+  var lat = document.getElementById('latitude').value;
+  var lng = document.getElementById('longitude').value;
+  if (!lat || !lng) {
+    alert('Vui lòng chọn vị trí sự cố');
+    isValid = false;
+  }
+
+  if (!isValid) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  // Create incident report object
+  var report = {
+    id: 'INC-' + Date.now(),
+    type: document.getElementById('incidentType').value,
+    title: document.getElementById('incidentTitle').value,
+    description: document.getElementById('incidentDescription').value,
+    location: {
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
+      address: document.getElementById('address').value
+    },
+    severity: document.getElementById('severity').value,
+    contact: {
+      name: document.getElementById('contactName').value,
+      phone: document.getElementById('contactPhone').value,
+      email: document.getElementById('contactEmail').value
+    },
+    anonymous: document.getElementById('anonymous').checked,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    hasImages: document.getElementById('incidentImage').files.length > 0,
+    hasVideo: document.getElementById('incidentVideo').files.length > 0
+  };
+
+  // Add to reports list
+  incidentReports.push(report);
+
+  // Add to incident data for map display
+  incidentData.push({
+    id: report.id,
+    type: report.type,
+    name: report.title,
+    lat: report.location.lat,
+    lng: report.location.lng,
+    severity: report.severity
+  });
+
+  // Update map markers
+  addMarkers(incidentData);
+
+  // Show success message
+  alert('Phản ánh đã được gửi thành công!\nMã số: ' + report.id + '\nChúng tôi sẽ xem xét và xử lý sớm nhất.');
+
+  // Clear form
+  clearIncidentForm();
+
+  // Update reports list
+  updateReportsList();
+});
+
+// Clear form
+document.getElementById('clearForm').addEventListener('click', clearIncidentForm);
+
+function clearIncidentForm() {
+  document.getElementById('incidentForm').reset();
+  document.getElementById('imagePreview').innerHTML = '';
+  document.getElementById('videoPreview').innerHTML = '';
+  currentLocation = null;
+
+  // Reset field styles
+  document.querySelectorAll('.form-group input, .form-group select, .form-group textarea').forEach(function(field) {
+    field.style.borderColor = '#ddd';
+  });
+}
+
+// Update reports list
+function updateReportsList() {
+  var reportsList = document.getElementById('reportsList');
+
+  if (incidentReports.length === 0) {
+    reportsList.innerHTML = '<div class="empty-state">' +
+                           '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>' +
+                           '<p>Chưa có phản ánh nào</p>' +
+                           '</div>';
+    return;
+  }
+
+  reportsList.innerHTML = incidentReports.map(function(report) {
+    var statusClass = report.status;
+    var statusText = report.status === 'pending' ? 'Chờ xử lý' :
+                    report.status === 'processing' ? 'Đang xử lý' : 'Đã giải quyết';
+
+    var createdDate = new Date(report.createdAt);
+    var formattedDate = createdDate.toLocaleDateString('vi-VN') + ' ' + createdDate.toLocaleTimeString('vi-VN');
+
+    var verificationBadge = '';
+    if (report.verification) {
+      var verificationColors = {
+        'verified': '#2ecc71',
+        'unverified': '#f39c12',
+        'duplicate': '#e74c3c',
+        'invalid': '#95a5a6'
+      };
+      var verificationText = {
+        'verified': 'Đã xác minh',
+        'unverified': 'Chưa xác minh',
+        'duplicate': 'Trùng lặp',
+        'invalid': 'Không hợp lệ'
+      };
+      verificationBadge = '<span style="color: ' + verificationColors[report.verification.status] + '; font-size: 11px; margin-left: 8px;">• ' + verificationText[report.verification.status] + '</span>';
+    }
+
+    var supplementInfo = '';
+    if (report.supplements && report.supplements.length > 0) {
+      supplementInfo = '<span style="color: #3498db; font-size: 11px; margin-left: 8px;">• Đã bổ sung ' + report.supplements.length + ' lần</span>';
+    }
+
+    return '<div class="report-item ' + report.type + '">' +
+           '<div class="report-item-content">' +
+           '<div class="report-item-title">' + report.title + '</div>' +
+           '<div class="report-item-meta">' +
+           '<span>Mã: ' + report.id + '</span> • ' +
+           '<span>' + formattedDate + '</span> • ' +
+           '<span class="report-item-status ' + statusClass + '">' + statusText + '</span>' +
+           verificationBadge +
+           supplementInfo +
+           '</div>' +
+           '<div class="report-item-actions">' +
+           '<button onclick="viewReportDetail(\'' + report.id + '\')">Xem chi tiết</button>' +
+           (report.status === 'pending' ? '<button onclick="editReport(\'' + report.id + '\')">Chỉnh sửa</button>' : '') +
+           (report.status === 'pending' ? '<button onclick="cancelReport(\'' + report.id + '\')">Hủy bỏ</button>' : '') +
+           '<button onclick="showVerificationDialog(\'' + report.id + '\')">Xác minh</button>' +
+           (report.status === 'pending' ? '<button onclick="supplementReport(\'' + report.id + '\')">Bổ sung</button>' : '') +
+           '</div>' +
+           '</div>' +
+           '</div>';
+  }).join('');
+}
+
+// View report detail
+function viewReportDetail(reportId) {
+  var report = incidentReports.find(function(r) {
+    return r.id === reportId;
+  });
+
+  if (report) {
+    var modal = document.getElementById('reportDetailModal');
+    var modalBody = document.getElementById('modalBody');
+
+    var createdDate = new Date(report.createdAt);
+    var formattedDate = createdDate.toLocaleDateString('vi-VN') + ' ' + createdDate.toLocaleTimeString('vi-VN');
+
+    var statusText = report.status === 'pending' ? 'Chờ xử lý' :
+                    report.status === 'processing' ? 'Đang xử lý' : 'Đã giải quyết';
+
+    var severityText = getSeverityName(report.severity);
+
+    var modalContent = '<div class="detail-section">' +
+                       '<h4>Thông tin chung</h4>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">Mã số:</div>' +
+                       '<div class="detail-value">' + report.id + '</div>' +
+                       '</div>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">Tiêu đề:</div>' +
+                       '<div class="detail-value">' + report.title + '</div>' +
+                       '</div>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">Loại sự cố:</div>' +
+                       '<div class="detail-value">' + getIncidentTypeName(report.type) + '</div>' +
+                       '</div>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">Mức độ:</div>' +
+                       '<div class="detail-value"><span class="severity-badge ' + report.severity + '">' + severityText + '</span></div>' +
+                       '</div>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">Trạng thái:</div>' +
+                       '<div class="detail-value"><span class="status-badge ' + report.status + '">' + statusText + '</span></div>' +
+                       '</div>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">Ngày tạo:</div>' +
+                       '<div class="detail-value">' + formattedDate + '</div>' +
+                       '</div>' +
+                       '</div>' +
+
+                       '<div class="detail-section">' +
+                       '<h4>Mô tả chi tiết</h4>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-value">' + report.description + '</div>' +
+                       '</div>' +
+                       '</div>' +
+
+                       '<div class="detail-section">' +
+                       '<h4>Vị trí</h4>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">Địa chỉ:</div>' +
+                       '<div class="detail-value">' + (report.location.address || 'Chưa có địa chỉ') + '</div>' +
+                       '</div>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">Tọa độ:</div>' +
+                       '<div class="detail-value">' + report.location.lat.toFixed(6) + ', ' + report.location.lng.toFixed(6) + '</div>' +
+                       '</div>' +
+                       '</div>' +
+
+                       '<div class="detail-section">' +
+                       '<h4>Thông tin liên hệ</h4>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">Họ tên:</div>' +
+                       '<div class="detail-value">' + (report.contact.name || (report.anonymous ? 'Ẩn danh' : 'Chưa cung cấp')) + '</div>' +
+                       '</div>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">SĐT:</div>' +
+                       '<div class="detail-value">' + (report.contact.phone || 'Chưa cung cấp') + '</div>' +
+                       '</div>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">Email:</div>' +
+                       '<div class="detail-value">' + (report.contact.email || 'Chưa cung cấp') + '</div>' +
+                       '</div>' +
+                       '</div>' +
+
+                       '<div class="detail-section">' +
+                       '<h4>Tệp đính kèm</h4>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">Hình ảnh:</div>' +
+                       '<div class="detail-value">' + (report.hasImages ? 'Có (' + (report.hasImages ? '1+' : '0') + ' ảnh)' : 'Không có') + '</div>' +
+                       '</div>' +
+                       '<div class="detail-row">' +
+                       '<div class="detail-label">Video:</div>' +
+                       '<div class="detail-value">' + (report.hasVideo ? 'Có' : 'Không có') + '</div>' +
+                       '</div>' +
+                       '</div>';
+
+    // Add verification information if available
+    if (report.verification) {
+      var verificationText = {
+        'verified': 'Đã xác minh',
+        'unverified': 'Chưa xác minh',
+        'duplicate': 'Trùng lặp',
+        'invalid': 'Không hợp lệ'
+      };
+
+      modalContent += '<div class="detail-section">' +
+                      '<h4>Xác minh</h4>' +
+                      '<div class="detail-row">' +
+                      '<div class="detail-label">Trạng thái:</div>' +
+                      '<div class="detail-value">' + verificationText[report.verification.status] + '</div>' +
+                      '</div>' +
+                      '<div class="detail-row">' +
+                      '<div class="detail-label">Mức độ tin cậy:</div>' +
+                      '<div class="detail-value">' + (report.verification.reliabilityLevel === 'high' ? 'Cao' : report.verification.reliabilityLevel === 'medium' ? 'Trung bình' : 'Thấp') + '</div>' +
+                      '</div>' +
+                      '<div class="detail-row">' +
+                      '<div class="detail-label">Thời gian xác minh:</div>' +
+                      '<div class="detail-value">' + new Date(report.verification.verifiedAt).toLocaleString('vi-VN') + '</div>' +
+                      '</div>' +
+                      '</div>';
+    }
+
+    // Add supplement information if available
+    if (report.supplements && report.supplements.length > 0) {
+      modalContent += '<div class="detail-section">' +
+                      '<h4>Thông tin bổ sung</h4>' +
+                      report.supplements.map(function(supplement) {
+                        return '<div class="detail-row">' +
+                               '<div class="detail-label">' + new Date(supplement.timestamp).toLocaleString('vi-VN') + ':</div>' +
+                               '<div class="detail-value">' + supplement.content + '</div>' +
+                               '</div>';
+                      }).join('') +
+                      '</div>';
+    }
+
+    // Add status history if available
+    if (report.statusHistory && report.statusHistory.length > 0) {
+      modalContent += '<div class="detail-section">' +
+                      '<h4>Lịch sử trạng thái</h4>' +
+                      report.statusHistory.map(function(history) {
+                        var statusText = history.status === 'pending' ? 'Chờ xử lý' :
+                                       history.status === 'processing' ? 'Đang xử lý' :
+                                       history.status === 'resolved' ? 'Đã giải quyết' :
+                                       history.status === 'edited' ? 'Đã chỉnh sửa' :
+                                       history.status === 'supplemented' ? 'Đã bổ sung' : history.status;
+                        return '<div class="detail-row">' +
+                               '<div class="detail-label">' + new Date(history.timestamp).toLocaleString('vi-VN') + ':</div>' +
+                               '<div class="detail-value">' + statusText + (history.note ? ' - ' + history.note : '') + '</div>' +
+                               '</div>';
+                      }).join('') +
+                      '</div>';
+    }
+
+    modalBody.innerHTML = modalContent;
+    modal.style.display = 'flex';
+
+    modal.style.display = 'flex';
+  }
+}
+
+// Close modal
+document.getElementById('closeModal').addEventListener('click', function() {
+  document.getElementById('reportDetailModal').style.display = 'none';
+});
+
+document.getElementById('closeModalBtn').addEventListener('click', function() {
+  document.getElementById('reportDetailModal').style.display = 'none';
+});
+
+// Close modal when clicking outside
+window.addEventListener('click', function(e) {
+  var modal = document.getElementById('reportDetailModal');
+  if (e.target === modal) {
+    modal.style.display = 'none';
+  }
+});
+
+// Cancel report
+function cancelReport(reportId) {
+  if (confirm('Bạn có chắc muốn hủy phản ánh này?')) {
+    var index = incidentReports.findIndex(function(r) {
+      return r.id === reportId;
+    });
+
+    if (index !== -1) {
+      incidentReports.splice(index, 1);
+
+      // Remove from incident data
+      var incidentIndex = incidentData.findIndex(function(i) {
+        return i.id === reportId;
+      });
+
+      if (incidentIndex !== -1) {
+        incidentData.splice(incidentIndex, 1);
+        addMarkers(incidentData);
+      }
+
+      updateReportsList();
+      alert('Đã hủy phản ánh thành công');
+    }
+  }
+}
+
+// Initialize reports list
+updateReportsList();
+
+// Report Status Updates (simulation)
+function simulateReportStatusUpdates() {
+  setInterval(function() {
+    if (incidentReports.length > 0) {
+      var pendingReports = incidentReports.filter(function(r) {
+        return r.status === 'pending';
+      });
+
+      if (pendingReports.length > 0) {
+        var randomReport = pendingReports[Math.floor(Math.random() * pendingReports.length)];
+
+        // Move to processing status
+        randomReport.status = 'processing';
+        randomReport.statusHistory = randomReport.statusHistory || [];
+        randomReport.statusHistory.push({
+          status: 'processing',
+          timestamp: new Date().toISOString(),
+          note: 'Bắt đầu xử lý'
+        });
+
+        updateReportsList();
+
+        // After some time, move to resolved
+        setTimeout(function() {
+          if (randomReport.status === 'processing') {
+            randomReport.status = 'resolved';
+            randomReport.statusHistory.push({
+              status: 'resolved',
+              timestamp: new Date().toISOString(),
+              note: 'Đã giải quyết'
+            });
+
+            updateReportsList();
+
+            // Show notification
+            if (Notification.permission === 'granted') {
+              new Notification('SOSMAP', {
+                body: 'Phản ánh ' + randomReport.id + ' đã được giải quyết'
+              });
+            }
+          }
+        }, 30000); // 30 seconds to resolve
+      }
+    }
+  }, 45000); // Check every 45 seconds
+}
+
+// Request notification permission
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+// Start status update simulation
+simulateReportStatusUpdates();
+
+// Verification System
+function showVerificationDialog(reportId) {
+  var report = incidentReports.find(function(r) {
+    return r.id === reportId;
+  });
+
+  if (report) {
+    var verificationOptions = prompt('Chọn trạng thái xác minh:\n1. Đã xác minh\n2. Chưa xác minh\n3. Trùng lặp\n4. Không hợp lệ\n\nNhập số (1-4):');
+
+    if (verificationOptions) {
+      var statusMap = {
+        '1': 'verified',
+        '2': 'unverified',
+        '3': 'duplicate',
+        '4': 'invalid'
+      };
+
+      var status = statusMap[verificationOptions];
+      if (status) {
+        report.verification = {
+          status: status,
+          verifiedAt: new Date().toISOString(),
+          verifiedBy: 'user',
+          reliabilityLevel: status === 'verified' ? 'high' : status === 'unverified' ? 'medium' : 'low'
+        };
+
+        // Add to status history
+        report.statusHistory = report.statusHistory || [];
+        report.statusHistory.push({
+          status: 'verified',
+          verificationStatus: status,
+          timestamp: new Date().toISOString(),
+          note: 'Đã xác minh bởi người dùng'
+        });
+
+        updateReportsList();
+        alert('Đã cập nhật trạng thái xác minh!');
+      }
+    }
+  }
+}
+
+// Supplement Information
+function supplementReport(reportId) {
+  var report = incidentReports.find(function(r) {
+    return r.id === reportId;
+  });
+
+  if (report && report.status === 'pending') {
+    var additionalInfo = prompt('Nhập thông tin bổ sung:');
+
+    if (additionalInfo && additionalInfo.trim()) {
+      report.supplements = report.supplements || [];
+      report.supplements.push({
+        content: additionalInfo,
+        timestamp: new Date().toISOString(),
+        addedBy: 'user'
+      });
+
+      // Add to status history
+      report.statusHistory = report.statusHistory || [];
+      report.statusHistory.push({
+        status: 'supplemented',
+        timestamp: new Date().toISOString(),
+        note: 'Đã bổ sung thông tin'
+      });
+
+      updateReportsList();
+      alert('Đã thêm thông tin bổ sung!');
+    }
+  } else if (report && report.status !== 'pending') {
+    alert('Chỉ có thể bổ sung thông tin cho phản ánh đang chờ xử lý');
+  }
+}
+
+// Edit report (only for pending reports)
+function editReport(reportId) {
+  var report = incidentReports.find(function(r) {
+    return r.id === reportId;
+  });
+
+  if (report && report.status === 'pending') {
+    var newTitle = prompt('Tiêu đề mới:', report.title);
+    if (newTitle && newTitle.trim()) {
+      report.title = newTitle;
+
+      var newDescription = prompt('Mô tả mới:', report.description);
+      if (newDescription && newDescription.trim()) {
+        report.description = newDescription;
+
+        // Add to status history
+        report.statusHistory = report.statusHistory || [];
+        report.statusHistory.push({
+          status: 'edited',
+          timestamp: new Date().toISOString(),
+          note: 'Đã chỉnh sửa thông tin'
+        });
+
+        updateReportsList();
+        alert('Đã cập nhật phản ánh!');
+      }
+    }
+  } else if (report && report.status !== 'pending') {
+    alert('Chỉ có thể chỉnh sửa phản ánh đang chờ xử lý');
+  }
+}
