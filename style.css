@@ -2071,6 +2071,27 @@ body, html {
   color: #856404;
 }
 
+/* System Status Panel */
+.system-status-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.system-status-panel h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+#systemStatus {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.6;
+}
+
 /* Accessibility Features */
 /* Focus indicators for keyboard navigation */
 *:focus {

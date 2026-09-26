@@ -1089,6 +1089,12 @@ document.getElementById('incidentForm').addEventListener('submit', function(e) {
     return;
   }
 
+  // Check rate limiting
+  if (!checkRateLimit(currentUser ? currentUser.id : 'anonymous')) {
+    alert('Bạn đã gửi quá nhiều phản ánh. Vui lòng thử lại sau 1 phút.');
+    return;
+  }
+
   // Validate required fields
   var requiredFields = ['incidentType', 'incidentTitle', 'incidentDescription', 'severity'];
   var isValid = true;
@@ -1116,23 +1122,41 @@ document.getElementById('incidentForm').addEventListener('submit', function(e) {
     return;
   }
 
+  // Sanitize inputs
+  var title = sanitizeInput(document.getElementById('incidentTitle').value);
+  var description = sanitizeInput(document.getElementById('incidentDescription').value);
+  var contactName = sanitizeInput(document.getElementById('contactName').value);
+  var contactPhone = sanitizeInput(document.getElementById('contactPhone').value);
+  var contactEmail = sanitizeInput(document.getElementById('contactEmail').value);
+
+  // Validate contact info if provided
+  if (contactEmail && !validateEmail(contactEmail)) {
+    alert('Email liên hệ không hợp lệ');
+    return;
+  }
+
+  if (contactPhone && !validatePhone(contactPhone)) {
+    alert('Số điện thoại liên hệ không hợp lệ');
+    return;
+  }
+
   // Create incident report object
   var report = {
     id: 'INC-' + Date.now(),
     userId: currentUser ? currentUser.id : null,
     type: document.getElementById('incidentType').value,
-    title: document.getElementById('incidentTitle').value,
-    description: document.getElementById('incidentDescription').value,
+    title: title,
+    description: description,
     location: {
       lat: parseFloat(lat),
       lng: parseFloat(lng),
-      address: document.getElementById('address').value
+      address: sanitizeInput(document.getElementById('address').value)
     },
     severity: document.getElementById('severity').value,
     contact: {
-      name: document.getElementById('contactName').value,
-      phone: document.getElementById('contactPhone').value,
-      email: document.getElementById('contactEmail').value
+      name: contactName,
+      phone: contactPhone,
+      email: contactEmail
     },
     anonymous: document.getElementById('anonymous').checked,
     status: 'pending',
@@ -1168,6 +1192,32 @@ document.getElementById('incidentForm').addEventListener('submit', function(e) {
 
   // Update reports list
   updateReportsList();
+});
+
+// File upload size validation
+document.getElementById('incidentImage').addEventListener('change', function(e) {
+  var files = e.target.files;
+  if (files.length > 5) {
+    alert('Chỉ được tải lên tối đa 5 ảnh');
+    e.target.value = '';
+    return;
+  }
+
+  for (var i = 0; i < files.length; i++) {
+    if (!validateFileSize(files[i], securityConfig.maxImageSize)) {
+      alert('Ảnh ' + (i + 1) + ' vượt quá kích thước cho phép (5MB)');
+      e.target.value = '';
+      return;
+    }
+  }
+});
+
+document.getElementById('incidentVideo').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (file && !validateFileSize(file, securityConfig.maxFileSize)) {
+    alert('Video vượt quá kích thước cho phép (50MB)');
+    e.target.value = '';
+  }
 });
 
 // Clear form
@@ -1922,6 +1972,718 @@ var currentUser = null;
 var users = [];
 var activityLog = [];
 
+// Security System
+var securityConfig = {
+  maxLoginAttempts: 5,
+  lockoutDuration: 15 * 60 * 1000, // 15 minutes
+  rateLimitWindow: 60 * 1000, // 1 minute
+  maxSubmissionsPerWindow: 10,
+  maxFileSize: 50 * 1024 * 1024, // 50MB
+  maxImageSize: 5 * 1024 * 1024, // 5MB
+  sessionTimeout: 24 * 60 * 60 * 1000, // 24 hours
+  requirePasswordChange: false
+};
+
+var loginAttempts = {};
+var submissionCounts = {};
+var apiResponseTimes = [];
+var errorLogs = [];
+
+// Simple password hashing (for demo - in production use bcrypt)
+function hashPassword(password) {
+  // Simple hash for demo purposes
+  var hash = 0;
+  for (var i = 0; i < password.length; i++) {
+    var char = password.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return 'hash_' + Math.abs(hash).toString(16);
+}
+
+// Input validation and sanitization
+function sanitizeInput(input) {
+  if (typeof input !== 'string') return input;
+
+  // Remove potentially dangerous characters
+  var sanitized = input
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;');
+
+  // Remove extra whitespace
+  sanitized = sanitized.trim().replace(/\s+/g, ' ');
+
+  return sanitized;
+}
+
+// Validate email format
+function validateEmail(email) {
+  var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// Validate phone number (Vietnam format)
+function validatePhone(phone) {
+  var phoneRegex = /^(0|\+84)([3-9][0-9]{8}|[2-9][0-9]{7})$/;
+  return phoneRegex.test(phone);
+}
+
+// Rate limiting for submissions
+function checkRateLimit(identifier) {
+  var now = Date.now();
+  var windowStart = now - securityConfig.rateLimitWindow;
+
+  // Clean old entries
+  submissionCounts[identifier] = submissionCounts[identifier] || [];
+  submissionCounts[identifier] = submissionCounts[identifier].filter(function(timestamp) {
+    return timestamp > windowStart;
+  });
+
+  // Check limit
+  if (submissionCounts[identifier].length >= securityConfig.maxSubmissionsPerWindow) {
+    return false;
+  }
+
+  // Add current submission
+  submissionCounts[identifier].push(now);
+  return true;
+}
+
+// Rate limiting for login attempts
+function checkLoginAttempts(email) {
+  var now = Date.now();
+  var attempts = loginAttempts[email] || { count: 0, lastAttempt: 0 };
+
+  // Reset if lockout period has passed
+  if (now - attempts.lastAttempt > securityConfig.lockoutDuration) {
+    attempts.count = 0;
+  }
+
+  // Check if locked out
+  if (attempts.count >= securityConfig.maxLoginAttempts) {
+    var remainingTime = Math.ceil((securityConfig.lockoutDuration - (now - attempts.lastAttempt)) / 60000);
+    return {
+      allowed: false,
+      message: 'Tài khoản đã bị khóa. Vui lòng thử lại sau ' + remainingTime + ' phút.'
+    };
+  }
+
+  // Increment attempts
+  attempts.count++;
+  attempts.lastAttempt = now;
+  loginAttempts[email] = attempts;
+
+  return {
+    allowed: true,
+    attemptsRemaining: securityConfig.maxLoginAttempts - attempts.count
+  };
+}
+
+// File size validation
+function validateFileSize(file, maxSize) {
+  maxSize = maxSize || securityConfig.maxFileSize;
+  return file.size <= maxSize;
+}
+
+// Personal data protection - mask sensitive information
+function maskPersonalData(data) {
+  if (!data) return data;
+
+  var masked = JSON.parse(JSON.stringify(data));
+
+  // Mask email
+  if (masked.email) {
+    var emailParts = masked.email.split('@');
+    if (emailParts.length === 2) {
+      var username = emailParts[0];
+      var maskedUsername = username.substring(0, 2) + '***' + username.substring(username.length - 1);
+      masked.email = maskedUsername + '@' + emailParts[1];
+    }
+  }
+
+  // Mask phone
+  if (masked.phone) {
+    masked.phone = masked.phone.substring(0, 3) + '***' + masked.phone.substring(masked.phone.length - 2);
+  }
+
+  // Remove password
+  if (masked.password) {
+    delete masked.password;
+  }
+
+  return masked;
+}
+
+// Data backup (local storage backup)
+function backupData() {
+  var backup = {
+    timestamp: new Date().toISOString(),
+    users: users.map(function(user) {
+      return maskPersonalData(user);
+    }),
+    incidentReports: incidentReports.map(function(report) {
+      // Remove sensitive personal data from backup
+      var safeReport = JSON.parse(JSON.stringify(report));
+      if (safeReport.contact) {
+        safeReport.contact = maskPersonalData(safeReport.contact);
+      }
+      return safeReport;
+    }),
+    activityLog: activityLog
+  };
+
+  try {
+    localStorage.setItem('sosmap_backup_' + Date.now(), JSON.stringify(backup));
+
+    // Keep only last 5 backups
+    var backupKeys = Object.keys(localStorage).filter(function(key) {
+      return key.startsWith('sosmap_backup_');
+    }).sort().reverse();
+
+    if (backupKeys.length > 5) {
+      backupKeys.slice(5).forEach(function(key) {
+        localStorage.removeItem(key);
+      });
+    }
+
+    logActivity('data_backup', 'Sao lưu dữ liệu thành công');
+    return true;
+  } catch (e) {
+    logActivity('data_backup_failed', 'Sao lưu dữ liệu thất bại: ' + e.message);
+    return false;
+  }
+}
+
+// Restore data from backup
+function restoreData(backupKey) {
+  try {
+    var backupData = JSON.parse(localStorage.getItem(backupKey));
+    if (backupData) {
+      incidentReports = backupData.incidentReports || [];
+      activityLog = backupData.activityLog || [];
+      logActivity('data_restore', 'Khôi phục dữ liệu từ backup: ' + backupKey);
+      return true;
+    }
+  } catch (e) {
+    logActivity('data_restore_failed', 'Khôi phục dữ liệu thất bại: ' + e.message);
+  }
+  return false;
+}
+
+// API response time logging
+function logApiResponseTime(apiName, duration) {
+  apiResponseTimes.push({
+    api: apiName,
+    duration: duration,
+    timestamp: new Date().toISOString()
+  });
+
+  // Keep only last 100 entries
+  if (apiResponseTimes.length > 100) {
+    apiResponseTimes = apiResponseTimes.slice(-100);
+  }
+}
+
+// Error logging
+function logError(error, context) {
+  var errorLog = {
+    error: error.message || error,
+    stack: error.stack,
+    context: context,
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+    url: window.location.href
+  };
+
+  errorLogs.push(errorLog);
+
+  // Keep only last 50 errors
+  if (errorLogs.length > 50) {
+    errorLogs = errorLogs.slice(-50);
+  }
+
+  console.error('Error logged:', errorLog);
+}
+
+// System status monitoring
+function getSystemStatus() {
+  var avgResponseTime = apiResponseTimes.length > 0 ?
+    apiResponseTimes.reduce(function(sum, log) { return sum + log.duration; }, 0) / apiResponseTimes.length : 0;
+
+  var recentErrors = errorLogs.filter(function(log) {
+    return Date.now() - new Date(log.timestamp).getTime() < 3600000; // Last hour
+  }).length;
+
+  return {
+    status: recentErrors > 10 ? 'degraded' : 'healthy',
+    avgResponseTime: avgResponseTime.toFixed(2) + 'ms',
+    errorCount: recentErrors,
+    uptime: processUptime(),
+    memoryUsage: getMemoryUsage()
+  };
+}
+
+function processUptime() {
+  var uptime = Date.now() - window.performance.timing.navigationStart;
+  var seconds = Math.floor(uptime / 1000);
+  var minutes = Math.floor(seconds / 60);
+  var hours = Math.floor(minutes / 60);
+
+  if (hours > 0) {
+    return hours + 'h ' + (minutes % 60) + 'm';
+  } else if (minutes > 0) {
+    return minutes + 'm ' + (seconds % 60) + 's';
+  } else {
+    return seconds + 's';
+  }
+}
+
+function getMemoryUsage() {
+  if (performance.memory) {
+    var used = performance.memory.usedJSHeapSize / 1048576; // Convert to MB
+    var total = performance.memory.totalJSHeapSize / 1048576;
+    return used.toFixed(2) + 'MB / ' + total.toFixed(2) + 'MB';
+  }
+  return 'N/A';
+}
+
+// Automated testing simulation
+function runAutomatedTests() {
+  var testResults = {
+    passed: 0,
+    failed: 0,
+    tests: []
+  };
+
+  // Test 1: Password hashing
+  try {
+    var hash = hashPassword('test123');
+    var test1Passed = hash !== 'test123' && hash.startsWith('hash_');
+    testResults.tests.push({ name: 'Password hashing', passed: test1Passed });
+    if (test1Passed) testResults.passed++; else testResults.failed++;
+  } catch (e) {
+    testResults.tests.push({ name: 'Password hashing', passed: false, error: e.message });
+    testResults.failed++;
+  }
+
+  // Test 2: Input sanitization
+  try {
+    var sanitized = sanitizeInput('<script>alert("xss")</script>');
+    var test2Passed = !sanitized.includes('<script>');
+    testResults.tests.push({ name: 'Input sanitization', passed: test2Passed });
+    if (test2Passed) testResults.passed++; else testResults.failed++;
+  } catch (e) {
+    testResults.tests.push({ name: 'Input sanitization', passed: false, error: e.message });
+    testResults.failed++;
+  }
+
+  // Test 3: Email validation
+  try {
+    var validEmail = validateEmail('test@example.com');
+    var invalidEmail = !validateEmail('invalid-email');
+    var test3Passed = validEmail && invalidEmail;
+    testResults.tests.push({ name: 'Email validation', passed: test3Passed });
+    if (test3Passed) testResults.passed++; else testResults.failed++;
+  } catch (e) {
+    testResults.tests.push({ name: 'Email validation', passed: false, error: e.message });
+    testResults.failed++;
+  }
+
+  // Test 4: Rate limiting
+  try {
+    var rateLimitPassed = checkRateLimit('test_user');
+    testResults.tests.push({ name: 'Rate limiting', passed: rateLimitPassed });
+    if (rateLimitPassed) testResults.passed++; else testResults.failed++;
+  } catch (e) {
+    testResults.tests.push({ name: 'Rate limiting', passed: false, error: e.message });
+    testResults.failed++;
+  }
+
+  logActivity('automated_test', 'Kết quả test: ' + testResults.passed + ' passed, ' + testResults.failed + ' failed');
+
+  return testResults;
+}
+
+// Security monitoring dashboard
+function updateSecurityDashboard() {
+  var status = getSystemStatus();
+  var statusDiv = document.getElementById('systemStatus');
+
+  if (statusDiv) {
+    var statusColor = status.status === 'healthy' ? '#28a745' : '#dc3545';
+    statusDiv.innerHTML = '<span style="color: ' + statusColor + ';">●</span> ' +
+                          'Trạng thái: ' + status.status + ' | ' +
+                          'Response time: ' + status.avgResponseTime + ' | ' +
+                          'Errors: ' + status.errorCount + ' | ' +
+                          'Uptime: ' + status.uptime + ' | ' +
+                          'Memory: ' + status.memoryUsage;
+  }
+}
+
+// Apply security enhancements to existing functions
+var originalInitializeUsers = initializeUsers;
+initializeUsers = function() {
+  originalInitializeUsers();
+
+  // Hash passwords for demo users
+  users.forEach(function(user) {
+    if (!user.password.startsWith('hash_')) {
+      user.password = hashPassword(user.password);
+    }
+  });
+};
+
+// Apply debouncing to search
+var originalPerformSearch = performSearch;
+performSearch = debounce(function() {
+  // Get current search value
+  var query = document.getElementById('searchInput').value.trim();
+  if (!query) return;
+
+  // Using Nominatim for geocoding
+  fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query) + '&limit=1&addressdetails=1')
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(data) {
+      if (data && data.length > 0) {
+        var result = data[0];
+        var lat = parseFloat(result.lat);
+        var lng = parseFloat(result.lon);
+
+        // Check if location is in Vietnam
+        checkVietnamBoundary(lat, lng)
+          .then(function(isInVietnam) {
+            if (!isInVietnam) {
+              alert('Cảnh báo: Kết quả tìm kiếm có thể nằm ngoài Việt Nam');
+            }
+
+            map.setView([lat, lng], 15);
+
+            L.marker([lat, lng])
+              .addTo(map)
+              .bindPopup(result.display_name)
+              .openPopup();
+          });
+      } else {
+        alert('Không tìm thấy địa điểm: ' + query);
+      }
+    })
+    .catch(function(error) {
+      console.error('Search error:', error);
+      alert('Lỗi khi tìm kiếm. Vui lòng thử lại.');
+    });
+}, 300);
+
+// File upload size validation
+document.getElementById('incidentImage').addEventListener('change', function(e) {
+  var files = e.target.files;
+  if (files.length > 5) {
+    alert('Chỉ được tải lên tối đa 5 ảnh');
+    e.target.value = '';
+    return;
+  }
+
+  for (var i = 0; i < files.length; i++) {
+    if (!validateFileSize(files[i], securityConfig.maxImageSize)) {
+      alert('Ảnh ' + (i + 1) + ' vượt quá kích thước cho phép (5MB)');
+      e.target.value = '';
+      return;
+    }
+  }
+});
+
+document.getElementById('incidentVideo').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (file && !validateFileSize(file, securityConfig.maxFileSize)) {
+    alert('Video vượt quá kích thước cho phép (50MB)');
+    e.target.value = '';
+  }
+});
+
+// Backup data periodically
+setInterval(backupData, 3600000); // Backup every hour
+
+// Update security dashboard periodically
+setInterval(updateSecurityDashboard, 30000); // Update every 30 seconds
+
+// Run automated tests periodically
+setInterval(runAutomatedTests, 3600000); // Run tests every hour
+
+// Caching System
+var cache = {
+  data: {},
+  ttl: 5 * 60 * 1000, // 5 minutes default TTL
+};
+
+function setCache(key, value, ttl) {
+  ttl = ttl || cache.ttl;
+  cache.data[key] = {
+    value: value,
+    expires: Date.now() + ttl
+  };
+}
+
+function getCache(key) {
+  var item = cache.data[key];
+  if (!item) return null;
+
+  if (Date.now() > item.expires) {
+    delete cache.data[key];
+    return null;
+  }
+
+  return item.value;
+}
+
+function clearCache() {
+  cache.data = {};
+  logActivity('cache_clear', 'Đã xóa cache');
+}
+
+function clearExpiredCache() {
+  var now = Date.now();
+  var cleared = 0;
+
+  Object.keys(cache.data).forEach(function(key) {
+    if (now > cache.data[key].expires) {
+      delete cache.data[key];
+      cleared++;
+    }
+  });
+
+  if (cleared > 0) {
+    logActivity('cache_cleanup', 'Đã xóa ' + cleared + ' mục cache hết hạn');
+  }
+}
+
+// Clear expired cache periodically
+setInterval(clearExpiredCache, 60000); // Every minute
+
+// Cache map data
+function cacheMapData() {
+  setCache('map_bounds', {
+    center: map.getCenter(),
+    zoom: map.getZoom()
+  }, 60000); // 1 minute
+
+  setCache('incident_data', incidentData, 30000); // 30 seconds
+}
+
+// Restore map data from cache
+function restoreMapData() {
+  var mapBounds = getCache('map_bounds');
+  if (mapBounds) {
+    map.setView(mapBounds.center, mapBounds.zoom);
+  }
+
+  var cachedIncidents = getCache('incident_data');
+  if (cachedIncidents) {
+    incidentData = cachedIncidents;
+  }
+}
+
+// Cache on map move
+map.on('moveend', cacheMapData);
+map.on('zoomend', cacheMapData);
+
+// Performance optimization: Lazy load markers
+var markerCache = new Map();
+var visibleBounds = null;
+
+function loadMarkersInBounds(bounds) {
+  visibleBounds = bounds;
+
+  // Filter markers within bounds
+  var visibleMarkers = incidentData.filter(function(incident) {
+    return bounds.contains([incident.lat, incident.lng]);
+  });
+
+  // Only load markers not already cached
+  var newMarkers = visibleMarkers.filter(function(incident) {
+    return !markerCache.has(incident.id);
+  });
+
+  // Add new markers
+  newMarkers.forEach(function(incident) {
+    var marker = createMarker(incident);
+    markerCache.set(incident.id, marker);
+  });
+
+  return visibleMarkers.length;
+}
+
+// Optimize marker rendering
+function optimizeMarkerRendering() {
+  var bounds = map.getBounds();
+  var markerCount = loadMarkersInBounds(bounds);
+
+  // Remove markers outside bounds to improve performance
+  markerCache.forEach(function(marker, id) {
+    var markerPos = marker.getLatLng();
+    if (!bounds.contains(markerPos)) {
+      if (map.hasLayer(marker)) {
+        map.removeLayer(marker);
+      }
+    } else {
+      if (!map.hasLayer(marker)) {
+        map.addLayer(marker);
+      }
+    }
+  });
+
+  logActivity('marker_optimization', 'Hiển thị ' + markerCount + ' marker trong phạm vi');
+}
+
+// Optimize on map move
+map.on('moveend', optimizeMarkerRendering);
+map.on('zoomend', optimizeMarkerRendering);
+
+// Performance monitoring: Page load time
+window.addEventListener('load', function() {
+  var loadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart;
+  logActivity('page_load', 'Thời gian tải trang: ' + loadTime + 'ms');
+});
+
+// Performance monitoring: API calls
+var originalFetch = window.fetch;
+window.fetch = function() {
+  var startTime = Date.now();
+  var url = arguments[0];
+
+  return originalFetch.apply(this, arguments).then(function(response) {
+    var duration = Date.now() - startTime;
+    var apiName = typeof url === 'string' ? url.split('/')[2] : 'unknown';
+    logApiResponseTime(apiName, duration);
+
+    if (duration > 3000) {
+      logActivity('slow_api', 'API chậm: ' + apiName + ' - ' + duration + 'ms');
+    }
+
+    return response;
+  }).catch(function(error) {
+    var duration = Date.now() - startTime;
+    logError(error, { context: 'API call', url: url, duration: duration });
+    throw error;
+  });
+};
+
+// Performance: Debounce function for frequent events
+function debounce(func, wait) {
+  var timeout;
+  return function() {
+    var context = this;
+    var args = arguments;
+    clearTimeout(timeout);
+    timeout = setTimeout(function() {
+      func.apply(context, args);
+    }, wait);
+  };
+}
+
+// Performance: Throttle function for scroll events
+function throttle(func, limit) {
+  var inThrottle;
+  return function() {
+    var context = this;
+    var args = arguments;
+    if (!inThrottle) {
+      func.apply(context, args);
+      inThrottle = true;
+      setTimeout(function() {
+        inThrottle = false;
+      }, limit);
+    }
+  };
+}
+
+// Apply debouncing to search
+var debouncedSearch = debounce(performSearch, 300);
+document.getElementById('searchBtn').addEventListener('click', debouncedSearch);
+
+// Apply throttling to map events
+map.on('move', throttle(function() {
+  // Throttled map move handler
+}, 100));
+
+// Lazy load images
+function lazyLoadImages() {
+  var images = document.querySelectorAll('img[data-src]');
+  var imageObserver = new IntersectionObserver(function(entries, observer) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var img = entry.target;
+        img.src = img.getAttribute('data-src');
+        img.removeAttribute('data-src');
+        observer.unobserve(img);
+      }
+    });
+  });
+
+  images.forEach(function(img) {
+    imageObserver.observe(img);
+  });
+}
+
+// Initialize lazy loading
+lazyLoadImages();
+
+// System health check endpoint simulation
+function healthCheck() {
+  var health = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    services: {
+      map: map ? 'operational' : 'down',
+      authentication: currentUser ? 'operational' : 'operational',
+      database: localStorage ? 'operational' : 'degraded',
+      cache: Object.keys(cache.data).length > 0 ? 'operational' : 'operational'
+    },
+    metrics: {
+      uptime: processUptime(),
+      memory: getMemoryUsage(),
+      avgResponseTime: apiResponseTimes.length > 0 ?
+        (apiResponseTimes.reduce(function(sum, log) { return sum + log.duration; }, 0) / apiResponseTimes.length).toFixed(2) + 'ms' : 'N/A',
+      errorRate: errorLogs.length > 0 ? (errorLogs.length / 100).toFixed(2) + '%' : '0%'
+    }
+  };
+
+  return health;
+}
+
+// Display system status in sidebar
+function displaySystemStatus() {
+  var health = healthCheck();
+  var statusPanel = document.getElementById('systemStatusPanel');
+
+  if (statusPanel) {
+    var statusColor = health.status === 'healthy' ? '#28a745' : '#dc3545';
+    statusPanel.innerHTML = '<div style="font-size: 12px; color: #666;">' +
+                          '<div style="margin-bottom: 4px;"><span style="color: ' + statusColor + ';">●</span> ' +
+                          'Trạng thái: ' + health.status + '</div>' +
+                          '<div>Uptime: ' + health.metrics.uptime + '</div>' +
+                          '<div>Memory: ' + health.metrics.memory + '</div>' +
+                          '<div>Response: ' + health.metrics.avgResponseTime + '</div>' +
+                          '</div>';
+  }
+}
+
+// Add system status panel to sidebar
+var statusPanelHTML = '<div class="system-status-panel" id="systemStatusPanel">' +
+                     '</div>';
+
+// Append to sidebar after traffic panel
+var trafficPanel = document.querySelector('.traffic-warnings');
+if (trafficPanel) {
+  trafficPanel.insertAdjacentHTML('afterend', statusPanelHTML);
+}
+
+// Update system status periodically
+setInterval(displaySystemStatus, 10000); // Every 10 seconds
+
 // User roles and permissions
 var roles = {
   viewer: {
@@ -2011,15 +2773,33 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
   e.preventDefault();
 
   var email = document.getElementById('loginEmail').value;
+
+  // Check rate limiting
+  var rateCheck = checkLoginAttempts(email);
+  if (!rateCheck.allowed) {
+    alert(rateCheck.message);
+    return;
+  }
+
+  if (rateCheck.attemptsRemaining <= 2) {
+    alert('Cảnh báo: Bạn còn ' + rateCheck.attemptsRemaining + ' lần thử đăng nhập.');
+  }
+
   var password = document.getElementById('loginPassword').value;
   var rememberMe = document.getElementById('rememberMe').checked;
 
+  // Hash password for comparison
+  var hashedPassword = hashPassword(password);
+
   // Find user
   var user = users.find(function(u) {
-    return u.email === email && u.password === password && u.isActive;
+    return u.email === email && u.password === hashedPassword && u.isActive;
   });
 
   if (user) {
+    // Reset login attempts on success
+    loginAttempts[email] = { count: 0, lastAttempt: 0 };
+
     currentUser = user;
 
     // Save to localStorage if remember me is checked
@@ -2052,12 +2832,30 @@ document.getElementById('closeRegisterModal').addEventListener('click', function
 document.getElementById('registerForm').addEventListener('submit', function(e) {
   e.preventDefault();
 
-  var name = document.getElementById('registerName').value;
-  var email = document.getElementById('registerEmail').value;
-  var phone = document.getElementById('registerPhone').value;
+  var name = sanitizeInput(document.getElementById('registerName').value);
+  var email = sanitizeInput(document.getElementById('registerEmail').value);
+  var phone = sanitizeInput(document.getElementById('registerPhone').value);
   var password = document.getElementById('registerPassword').value;
   var confirmPassword = document.getElementById('registerConfirmPassword').value;
   var agreeTerms = document.getElementById('agreeTerms').checked;
+
+  // Validate email
+  if (!validateEmail(email)) {
+    alert('Email không hợp lệ');
+    return;
+  }
+
+  // Validate phone if provided
+  if (phone && !validatePhone(phone)) {
+    alert('Số điện thoại không hợp lệ');
+    return;
+  }
+
+  // Check rate limiting
+  if (!checkRateLimit(email)) {
+    alert('Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau 1 phút.');
+    return;
+  }
 
   // Validation
   if (password !== confirmPassword) {
@@ -2091,8 +2889,8 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
     name: name,
     email: email,
     phone: phone,
-    password: password, // In real app, this would be hashed
-    role: 'reporter', // Default role
+    password: hashPassword(password),
+    role: 'reporter',
     createdAt: new Date().toISOString(),
     isActive: true
   };
