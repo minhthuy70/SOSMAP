@@ -579,6 +579,32 @@
           </div>
         </div>
 
+        <!-- Fire & Infrastructure Panel -->
+        <div class="fire-panel" id="firePanel">
+          <h3>Cháy nổ & Hạ tầng</h3>
+          <div class="fire-controls">
+            <button class="fire-btn emergency" id="reportFireBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8.6 13.6a2 2 0 0 0 2.8 2.8l0 0a2 2 0 0 0 2.8-2.8V3.2H13v8.4a2 2 0 0 0 2.8 2.8l0 0a2 2 0 0 0-2.8-2.8"></path>
+                <line x1="12" y1="13" x2="12" y2="13"></line>
+              </svg>
+              Báo cháy
+            </button>
+            <button class="fire-btn" id="reportInfrastructureBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+              </svg>
+              Sự cố hạ tầng
+            </button>
+          </div>
+          <div class="fire-alerts" id="fireAlerts">
+            <div class="fire-alert-item info">
+              <span class="alert-icon">ℹ️</span>
+              <span class="alert-text">Không có sự cố nào trong khu vực</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
