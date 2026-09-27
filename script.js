@@ -6135,9 +6135,10 @@ var healthCases = [
   { id: 'case3', type: 'cluster', location: { lat: 10.7750, lng: 106.6950 }, date: '2024-09-20', verified: true }
 ];
 var healthFacilities = [
-  { id: 'fac1', name: 'Bệnh viện Chợ Rẫy', type: 'hospital', location: { lat: 10.7769, lng: 106.7009 }, services: ['emergency', 'pediatric', 'neonatal'], capacity: '24/7', phone: '028 3855 8888' },
-  { id: 'fac2', name: 'Trạm y tế Quận 1', type: 'clinic', location: { lat: 10.7800, lng: 106.7050 }, services: ['testing', 'vaccination'], capacity: 'regular', phone: '028 3823 4567' },
-  { id: 'fac3', name: 'Bệnh viện Nhi Đồng', type: 'specialized', location: { lat: 10.7750, lng: 106.6950 }, services: ['pediatric', 'infectious', 'neonatal'], capacity: '24/7', phone: '028 3839 1234' }
+  { id: 'fac1', name: 'Bệnh viện Chợ Rẫy', type: 'hospital', location: { lat: 10.7769, lng: 106.7009 }, services: ['emergency', 'pediatric', 'neonatal', 'medicine', 'oxygen'], departments: ['surgery', 'pediatric', 'internal', 'infectious'], capacity: '24/7', currentCapacity: 'medium', phone: '028 3855 8888', distance: 2.5 },
+  { id: 'fac2', name: 'Trạm y tế Quận 1', type: 'clinic', location: { lat: 10.7800, lng: 106.7050 }, services: ['testing', 'vaccination', 'medicine'], departments: ['general', 'vaccination'], capacity: 'regular', currentCapacity: 'low', phone: '028 3823 4567', distance: 1.8 },
+  { id: 'fac3', name: 'Bệnh viện Nhi Đồng', type: 'specialized', location: { lat: 10.7750, lng: 106.6950 }, services: ['emergency', 'pediatric', 'infectious', 'neonatal', 'oxygen'], departments: ['pediatric', 'infectious', 'neonatal', 'surgery'], capacity: '24/7', currentCapacity: 'high', phone: '028 3839 1234', distance: 3.2 },
+  { id: 'fac4', name: 'Bệnh viện Thành phố Thủ Đức', type: 'hospital', location: { lat: 10.7700, lng: 106.6900 }, services: ['emergency', 'medicine', 'oxygen'], departments: ['emergency', 'internal'], capacity: '24/7', currentCapacity: 'medium', phone: '028 3772 0000', distance: 5.1 }
 ];
 var healthRequests = [];
 var healthMap = null;
@@ -6448,6 +6449,189 @@ document.getElementById('facilitySearch') && document.getElementById('facilitySe
 document.addEventListener('DOMContentLoaded', function() {
   initializeHealthSystem();
 });
+
+// Emergency Care System
+var emergencyRequests = [];
+var currentEmergencyPriority = 'medium';
+
+function callAmbulance() {
+  alert('Đang gọi xe cấp cứu (115)...');
+  logActivity('emergency_call', 'Gọi xe cấp cứu: 115');
+  // In production, this would initiate actual phone call
+}
+
+function callFireDepartment() {
+  alert('Đang gọi cứu hỏa (114)...');
+  logActivity('emergency_call', 'Gọi cứu hỏa: 114');
+}
+
+function callPolice() {
+  alert('Đang gọi cảnh sát (113)...');
+  logActivity('emergency_call', 'Gọi cảnh sát: 113');
+}
+
+function setEmergencyPriority(priority) {
+  currentEmergencyPriority = priority;
+  document.querySelectorAll('.priority-btn').forEach(function(btn) {
+    btn.classList.remove('active');
+  });
+  event.currentTarget.classList.add('active');
+  logActivity('emergency_priority', 'Đặt mức độ khẩn cấp: ' + priority);
+}
+
+function getEmergencyLocation() {
+  var coordsDiv = document.getElementById('emergencyCoords');
+  if (!coordsDiv) return;
+
+  coordsDiv.textContent = 'Đang lấy vị trí...';
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        coordsDiv.textContent = lat.toFixed(6) + ', ' + lng.toFixed(6);
+        coordsDiv.style.color = '#2ecc71';
+      },
+      function(error) {
+        coordsDiv.textContent = 'Không thể lấy vị trí';
+        coordsDiv.style.color = '#e74c3c';
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  } else {
+    coordsDiv.textContent = 'Geolocation không được hỗ trợ';
+  }
+}
+
+function createEmergencyRequest(data) {
+  var request = {
+    id: 'EMG-' + Date.now(),
+    priority: data.priority,
+    description: data.description,
+    location: data.location,
+    contactName: data.contactName,
+    contactPhone: data.contactPhone,
+    specialNeeds: data.specialNeeds,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    assignedTo: null,
+    estimatedArrival: null
+  };
+
+  emergencyRequests.push(request);
+  saveEmergencyRequests();
+
+  // Send browser notification
+  if (Notification.permission === 'granted') {
+    new Notification('🆘 SOS Khẩn cấp: ' + request.id, {
+      body: request.description,
+      icon: '/favicon.ico',
+      requireInteraction: true
+    });
+  }
+
+  alert('Đã gửi SOS khẩn cấp! Mã yêu cầu: ' + request.id);
+  logActivity('emergency_create', 'Tạo yêu cầu cấp cứu khẩn cấp: ' + request.id);
+
+  return request;
+}
+
+function saveEmergencyRequests() {
+  localStorage.setItem('sosmap_emergency_requests', JSON.stringify(emergencyRequests));
+}
+
+// Emergency Care Modal Event Listeners
+document.getElementById('emergencyCareBtn').addEventListener('click', function() {
+  document.getElementById('emergencyCareModal').style.display = 'block';
+  getEmergencyLocation();
+});
+
+document.getElementById('closeEmergencyCareModal').addEventListener('click', function() {
+  document.getElementById('emergencyCareModal').style.display = 'none';
+});
+
+document.getElementById('closeEmergencyCareBtn').addEventListener('click', function() {
+  document.getElementById('emergencyCareModal').style.display = 'none';
+});
+
+document.getElementById('refreshEmergencyLocation').addEventListener('click', function() {
+  getEmergencyLocation();
+});
+
+document.getElementById('submitEmergencyBtn').addEventListener('click', function() {
+  var description = document.getElementById('emergencyDescription').value;
+  var contactName = document.getElementById('emergencyContactName').value;
+  var contactPhone = document.getElementById('emergencyContactPhone').value;
+
+  var specialNeeds = [];
+  document.querySelectorAll('input[name="emergencySpecialNeeds"]:checked').forEach(function(checkbox) {
+    specialNeeds.push(checkbox.value);
+  });
+
+  if (!description || !contactPhone) {
+    alert('Vui lòng điền mô tả tình huống và số điện thoại');
+    return;
+  }
+
+  var coordsDiv = document.getElementById('emergencyCoords');
+  var location = coordsDiv.textContent.includes(',') ? coordsDiv.textContent : null;
+
+  var emergencyData = {
+    priority: currentEmergencyPriority,
+    description: description,
+    location: location,
+    contactName: contactName,
+    contactPhone: contactPhone,
+    specialNeeds: specialNeeds
+  };
+
+  createEmergencyRequest(emergencyData);
+  document.getElementById('emergencyCareModal').style.display = 'none';
+  document.getElementById('emergencyDescription').value = '';
+  document.getElementById('emergencyContactName').value = '';
+  document.getElementById('emergencyContactPhone').value = '';
+});
+
+// Enhanced facility rendering with new data
+function renderHealthFacilities() {
+  var list = document.getElementById('facilitiesList');
+  if (!list) return;
+
+  list.innerHTML = healthFacilities.map(function(facility) {
+    var capacityColor = facility.currentCapacity === 'high' ? '#f8d7da' : facility.currentCapacity === 'medium' ? '#fff3cd' : '#d4edda';
+    var capacityText = facility.currentCapacity === 'high' ? 'Cao' : facility.currentCapacity === 'medium' ? 'Trung bình' : 'Thấp';
+
+    return `
+      <div class="facility-item">
+        <div class="facility-info">
+          <div class="facility-name">${facility.name}</div>
+          <div class="facility-type">${facility.type === 'hospital' ? 'Bệnh viện đa khoa' : facility.type === 'clinic' ? 'Trạm y tế' : 'Bệnh viện chuyên khoa'}</div>
+          <div class="facility-capacity">${facility.capacity} • Sức tiếp nhận: <span style="color: ${capacityColor}; font-weight: 600;">${capacityText}</span></div>
+          <div class="facility-distance">${facility.distance} km</div>
+        </div>
+        <div class="facility-services">
+          ${facility.services.map(function(service) {
+            return '<span class="service-tag">' + service + '</span>';
+          }).join('')}
+        </div>
+        <div class="facility-departments">
+          ${facility.departments.map(function(dept) {
+            return '<span class="dept-tag">' + dept + '</span>';
+          }).join('')}
+        </div>
+        <div class="facility-actions">
+          <button class="btn btn-primary" style="font-size: 12px;" onclick="routeToFacility('${facility.id}')">Chỉ đường</button>
+          <button class="btn btn-secondary" style="font-size: 12px;" onclick="callFacility('${facility.phone}')">Gọi</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
 // High contrast mode toggle
 var highContrastMode = false;

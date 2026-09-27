@@ -3401,6 +3401,196 @@ body, html {
   gap: 8px;
 }
 
+.facility-distance {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.facility-departments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.dept-tag {
+  padding: 4px 8px;
+  background: #e9ecef;
+  color: #495057;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+/* Emergency Care Styles */
+.emergency-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.emergency-action-btn {
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s;
+}
+
+.emergency-action-btn svg {
+  flex-shrink: 0;
+}
+
+.emergency-action-btn.critical {
+  background: #e74c3c;
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.emergency-action-btn.critical:hover {
+  background: #c0392b;
+}
+
+.emergency-location {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.emergency-location h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.location-display {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.emergency-priority {
+  margin-bottom: 20px;
+}
+
+.emergency-priority h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.priority-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.priority-btn {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.priority-btn.low {
+  border-color: #2ecc71;
+  color: #2ecc71;
+  background: white;
+}
+
+.priority-btn.low:hover {
+  background: #2ecc71;
+  color: white;
+}
+
+.priority-btn.medium {
+  border-color: #f39c12;
+  color: #f39c12;
+  background: white;
+}
+
+.priority-btn.medium:hover {
+  background: #f39c12;
+  color: white;
+}
+
+.priority-btn.high {
+  border-color: #e67e22;
+  color: #e67e22;
+  background: white;
+}
+
+.priority-btn.high:hover {
+  background: #e67e22;
+  color: white;
+}
+
+.priority-btn.critical {
+  border-color: #e74c3c;
+  color: #e74c3c;
+  background: white;
+}
+
+.priority-btn.critical:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.priority-btn.active {
+  background: currentColor;
+  color: white;
+}
+
+.emergency-description {
+  margin-bottom: 20px;
+}
+
+.emergency-description h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.emergency-description textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  resize: vertical;
+}
+
+.emergency-contact {
+  margin-bottom: 20px;
+}
+
+.emergency-contact h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.special-needs-emergency {
+  margin-bottom: 20px;
+}
+
+.special-needs-emergency h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
 /* Responsive Health Panel */
 @media (max-width: 768px) {
   .health-controls {
