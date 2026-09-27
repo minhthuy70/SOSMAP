@@ -2381,6 +2381,387 @@ body, html {
   }
 }
 
+/* Search & Rescue Panel */
+.rescue-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.rescue-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rescue-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.rescue-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: #005BAC;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.rescue-btn:hover {
+  background: #004a8a;
+}
+
+.rescue-btn.emergency {
+  background: #e74c3c;
+  animation: pulse 2s infinite;
+}
+
+.rescue-btn.emergency:hover {
+  background: #c0392b;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.rescue-btn svg {
+  flex-shrink: 0;
+}
+
+.rescue-requests-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.rescue-request-item {
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  border-left: 4px solid;
+  background: #f8f9fa;
+}
+
+.rescue-request-item.pending {
+  border-left-color: #f39c12;
+  background: #fffaf0;
+}
+
+.rescue-request-item.assigned {
+  border-left-color: #3498db;
+  background: #f0f8ff;
+}
+
+.rescue-request-item.in_progress {
+  border-left-color: #e67e22;
+  background: #fff5f0;
+}
+
+.rescue-request-item.completed {
+  border-left-color: #2ecc71;
+  background: #f0fff4;
+}
+
+.rescue-request-item.cancelled {
+  border-left-color: #95a5a6;
+  background: #f5f5f5;
+}
+
+.rescue-request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.rescue-request-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.rescue-request-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.rescue-request-badge.emergency {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.rescue-request-content {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.rescue-request-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #999;
+}
+
+.rescue-request-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.rescue-action-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rescue-action-btn:hover {
+  background: #f8f9fa;
+  border-color: #005BAC;
+}
+
+/* Emergency Rescue Form */
+.alert-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 15px;
+  font-size: 13px;
+  color: #856404;
+}
+
+.location-input-group {
+  display: flex;
+  gap: 8px;
+}
+
+.location-input-group input {
+  flex: 1;
+}
+
+.gps-accuracy {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+}
+
+/* Rescue Requests Table */
+.rescue-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.rescue-filters select {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.rescue-requests-table {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.rescue-table-row {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 100px;
+  gap: 10px;
+  align-items: center;
+}
+
+.rescue-table-row:last-child {
+  border-bottom: none;
+}
+
+.rescue-table-cell {
+  font-size: 13px;
+}
+
+.rescue-table-cell.status {
+  text-align: center;
+}
+
+.rescue-table-cell.actions {
+  text-align: right;
+}
+
+/* Dispatch Center */
+.dispatch-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 20px;
+  height: 600px;
+}
+
+.dispatch-sidebar {
+  overflow-y: auto;
+}
+
+.dispatch-sidebar h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.dispatch-requests-list {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.dispatch-request-item {
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dispatch-request-item:hover {
+  background: #e9ecef;
+}
+
+.dispatch-request-item.selected {
+  background: #d4edda;
+  border: 2px solid #28a745;
+}
+
+.dispatch-main {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.dispatch-map-container {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dispatch-teams h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.teams-list {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.team-item {
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.team-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.team-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #333;
+}
+
+.team-status {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.team-status.available {
+  background: #d4edda;
+  color: #155724;
+}
+
+.team-status.busy {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.team-capacity {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Responsive Rescue Panel */
+@media (max-width: 768px) {
+  .rescue-controls {
+    flex-direction: column;
+  }
+
+  .rescue-requests-list {
+    max-height: 250px;
+  }
+
+  .rescue-filters {
+    flex-direction: column;
+  }
+
+  .rescue-table-row {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .dispatch-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .dispatch-map-container {
+    height: 300px;
+  }
+}
+
 /* System Status Panel */
 .system-status-panel {
   background: white;

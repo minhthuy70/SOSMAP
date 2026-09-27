@@ -5212,6 +5212,639 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeEarlyWarningSystem();
 });
 
+// Search & Rescue System
+var rescueRequests = [];
+var rescueTeams = [
+  { id: 'medical', name: 'Đội Y tế', status: 'available', capacity: 5, skills: ['y tế', 'cấp cứu'], location: { lat: 10.7769, lng: 106.7009 } },
+  { id: 'water', name: 'Đội Dưới nước', status: 'available', capacity: 8, skills: ['lặn', 'cứu đuối'], location: { lat: 10.7800, lng: 106.7050 } },
+  { id: 'mountain', name: 'Đội Leo núi', status: 'busy', capacity: 6, skills: ['leo núi', 'tìm kiếm'], location: { lat: 10.7750, lng: 106.6950 } },
+  { id: 'fire', name: 'Đội PCCC', status: 'available', capacity: 10, skills: ['phòng cháy', 'cứu hỏa'], location: { lat: 10.7780, lng: 106.7100 } }
+];
+var volunteers = [];
+var dispatchMap = null;
+
+var rescueTypes = {
+  trapped: 'Mắc kẹt',
+  injured: 'Bị thương',
+  missing: 'Mất tích',
+  medical: 'Cần y tế khẩn cấp',
+  evacuation: 'Cần sơ tán',
+  other: 'Khác'
+};
+
+var rescueStatuses = {
+  pending: 'Đang chờ',
+  assigned: 'Đã phân công',
+  in_progress: 'Đang xử lý',
+  completed: 'Đã hoàn thành',
+  cancelled: 'Đã hủy'
+};
+
+function initializeRescueSystem() {
+  // Load rescue requests from localStorage
+  var savedRequests = localStorage.getItem('sosmap_rescue_requests');
+  if (savedRequests) {
+    rescueRequests = JSON.parse(savedRequests);
+  }
+
+  var savedVolunteers = localStorage.getItem('sosmap_volunteers');
+  if (savedVolunteers) {
+    volunteers = JSON.parse(savedVolunteers);
+  }
+
+  // Render rescue requests
+  renderRescueRequests();
+
+  // Check for overdue requests
+  setInterval(checkOverdueRescueRequests, 60000); // Check every minute
+}
+
+function renderRescueRequests() {
+  var list = document.getElementById('rescueRequestsList');
+  if (!list) return;
+
+  var activeRequests = rescueRequests.filter(function(r) {
+    return r.status !== 'cancelled' && r.status !== 'completed';
+  });
+
+  if (activeRequests.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <p>Không có yêu cầu cứu hộ nào</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = activeRequests.map(function(request) {
+    var typeLabel = rescueTypes[request.type] || request.type;
+    var statusLabel = rescueStatuses[request.status] || request.status;
+    var isEmergency = request.priority === 'emergency';
+
+    return `
+      <div class="rescue-request-item ${request.status}">
+        <div class="rescue-request-header">
+          <div class="rescue-request-title">
+            ${isEmergency ? '🆘 ' : ''}${typeLabel} - ${request.peopleCount} người
+          </div>
+          <span class="rescue-request-badge ${isEmergency ? 'emergency' : ''}">${statusLabel}</span>
+        </div>
+        <div class="rescue-request-content">${request.description}</div>
+        <div class="rescue-request-meta">
+          <span>${new Date(request.createdAt).toLocaleString('vi-VN')}</span>
+          <span>Mã: ${request.id}</span>
+        </div>
+        <div class="rescue-request-actions">
+          <button class="rescue-action-btn" onclick="showRescueDetail('${request.id}')">Chi tiết</button>
+          ${request.status === 'pending' ? `<button class="rescue-action-btn" onclick="cancelRescueRequest('${request.id}')">Hủy</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function createRescueRequest(data) {
+  var request = {
+    id: 'SOS-' + Date.now(),
+    type: data.type,
+    peopleCount: data.peopleCount,
+    vulnerableGroups: data.vulnerableGroups || [],
+    description: data.description,
+    location: data.location,
+    gpsAccuracy: data.gpsAccuracy,
+    contact: data.contact,
+    name: data.name,
+    hasImage: data.hasImage,
+    hasVideo: data.hasVideo,
+    allowRelative: data.allowRelative,
+    enableTracking: data.enableTracking,
+    status: 'pending',
+    priority: 'emergency',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    assignedTeam: null,
+    timeline: [],
+    communications: []
+  };
+
+  // Add initial timeline entry
+  request.timeline.push({
+    action: 'created',
+    timestamp: new Date().toISOString(),
+    note: 'Yêu cầu cứu hộ được tạo'
+  });
+
+  rescueRequests.push(request);
+  saveRescueRequests();
+  renderRescueRequests();
+
+  // Send browser notification
+  if (Notification.permission === 'granted') {
+    new Notification('🆘 Yêu cầu cứu hộ mới: ' + request.id, {
+      body: request.description,
+      icon: '/favicon.ico',
+      requireInteraction: true
+    });
+  }
+
+  logActivity('rescue_create', 'Tạo yêu cầu cứu hộ: ' + request.id);
+
+  return request;
+}
+
+function cancelRescueRequest(requestId) {
+  var request = rescueRequests.find(function(r) {
+    return r.id === requestId;
+  });
+
+  if (!request) {
+    alert('Không tìm thấy yêu cầu cứu hộ');
+    return;
+  }
+
+  if (request.status !== 'pending') {
+    alert('Chỉ có thể hủy yêu cầu đang chờ xử lý');
+    return;
+  }
+
+  if (!confirm('Bạn có chắc muốn hủy yêu cầu cứu hộ này?')) {
+    return;
+  }
+
+  request.status = 'cancelled';
+  request.cancelledAt = new Date().toISOString();
+  request.cancelledBy = currentUser ? currentUser.id : 'anonymous';
+
+  request.timeline.push({
+    action: 'cancelled',
+    timestamp: new Date().toISOString(),
+    note: 'Yêu cầu được hủy bởi người yêu cầu'
+  });
+
+  saveRescueRequests();
+  renderRescueRequests();
+
+  alert('Đã hủy yêu cầu cứu hộ!');
+  logActivity('rescue_cancel', 'Hủy yêu cầu cứu hộ: ' + requestId);
+}
+
+function showRescueDetail(requestId) {
+  var request = rescueRequests.find(function(r) {
+    return r.id === requestId;
+  });
+
+  if (!request) {
+    alert('Không tìm thấy yêu cầu cứu hộ');
+    return;
+  }
+
+  var content = document.getElementById('rescueDetailContent');
+  if (content) {
+    var typeLabel = rescueTypes[request.type] || request.type;
+    var statusLabel = rescueStatuses[request.status] || request.status;
+
+    content.innerHTML = `
+      <div class="rescue-detail">
+        <div class="detail-row">
+          <strong>Mã yêu cầu:</strong> ${request.id}
+        </div>
+        <div class="detail-row">
+          <strong>Loại yêu cầu:</strong> ${typeLabel}
+        </div>
+        <div class="detail-row">
+          <strong>Số người:</strong> ${request.peopleCount}
+        </div>
+        ${request.vulnerableGroups.length > 0 ? `
+        <div class="detail-row">
+          <strong>Nhóm yếu thế:</strong> ${request.vulnerableGroups.join(', ')}
+        </div>
+        ` : ''}
+        <div class="detail-row">
+          <strong>Mô tả:</strong> ${request.description}
+        </div>
+        <div class="detail-row">
+          <strong>Vị trí:</strong> ${request.location.lat.toFixed(6)}, ${request.location.lng.toFixed(6)}
+        </div>
+        ${request.gpsAccuracy ? `
+        <div class="detail-row">
+          <strong>Độ chính xác GPS:</strong> ±${request.gpsAccuracy}m
+        </div>
+        ` : ''}
+        <div class="detail-row">
+          <strong>Liên hệ:</strong> ${request.contact} (${request.name || 'Không tên'})
+        </div>
+        <div class="detail-row">
+          <strong>Trạng thái:</strong> ${statusLabel}
+        </div>
+        <div class="detail-row">
+          <strong>Thời gian tạo:</strong> ${new Date(request.createdAt).toLocaleString('vi-VN')}
+        </div>
+        ${request.assignedTeam ? `
+        <div class="detail-row">
+          <strong>Đội cứu hộ:</strong> ${request.assignedTeam}
+        </div>
+        ` : ''}
+        <div class="detail-row">
+          <strong>Lịch sử:</strong>
+          <ul>
+            ${request.timeline.map(function(entry) {
+              return '<li>' + new Date(entry.timestamp).toLocaleString('vi-VN') + ' - ' + entry.note + '</li>';
+            }).join('')}
+          </ul>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById('rescueDetailModal').style.display = 'block';
+}
+
+function checkOverdueRescueRequests() {
+  var now = new Date();
+  var overdueThreshold = 30 * 60 * 1000; // 30 minutes
+
+  rescueRequests.forEach(function(request) {
+    if (request.status === 'pending' || request.status === 'assigned') {
+      var elapsed = now - new Date(request.createdAt);
+      if (elapsed > overdueThreshold) {
+        // Alert about overdue request
+        if (Notification.permission === 'granted') {
+          new Notification('⚠️ Yêu cầu cứu hộ quá hạn: ' + request.id, {
+            body: 'Yêu cầu đã chờ quá 30 phút chưa được xử lý',
+            icon: '/favicon.ico'
+          });
+        }
+        logActivity('rescue_overdue', 'Yêu cầu quá hạn: ' + request.id);
+      }
+    }
+  });
+}
+
+function saveRescueRequests() {
+  localStorage.setItem('sosmap_rescue_requests', JSON.stringify(rescueRequests));
+}
+
+function saveVolunteers() {
+  localStorage.setItem('sosmap_volunteers', JSON.stringify(volunteers));
+}
+
+// Emergency Rescue Modal Event Listeners
+document.getElementById('emergencyRescueBtn').addEventListener('click', function() {
+  document.getElementById('emergencyRescueModal').style.display = 'block';
+  // Get current location automatically
+  getCurrentLocation();
+});
+
+document.getElementById('closeEmergencyRescueModal').addEventListener('click', function() {
+  document.getElementById('emergencyRescueModal').style.display = 'none';
+});
+
+document.getElementById('cancelEmergencyRescueBtn').addEventListener('click', function() {
+  document.getElementById('emergencyRescueModal').style.display = 'none';
+});
+
+document.getElementById('getCurrentLocationBtn').addEventListener('click', function() {
+  getCurrentLocation();
+});
+
+function getCurrentLocation() {
+  var locationInput = document.getElementById('rescueLocation');
+  var latInput = document.getElementById('rescueLat');
+  var lngInput = document.getElementById('rescueLng');
+  var accuracyDiv = document.getElementById('gpsAccuracy');
+
+  locationInput.value = 'Đang lấy vị trí...';
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        var accuracy = position.coords.accuracy;
+
+        latInput.value = lat;
+        lngInput.value = lng;
+        locationInput.value = lat.toFixed(6) + ', ' + lng.toFixed(6);
+        accuracyDiv.textContent = 'Độ chính xác: ±' + Math.round(accuracy) + 'm';
+        accuracyDiv.style.color = accuracy < 50 ? '#2ecc71' : accuracy < 100 ? '#f39c12' : '#e74c3c';
+      },
+      function(error) {
+        locationInput.value = 'Không thể lấy vị trí';
+        accuracyDiv.textContent = 'Lỗi: ' + error.message;
+        accuracyDiv.style.color = '#e74c3c';
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  } else {
+    locationInput.value = 'Trình duyệt không hỗ trợ GPS';
+    accuracyDiv.textContent = 'Geolocation không được hỗ trợ';
+  }
+}
+
+document.getElementById('submitEmergencyRescueBtn').addEventListener('click', function() {
+  var type = document.getElementById('rescueType').value;
+  var peopleCount = parseInt(document.getElementById('rescuePeopleCount').value);
+  var description = document.getElementById('rescueDescription').value;
+  var contact = document.getElementById('rescueContact').value;
+  var name = document.getElementById('rescueName').value;
+  var lat = document.getElementById('rescueLat').value;
+  var lng = document.getElementById('rescueLng').value;
+  var allowRelative = document.getElementById('allowRelativeRequest').checked;
+  var enableTracking = document.getElementById('enableRealtimeTracking').checked;
+
+  var vulnerableGroups = [];
+  document.querySelectorAll('input[name="vulnerable"]:checked').forEach(function(checkbox) {
+    vulnerableGroups.push(checkbox.value);
+  });
+
+  if (!type || !peopleCount || !description || !contact) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  if (!lat || !lng) {
+    alert('Vui lòng lấy vị trí GPS');
+    return;
+  }
+
+  var hasImage = document.getElementById('rescueImage').files.length > 0;
+  var hasVideo = document.getElementById('rescueVideo').files.length > 0;
+
+  var rescueData = {
+    type: type,
+    peopleCount: peopleCount,
+    vulnerableGroups: vulnerableGroups,
+    description: description,
+    location: { lat: parseFloat(lat), lng: parseFloat(lng) },
+    gpsAccuracy: parseFloat(document.getElementById('gpsAccuracy').textContent) || null,
+    contact: contact,
+    name: name,
+    hasImage: hasImage,
+    hasVideo: hasVideo,
+    allowRelative: allowRelative,
+    enableTracking: enableTracking
+  };
+
+  createRescueRequest(rescueData);
+  document.getElementById('emergencyRescueModal').style.display = 'none';
+  document.getElementById('emergencyRescueForm').reset();
+  alert('Đã gửi yêu cầu cứu hộ khẩn cấp! Mã yêu cầu: ' + rescueRequests[rescueRequests.length - 1].id);
+});
+
+// Rescue Requests Modal Event Listeners
+document.getElementById('viewRescueRequestsBtn').addEventListener('click', function() {
+  renderRescueRequestsTable();
+  document.getElementById('rescueRequestsModal').style.display = 'block';
+});
+
+document.getElementById('closeRescueRequestsModal').addEventListener('click', function() {
+  document.getElementById('rescueRequestsModal').style.display = 'none';
+});
+
+document.getElementById('closeRescueRequestsBtn').addEventListener('click', function() {
+  document.getElementById('rescueRequestsModal').style.display = 'none';
+});
+
+function renderRescueRequestsTable() {
+  var table = document.getElementById('rescueRequestsTable');
+  if (!table) return;
+
+  var statusFilter = document.getElementById('rescueStatusFilter').value;
+  var typeFilter = document.getElementById('rescueTypeFilter').value;
+
+  var filteredRequests = rescueRequests.filter(function(r) {
+    var statusMatch = statusFilter === 'all' || r.status === statusFilter;
+    var typeMatch = typeFilter === 'all' || r.type === typeFilter;
+    return statusMatch && typeMatch;
+  });
+
+  if (filteredRequests.length === 0) {
+    table.innerHTML = '<div class="empty-state"><p>Không có yêu cầu nào</p></div>';
+    return;
+  }
+
+  table.innerHTML = filteredRequests.map(function(request) {
+    var typeLabel = rescueTypes[request.type] || request.type;
+    var statusLabel = rescueStatuses[request.status] || request.status;
+
+    return `
+      <div class="rescue-table-row">
+        <div class="rescue-table-cell">
+          <strong>${request.id}</strong><br>
+          ${typeLabel} - ${request.peopleCount} người
+        </div>
+        <div class="rescue-table-cell">
+          ${request.description.substring(0, 50)}...
+        </div>
+        <div class="rescue-table-cell status">
+          <span class="rescue-request-badge ${request.status}">${statusLabel}</span>
+        </div>
+        <div class="rescue-table-cell actions">
+          <button class="rescue-action-btn" onclick="showRescueDetail('${request.id}')">Xem</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('rescueStatusFilter').addEventListener('change', renderRescueRequestsTable);
+document.getElementById('rescueTypeFilter').addEventListener('change', renderRescueRequestsTable);
+
+// Rescue Detail Modal Event Listeners
+document.getElementById('closeRescueDetailModal').addEventListener('click', function() {
+  document.getElementById('rescueDetailModal').style.display = 'none';
+});
+
+document.getElementById('closeRescueDetailBtn').addEventListener('click', function() {
+  document.getElementById('rescueDetailModal').style.display = 'none';
+});
+
+document.getElementById('cancelRescueBtn').addEventListener('click', function() {
+  var requestId = document.querySelector('.rescue-detail .detail-row strong').textContent.replace('Mã yêu cầu: ', '');
+  cancelRescueRequest(requestId);
+  document.getElementById('rescueDetailModal').style.display = 'none';
+});
+
+// Dispatch Center Modal Event Listeners
+document.getElementById('dispatchCenterBtn').addEventListener('click', function() {
+  document.getElementById('dispatchCenterModal').style.display = 'block';
+  initializeDispatchMap();
+  renderDispatchRequests();
+  renderTeamsList();
+});
+
+document.getElementById('closeDispatchCenterModal').addEventListener('click', function() {
+  document.getElementById('dispatchCenterModal').style.display = 'none';
+});
+
+document.getElementById('closeDispatchCenterBtn').addEventListener('click', function() {
+  document.getElementById('dispatchCenterModal').style.display = 'none';
+});
+
+function initializeDispatchMap() {
+  if (dispatchMap) {
+    dispatchMap.remove();
+  }
+
+  dispatchMap = L.map('dispatchMap').setView([10.7769, 106.7009], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(dispatchMap);
+
+  // Add rescue request markers
+  rescueRequests.filter(function(r) {
+    return r.status === 'pending' || r.status === 'assigned' || r.status === 'in_progress';
+  }).forEach(function(request) {
+    var marker = L.marker([request.location.lat, request.location.lng])
+      .addTo(dispatchMap)
+      .bindPopup('<b>' + request.id + '</b><br>' + rescueTypes[request.type] + '<br>' + request.peopleCount + ' người');
+  });
+
+  // Add team markers
+  rescueTeams.forEach(function(team) {
+    if (team.location) {
+      var marker = L.marker([team.location.lat, team.location.lng], {
+        icon: L.divIcon({
+          className: 'team-marker',
+          html: '<div style="background: ' + (team.status === 'available' ? '#2ecc71' : '#e74c3c') + '; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        })
+      })
+      .addTo(dispatchMap)
+      .bindPopup('<b>' + team.name + '</b><br>' + (team.status === 'available' ? 'Sẵn sàng' : 'Đang nhiệm vụ'));
+    }
+  });
+}
+
+function renderDispatchRequests() {
+  var list = document.getElementById('dispatchRequestsList');
+  if (!list) return;
+
+  var pendingRequests = rescueRequests.filter(function(r) {
+    return r.status === 'pending' || r.status === 'assigned';
+  });
+
+  if (pendingRequests.length === 0) {
+    list.innerHTML = '<div class="empty-state"><p>Không có yêu cầu nào</p></div>';
+    return;
+  }
+
+  list.innerHTML = pendingRequests.map(function(request) {
+    var typeLabel = rescueTypes[request.type] || request.type;
+    var elapsed = Math.floor((new Date() - new Date(request.createdAt)) / 60000); // minutes
+
+    return `
+      <div class="dispatch-request-item" onclick="selectDispatchRequest('${request.id}')">
+        <div class="rescue-request-title">${request.id}</div>
+        <div class="rescue-request-content">${typeLabel} - ${request.peopleCount} người</div>
+        <div class="rescue-request-meta">${elapsed} phút trước</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderTeamsList() {
+  var list = document.getElementById('teamsList');
+  if (!list) return;
+
+  list.innerHTML = rescueTeams.map(function(team) {
+    return `
+      <div class="team-item">
+        <div class="team-info">
+          <span class="team-name">${team.name}</span>
+          <span class="team-status ${team.status}">${team.status === 'available' ? 'Sẵn sàng' : 'Đang nhiệm vụ'}</span>
+        </div>
+        <div class="team-capacity">${team.capacity} thành viên</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectDispatchRequest(requestId) {
+  // Highlight selected request
+  var items = document.querySelectorAll('.dispatch-request-item');
+  items.forEach(function(item) {
+    item.classList.remove('selected');
+  });
+
+  event.currentTarget.classList.add('selected');
+
+  // Show details and assign options
+  var request = rescueRequests.find(function(r) {
+    return r.id === requestId;
+  });
+
+  if (request) {
+    // Pan map to request location
+    if (dispatchMap) {
+      dispatchMap.setView([request.location.lat, request.location.lng], 15);
+    }
+  }
+}
+
+// Volunteer Registration Modal Event Listeners
+document.getElementById('volunteerModal') && document.getElementById('volunteerModal').addEventListener('click', function() {
+  document.getElementById('volunteerModal').style.display = 'block';
+});
+
+document.getElementById('closeVolunteerModal') && document.getElementById('closeVolunteerModal').addEventListener('click', function() {
+  document.getElementById('volunteerModal').style.display = 'none';
+});
+
+document.getElementById('cancelVolunteerBtn') && document.getElementById('cancelVolunteerBtn').addEventListener('click', function() {
+  document.getElementById('volunteerModal').style.display = 'none';
+});
+
+document.getElementById('submitVolunteerBtn') && document.getElementById('submitVolunteerBtn').addEventListener('click', function() {
+  var name = document.getElementById('volunteerName').value;
+  var phone = document.getElementById('volunteerPhone').value;
+  var area = document.getElementById('volunteerArea').value;
+  var skills = document.getElementById('volunteerSkills').value;
+  var equipment = document.getElementById('volunteerEquipment').value;
+  var available = document.getElementById('volunteerAvailable').checked;
+
+  if (!name || !phone || !area) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  var volunteer = {
+    id: 'VOL-' + Date.now(),
+    name: name,
+    phone: phone,
+    area: area,
+    skills: skills,
+    equipment: equipment,
+    status: available ? 'available' : 'unavailable',
+    registeredAt: new Date().toISOString(),
+    missions: []
+  };
+
+  volunteers.push(volunteer);
+  saveVolunteers();
+
+  document.getElementById('volunteerModal').style.display = 'none';
+  document.getElementById('volunteerForm').reset();
+  alert('Đã đăng ký tình nguyện viên! Mã: ' + volunteer.id);
+  logActivity('volunteer_register', 'Đăng ký tình nguyện viên: ' + volunteer.id);
+});
+
+// Initialize rescue system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeRescueSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {

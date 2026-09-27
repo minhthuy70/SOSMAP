@@ -457,6 +457,46 @@
           </div>
         </div>
 
+        <!-- Search & Rescue Panel -->
+        <div class="rescue-panel" id="rescuePanel">
+          <h3>Cứu hộ & Cứu nạn</h3>
+          <div class="rescue-controls">
+            <button class="rescue-btn emergency" id="emergencyRescueBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              SOS Khẩn cấp
+            </button>
+            <button class="rescue-btn" id="viewRescueRequestsBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              Yêu cầu
+            </button>
+            <button class="rescue-btn" id="dispatchCenterBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+              Điều phối
+            </button>
+          </div>
+          <div class="rescue-requests-list" id="rescueRequestsList">
+            <div class="empty-state">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <p>Không có yêu cầu cứu hộ nào</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -1312,6 +1352,292 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeActionGuideBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Rescue Request Modal -->
+      <div class="modal" id="emergencyRescueModal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+          <div class="modal-header">
+            <h3>🆘 Yêu cầu cứu hộ khẩn cấp</h3>
+            <button class="modal-close" id="closeEmergencyRescueModal">×</button>
+          </div>
+          <div class="modal-body">
+            <form id="emergencyRescueForm">
+              <div class="form-group">
+                <label for="rescueType">Loại yêu cầu *</label>
+                <select id="rescueType" required>
+                  <option value="">-- Chọn loại --</option>
+                  <option value="trapped">Mắc kẹt</option>
+                  <option value="injured">Bị thương</option>
+                  <option value="missing">Mất tích</option>
+                  <option value="medical">Cần y tế khẩn cấp</option>
+                  <option value="evacuation">Cần sơ tán</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="rescuePeopleCount">Số người đang gặp nạn *</label>
+                <input type="number" id="rescuePeopleCount" min="1" required placeholder="1">
+              </div>
+
+              <div class="form-group">
+                <label>Nhóm yếu thế (đánh dấu nếu có)</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="vulnerable" value="children">
+                    <span>Trẻ em</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="vulnerable" value="elderly">
+                    <span>Người già</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="vulnerable" value="disabled">
+                    <span>Người khuyết tật</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="vulnerable" value="pregnant">
+                    <span>Phụ nữ mang thai</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="rescueDescription">Mô tả nguy cơ và khả năng tiếp cận *</label>
+                <textarea id="rescueDescription" rows="4" required placeholder="Mô tả chi tiết tình trạng, vị trí, và điều kiện tiếp cận"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="rescueLocation">Vị trí hiện tại</label>
+                <div class="location-input-group">
+                  <input type="text" id="rescueLocation" readonly placeholder="Đang lấy vị trí...">
+                  <button type="button" class="btn btn-secondary" id="getCurrentLocationBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                    </svg>
+                    Lấy GPS
+                  </button>
+                </div>
+                <input type="hidden" id="rescueLat">
+                <input type="hidden" id="rescueLng">
+                <div class="gps-accuracy" id="gpsAccuracy"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="rescueContact">Số điện thoại liên hệ *</label>
+                <input type="tel" id="rescueContact" required placeholder="Nhập số điện thoại">
+              </div>
+
+              <div class="form-group">
+                <label for="rescueName">Tên người liên hệ</label>
+                <input type="text" id="rescueName" placeholder="Tên của bạn">
+              </div>
+
+              <div class="form-group">
+                <label for="rescueImage">Tải ảnh minh chứng</label>
+                <input type="file" id="rescueImage" accept="image/*" multiple>
+                <div class="image-preview" id="rescueImagePreview"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="rescueVideo">Tải video (tối đa 50MB)</label>
+                <input type="file" id="rescueVideo" accept="video/*">
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="allowRelativeRequest">
+                  <span>Cho phép người thân gửi yêu cầu thay</span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="enableRealtimeTracking">
+                  <span>Cập nhật vị trí theo thời gian thực</span>
+                </label>
+              </div>
+
+              <div class="alert-warning">
+                <strong>⚠️ Lưu ý:</strong> Yêu cầu cứu hộ giả mạo có thể bị xử lý theo pháp luật.
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelEmergencyRescueBtn">Hủy</button>
+            <button type="button" class="btn btn-danger" id="submitEmergencyRescueBtn">🆘 Gửi SOS</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rescue Requests List Modal -->
+      <div class="modal" id="rescueRequestsModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>Danh sách yêu cầu cứu hộ</h3>
+            <button class="modal-close" id="closeRescueRequestsModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="rescue-filters">
+              <select id="rescueStatusFilter">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="pending">Đang chờ</option>
+                <option value="assigned">Đã phân công</option>
+                <option value="in_progress">Đang xử lý</option>
+                <option value="completed">Đã hoàn thành</option>
+                <option value="cancelled">Đã hủy</option>
+              </select>
+              <select id="rescueTypeFilter">
+                <option value="all">Tất cả loại</option>
+                <option value="trapped">Mắc kẹt</option>
+                <option value="injured">Bị thương</option>
+                <option value="missing">Mất tích</option>
+                <option value="medical">Cần y tế</option>
+                <option value="evacuation">Cần sơ tán</option>
+              </select>
+            </div>
+            <div class="rescue-requests-table" id="rescueRequestsTable">
+              <div class="empty-state">
+                <p>Không có yêu cầu cứu hộ nào</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeRescueRequestsBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dispatch Center Modal -->
+      <div class="modal" id="dispatchCenterModal" style="display: none;">
+        <div class="modal-content" style="max-width: 1200px;">
+          <div class="modal-header">
+            <h3>Trung tâm điều phối cứu hộ</h3>
+            <button class="modal-close" id="closeDispatchCenterModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="dispatch-layout">
+              <div class="dispatch-sidebar">
+                <h4>Yêu cầu đang mở</h4>
+                <div class="dispatch-requests-list" id="dispatchRequestsList">
+                  <div class="empty-state">
+                    <p>Không có yêu cầu nào</p>
+                  </div>
+                </div>
+              </div>
+              <div class="dispatch-main">
+                <div class="dispatch-map-container">
+                  <div id="dispatchMap" style="height: 400px; border-radius: 8px;"></div>
+                </div>
+                <div class="dispatch-teams">
+                  <h4>Đội cứu hộ sẵn sàng</h4>
+                  <div class="teams-list" id="teamsList">
+                    <div class="team-item">
+                      <div class="team-info">
+                        <span class="team-name">Đội Y tế</span>
+                        <span class="team-status available">Sẵn sàng</span>
+                      </div>
+                      <div class="team-capacity">5 thành viên</div>
+                    </div>
+                    <div class="team-item">
+                      <div class="team-info">
+                        <span class="team-name">Đội Dưới nước</span>
+                        <span class="team-status available">Sẵn sàng</span>
+                      </div>
+                      <div class="team-capacity">8 thành viên</div>
+                    </div>
+                    <div class="team-item">
+                      <div class="team-info">
+                        <span class="team-name">Đội Leo núi</span>
+                        <span class="team-status busy">Đang nhiệm vụ</span>
+                      </div>
+                      <div class="team-capacity">6 thành viên</div>
+                    </div>
+                    <div class="team-item">
+                      <div class="team-info">
+                        <span class="team-name">Đội PCCC</span>
+                        <span class="team-status available">Sẵn sàng</span>
+                      </div>
+                      <div class="team-capacity">10 thành viên</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeDispatchCenterBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rescue Detail Modal -->
+      <div class="modal" id="rescueDetailModal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+          <div class="modal-header">
+            <h3>Chi tiết yêu cầu cứu hộ</h3>
+            <button class="modal-close" id="closeRescueDetailModal">×</button>
+          </div>
+          <div class="modal-body" id="rescueDetailContent">
+            <!-- Content will be dynamically loaded -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeRescueDetailBtn">Đóng</button>
+            <button type="button" class="btn btn-danger" id="cancelRescueBtn">Hủy yêu cầu</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Volunteer Registration Modal -->
+      <div class="modal" id="volunteerModal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+          <div class="modal-header">
+            <h3>Đăng ký tình nguyện viên cứu hộ</h3>
+            <button class="modal-close" id="closeVolunteerModal">×</button>
+          </div>
+          <div class="modal-body">
+            <form id="volunteerForm">
+              <div class="form-group">
+                <label for="volunteerName">Họ tên *</label>
+                <input type="text" id="volunteerName" required>
+              </div>
+              <div class="form-group">
+                <label for="volunteerPhone">Số điện thoại *</label>
+                <input type="tel" id="volunteerPhone" required>
+              </div>
+              <div class="form-group">
+                <label for="volunteerArea">Khu vực hoạt động *</label>
+                <select id="volunteerArea" required>
+                  <option value="">-- Chọn khu vực --</option>
+                  <option value="hcm">Thành phố Hồ Chí Minh</option>
+                  <option value="hanoi">Thành phố Hà Nội</option>
+                  <option value="danang">Thành phố Đà Nẵng</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="volunteerSkills">Kỹ năng đặc biệt</label>
+                <textarea id="volunteerSkills" rows="3" placeholder="Ví dụ: Y tế cấp cứu, lặn, leo núi, lái xe chuyên dụng..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="volunteerEquipment">Phương tiện/vật tư có thể hỗ trợ</label>
+                <textarea id="volunteerEquipment" rows="2" placeholder="Ví dụ: Xe tải, xuồng, máy bơm, thiết bị y tế..."></textarea>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="volunteerAvailable">
+                  <span>Tôi sẵn sàng nhận nhiệm vụ ngay</span>
+                </label>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelVolunteerBtn">Hủy</button>
+            <button type="button" class="btn btn-primary" id="submitVolunteerBtn">Đăng ký</button>
           </div>
         </div>
       </div>
