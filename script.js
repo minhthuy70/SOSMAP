@@ -6128,6 +6128,327 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeReliefSystem();
 });
 
+// Public Health System
+var healthCases = [
+  { id: 'case1', type: 'suspected', location: { lat: 10.7769, lng: 106.7009 }, date: '2024-09-22', verified: false },
+  { id: 'case2', type: 'confirmed', location: { lat: 10.7800, lng: 106.7050 }, date: '2024-09-21', verified: true },
+  { id: 'case3', type: 'cluster', location: { lat: 10.7750, lng: 106.6950 }, date: '2024-09-20', verified: true }
+];
+var healthFacilities = [
+  { id: 'fac1', name: 'Bệnh viện Chợ Rẫy', type: 'hospital', location: { lat: 10.7769, lng: 106.7009 }, services: ['emergency', 'pediatric', 'neonatal'], capacity: '24/7', phone: '028 3855 8888' },
+  { id: 'fac2', name: 'Trạm y tế Quận 1', type: 'clinic', location: { lat: 10.7800, lng: 106.7050 }, services: ['testing', 'vaccination'], capacity: 'regular', phone: '028 3823 4567' },
+  { id: 'fac3', name: 'Bệnh viện Nhi Đồng', type: 'specialized', location: { lat: 10.7750, lng: 106.6950 }, services: ['pediatric', 'infectious', 'neonatal'], capacity: '24/7', phone: '028 3839 1234' }
+];
+var healthRequests = [];
+var healthMap = null;
+var healthDataAccessLog = [];
+
+var healthCaseTypes = {
+  suspected: 'Ca nghi ngờ',
+  confirmed: 'Ca xác nhận',
+  cluster: 'Điểm dịch',
+  recovered: 'Đã hồi phục',
+  deceased: 'Đã tử vong'
+};
+
+function initializeHealthSystem() {
+  // Load health requests from localStorage
+  var savedRequests = localStorage.getItem('sosmap_health_requests');
+  if (savedRequests) {
+    healthRequests = JSON.parse(savedRequests);
+  }
+
+  // Load health data access log
+  var savedLog = localStorage.getItem('sosmap_health_access_log');
+  if (savedLog) {
+    healthDataAccessLog = JSON.parse(savedLog);
+  }
+
+  // Update health alerts
+  updateHealthAlerts();
+}
+
+function updateHealthAlerts() {
+  var alertsDiv = document.getElementById('healthAlerts');
+  if (!alertsDiv) return;
+
+  var caseCount = healthCases.filter(function(c) {
+    return c.type === 'confirmed' || c.type === 'suspected';
+  }).length;
+
+  var alertLevel = caseCount > 10 ? 'high' : caseCount > 5 ? 'medium' : 'low';
+  var alertText = alertLevel === 'high' ? 'Cao' : alertLevel === 'medium' ? 'Trung bình' : 'Thấp';
+
+  alertsDiv.innerHTML = `
+    <div class="health-alert-item ${alertLevel === 'high' ? 'warning' : 'info'}">
+      <span class="alert-icon">${alertLevel === 'high' ? '⚠️' : 'ℹ️'}</span>
+      <span class="alert-text">Mức độ cảnh báo: ${alertText} (${caseCount} ca)</span>
+    </div>
+    <div class="health-alert-item info">
+      <span class="alert-icon">ℹ️</span>
+      <span class="alert-text">Cập nhật: 5 phút trước</span>
+    </div>
+  `;
+}
+
+function initializeHealthMap() {
+  if (healthMap) {
+    healthMap.remove();
+  }
+
+  healthMap = L.map('healthMap').setView([10.7769, 106.7009], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(healthMap);
+
+  // Add case markers
+  healthCases.forEach(function(c) {
+    var color = c.type === 'suspected' ? '#f39c12' : c.type === 'confirmed' ? '#e74c3c' : c.type === 'cluster' ? '#9b59b6' : '#3498db';
+    var icon = L.divIcon({
+      className: 'health-marker',
+      html: '<div style="background: ' + color + '; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+
+    L.marker([c.location.lat, c.location.lng], { icon: icon })
+      .addTo(healthMap)
+      .bindPopup('<b>' + healthCaseTypes[c.type] + '</b><br>Ngày: ' + c.date + '<br>Xác minh: ' + (c.verified ? 'Có' : 'Chưa'));
+  });
+
+  // Add facility markers
+  healthFacilities.forEach(function(f) {
+    var marker = L.marker([f.location.lat, f.location.lng])
+      .addTo(healthMap)
+      .bindPopup('<b>' + f.name + '</b><br>' + f.type + '<br>' + f.capacity + '<br>' + f.phone);
+  });
+}
+
+function createHealthRequest(data) {
+  var request = {
+    id: 'HLTH-' + Date.now(),
+    type: data.type,
+    symptoms: data.symptoms,
+    householdMembers: data.householdMembers,
+    closeContacts: data.closeContacts,
+    quarantineDuration: data.quarantineDuration,
+    contact: data.contact,
+    address: data.address,
+    priority: data.priority,
+    medicineRequest: data.medicineRequest,
+    emergencyReport: data.emergencyReport,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  healthRequests.push(request);
+  saveHealthRequests();
+
+  logHealthDataAccess('create_health_request', request.id);
+
+  alert('Đã gửi yêu cầu y tế! Mã yêu cầu: ' + request.id);
+  logActivity('health_request', 'Tạo yêu cầu y tế: ' + request.id);
+
+  return request;
+}
+
+function saveHealthRequests() {
+  localStorage.setItem('sosmap_health_requests', JSON.stringify(healthRequests));
+}
+
+function logHealthDataAccess(action, resourceId) {
+  var logEntry = {
+    action: action,
+    resourceId: resourceId,
+    userId: currentUser ? currentUser.id : 'anonymous',
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent
+  };
+
+  healthDataAccessLog.push(logEntry);
+  localStorage.setItem('sosmap_health_access_log', JSON.stringify(healthDataAccessLog));
+}
+
+function anonymizeHealthData(data) {
+  // Remove personally identifiable information
+  var anonymized = JSON.parse(JSON.stringify(data));
+  if (anonymized.contact) {
+    anonymized.contact = maskContact(anonymized.contact);
+  }
+  if (anonymized.address) {
+    anonymized.address = maskAddress(anonymized.address);
+  }
+  return anonymized;
+}
+
+function maskContact(contact) {
+  // Mask phone number: 0901234567 -> 0901***567
+  if (contact.length > 6) {
+    return contact.substring(0, 4) + '***' + contact.substring(contact.length - 3);
+  }
+  return '***';
+}
+
+function maskAddress(address) {
+  // Mask detailed address: 123 Nguyễn Văn A -> 123 ***
+  var parts = address.split(',');
+  if (parts.length > 1) {
+    return parts[0] + ', ***';
+  }
+  return '***';
+}
+
+// Health Map Modal Event Listeners
+document.getElementById('healthMapBtn').addEventListener('click', function() {
+  document.getElementById('healthMapModal').style.display = 'block';
+  initializeHealthMap();
+});
+
+document.getElementById('closeHealthMapModal').addEventListener('click', function() {
+  document.getElementById('healthMapModal').style.display = 'none';
+});
+
+document.getElementById('closeHealthMapBtn').addEventListener('click', function() {
+  document.getElementById('healthMapModal').style.display = 'none';
+});
+
+// Health Request Modal Event Listeners
+document.getElementById('healthRequestBtn').addEventListener('click', function() {
+  document.getElementById('healthRequestModal').style.display = 'block';
+});
+
+document.getElementById('closeHealthRequestModal').addEventListener('click', function() {
+  document.getElementById('healthRequestModal').style.display = 'none';
+});
+
+document.getElementById('cancelHealthRequestBtn').addEventListener('click', function() {
+  document.getElementById('healthRequestModal').style.display = 'none';
+});
+
+document.getElementById('submitHealthRequestBtn').addEventListener('click', function() {
+  var type = document.getElementById('healthRequestType').value;
+  var symptoms = document.getElementById('healthSymptoms').value;
+  var householdMembers = parseInt(document.getElementById('healthHouseholdMembers').value) || 0;
+  var closeContacts = parseInt(document.getElementById('healthCloseContacts').value) || 0;
+  var quarantineDuration = parseInt(document.getElementById('healthQuarantineDuration').value) || 0;
+  var contact = document.getElementById('healthContact').value;
+  var address = document.getElementById('healthAddress').value;
+  var priority = document.getElementById('healthPriority').value;
+  var medicineRequest = document.getElementById('healthMedicineRequest').checked;
+  var emergencyReport = document.getElementById('healthEmergencyReport').checked;
+
+  if (!type || !contact || !address) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  var healthData = {
+    type: type,
+    symptoms: symptoms,
+    householdMembers: householdMembers,
+    closeContacts: closeContacts,
+    quarantineDuration: quarantineDuration,
+    contact: contact,
+    address: address,
+    priority: priority,
+    medicineRequest: medicineRequest,
+    emergencyReport: emergencyReport
+  };
+
+  createHealthRequest(healthData);
+  document.getElementById('healthRequestModal').style.display = 'none';
+  document.getElementById('healthRequestForm').reset();
+});
+
+// Health Facilities Modal Event Listeners
+document.getElementById('healthFacilitiesBtn').addEventListener('click', function() {
+  document.getElementById('healthFacilitiesModal').style.display = 'block';
+  renderHealthFacilities();
+});
+
+document.getElementById('closeHealthFacilitiesModal').addEventListener('click', function() {
+  document.getElementById('healthFacilitiesModal').style.display = 'none';
+});
+
+document.getElementById('closeHealthFacilitiesBtn').addEventListener('click', function() {
+  document.getElementById('healthFacilitiesModal').style.display = 'none';
+});
+
+function renderHealthFacilities() {
+  var list = document.getElementById('facilitiesList');
+  if (!list) return;
+
+  list.innerHTML = healthFacilities.map(function(facility) {
+    return `
+      <div class="facility-item">
+        <div class="facility-info">
+          <div class="facility-name">${facility.name}</div>
+          <div class="facility-type">${facility.type === 'hospital' ? 'Bệnh viện đa khoa' : facility.type === 'clinic' ? 'Trạm y tế' : 'Bệnh viện chuyên khoa'}</div>
+          <div class="facility-capacity">${facility.capacity === '24/7' ? 'Cấp cứu 24/7' : 'Khám chữa thường'}</div>
+        </div>
+        <div class="facility-services">
+          ${facility.services.map(function(service) {
+            return '<span class="service-tag">' + service + '</span>';
+          }).join('')}
+        </div>
+        <div class="facility-actions">
+          <button class="btn btn-primary" style="font-size: 12px;" onclick="routeToFacility('${facility.id}')">Chỉ đường</button>
+          <button class="btn btn-secondary" style="font-size: 12px;" onclick="callFacility('${facility.phone}')">Gọi</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function routeToFacility(facilityId) {
+  var facility = healthFacilities.find(function(f) {
+    return f.id === facilityId;
+  });
+
+  if (facility) {
+    // Open routing in map
+    alert('Đang chỉ đường đến: ' + facility.name);
+    logActivity('facility_route', 'Chỉ đường đến cơ sở y tế: ' + facility.name);
+  }
+}
+
+function callFacility(phone) {
+  alert('Đang gọi: ' + phone);
+  logActivity('facility_call', 'Gọi cơ sở y tế: ' + phone);
+}
+
+// Health data filter event listeners
+document.getElementById('healthMapFilter') && document.getElementById('healthMapFilter').addEventListener('change', function() {
+  // Filter health map markers
+  var filter = this.value;
+  // TODO: Implement filter logic
+});
+
+document.getElementById('healthRegionFilter') && document.getElementById('healthRegionFilter').addEventListener('change', function() {
+  // Filter by region
+  var filter = this.value;
+  // TODO: Implement filter logic
+});
+
+document.getElementById('facilityTypeFilter') && document.getElementById('facilityTypeFilter').addEventListener('change', function() {
+  // Filter facilities by type
+  var filter = this.value;
+  // TODO: Implement filter logic
+});
+
+document.getElementById('facilitySearch') && document.getElementById('facilitySearch').addEventListener('input', function() {
+  // Search facilities
+  var search = this.value;
+  // TODO: Implement search logic
+});
+
+// Initialize health system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeHealthSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {

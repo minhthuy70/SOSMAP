@@ -534,6 +534,43 @@
           </div>
         </div>
 
+        <!-- Public Health Panel -->
+        <div class="health-panel" id="healthPanel">
+          <h3>Sức khỏe & Dịch tế</h3>
+          <div class="health-controls">
+            <button class="health-btn" id="healthMapBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              Bản đồ dịch
+            </button>
+            <button class="health-btn" id="healthRequestBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+              </svg>
+              Yêu cầu y tế
+            </button>
+            <button class="health-btn" id="healthFacilitiesBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 21h18M5 21V7l8-4 8 4v14M8 21v-2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Cơ sở y tế
+            </button>
+          </div>
+          <div class="health-alerts" id="healthAlerts">
+            <div class="health-alert-item warning">
+              <span class="alert-icon">⚠️</span>
+              <span class="alert-text">Mức độ cảnh báo: Trung bình</span>
+            </div>
+            <div class="health-alert-item info">
+              <span class="alert-icon">ℹ️</span>
+              <span class="alert-text">Cập nhật: 5 phút trước</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -1995,6 +2032,235 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeDonationBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Map Modal -->
+      <div class="modal" id="healthMapModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>Bản đồ dịch tế</h3>
+            <button class="modal-close" id="closeHealthMapModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="health-map-filters">
+              <select id="healthMapFilter">
+                <option value="all">Tất cả</option>
+                <option value="suspected">Ca nghi ngờ</option>
+                <option value="confirmed">Ca xác nhận</option>
+                <option value="cluster">Điểm dịch</option>
+              </select>
+              <select id="healthRegionFilter">
+                <option value="all">Tất cả khu vực</option>
+                <option value="hcm">TP.HCM</option>
+                <option value="hanoi">Hà Nội</option>
+                <option value="danang">Đà Nẵng</option>
+              </select>
+            </div>
+            <div class="health-map-container">
+              <div id="healthMap" style="height: 400px; border-radius: 8px;"></div>
+            </div>
+            <div class="health-map-legend">
+              <div class="legend-item">
+                <span class="legend-color suspected"></span>
+                <span>Ca nghi ngờ</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color confirmed"></span>
+                <span>Ca xác nhận</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color cluster"></span>
+                <span>Điểm dịch</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color vaccination"></span>
+                <span>Điểm tiêm chủng</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color quarantine"></span>
+                <span>Vùng hạn chế</span>
+              </div>
+            </div>
+            <div class="health-official-info">
+              <h4>Thông tin chính thức</h4>
+              <div class="official-source">
+                <span>📅 Cập nhật: 5 phút trước</span>
+                <span>🏥 Nguồn: Bộ Y tế</span>
+              </div>
+              <div class="health-recommendations">
+                <h5>Khuyến cáo phòng bệnh:</h5>
+                <ul>
+                  <li>Đeo khẩu trang nơi công cộng</li>
+                  <li>Rửa tay thường xuyên với xà phòng</li>
+                  <li>Giữ khoảng cách xã hội</li>
+                  <li>Tiêm chủ theo khuyến cáo</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeHealthMapBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Request Modal -->
+      <div class="modal" id="healthRequestModal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+          <div class="modal-header">
+            <h3>Yêu cầu y tế & Cách ly</h3>
+            <button class="modal-close" id="closeHealthRequestModal">×</button>
+          </div>
+          <div class="modal-body">
+            <form id="healthRequestForm">
+              <div class="form-group">
+                <label for="healthRequestType">Loại yêu cầu *</label>
+                <select id="healthRequestType" required>
+                  <option value="">-- Chọn loại --</option>
+                  <option value="symptoms">Tự khai triệu chứng</option>
+                  <option value="consultation">Tư vấn y tế từ xa</option>
+                  <option value="ambulance">Yêu cầu xe cấp cứu/chuyển viện</option>
+                  <option value="quarantine_center">Đăng ký điểm cách ly tập trung</option>
+                  <option value="home_quarantine">Đăng ký cách ly tại nhà</option>
+                  <option value="testing">Đặt lịch xét nghiệm</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="healthSymptoms">Triệu chứng (nếu có)</label>
+                <textarea id="healthSymptoms" rows="3" placeholder="Mô tả triệu chứng bạn đang gặp phải"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="healthHouseholdMembers">Số người trong cùng hộ</label>
+                <input type="number" id="healthHouseholdMembers" min="0" placeholder="Số người">
+              </div>
+
+              <div class="form-group">
+                <label for="healthCloseContacts">Số người tiếp xúc gần</label>
+                <input type="number" id="healthCloseContacts" min="0" placeholder="Số người tiếp xúc gần trong 14 ngày qua">
+              </div>
+
+              <div class="form-group">
+                <label for="healthQuarantineDuration">Thời gian cách lý (ngày)</label>
+                <input type="number" id="healthQuarantineDuration" min="0" placeholder="Số ngày theo chỉ dẫn y tế">
+              </div>
+
+              <div class="form-group">
+                <label for="healthContact">Người liên hệ *</label>
+                <input type="text" id="healthContact" required placeholder="Tên và số điện thoại">
+              </div>
+
+              <div class="form-group">
+                <label for="healthAddress">Địa chỉ hiện tại *</label>
+                <input type="text" id="healthAddress" required placeholder="Địa chỉ đầy đủ">
+              </div>
+
+              <div class="form-group">
+                <label for="healthPriority">Mức độ khẩn cấp</label>
+                <select id="healthPriority">
+                  <option value="low">Thấp</option>
+                  <option value="medium" selected>Trung bình</option>
+                  <option value="high">Cao</option>
+                  <option value="critical">Khẩn cấp</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="healthMedicineRequest">
+                  <span>Yêu cầu giao thuốc và lương thực cho người cách ly</span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="healthEmergencyReport">
+                  <span>Báo cáo tình trạng khẩn cấp trong thời gian cách ly</span>
+                </label>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelHealthRequestBtn">Hủy</button>
+            <button type="button" class="btn btn-primary" id="submitHealthRequestBtn">Gửi yêu cầu</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Facilities Modal -->
+      <div class="modal" id="healthFacilitiesModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>Cơ sở y tế gần nhất</h3>
+            <button class="modal-close" id="closeHealthFacilitiesModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="health-facilities-filters">
+              <select id="facilityTypeFilter">
+                <option value="all">Tất cả</option>
+                <option value="hospital">Bệnh viện</option>
+                <option value="clinic">Trạm y tế</option>
+                <option value="emergency">Cấp cứu 24/7</option>
+                <option value="pediatric">Tiếp nhận trẻ em</option>
+                <option value="specialized">Chuyên khoa</option>
+              </select>
+              <input type="text" id="facilitySearch" placeholder="Tìm cơ sở y tế...">
+            </div>
+            <div class="facilities-list" id="facilitiesList">
+              <div class="facility-item">
+                <div class="facility-info">
+                  <div class="facility-name">Bệnh viện Chợ Rẫy</div>
+                  <div class="facility-type">Bệnh viện đa khoa</div>
+                  <div class="facility-capacity">Cấp cứu 24/7</div>
+                </div>
+                <div class="facility-services">
+                  <span class="service-tag">Cấp cứu</span>
+                  <span class="service-tag">Trẻ em</span>
+                  <span class="service-tag">Nhi</span>
+                </div>
+                <div class="facility-actions">
+                  <button class="btn btn-primary" style="font-size: 12px;">Chỉ đường</button>
+                  <button class="btn btn-secondary" style="font-size: 12px;">Gọi</button>
+                </div>
+              </div>
+              <div class="facility-item">
+                <div class="facility-info">
+                  <div class="facility-name">Trạm y tế Quận 1</div>
+                  <div class="facility-type">Trạm y tế</div>
+                  <div class="facility-capacity">Khám chữa thường</div>
+                </div>
+                <div class="facility-services">
+                  <span class="service-tag">Xét nghiệm</span>
+                  <span class="service-tag">Tiêm chủng</span>
+                </div>
+                <div class="facility-actions">
+                  <button class="btn btn-primary" style="font-size: 12px;">Chỉ đường</button>
+                  <button class="btn btn-secondary" style="font-size: 12px;">Gọi</button>
+                </div>
+              </div>
+              <div class="facility-item">
+                <div class="facility-info">
+                  <div class="facility-name">Bệnh viện Nhi Đồng</div>
+                  <div class="facility-type">Bệnh viện chuyên khoa</div>
+                  <div class="facility-capacity">Cấp cứu 24/7</div>
+                </div>
+                <div class="facility-services">
+                  <span class="service-tag">Nhi</span>
+                  <span class="service-tag">Truyền nhiễm</span>
+                  <span class="service-tag">Sơ sinh</span>
+                </div>
+                <div class="facility-actions">
+                  <button class="btn btn-primary" style="font-size: 12px;">Chỉ đường</button>
+                  <button class="btn btn-secondary" style="font-size: 12px;">Gọi</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeHealthFacilitiesBtn">Đóng</button>
           </div>
         </div>
       </div>
