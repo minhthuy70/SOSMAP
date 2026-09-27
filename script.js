@@ -2113,6 +2113,160 @@ var submissionCounts = {};
 var apiResponseTimes = [];
 var errorLogs = [];
 
+// Early Warning System
+var warningDataSources = [
+  { id: 'weather', name: 'Bản tin khí tượng', status: 'disconnected', lastUpdate: null, delay: 0 },
+  { id: 'water', name: 'Mực nước sông/hồ đập', status: 'disconnected', lastUpdate: null, delay: 0 },
+  { id: 'landslide', name: 'Cảnh báo sạt lở', status: 'disconnected', lastUpdate: null, delay: 0 },
+  { id: 'earthquake', name: 'Động đất/Rung chấn', status: 'disconnected', lastUpdate: null, delay: 0 },
+  { id: 'air', name: 'Chất lượng không khí', status: 'disconnected', lastUpdate: null, delay: 0 },
+  { id: 'temperature', name: 'Nhiệt độ/Hạn hán', status: 'disconnected', lastUpdate: null, delay: 0 },
+  { id: 'health', name: 'Dịch bệnh (Y tế)', status: 'disconnected', lastUpdate: null, delay: 0 }
+];
+
+var warnings = [];
+var warningHistory = [];
+
+var warningLevels = {
+  low: { label: 'Cấp 1 - Thấp', color: '#2ecc71', class: 'low' },
+  medium: { label: 'Cấp 2 - Trung bình', color: '#f39c12', class: 'medium' },
+  high: { label: 'Cấp 3 - Cao', color: '#e67e22', class: 'high' },
+  severe: { label: 'Cấp 4 - Nghiêm trọng', color: '#e74c3c', class: 'severe' },
+  critical: { label: 'Cấp 5 - Cực kỳ nghiêm trọng', color: '#9b59b6', class: 'critical' }
+};
+
+var actionGuides = {
+  storm: {
+    title: 'Hướng dẫn sơ tán trước bão',
+    vi: [
+      'Theo dõi thông tin cảnh báo từ cơ quan chức năng',
+      'Chuẩn bị túi cứu sinh với các vật dụng cần thiết',
+      'Di chuyển đến khu vực an toàn theo chỉ dẫn',
+      'Không quay lại nhà khi chưa có lệnh cho phép',
+      'Cố định nhà cửa, đóng kín cửa sổ',
+      'Tránh xa cửa kính và dây điện'
+    ],
+    en: [
+      'Monitor official weather warnings',
+      'Prepare emergency kit with essential items',
+      'Move to safe areas as directed',
+      'Do not return home until authorized',
+      'Secure windows and doors',
+      'Stay away from windows and power lines'
+    ]
+  },
+  flood: {
+    title: 'Hướng dẫn khi ngập lụt',
+    vi: [
+      'Không chạm vào thiết bị điện khi đang ngập nước',
+      'Ngắt cầu dao tổng trước khi nước dâng cao',
+      'Sử dụng đèn pin thay vì điện',
+      'Không đi qua cầu, hàm và vùng nước chảy xiết',
+      'Di chuyển đến nơi cao hơn nếu nước dâng nhanh'
+    ],
+    en: [
+      'Do not touch electrical equipment in floodwater',
+      'Turn off main power before water rises',
+      'Use flashlights instead of electricity',
+      'Do not cross bridges or fast-flowing water',
+      'Move to higher ground if water rises quickly'
+    ]
+  },
+  landslide: {
+    title: 'Hướng dẫn khi sạt lở',
+    vi: [
+      'Cảnh báo tiếng động lớn hoặc tiếng cây gãy',
+      'Di chuyển ngay lập tức sang vùng an toàn',
+      'Không đi qua khu vực có dấu hiệu sạt lở',
+      'Tránh xa đường dốc và bờ sông khi mưa lớn'
+    ],
+    en: [
+      'Watch for loud rumbling or cracking sounds',
+      'Move immediately to safe areas',
+      'Do not cross areas showing landslide signs',
+      'Avoid steep slopes and riverbanks during heavy rain'
+    ]
+  },
+  earthquake: {
+    title: 'Hướng dẫn khi động đất',
+    vi: [
+      'Nằm xuống, che đầu và giữ vững',
+      'Tránh xa cửa kính, tường và các vật có thể rơi',
+      'Nếu ở ngoài trời, đứng ở vùng trống, tránh xa tòa nhà',
+      'Không sử dụng thang máy',
+      'Sau khi rung lắc, kiểm tra gas và điện'
+    ],
+    en: [
+      'Drop, cover, and hold on',
+      'Stay away from windows, walls, and falling objects',
+      'If outdoors, stay in open areas away from buildings',
+      'Do not use elevators',
+      'After shaking stops, check gas and electricity'
+    ]
+  },
+  fire: {
+    title: 'Hướng dẫn phòng cháy chữa cháy',
+    vi: [
+      'Báo ngay cho cơ quan chức năng',
+      'Sử dụng thiết bị chữa cháy nếu an toàn',
+      'Di chuyển theo lối thoát hiểm',
+      'Không sử dụng thang máy',
+      'Bò thấp để tránh khói'
+    ],
+    en: [
+      'Immediately notify authorities',
+      'Use fire extinguisher if safe to do so',
+      'Follow emergency exits',
+      'Do not use elevators',
+      'Crawl low to avoid smoke'
+    ]
+  },
+  epidemic: {
+    title: 'Hướng dẫn phòng lây nhiễm',
+    vi: [
+      'Đeo khẩu trang nơi công cộng',
+      'Rửa tay thường xuyên với xà phòng',
+      'Giữ khoảng cách xã hội',
+      'Theo dõi sức khỏe và báo cáo nếu có triệu chứng',
+      'Tiêm phòng vắc-xin theo khuyến cáo'
+    ],
+    en: [
+      'Wear masks in public places',
+      'Wash hands frequently with soap',
+      'Maintain social distancing',
+      'Monitor health and report symptoms',
+      'Get vaccinated as recommended'
+    ]
+  }
+};
+
+var emergencyHotlines = {
+  'Hồ Chí Minh': {
+    police: '113',
+    fire: '114',
+    rescue: '115',
+    disaster: '1900 2110'
+  },
+  'Hà Nội': {
+    police: '113',
+    fire: '114',
+    rescue: '115',
+    disaster: '1900 2110'
+  },
+  'Đà Nẵng': {
+    police: '113',
+    fire: '114',
+    rescue: '115',
+    disaster: '1900 2110'
+  },
+  'default': {
+    police: '113',
+    fire: '114',
+    rescue: '115',
+    disaster: '1900 2110'
+  }
+};
+
 // Simple password hashing (for demo - in production use bcrypt)
 function hashPassword(password) {
   // Simple hash for demo purposes
@@ -4634,6 +4788,428 @@ document.querySelectorAll('button').forEach(function(btn) {
       }
     }
   }
+});
+
+// Initialize Early Warning System
+function initializeEarlyWarningSystem() {
+  // Load warning data from localStorage
+  var savedWarnings = localStorage.getItem('sosmap_warnings');
+  if (savedWarnings) {
+    warnings = JSON.parse(savedWarnings);
+  }
+
+  var savedHistory = localStorage.getItem('sosmap_warning_history');
+  if (savedHistory) {
+    warningHistory = JSON.parse(savedHistory);
+  }
+
+  // Update warning data sources panel
+  updateWarningDataSources();
+
+  // Simulate connecting to warning data sources
+  simulateWarningDataSources();
+
+  // Render active warnings
+  renderWarnings();
+
+  // Check for expired warnings
+  setInterval(checkExpiredWarnings, 60000); // Check every minute
+
+  // Update warning data sources status
+  setInterval(updateWarningDataSources, 30000); // Update every 30 seconds
+}
+
+function updateWarningDataSources() {
+  var panel = document.getElementById('dataSourcesList');
+  if (!panel) return;
+
+  var now = new Date();
+  warningDataSources.forEach(function(source) {
+    if (source.lastUpdate) {
+      var diff = now - new Date(source.lastUpdate);
+      source.delay = Math.floor(diff / 1000); // delay in seconds
+    }
+  });
+
+  // Update UI
+  var warningSources = panel.querySelectorAll('.warning-source');
+  warningSources.forEach(function(element, index) {
+    if (index < warningDataSources.length) {
+      var source = warningDataSources[index];
+      var statusElement = element.querySelector('.data-source-status');
+      var timestampElement = element.querySelector('.data-source-timestamp');
+
+      if (statusElement) {
+        statusElement.textContent = source.status === 'connected' ? 'Đã kết nối' : 'Ngắt kết nối';
+        statusElement.className = 'data-source-status ' + source.status;
+      }
+
+      if (timestampElement) {
+        if (source.lastUpdate) {
+          var time = new Date(source.lastUpdate);
+          timestampElement.textContent = time.toLocaleTimeString('vi-VN');
+          if (source.delay > 300) {
+            timestampElement.style.color = '#e74c3c';
+          } else {
+            timestampElement.style.color = '#999';
+          }
+        } else {
+          timestampElement.textContent = '--:--:--';
+        }
+      }
+    }
+  });
+}
+
+function simulateWarningDataSources() {
+  // Simulate connecting to warning data sources
+  warningDataSources.forEach(function(source, index) {
+    setTimeout(function() {
+      source.status = 'connecting';
+      updateWarningDataSources();
+
+      setTimeout(function() {
+        source.status = 'connected';
+        source.lastUpdate = new Date().toISOString();
+        updateWarningDataSources();
+      }, 2000 + Math.random() * 3000);
+    }, index * 1000);
+  });
+}
+
+function renderWarnings() {
+  var list = document.getElementById('warningList');
+  if (!list) return;
+
+  var activeWarnings = warnings.filter(function(w) {
+    return w.status === 'active' && new Date(w.endTime) > new Date();
+  });
+
+  if (activeWarnings.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <p>Không có cảnh báo nào</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = activeWarnings.map(function(warning) {
+    var level = warningLevels[warning.level] || warningLevels.medium;
+    var startTime = new Date(warning.startTime);
+    var endTime = new Date(warning.endTime);
+    var isConfirmed = warning.confirmations && warning.confirmations[currentUser ? currentUser.id : 'anonymous'];
+
+    return `
+      <div class="warning-item ${level.class} ${warning.status}">
+        <div class="warning-header">
+          <div class="warning-title">${warning.title}</div>
+          <span class="warning-badge ${level.class}">${level.label}</span>
+        </div>
+        <div class="warning-content">${warning.content}</div>
+        <div class="warning-meta">
+          <span>Thời gian: ${startTime.toLocaleString('vi-VN')} - ${endTime.toLocaleString('vi-VN')}</span>
+          <span>Khu vực: ${warning.area}</span>
+        </div>
+        ${warning.actionGuide ? `<div class="warning-actions">
+          <button class="warning-action-btn" onclick="showActionGuide('${warning.type}')">Xem hướng dẫn</button>
+          ${warning.requireConfirmation && !isConfirmed ? `<button class="warning-action-btn confirm" onclick="confirmWarning('${warning.id}')">Xác nhận đã nhận</button>` : ''}
+          ${isConfirmed ? '<span style="color: #2ecc71; font-size: 12px;">✓ Đã xác nhận</span>' : ''}
+        </div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function checkExpiredWarnings() {
+  var now = new Date();
+  var expiredCount = 0;
+
+  warnings.forEach(function(warning) {
+    if (warning.status === 'active' && new Date(warning.endTime) < now) {
+      warning.status = 'expired';
+      expiredCount++;
+    }
+  });
+
+  if (expiredCount > 0) {
+    saveWarnings();
+    renderWarnings();
+  }
+}
+
+function saveWarnings() {
+  localStorage.setItem('sosmap_warnings', JSON.stringify(warnings));
+  localStorage.setItem('sosmap_warning_history', JSON.stringify(warningHistory));
+}
+
+function createWarning(data) {
+  var warning = {
+    id: 'WRN-' + Date.now(),
+    type: data.type,
+    level: data.level,
+    title: data.title,
+    content: data.content,
+    contentVI: data.contentVI,
+    contentEN: data.contentEN,
+    area: data.area,
+    radius: data.radius,
+    startTime: data.startTime,
+    endTime: data.endTime,
+    targets: data.targets,
+    requireConfirmation: data.requireConfirmation,
+    sendReminder: data.sendReminder,
+    actionGuide: data.actionGuide,
+    status: 'active',
+    createdBy: currentUser ? currentUser.id : 'system',
+    createdAt: new Date().toISOString(),
+    confirmations: {},
+    reminders: []
+  };
+
+  warnings.push(warning);
+  warningHistory.push({
+    action: 'create',
+    warningId: warning.id,
+    timestamp: new Date().toISOString(),
+    details: warning
+  });
+
+  saveWarnings();
+  renderWarnings();
+
+  // Send browser notifications for active warnings
+  if (Notification.permission === 'granted') {
+    new Notification('Cảnh báo mới: ' + warning.title, {
+      body: warning.content,
+      icon: '/favicon.ico'
+    });
+  }
+
+  logActivity('warning_create', 'Tạo cảnh báo: ' + warning.id);
+
+  return warning;
+}
+
+function confirmWarning(warningId) {
+  var warning = warnings.find(function(w) {
+    return w.id === warningId;
+  });
+
+  if (!warning) {
+    alert('Không tìm thấy cảnh báo');
+    return;
+  }
+
+  var userId = currentUser ? currentUser.id : 'anonymous';
+  warning.confirmations[userId] = {
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent
+  };
+
+  saveWarnings();
+  renderWarnings();
+
+  alert('Đã xác nhận nhận cảnh báo!');
+  logActivity('warning_confirm', 'Xác nhận cảnh báo: ' + warningId);
+}
+
+function revokeWarning(warningId) {
+  var warning = warnings.find(function(w) {
+    return w.id === warningId;
+  });
+
+  if (!warning) {
+    alert('Không tìm thấy cảnh báo');
+    return;
+  }
+
+  warning.status = 'revoked';
+  warning.revokedAt = new Date().toISOString();
+  warning.revokedBy = currentUser ? currentUser.id : 'system';
+
+  warningHistory.push({
+    action: 'revoke',
+    warningId: warningId,
+    timestamp: new Date().toISOString(),
+    details: warning
+  });
+
+  saveWarnings();
+  renderWarnings();
+  renderWarningHistory();
+
+  alert('Đã thu hồi cảnh báo!');
+  logActivity('warning_revoke', 'Thu hồi cảnh báo: ' + warningId);
+}
+
+function showActionGuide(type) {
+  var guide = actionGuides[type];
+  if (!guide) {
+    alert('Không có hướng dẫn cho loại sự cố này');
+    return;
+  }
+
+  var content = document.getElementById('actionGuideContent');
+  if (content) {
+    var currentLang = 'vi'; // Default to Vietnamese
+    content.innerHTML = `
+      <h4>${guide.title}</h4>
+      <ul>
+        ${guide[currentLang].map(function(item) {
+          return '<li>' + item + '</li>';
+        }).join('')}
+      </ul>
+      <h4>Số điện thoại khẩn cấp</h4>
+      <ul class="hotline-list">
+        <li>Cảnh sát: ${emergencyHotlines.default.police}</li>
+        <li>Cứu hỏa: ${emergencyHotlines.default.fire}</li>
+        <li>Cứu hộ: ${emergencyHotlines.default.rescue}</li>
+        <li>Tổng đài thiên tai: ${emergencyHotlines.default.disaster}</li>
+      </ul>
+    `;
+  }
+
+  document.getElementById('actionGuideModal').style.display = 'block';
+}
+
+function renderWarningHistory() {
+  var list = document.getElementById('warningHistoryList');
+  if (!list) return;
+
+  if (warningHistory.length === 0) {
+    list.innerHTML = '<div class="empty-state"><p>Không có lịch sử cảnh báo</p></div>';
+    return;
+  }
+
+  list.innerHTML = warningHistory.map(function(entry) {
+    var warning = entry.details;
+    var level = warningLevels[warning.level] || warningLevels.medium;
+    var time = new Date(entry.timestamp);
+
+    return `
+      <div class="warning-history-item">
+        <div class="warning-history-info">
+          <div class="warning-history-title">${warning.title}</div>
+          <div class="warning-history-meta">
+            ${entry.action === 'create' ? 'Tạo mới' : entry.action === 'revoke' ? 'Thu hồi' : 'Cập nhật'} - ${time.toLocaleString('vi-VN')}
+          </div>
+          <span class="warning-history-status ${warning.status}">${warning.status === 'active' ? 'Đang hoạt động' : warning.status === 'expired' ? 'Đã hết hạn' : 'Đã thu hồi'}</span>
+        </div>
+        <div class="warning-history-actions">
+          ${warning.status === 'active' ? `<button class="warning-action-btn" onclick="revokeWarning('${warning.id}')">Thu hồi</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Warning Modal Event Listeners
+document.getElementById('createWarningBtn').addEventListener('click', function() {
+  document.getElementById('warningModal').style.display = 'block';
+});
+
+document.getElementById('closeWarningModal').addEventListener('click', function() {
+  document.getElementById('warningModal').style.display = 'none';
+});
+
+document.getElementById('cancelWarningBtn').addEventListener('click', function() {
+  document.getElementById('warningModal').style.display = 'none';
+});
+
+document.getElementById('submitWarningBtn').addEventListener('click', function() {
+  var type = document.getElementById('warningType').value;
+  var level = document.getElementById('warningLevel').value;
+  var title = document.getElementById('warningTitle').value;
+  var content = document.getElementById('warningContent').value;
+  var contentVI = document.getElementById('warningContentVI').value;
+  var contentEN = document.getElementById('warningContentEN').value;
+  var area = document.getElementById('warningArea').value;
+  var radius = document.getElementById('warningRadius').value;
+  var startTime = document.getElementById('warningStartTime').value;
+  var endTime = document.getElementById('warningEndTime').value;
+  var requireConfirmation = document.getElementById('requireConfirmation').checked;
+  var sendReminder = document.getElementById('sendReminder').checked;
+  var actionGuide = document.getElementById('actionGuide').value;
+
+  var targets = [];
+  document.querySelectorAll('input[name="target"]:checked').forEach(function(checkbox) {
+    targets.push(checkbox.value);
+  });
+
+  if (!type || !level || !title || !content || !area || !startTime || !endTime) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  if (new Date(startTime) >= new Date(endTime)) {
+    alert('Thời gian bắt đầu phải trước thời gian hết hạn');
+    return;
+  }
+
+  var warningData = {
+    type: type,
+    level: level,
+    title: title,
+    content: content,
+    contentVI: contentVI,
+    contentEN: contentEN,
+    area: area,
+    radius: radius ? parseFloat(radius) : null,
+    startTime: new Date(startTime).toISOString(),
+    endTime: new Date(endTime).toISOString(),
+    targets: targets,
+    requireConfirmation: requireConfirmation,
+    sendReminder: sendReminder,
+    actionGuide: actionGuide
+  };
+
+  createWarning(warningData);
+  document.getElementById('warningModal').style.display = 'none';
+  document.getElementById('warningForm').reset();
+  alert('Đã phát hành cảnh báo!');
+});
+
+document.getElementById('warningArea').addEventListener('change', function() {
+  var customGroup = document.getElementById('customAreaGroup');
+  if (this.value === 'custom') {
+    customGroup.style.display = 'block';
+  } else {
+    customGroup.style.display = 'none';
+  }
+});
+
+// Warning History Modal Event Listeners
+document.getElementById('viewHistoryBtn').addEventListener('click', function() {
+  renderWarningHistory();
+  document.getElementById('warningHistoryModal').style.display = 'block';
+});
+
+document.getElementById('closeHistoryModal').addEventListener('click', function() {
+  document.getElementById('warningHistoryModal').style.display = 'none';
+});
+
+document.getElementById('closeHistoryBtn').addEventListener('click', function() {
+  document.getElementById('warningHistoryModal').style.display = 'none';
+});
+
+// Action Guide Modal Event Listeners
+document.getElementById('closeActionGuideModal').addEventListener('click', function() {
+  document.getElementById('actionGuideModal').style.display = 'none';
+});
+
+document.getElementById('closeActionGuideBtn').addEventListener('click', function() {
+  document.getElementById('actionGuideModal').style.display = 'none';
+});
+
+// Initialize early warning system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeEarlyWarningSystem();
 });
 
 // High contrast mode toggle

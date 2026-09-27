@@ -371,18 +371,88 @@
             <div class="data-source-item">
               <div class="data-source-name">API Giao thông</div>
               <div class="data-source-status disconnected">Ngắt kết nối</div>
+              <div class="data-source-timestamp">--:--:--</div>
             </div>
             <div class="data-source-item">
               <div class="data-source-name">Hệ thống bên ngoài</div>
               <div class="data-source-status disconnected">Ngắt kết nối</div>
+              <div class="data-source-timestamp">--:--:--</div>
             </div>
             <div class="data-source-item">
               <div class="data-source-name">Camera giao thông</div>
               <div class="data-source-status disconnected">Ngắt kết nối</div>
+              <div class="data-source-timestamp">--:--:--</div>
             </div>
             <div class="data-source-item">
               <div class="data-source-name">Trạm quan trắc</div>
               <div class="data-source-status disconnected">Ngắt kết nối</div>
+              <div class="data-source-timestamp">--:--:--</div>
+            </div>
+            <div class="data-source-item warning-source">
+              <div class="data-source-name">Bản tin khí tượng</div>
+              <div class="data-source-status disconnected">Ngắt kết nối</div>
+              <div class="data-source-timestamp">--:--:--</div>
+            </div>
+            <div class="data-source-item warning-source">
+              <div class="data-source-name">Mực nước sông/hồ đập</div>
+              <div class="data-source-status disconnected">Ngắt kết nối</div>
+              <div class="data-source-timestamp">--:--:--</div>
+            </div>
+            <div class="data-source-item warning-source">
+              <div class="data-source-name">Cảnh báo sạt lở</div>
+              <div class="data-source-status disconnected">Ngắt kết nối</div>
+              <div class="data-source-timestamp">--:--:--</div>
+            </div>
+            <div class="data-source-item warning-source">
+              <div class="data-source-name">Động đất/Rung chấn</div>
+              <div class="data-source-status disconnected">Ngắt kết nối</div>
+              <div class="data-source-timestamp">--:--:--</div>
+            </div>
+            <div class="data-source-item warning-source">
+              <div class="data-source-name">Chất lượng không khí</div>
+              <div class="data-source-status disconnected">Ngắt kết nối</div>
+              <div class="data-source-timestamp">--:--:--</div>
+            </div>
+            <div class="data-source-item warning-source">
+              <div class="data-source-name">Nhiệt độ/Hạn hán</div>
+              <div class="data-source-status disconnected">Ngắt kết nối</div>
+              <div class="data-source-timestamp">--:--:--</div>
+            </div>
+            <div class="data-source-item warning-source">
+              <div class="data-source-name">Dịch bệnh (Y tế)</div>
+              <div class="data-source-status disconnected">Ngắt kết nối</div>
+              <div class="data-source-timestamp">--:--:--</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Early Warning Panel -->
+        <div class="early-warning-panel" id="earlyWarningPanel">
+          <h3>Cảnh báo sớm</h3>
+          <div class="warning-controls">
+            <button class="warning-btn" id="createWarningBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+              </svg>
+              Tạo cảnh báo
+            </button>
+            <button class="warning-btn" id="viewHistoryBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 12 12 12"></polyline>
+              </svg>
+              Lịch sử
+            </button>
+          </div>
+          <div class="warning-list" id="warningList">
+            <div class="empty-state">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <p>Không có cảnh báo nào</p>
             </div>
           </div>
         </div>
@@ -1047,6 +1117,201 @@
             <div class="modal-footer">
               <button class="btn btn-secondary" id="closeModalBtn">Đóng</button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Early Warning Modal -->
+      <div class="modal" id="warningModal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+          <div class="modal-header">
+            <h3>Tạo cảnh báo sớm</h3>
+            <button class="modal-close" id="closeWarningModal">×</button>
+          </div>
+          <div class="modal-body">
+            <form id="warningForm">
+              <div class="form-group">
+                <label for="warningType">Loại cảnh báo *</label>
+                <select id="warningType" required>
+                  <option value="">-- Chọn loại --</option>
+                  <optgroup label="Thiên tai">
+                    <option value="storm">Bão, áp thấp nhiệt</option>
+                    <option value="flood">Lũ lụt, lũ quét</option>
+                    <option value="landslide">Sạt lở đất</option>
+                    <option value="earthquake">Động đất, sóng thần</option>
+                    <option value="drought">Hạn hán, xâm nhập mặn</option>
+                  </optgroup>
+                  <optgroup label="Sức khỏe">
+                    <option value="epidemic">Dịch bệnh</option>
+                    <option value="pollution">Ô nhiễm không khí</option>
+                  </optgroup>
+                  <optgroup label="Khác">
+                    <option value="heatwave">Nắng nóng cực đoan</option>
+                    <option value="fire">Cháy rừng</option>
+                    <option value="infrastructure">Sự cố hạ tầng</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="warningLevel">Mức độ cảnh báo *</label>
+                <select id="warningLevel" required>
+                  <option value="low">Cấp 1 - Thấp (Màu xanh)</option>
+                  <option value="medium">Cấp 2 - Trung bình (Màu vàng)</option>
+                  <option value="high">Cấp 3 - Cao (Màu cam)</option>
+                  <option value="severe">Cấp 4 - Nghiêm trọng (Màu đỏ)</option>
+                  <option value="critical">Cấp 5 - Cực kỳ nghiêm trọng (Màu tím)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="warningTitle">Tiêu đề cảnh báo *</label>
+                <input type="text" id="warningTitle" required placeholder="Nhập tiêu đề cảnh báo">
+              </div>
+
+              <div class="form-group">
+                <label for="warningContent">Nội dung cảnh báo *</label>
+                <textarea id="warningContent" rows="4" required placeholder="Nhập nội dung chi tiết cảnh báo"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="warningContentVI">Nội dung (Tiếng Việt)</label>
+                <textarea id="warningContentVI" rows="3" placeholder="Nội dung tiếng Việt (nếu cần song ngữ)"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="warningContentEN">Nội dung (English)</label>
+                <textarea id="warningContentEN" rows="3" placeholder="English content (for bilingual)"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="warningArea">Khu vực cảnh báo *</label>
+                <select id="warningArea" required>
+                  <option value="all">Toàn quốc</option>
+                  <option value="hcm">Thành phố Hồ Chí Minh</option>
+                  <option value="hanoi">Thành phố Hà Nội</option>
+                  <option value="danang">Thành phố Đà Nẵng</option>
+                  <option value="custom">Tùy chỉnh (bán kính/polygon)</option>
+                </select>
+              </div>
+
+              <div class="form-group" id="customAreaGroup" style="display: none;">
+                <label for="warningRadius">Bán kính cảnh báo (km)</label>
+                <input type="number" id="warningRadius" min="1" max="500" placeholder="50">
+              </div>
+
+              <div class="form-group">
+                <label for="warningStartTime">Thời gian bắt đầu *</label>
+                <input type="datetime-local" id="warningStartTime" required>
+              </div>
+
+              <div class="form-group">
+                <label for="warningEndTime">Thời gian hết hạn *</label>
+                <input type="datetime-local" id="warningEndTime" required>
+              </div>
+
+              <div class="form-group">
+                <label for="warningTarget">Đối tượng nhận cảnh báo</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="target" value="all" checked>
+                    <span>Tất cả người dùng</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="target" value="residents">
+                    <span>Cư dân khu vực</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="target" value="officials">
+                    <span>Cán bộ chức năng</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="target" value="emergency">
+                    <span>Đội cứu hộ</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="requireConfirmation">
+                  <span>Yêu cầu xác nhận đã nhận cảnh báo</span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="sendReminder">
+                  <span>Gửi nhắc nhở nếu chưa xác nhận (sau 15 phút)</span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label for="actionGuide">Hướng dẫn hành động</label>
+                <textarea id="actionGuide" rows="3" placeholder="Hướng dẫn người dân nên làm gì khi có cảnh báo"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelWarningBtn">Hủy</button>
+            <button type="button" class="btn btn-primary" id="submitWarningBtn">Phát hành cảnh báo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Warning History Modal -->
+      <div class="modal" id="warningHistoryModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>Lịch sử cảnh báo</h3>
+            <button class="modal-close" id="closeHistoryModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="warning-history-list" id="warningHistoryList">
+              <div class="empty-state">
+                <p>Không có lịch sử cảnh báo</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeHistoryBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Guide Modal -->
+      <div class="modal" id="actionGuideModal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+          <div class="modal-header">
+            <h3>Hướng dẫn hành động</h3>
+            <button class="modal-close" id="closeActionGuideModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="action-guide-content" id="actionGuideContent">
+              <h4>Hướng dẫn sơ tán trước bão và sạt lở</h4>
+              <ul>
+                <li>Theo dõi thông tin cảnh báo từ cơ quan chức năng</li>
+                <li>Chuẩn bị túi cứu sinh với các vật dụng cần thiết</li>
+                <li>Di chuyển đến khu vực an toàn theo chỉ dẫn</li>
+                <li>Không quay lại nhà khi chưa có lệnh cho phép</li>
+              </ul>
+              <h4>Phòng tránh điện giật khi ngập lụt</h4>
+              <ul>
+                <li>Không chạm vào thiết bị điện khi đang ngập nước</li>
+                <li>Ngắt cầu dao tổng trước khi nước dâng cao</li>
+                <li>Sử dụng đèn pin thay vì điện</li>
+              </ul>
+              <h4>Số điện thoại khẩn cấp</h4>
+              <ul>
+                <li>Cảnh sát: 113</li>
+                <li>Cứu hỏa: 114</li>
+                <li>Cứu hộ: 115</li>
+                <li>Tổng đài thiên tai: 1900 2110</li>
+              </ul>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeActionGuideBtn">Đóng</button>
           </div>
         </div>
       </div>
