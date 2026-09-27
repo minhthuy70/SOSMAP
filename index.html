@@ -497,6 +497,43 @@
           </div>
         </div>
 
+        <!-- Relief & Logistics Panel -->
+        <div class="relief-panel" id="reliefPanel">
+          <h3>Cứu trợ & Hậu cần</h3>
+          <div class="relief-controls">
+            <button class="relief-btn" id="requestReliefBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              Yêu cầu
+            </button>
+            <button class="relief-btn" id="warehouseBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 3h18v18H3zM3 9h18M9 21V9"></path>
+              </svg>
+              Kho
+            </button>
+            <button class="relief-btn" id="donationBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+              Quyên góp
+            </button>
+          </div>
+          <div class="relief-needs-list" id="reliefNeedsList">
+            <div class="empty-state">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+              <p>Không có nhu cầu cứu trợ nào</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -1638,6 +1675,326 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="cancelVolunteerBtn">Hủy</button>
             <button type="button" class="btn btn-primary" id="submitVolunteerBtn">Đăng ký</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Relief Request Modal -->
+      <div class="modal" id="reliefRequestModal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+          <div class="modal-header">
+            <h3>Yêu cầu cứu trợ</h3>
+            <button class="modal-close" id="closeReliefRequestModal">×</button>
+          </div>
+          <div class="modal-body">
+            <form id="reliefRequestForm">
+              <div class="form-group">
+                <label for="reliefType">Loại nhu cầu *</label>
+                <select id="reliefType" required>
+                  <option value="">-- Chọn loại --</option>
+                  <optgroup label="Lương thực">
+                    <option value="food">Lương thực</option>
+                    <option value="water">Nước uống</option>
+                    <option value="milk">Sữa cho trẻ em</option>
+                  </optgroup>
+                  <optgroup label="Y tế">
+                    <option value="medicine">Thuốc</option>
+                    <option value="medical_supplies">Vật tư y tế</option>
+                    <option value="protection">Đồ bảo hộ</option>
+                  </optgroup>
+                  <optgroup label="Quần áo">
+                    <option value="clothing">Quần áo</option>
+                    <option value="blankets">Chăn màn</option>
+                    <option value="personal">Đồ dùng cá nhân</option>
+                  </optgroup>
+                  <optgroup label="Hạ tầng">
+                    <option value="water_treatment">Xử lý nước</option>
+                    <option value="generator">Máy phát điện</option>
+                    <option value="fuel">Nhiên liệu</option>
+                  </optgroup>
+                  <optgroup label="Phương tiện">
+                    <option value="boat">Thuyền</option>
+                    <option value="truck">Xe tải</option>
+                    <option value="rescue_vehicle">Phương tiện cứu hộ</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="reliefQuantity">Số lượng *</label>
+                <input type="number" id="reliefQuantity" min="1" required placeholder="Số lượng">
+              </div>
+
+              <div class="form-group">
+                <label for="reliefUnit">Đơn vị tính *</label>
+                <input type="text" id="reliefUnit" required placeholder="Ví dụ: kg, cái, lít, thùng">
+              </div>
+
+              <div class="form-group">
+                <label for="reliefDeadline">Thời hạn cần *</label>
+                <input type="datetime-local" id="reliefDeadline" required>
+              </div>
+
+              <div class="form-group">
+                <label for="reliefLocation">Địa điểm nhận</label>
+                <input type="text" id="reliefLocation" placeholder="Địa chỉ cụ thể">
+              </div>
+
+              <div class="form-group">
+                <label for="reliefBeneficiary">Gắn với</label>
+                <select id="reliefBeneficiary">
+                  <option value="">-- Chọn --</option>
+                  <option value="household">Hộ gia đình</option>
+                  <option value="shelter">Điểm trú an</option>
+                  <option value="community">Cộng đồng địa phương</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="reliefBeneficiaryName">Tên hộ gia đình/điểm trú an</label>
+                <input type="text" id="reliefBeneficiaryName" placeholder="Nhập tên">
+              </div>
+
+              <div class="form-group">
+                <label for="reliefDescription">Mô tả chi tiết</label>
+                <textarea id="reliefDescription" rows="3" placeholder="Mô tả nhu cầu cụ thể"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="reliefContact">Người liên hệ *</label>
+                <input type="text" id="reliefContact" required placeholder="Tên và số điện thoại">
+              </div>
+
+              <div class="form-group">
+                <label for="reliefPriority">Mức độ ưu tiên</label>
+                <select id="reliefPriority">
+                  <option value="low">Thấp</option>
+                  <option value="medium" selected>Trung bình</option>
+                  <option value="high">Cao</option>
+                  <option value="critical">Khẩn cấp</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="reliefOfficialConfirm">
+                  <span>Xác nhận bởi cán bộ/ tổ chức uy tín</span>
+                </label>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelReliefRequestBtn">Hủy</button>
+            <button type="button" class="btn btn-primary" id="submitReliefRequestBtn">Gửi yêu cầu</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Warehouse Modal -->
+      <div class="modal" id="warehouseModal" style="display: none;">
+        <div class="modal-content" style="max-width: 1000px;">
+          <div class="modal-header">
+            <h3>Quản lý kho & Phân phối</h3>
+            <button class="modal-close" id="closeWarehouseModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="warehouse-layout">
+              <div class="warehouse-sidebar">
+                <h4>Danh sách kho</h4>
+                <div class="warehouse-list" id="warehouseList">
+                  <div class="warehouse-item active">
+                    <div class="warehouse-name">Kho chính HCM</div>
+                    <div class="warehouse-status">Đang hoạt động</div>
+                  </div>
+                  <div class="warehouse-item">
+                    <div class="warehouse-name">Kho Hà Nội</div>
+                    <div class="warehouse-status">Đang hoạt động</div>
+                  </div>
+                  <div class="warehouse-item">
+                    <div class="warehouse-name">Điểm tiếp nhận Đà Nẵng</div>
+                    <div class="warehouse-status">Đang hoạt động</div>
+                  </div>
+                </div>
+                <button class="btn btn-primary" id="addWarehouseBtn" style="margin-top: 10px; width: 100%;">+ Thêm kho</button>
+              </div>
+              <div class="warehouse-main">
+                <div class="warehouse-tabs">
+                  <button class="tab-btn active" data-tab="inventory">Tồn kho</button>
+                  <button class="tab-btn" data-tab="incoming">Phiếu nhập</button>
+                  <button class="tab-btn" data-tab="outgoing">Phiếu xuất</button>
+                  <button class="tab-btn" data-tab="transport">Vận chuyển</button>
+                </div>
+                <div class="warehouse-content" id="warehouseContent">
+                  <div class="inventory-table">
+                    <h4>Tồn kho hiện tại</h4>
+                    <table style="width: 100%; border-collapse: collapse;">
+                      <thead>
+                        <tr style="background: #f8f9fa;">
+                          <th style="padding: 10px; text-align: left;">Mặt hàng</th>
+                          <th style="padding: 10px; text-align: right;">Số lượng</th>
+                          <th style="padding: 10px; text-align: right;">Đơn vị</th>
+                          <th style="padding: 10px; text-align: left;">Hạn sử dụng</th>
+                          <th style="padding: 10px; text-align: left;">Nhà tài trợ</th>
+                          <th style="padding: 10px; text-align: center;">Trạng thái</th>
+                        </tr>
+                      </thead>
+                      <tbody id="inventoryTableBody">
+                        <tr>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee;">Lương thực</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">500</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">kg</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee;">2024-12-31</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee;">UNICEF</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">
+                            <span style="background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Bình thường</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee;">Nước uống</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">1000</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">lít</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee;">2025-06-30</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee;">Chính phủ</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">
+                            <span style="background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Bình thường</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee;">Thuốc</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">50</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">hộp</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee;">2024-10-15</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee;">WHO</td>
+                          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">
+                            <span style="background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 4px; font-size: 11px;">Cảnh báo</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeWarehouseBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Donation Modal -->
+      <div class="modal" id="donationModal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+          <div class="modal-header">
+            <h3>Quyên góp minh bạch</h3>
+            <button class="modal-close" id="closeDonationModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="donation-campaigns">
+              <h4>Chiến dịch quyên góp</h4>
+              <div class="campaign-item">
+                <div class="campaign-header">
+                  <div class="campaign-title">Cứu trợ bão lũ miền Trung</div>
+                  <span class="campaign-status active">Đang hoạt động</span>
+                </div>
+                <div class="campaign-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 75%;"></div>
+                  </div>
+                  <div class="progress-text">750,000,000đ / 1,000,000,000đ (75%)</div>
+                </div>
+                <div class="campaign-details">
+                  <span>📅 Bắt đầu: 01/09/2024</span>
+                  <span>👥 1,234 người đóng góp</span>
+                </div>
+                <div class="campaign-actions">
+                  <button class="btn btn-primary" onclick="showDonationForm('mid-flood')">Đóng góp ngay</button>
+                  <button class="btn btn-secondary" onclick="showDonationDetails('mid-flood')">Chi tiết</button>
+                </div>
+              </div>
+
+              <div class="campaign-item">
+                <div class="campaign-header">
+                  <div class="campaign-title">Hỗ trợ nạn nhân động đất</div>
+                  <span class="campaign-status active">Đang hoạt động</span>
+                </div>
+                <div class="campaign-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: 45%;"></div>
+                  </div>
+                  <div class="progress-text">450,000,000đ / 1,000,000,000đ (45%)</div>
+                </div>
+                <div class="campaign-details">
+                  <span>📅 Bắt đầu: 15/09/2024</span>
+                  <span>👥 567 người đóng góp</span>
+                </div>
+                <div class="campaign-actions">
+                  <button class="btn btn-primary" onclick="showDonationForm('earthquake')">Đóng góp ngay</button>
+                  <button class="btn btn-secondary" onclick="showDonationDetails('earthquake')">Chi tiết</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="donation-qr-section">
+              <h4>Quyên góp qua QR Code</h4>
+              <div class="qr-container">
+                <div class="qr-code">
+                  <div style="width: 150px; height: 150px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border: 2px solid #ddd;">
+                    QR Code
+                  </div>
+                  <p>Ngân hàng BIDV</p>
+                  <p>Số tài khoản: 1234567890</p>
+                  <p>Chủ tài khoản: SOS MAP VIETNAM</p>
+                </div>
+                <div class="donation-info">
+                  <p>Sau khi chuyển khoản, vui lòng nhập thông tin để chúng tôi xác nhận:</p>
+                  <input type="text" placeholder="Mã giao dịch" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px;">
+                  <input type="text" placeholder="Số tiền" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px;">
+                  <input type="text" placeholder="Tên người đóng góp" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px;">
+                  <button class="btn btn-primary" style="width: 100%;">Xác nhận chuyển khoản</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="donation-transparency">
+              <h4>Danh sách đóng góp minh bạch</h4>
+              <div class="transparency-table">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr style="background: #f8f9fa;">
+                      <th style="padding: 10px; text-align: left;">Người đóng góp</th>
+                      <th style="padding: 10px; text-align: right;">Số tiền</th>
+                      <th style="padding: 10px; text-align: left;">Thời gian</th>
+                      <th style="padding: 10px; text-align: left;">Mã giao dịch</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="padding: 10px; border-bottom: 1px solid #eee;">Nguyễn Văn A</td>
+                      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">5,000,000đ</td>
+                      <td style="padding: 10px; border-bottom: 1px solid #eee;">22/09/2024 10:30</td>
+                      <td style="padding: 10px; border-bottom: 1px solid #eee;">TXN123456</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px; border-bottom: 1px solid #eee;">Trần Thị B</td>
+                      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">2,000,000đ</td>
+                      <td style="padding: 10px; border-bottom: 1px solid #eee;">22/09/2024 09:15</td>
+                      <td style="padding: 10px; border-bottom: 1px solid #eee;">TXN123455</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 10px; border-bottom: 1px solid #eee;">Lê Văn C</td>
+                      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">10,000,000đ</td>
+                      <td style="padding: 10px; border-bottom: 1px solid #eee;">21/09/2024 16:45</td>
+                      <td style="padding: 10px; border-bottom: 1px solid #eee;">TXN123454</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeDonationBtn">Đóng</button>
           </div>
         </div>
       </div>

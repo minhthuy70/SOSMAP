@@ -5845,6 +5845,289 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeRescueSystem();
 });
 
+// Relief & Logistics System
+var reliefNeeds = [];
+var warehouses = [
+  { id: 'wh1', name: 'Kho chính HCM', location: 'TP.HCM', status: 'active', inventory: [] },
+  { id: 'wh2', name: 'Kho Hà Nội', location: 'Hà Nội', status: 'active', inventory: [] },
+  { id: 'wh3', name: 'Điểm tiếp nhận Đà Nẵng', location: 'Đà Nẵng', status: 'active', inventory: [] }
+];
+var inventory = [
+  { id: 'inv1', warehouseId: 'wh1', name: 'Lương thực', quantity: 500, unit: 'kg', expiry: '2024-12-31', sponsor: 'UNICEF', status: 'normal' },
+  { id: 'inv2', warehouseId: 'wh1', name: 'Nước uống', quantity: 1000, unit: 'lít', expiry: '2025-06-30', sponsor: 'Chính phủ', status: 'normal' },
+  { id: 'inv3', warehouseId: 'wh1', name: 'Thuốc', quantity: 50, unit: 'hộp', expiry: '2024-10-15', sponsor: 'WHO', status: 'warning' }
+];
+var donationCampaigns = [
+  { id: 'camp1', title: 'Cứu trợ bão lũ miền Trung', target: 1000000000, raised: 750000000, status: 'active', startDate: '2024-09-01', donors: 1234 },
+  { id: 'camp2', title: 'Hỗ trợ nạn nhân động đất', target: 1000000000, raised: 450000000, status: 'active', startDate: '2024-09-15', donors: 567 }
+];
+var donations = [
+  { id: 'don1', campaignId: 'camp1', donor: 'Nguyễn Văn A', amount: 5000000, date: '2024-09-22T10:30', transactionId: 'TXN123456' },
+  { id: 'don2', campaignId: 'camp1', donor: 'Trần Thị B', amount: 2000000, date: '2024-09-22T09:15', transactionId: 'TXN123455' },
+  { id: 'don3', campaignId: 'camp1', donor: 'Lê Văn C', amount: 10000000, date: '2024-09-21T16:45', transactionId: 'TXN123454' }
+];
+
+var reliefTypes = {
+  food: 'Lương thực',
+  water: 'Nước uống',
+  milk: 'Sữa cho trẻ em',
+  medicine: 'Thuốc',
+  medical_supplies: 'Vật tư y tế',
+  protection: 'Đồ bảo hộ',
+  clothing: 'Quần áo',
+  blankets: 'Chăn màn',
+  personal: 'Đồ dùng cá nhân',
+  water_treatment: 'Xử lý nước',
+  generator: 'Máy phát điện',
+  fuel: 'Nhiên liệu',
+  boat: 'Thuyền',
+  truck: 'Xe tải',
+  rescue_vehicle: 'Phương tiện cứu hộ'
+};
+
+var reliefPriorities = {
+  low: 'Thấp',
+  medium: 'Trung bình',
+  high: 'Cao',
+  critical: 'Khẩn cấp'
+};
+
+function initializeReliefSystem() {
+  // Load relief needs from localStorage
+  var savedNeeds = localStorage.getItem('sosmap_relief_needs');
+  if (savedNeeds) {
+    reliefNeeds = JSON.parse(savedNeeds);
+  }
+
+  // Render relief needs
+  renderReliefNeeds();
+
+  // Check for overdue needs
+  setInterval(checkOverdueReliefNeeds, 60000); // Check every minute
+}
+
+function renderReliefNeeds() {
+  var list = document.getElementById('reliefNeedsList');
+  if (!list) return;
+
+  var activeNeeds = reliefNeeds.filter(function(n) {
+    return n.status !== 'cancelled' && n.status !== 'fulfilled';
+  });
+
+  if (activeNeeds.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+        <p>Không có nhu cầu cứu trợ nào</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = activeNeeds.map(function(need) {
+    var typeLabel = reliefTypes[need.type] || need.type;
+    var priorityLabel = reliefPriorities[need.priority] || need.priority;
+
+    return `
+      <div class="relief-need-item ${need.priority}">
+        <div class="relief-need-header">
+          <div class="relief-need-title">${typeLabel} - ${need.quantity} ${need.unit}</div>
+          <span class="relief-need-badge ${need.priority === 'critical' ? 'critical' : ''}">${priorityLabel}</span>
+        </div>
+        <div class="relief-need-content">${need.description || 'Không có mô tả'}</div>
+        <div class="relief-need-meta">
+          <span>${new Date(need.createdAt).toLocaleString('vi-VN')}</span>
+          <span>Mã: ${need.id}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function createReliefRequest(data) {
+  var request = {
+    id: 'REL-' + Date.now(),
+    type: data.type,
+    quantity: data.quantity,
+    unit: data.unit,
+    deadline: data.deadline,
+    location: data.location,
+    beneficiary: data.beneficiary,
+    beneficiaryName: data.beneficiaryName,
+    description: data.description,
+    contact: data.contact,
+    priority: data.priority,
+    officialConfirm: data.officialConfirm,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    fulfilled: false,
+    fulfilledAt: null
+  };
+
+  reliefNeeds.push(request);
+  saveReliefNeeds();
+  renderReliefNeeds();
+
+  logActivity('relief_create', 'Tạo yêu cầu cứu trợ: ' + request.id);
+
+  return request;
+}
+
+function checkOverdueReliefNeeds() {
+  var now = new Date();
+  var overdueThreshold = 24 * 60 * 60 * 1000; // 24 hours
+
+  reliefNeeds.forEach(function(need) {
+    if (need.status === 'pending' && new Date(need.deadline) < now) {
+      // Alert about overdue need
+      if (Notification.permission === 'granted') {
+        new Notification('⚠️ Nhu cầu cứu trợ quá hạn: ' + need.id, {
+          body: 'Nhu cầu đã quá hạn chưa được đáp ứng',
+          icon: '/favicon.ico'
+        });
+      }
+      logActivity('relief_overdue', 'Nhu cầu quá hạn: ' + need.id);
+    }
+  });
+}
+
+function saveReliefNeeds() {
+  localStorage.setItem('sosmap_relief_needs', JSON.stringify(reliefNeeds));
+}
+
+// Relief Request Modal Event Listeners
+document.getElementById('requestReliefBtn').addEventListener('click', function() {
+  document.getElementById('reliefRequestModal').style.display = 'block';
+});
+
+document.getElementById('closeReliefRequestModal').addEventListener('click', function() {
+  document.getElementById('reliefRequestModal').style.display = 'none';
+});
+
+document.getElementById('cancelReliefRequestBtn').addEventListener('click', function() {
+  document.getElementById('reliefRequestModal').style.display = 'none';
+});
+
+document.getElementById('submitReliefRequestBtn').addEventListener('click', function() {
+  var type = document.getElementById('reliefType').value;
+  var quantity = parseInt(document.getElementById('reliefQuantity').value);
+  var unit = document.getElementById('reliefUnit').value;
+  var deadline = document.getElementById('reliefDeadline').value;
+  var location = document.getElementById('reliefLocation').value;
+  var beneficiary = document.getElementById('reliefBeneficiary').value;
+  var beneficiaryName = document.getElementById('reliefBeneficiaryName').value;
+  var description = document.getElementById('reliefDescription').value;
+  var contact = document.getElementById('reliefContact').value;
+  var priority = document.getElementById('reliefPriority').value;
+  var officialConfirm = document.getElementById('reliefOfficialConfirm').checked;
+
+  if (!type || !quantity || !unit || !deadline || !contact) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  var reliefData = {
+    type: type,
+    quantity: quantity,
+    unit: unit,
+    deadline: new Date(deadline).toISOString(),
+    location: location,
+    beneficiary: beneficiary,
+    beneficiaryName: beneficiaryName,
+    description: description,
+    contact: contact,
+    priority: priority,
+    officialConfirm: officialConfirm
+  };
+
+  createReliefRequest(reliefData);
+  document.getElementById('reliefRequestModal').style.display = 'none';
+  document.getElementById('reliefRequestForm').reset();
+  alert('Đã gửi yêu cầu cứu trợ! Mã yêu cầu: ' + reliefNeeds[reliefNeeds.length - 1].id);
+});
+
+// Warehouse Modal Event Listeners
+document.getElementById('warehouseBtn').addEventListener('click', function() {
+  document.getElementById('warehouseModal').style.display = 'block';
+  renderInventoryTable();
+});
+
+document.getElementById('closeWarehouseModal').addEventListener('click', function() {
+  document.getElementById('warehouseModal').style.display = 'none';
+});
+
+document.getElementById('closeWarehouseBtn').addEventListener('click', function() {
+  document.getElementById('warehouseModal').style.display = 'none';
+});
+
+function renderInventoryTable() {
+  var tbody = document.getElementById('inventoryTableBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = inventory.map(function(item) {
+    var statusColor = item.status === 'normal' ? '#d4edda' : item.status === 'warning' ? '#fff3cd' : '#f8d7da';
+    var statusText = item.status === 'normal' ? 'Bình thường' : item.status === 'warning' ? 'Cảnh báo' : 'Nguy cấp';
+    var statusBgColor = item.status === 'normal' ? '#155724' : item.status === 'warning' ? '#856404' : '#721c24';
+
+    return `
+      <tr>
+        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.quantity}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.unit}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.expiry}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.sponsor}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">
+          <span style="background: ${statusColor}; color: ${statusBgColor}; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${statusText}</span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Warehouse tab switching
+document.querySelectorAll('.tab-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab-btn').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    this.classList.add('active');
+    // TODO: Load content based on tab
+  });
+});
+
+// Donation Modal Event Listeners
+document.getElementById('donationBtn').addEventListener('click', function() {
+  document.getElementById('donationModal').style.display = 'block';
+});
+
+document.getElementById('closeDonationModal').addEventListener('click', function() {
+  document.getElementById('donationModal').style.display = 'none';
+});
+
+document.getElementById('closeDonationBtn').addEventListener('click', function() {
+  document.getElementById('donationModal').style.display = 'none';
+});
+
+function showDonationForm(campaignId) {
+  // Show donation form for specific campaign
+  alert('Form đóng góp cho chiến dịch: ' + campaignId);
+}
+
+function showDonationDetails(campaignId) {
+  // Show campaign details
+  alert('Chi tiết chiến dịch: ' + campaignId);
+}
+
+// Initialize relief system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeReliefSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {
