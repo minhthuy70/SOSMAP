@@ -19,11 +19,34 @@ mapLayers.street.addTo(map);
 
 // Marker colors by incident type
 var markerColors = {
+  // Traffic incidents
   tainan: '#e74c3c',    // Tai nạn - đỏ
   oga: '#f39c12',       // Ổ gà - cam
   ngapnuoc: '#3498db',  // Ngập nước - xanh dương
   vatcan: '#9b59b6',    // Vật cản - tím
-  kexe: '#e67e22'       // Kẹt xe - cam đậm
+  kexe: '#e67e22',       // Kẹt xe - cam đậm
+  // Natural disasters
+  bao: '#8e44ad',       // Bão - tím đậm
+  lut: '#2980b9',       // Lũ lụt - xanh đậm
+  satlo: '#d35400',     // Sạt lở - cam đậm
+  dongdat: '#c0392b',   // Động đất - đỏ đậm
+  hanhan: '#f39c12',     // Hạn hán - cam
+  // Fire
+  chay: '#e74c3c',      // Cháy - đỏ
+  no: '#e67e22',        // Nổ - cam đậm
+  // Health
+  dich: '#7f8c8d',      // Dịch bệnh - xám
+  onhiem: '#27ae60',    // Ô nhiễm - xanh lá
+  // Infrastructure
+  matdien: '#f1c40f',   // Mất điện - vàng
+  matnuoc: '#3498db',   // Mất nước - xanh dương
+  hata: '#9b59b6',      // Sự cố công trình - tím
+  // Security
+  tauthuyen: '#1abc9c', // Tàu thuyền - xanh ngọc
+  anam: '#e74c3c',     // Mất tích - đỏ
+  nguyhiem: '#e67e22', // Trẻ em nguy hiểm - cam đậm
+  // Other
+  khac: '#95a5a6'       // Khác - xám nhạt
 };
 
 // Custom marker icons
@@ -57,6 +80,13 @@ function addMarkers(incidents) {
   });
   incidentMarkers = [];
 
+  // Clear affected areas
+  map.eachLayer(function(layer) {
+    if (layer instanceof L.Circle && layer.options.isAffectedArea) {
+      map.removeLayer(layer);
+    }
+  });
+
   incidents.forEach(function(incident) {
     var color = markerColors[incident.type] || '#666';
     var icon = createCustomIcon(color);
@@ -69,29 +99,82 @@ function addMarkers(incidents) {
         <p><strong>Loại:</strong> ${getIncidentTypeName(incident.type)}</p>
         <p><strong>Mức độ:</strong> ${getSeverityName(incident.severity)}</p>
         <p><strong>Vị trí:</strong> ${incident.lat.toFixed(4)}, ${incident.lng.toFixed(4)}</p>
+        ${incident.affectedArea ? '<p><strong>Vùng ảnh hưởng:</strong> ' + incident.affectedArea + ' km²</p>' : ''}
+        ${incident.estimatedCasualties ? '<p><strong>Người bị ảnh hưởng:</strong> ' + incident.estimatedCasualties + '</p>' : ''}
       </div>
     `;
 
     marker.bindPopup(popupContent);
     marker.addTo(map);
     incidentMarkers.push(marker);
+
+    // Draw affected area if specified
+    if (incident.affectedArea && incident.affectedArea > 0) {
+      var radius = Math.sqrt(incident.affectedArea / Math.PI) * 1000;
+      var severityColors = {
+        cap1: '#2ecc71',
+        cap2: '#f39c12',
+        cap3: '#3498db',
+        cap4: '#e67e22',
+        cap5: '#e74c3c'
+      };
+
+      var areaColor = severityColors[incident.severity] || '#f39c12';
+
+      L.circle([incident.lat, incident.lng], {
+        radius: radius,
+        color: areaColor,
+        fillColor: areaColor,
+        fillOpacity: 0.2,
+        weight: 2,
+        isAffectedArea: true
+      }).addTo(map).bindPopup('Vùng ảnh hưởng: ' + incident.affectedArea + ' km²');
+    }
   });
 }
 
 // Helper functions
 function getIncidentTypeName(type) {
   const names = {
+    // Traffic
     'oga': 'Ổ gà',
     'tainan': 'Tai nạn',
     'ngapnuoc': 'Ngập nước',
     'vatcan': 'Vật cản',
-    'kexe': 'Kẹt xe'
+    'kexe': 'Kẹt xe',
+    // Natural disasters
+    'bao': 'Bão, áp thấp nhiệt',
+    'lut': 'Lũ lụt, lũ quét',
+    'satlo': 'Sạt lở đất',
+    'dongdat': 'Động đất, sóng thần',
+    'hanhan': 'Hạn hán',
+    // Fire
+    'chay': 'Cháy rừng, cháy nhà',
+    'no': 'Nổ',
+    // Health
+    'dich': 'Dịch bệnh',
+    'onhiem': 'Ô nhiễm',
+    // Infrastructure
+    'matdien': 'Mất điện',
+    'matnuoc': 'Mất nước',
+    'hata': 'Sự cố công trình',
+    // Security
+    'tauthuyen': 'Sự cố tàu thuyền',
+    'anam': 'Người mất tích',
+    'nguyhiem': 'Trẻ em nguy hiểm',
+    // Other
+    'khac': 'Sự cố khác'
   };
   return names[type] || type;
 }
 
 function getSeverityName(severity) {
   const names = {
+    'cap1': 'Cấp 1 - Rất thấp',
+    'cap2': 'Cấp 2 - Thấp',
+    'cap3': 'Cấp 3 - Trung bình',
+    'cap4': 'Cấp 4 - Cao',
+    'cap5': 'Cấp 5 - Rất cao',
     'thap': 'Thấp',
     'trungbinh': 'Trung bình',
     'cao': 'Cao'
@@ -1162,7 +1245,23 @@ document.getElementById('incidentForm').addEventListener('submit', function(e) {
     status: 'pending',
     createdAt: new Date().toISOString(),
     hasImages: document.getElementById('incidentImage').files.length > 0,
-    hasVideo: document.getElementById('incidentVideo').files.length > 0
+    hasVideo: document.getElementById('incidentVideo').files.length > 0,
+    // Multi-hazard specific fields
+    affectedArea: parseFloat(document.getElementById('affectedArea').value) || null,
+    estimatedCasualties: parseInt(document.getElementById('estimatedCasualties').value) || null,
+    sourceReliability: document.getElementById('sourceReliability').value || 'medium',
+    relatedIncidents: document.getElementById('relatedIncidents').value ? document.getElementById('relatedIncidents').value.split(',').map(function(id) { return id.trim(); }) : [],
+    // Severity level (1-5)
+    severityLevel: parseInt(document.getElementById('severity').value.replace('cap', '')) || 3,
+    // Initial status
+    incidentStatus: 'new', // new, monitoring, controlled, resolved
+    source: 'user_report', // user_report, official, verified
+    verification: {
+      status: 'unverified',
+      verifiedBy: null,
+      verifiedAt: null,
+      reliabilityLevel: document.getElementById('sourceReliability').value
+    }
   };
 
   // Add to reports list
@@ -1175,8 +1274,33 @@ document.getElementById('incidentForm').addEventListener('submit', function(e) {
     name: report.title,
     lat: report.location.lat,
     lng: report.location.lng,
-    severity: report.severity
+    severity: report.severity,
+    severityLevel: report.severityLevel,
+    affectedArea: report.affectedArea
   });
+
+  // Draw affected area on map if specified
+  if (report.affectedArea && report.affectedArea > 0) {
+    var radius = Math.sqrt(report.affectedArea / Math.PI) * 1000; // Convert km² to meters
+    var severityColors = {
+      cap1: '#2ecc71',
+      cap2: '#f39c12',
+      cap3: '#3498db',
+      cap4: '#e67e22',
+      cap5: '#e74c3c'
+    };
+
+    var areaColor = severityColors[report.severity] || '#f39c12';
+
+    L.circle([report.location.lat, report.location.lng], {
+      radius: radius,
+      color: areaColor,
+      fillColor: areaColor,
+      fillOpacity: 0.2,
+      weight: 2,
+      isAffectedArea: true
+    }).addTo(map).bindPopup('Vùng ảnh hưởng: ' + report.affectedArea + ' km²');
+  }
 
   // Update map markers
   addMarkers(incidentData);

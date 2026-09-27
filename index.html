@@ -828,12 +828,41 @@
               <label for="incidentType">Loại sự cố *</label>
               <select id="incidentType" name="incidentType" required>
                 <option value="">-- Chọn loại sự cố --</option>
-                <option value="oga">Ổ gà</option>
-                <option value="tainan">Tai nạn</option>
-                <option value="ngapnuoc">Ngập nước</option>
-                <option value="vatcan">Vật cản</option>
-                <option value="kexe">Kẹt xe</option>
-                <option value="khac">Sự cố khác</option>
+                <optgroup label="Giao thông">
+                  <option value="oga">Ổ gà</option>
+                  <option value="tainan">Tai nạn giao thông</option>
+                  <option value="ngapnuoc">Ngập nước (giao thông)</option>
+                  <option value="vatcan">Vật cản đường</option>
+                  <option value="kexe">Kẹt xe</option>
+                </optgroup>
+                <optgroup label="Thiên tai">
+                  <option value="bao">Bão, áp thấp nhiệt</option>
+                  <option value="lut">Lũ lụt, lũ quét</option>
+                  <option value="satlo">Sạt lở đất, bờ sông</option>
+                  <option value="dongdat">Động đất, sóng thần</option>
+                  <option value="hanhan">Hạn hán, xâm nhập mặn</option>
+                </optgroup>
+                <optgroup label="Chay nổ">
+                  <option value="chay">Cháy rừng, cháy nhà</option>
+                  <option value="no">Nổ</option>
+                </optgroup>
+                <optgroup label="Sức khỏe">
+                  <option value="dich">Dịch bệnh, ô dịch</option>
+                  <option value="onhiem">Ô nhiễm không khí, nước</option>
+                </optgroup>
+                <optgroup label="Hạ tầng">
+                  <option value="matdien">Mất điện</option>
+                  <option value="matnuoc">Mất nước</option>
+                  <option value="hata">Sự cố công trình</option>
+                </optgroup>
+                <optgroup label="An ninh">
+                  <option value="tauthuyen">Sự cố tàu thuyền</option>
+                  <option value="anam">Người mất tích</option>
+                  <option value="nguyhiem">Trẻ em gặp nguy hiểm</option>
+                </optgroup>
+                <optgroup label="Khác">
+                  <option value="khac">Sự cố khác</option>
+                </optgroup>
               </select>
             </div>
 
@@ -884,9 +913,11 @@
               <label for="severity">Mức độ nghiêm trọng *</label>
               <select id="severity" name="severity" required>
                 <option value="">-- Chọn mức độ --</option>
-                <option value="thap">Thấp</option>
-                <option value="trungbinh">Trung bình</option>
-                <option value="cao">Cao</option>
+                <option value="cap1">Cấp 1 - Rất thấp</option>
+                <option value="cap2">Cấp 2 - Thấp</option>
+                <option value="cap3">Cấp 3 - Trung bình</option>
+                <option value="cap4">Cấp 4 - Cao</option>
+                <option value="cap5">Cấp 5 - Rất cao/Nguy hiểm</option>
               </select>
             </div>
 
@@ -931,6 +962,31 @@
                 <input type="tel" id="contactPhone" name="contactPhone" placeholder="Số điện thoại">
                 <input type="email" id="contactEmail" name="contactEmail" placeholder="Email">
               </div>
+            </div>
+
+            <!-- Additional Info for Multi-hazard -->
+            <div class="form-group">
+              <label for="affectedArea">Vùng ảnh hưởng (km²)</label>
+              <input type="number" id="affectedArea" name="affectedArea" min="0" step="0.1" placeholder="0.5">
+            </div>
+
+            <div class="form-group">
+              <label for="estimatedCasualties">Ước tính số người bị ảnh hưởng</label>
+              <input type="number" id="estimatedCasualties" name="estimatedCasualties" min="0" placeholder="0">
+            </div>
+
+            <div class="form-group">
+              <label for="sourceReliability">Độ tin cậy nguồn tin</label>
+              <select id="sourceReliability" name="sourceReliability">
+                <option value="high">Cao - Đã xác minh</option>
+                <option value="medium">Trung bình - Cần kiểm tra</option>
+                <option value="low">Thấp - Chưa xác minh</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="relatedIncidents">Liên kết với sự cố khác (Mã số)</label>
+              <input type="text" id="relatedIncidents" name="relatedIncidents" placeholder="INC-123, INC-456">
             </div>
 
             <!-- Anonymous Option -->
@@ -1011,6 +1067,238 @@
         <h3>Liên hệ:</h3>
         <p>Email: contact@sosmap.vn</p>
         <p>Hotline: 1900 xxxx</p>
+
+        <hr style="margin: 40px 0; border: none; border-top: 1px solid #eee;">
+
+        <h2>Hướng phát triển tương lai</h2>
+        <p class="roadmap-intro">Dưới đây là lộ trình phát triển của SOS MAP, bao gồm các tính năng đã hoàn thành và kế hoạch phát triển tiếp theo.</p>
+
+        <div class="roadmap-container">
+          <!-- Phase 1: Completed -->
+          <div class="roadmap-phase completed">
+            <div class="phase-header">
+              <span class="phase-badge completed">✅ Đã hoàn thành</span>
+              <h3>Phiên bản 1.0 - Giao diện người dùng & Bản đồ tương tác</h3>
+              <span class="phase-date">Q1 2024</span>
+            </div>
+            <div class="phase-content">
+              <div class="feature-list">
+                <div class="feature-item completed">
+                  <span class="feature-icon">✓</span>
+                  <span class="feature-text">Giao diện tổng quan với thanh điều hướng</span>
+                </div>
+                <div class="feature-item completed">
+                  <span class="feature-icon">✓</span>
+                  <span class="feature-text">Bản đồ tương tác với nhiều lớp (OpenStreetMap, Satellite, Terrain)</span>
+                </div>
+                <div class="feature-item completed">
+                  <span class="feature-icon">✓</span>
+                  <span class="feature-text">Theo dõi tình trạng giao thông thời gian thực</span>
+                </div>
+                <div class="feature-item completed">
+                  <span class="feature-icon">✓</span>
+                  <span class="feature-text">Tiếp nhận phản ánh sự cố từ người dân</span>
+                </div>
+                <div class="feature-item completed">
+                  <span class="feature-icon">✓</span>
+                  <span class="feature-text">Cảnh báo và thông báo sự cố</span>
+                </div>
+                <div class="feature-item completed">
+                  <span class="feature-icon">✓</span>
+                  <span class="feature-text">Hệ thống tài khoản và phân quyền</span>
+                </div>
+                <div class="feature-item completed">
+                  <span class="feature-icon">✓</span>
+                  <span class="feature-text">Quản trị dữ liệu sự cố</span>
+                </div>
+                <div class="feature-item completed">
+                  <span class="feature-icon">✓</span>
+                  <span class="feature-text">Dữ liệu địa lý và tích hợp</span>
+                </div>
+                <div class="feature-item completed">
+                  <span class="feature-icon">✓</span>
+                  <span class="feature-text">Trải nghiệm mobile và khả năng tiếp cận</span>
+                </div>
+                <div class="feature-item completed">
+                  <span class="feature-icon">✓</span>
+                  <span class="feature-text">An toàn, hiệu năng và vận hành</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 2: In Progress -->
+          <div class="roadmap-phase in-progress">
+            <div class="phase-header">
+              <span class="phase-badge in-progress">🔄 Đang phát triển</span>
+              <h3>Phiên bản 2.0 - Backend & Tích hợp dữ liệu</h3>
+              <span class="phase-date">Q2 2024</span>
+            </div>
+            <div class="phase-content">
+              <div class="feature-list">
+                <div class="feature-item in-progress">
+                  <span class="feature-icon">◐</span>
+                  <span class="feature-text">Xây dựng backend và cơ sở dữ liệu cho phản ánh</span>
+                </div>
+                <div class="feature-item in-progress">
+                  <span class="feature-icon">◐</span>
+                  <span class="feature-text">Xây dựng API quản lý sự cố giao thông</span>
+                </div>
+                <div class="feature-item in-progress">
+                  <span class="feature-icon">◐</span>
+                  <span class="feature-text">Kết nối nguồn dữ liệu giao thông thời gian thực</span>
+                </div>
+                <div class="feature-item in-progress">
+                  <span class="feature-icon">◐</span>
+                  <span class="feature-text">Tích hợp camera giao thông và trạm quan trắc</span>
+                </div>
+                <div class="feature-item in-progress">
+                  <span class="feature-icon">◐</span>
+                  <span class="feature-text">Hệ thống authentication nâng cao (JWT, OAuth)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 3: Planned -->
+          <div class="roadmap-phase planned">
+            <div class="phase-header">
+              <span class="phase-badge planned">📋 Kế hoạch</span>
+              <h3>Phiên bản 3.0 - Multi-hazard & Early Warning</h3>
+              <span class="phase-date">Q3 2024</span>
+            </div>
+            <div class="phase-content">
+              <div class="feature-list">
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Quản lý sự cố đa rủi ro (bão, lũ, động đất, cháy nổ)</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Cảnh báo sớm và dự báo thời tiết</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Báo lũ, sạt lở và sơ tán</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Điều phối cứu hộ cứu nạn</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Cung cấp cứu trợ và hậu cần</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 4: Planned -->
+          <div class="roadmap-phase planned">
+            <div class="phase-header">
+              <span class="phase-badge planned">📋 Kế hoạch</span>
+              <h3>Phiên bản 4.0 - Public Health & Emergency Care</h3>
+              <span class="phase-date">Q4 2024</span>
+            </div>
+            <div class="phase-content">
+              <div class="feature-list">
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Dịch bệnh và kiểm soát lây nhiễm</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Y tế khẩn cấp và hỗ trợ người yếu thế</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Cháy nổ, cứu hỏa và sự cố công trình</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Giao thông, hạn chế di chuyển và môi trường</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 5: Planned -->
+          <div class="roadmap-phase planned">
+            <div class="phase-header">
+              <span class="phase-badge planned">📋 Kế hoạch</span>
+              <h3>Phiên bản 5.0 - PWA & Mobile App</h3>
+              <span class="phase-date">Q1 2025</span>
+            </div>
+            <div class="phase-content">
+              <div class="feature-list">
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Cài đặt hệ thống như ứng dụng web (PWA)</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Ứng dụng mobile (iOS, Android)</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Push notifications nâng cao</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Offline mode và sync</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase 6: Planned -->
+          <div class="roadmap-phase planned">
+            <div class="phase-header">
+              <span class="phase-badge planned">📋 Kế hoạch</span>
+              <h3>Phiên bản 6.0 - AI & Analytics</h3>
+              <span class="phase-date">Q2 2025</span>
+            </div>
+            <div class="phase-content">
+              <div class="feature-list">
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">AI dự báo giao thông và sự cố</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Phân tích dữ liệu nâng cao</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Báo cáo và thống kê tự động</span>
+                </div>
+                <div class="feature-item planned">
+                  <span class="feature-icon">○</span>
+                  <span class="feature-text">Dashboard quản trị thông minh</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="roadmap-stats">
+          <div class="stat-item">
+            <div class="stat-number">10</div>
+            <div class="stat-label">Mục lớn</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">89</div>
+            <div class="stat-label">Tính năng</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">10</div>
+            <div class="stat-label">Đã hoàn thành</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">79</div>
+            <div class="stat-label">Kế hoạch</div>
+          </div>
+        </div>
       </div>
     </div>
 
