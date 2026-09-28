@@ -2468,6 +2468,199 @@
           </div>
         </div>
       </div>
+
+      <!-- Fire Report Modal -->
+      <div class="modal" id="fireReportModal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+          <div class="modal-header">
+            <h3>🔥 Báo cáo cháy nổ</h3>
+            <button class="modal-close" id="closeFireReportModal">×</button>
+          </div>
+          <div class="modal-body">
+            <form id="fireReportForm">
+              <div class="form-group">
+                <label for="fireType">Loại sự cố *</label>
+                <select id="fireType" required>
+                  <option value="">-- Chọn loại --</option>
+                  <option value="fire">Cháy</option>
+                  <option value="explosion">Nổ</option>
+                  <option value="smoke">Khói</option>
+                  <option value="gas_leak">Rò rỉ gas</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="fireBuildingType">Loại công trình *</label>
+                <select id="fireBuildingType" required>
+                  <option value="">-- Chọn loại --</option>
+                  <option value="residential">Nhà ở</option>
+                  <option value="apartment">Chung cư</option>
+                  <option value="commercial">Tòa nhà thương mại</option>
+                  <option value="industrial">Nhà xưởng/kho</option>
+                  <option value="school">Trường học</option>
+                  <option value="hospital">Bệnh viện</option>
+                  <option value="market">Chợ</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="fireDangerLevel">Mức độ nguy hiểm *</label>
+                <select id="fireDangerLevel" required>
+                  <option value="low">Thấp</option>
+                  <option value="medium" selected>Trung bình</option>
+                  <option value="high">Cao</option>
+                  <option value="critical">Rất cao</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="fireTrappedPeople">Số người mắc kẹt</label>
+                <input type="number" id="fireTrappedPeople" min="0" placeholder="Số người mắc kẹt">
+              </div>
+
+              <div class="form-group">
+                <label for="fireAccessDirection">Hướng tiếp cận</label>
+                <input type="text" id="fireAccessDirection" placeholder="Ví dụ: Cửa chính phía đường, cầu thang bộ bên trái">
+              </div>
+
+              <div class="form-group">
+                <label for="fireLocation">Vị trí chính xác</label>
+                <div class="location-input-group">
+                  <input type="text" id="fireLocation" readonly placeholder="Đang lấy vị trí...">
+                  <button type="button" class="btn btn-secondary" id="getFireLocationBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                    </svg>
+                    Lấy GPS
+                  </button>
+                </div>
+                <input type="hidden" id="fireLat">
+                <input type="hidden" id="fireLng">
+              </div>
+
+              <div class="form-group">
+                <label for="fireDescription">Mô tả chi tiết *</label>
+                <textarea id="fireDescription" rows="4" required placeholder="Mô tả tình trạng cháy, vị trí bắt đầu, nguy cơ lan rộng..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="fireContact">Người liên hệ *</label>
+                <input type="text" id="fireContact" required placeholder="Tên và số điện thoại">
+              </div>
+
+              <div class="form-group">
+                <label for="fireImage">Tải ảnh minh chứng (nếu an toàn)</label>
+                <input type="file" id="fireImage" accept="image/*" multiple>
+                <div class="image-preview" id="fireImagePreview"></div>
+              </div>
+
+              <div class="alert-warning">
+                <strong>⚠️ Lưu ý an toàn:</strong> Chỉ chụp ảnh khi đảm bảo an toàn. Ưu tiên sơ tán trước khi báo cáo.
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelFireReportBtn">Hủy</button>
+            <button type="button" class="btn btn-danger" id="submitFireReportBtn">🔥 Gửi báo cáo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Infrastructure Report Modal -->
+      <div class="modal" id="infrastructureReportModal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+          <div class="modal-header">
+            <h3>⚡ Báo cáo sự cố hạ tầng</h3>
+            <button class="modal-close" id="closeInfrastructureReportModal">×</button>
+          </div>
+          <div class="modal-body">
+            <form id="infrastructureReportForm">
+              <div class="form-group">
+                <label for="infraType">Loại sự cố *</label>
+                <select id="infraType" required>
+                  <option value="">-- Chọn loại --</option>
+                  <optgroup label="Điện">
+                    <option value="power_outage">Đứt cáp điện</option>
+                    <option value="electric_leak">Rò rỉ điện</option>
+                    <option value="pole_down">Cột điện đổ</option>
+                  </optgroup>
+                  <optgroup label="Nước">
+                    <option value="water_pipe_break">Vỡ ống nước</option>
+                    <option value="water_shortage">Thiếu nước sinh hoạt</option>
+                  </optgroup>
+                  <optgroup label="Giao thông">
+                    <option value="bridge_damage">Hỏng cầu</option>
+                    <option value="road_damage">Hỏng đường</option>
+                    <option value="embankment_damage">Hỏng đê</option>
+                    <option value="drainage_damage">Hỏng cống</option>
+                    <option value="pump_station">Trạm bơm hỏng</option>
+                  </optgroup>
+                  <optgroup label="Khác">
+                    <option value="tree_down">Cây đổ</option>
+                    <option value="sign_down">Biển báo đổ</option>
+                    <option value="obstacle">Vật cản nguy hiểm</option>
+                    <option value="cell_tower">Trạm phát sóng sự cố</option>
+                    <option value="communication_loss">Mất liên lạc</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="infraLocation">Vị trí sự cố *</label>
+                <div class="location-input-group">
+                  <input type="text" id="infraLocation" readonly placeholder="Đang lấy vị trí...">
+                  <button type="button" class="btn btn-secondary" id="getInfraLocationBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                    </svg>
+                    Lấy GPS
+                  </button>
+                </div>
+                <input type="hidden" id="infraLat">
+                <input type="hidden" id="infraLng">
+              </div>
+
+              <div class="form-group">
+                <label for="infraDescription">Mô tả chi tiết *</label>
+                <textarea id="infraDescription" rows="4" required placeholder="Mô tả tình trạng sự cố, phạm vi ảnh hưởng, nguy cơ..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="infraResponsibleUnit">Đơn vị quản lý (nếu biết)</label>
+                <input type="text" id="infraResponsibleUnit" placeholder="Tên đơn vị quản lý hạ tầng">
+              </div>
+
+              <div class="form-group">
+                <label for="infraContact">Người liên hệ *</label>
+                <input type="text" id="infraContact" required placeholder="Tên và số điện thoại">
+              </div>
+
+              <div class="form-group">
+                <label for="infraPriority">Mức độ ưu tiên</label>
+                <select id="infraPriority">
+                  <option value="low">Thấp</option>
+                  <option value="medium" selected>Trung bình</option>
+                  <option value="high">Cao</option>
+                  <option value="critical">Khẩn cấp</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="infraImage">Tải ảnh minh chứng</label>
+                <input type="file" id="infraImage" accept="image/*" multiple>
+                <div class="image-preview" id="infraImagePreview"></div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelInfrastructureReportBtn">Hủy</button>
+            <button type="button" class="btn btn-primary" id="submitInfrastructureReportBtn">Gửi báo cáo</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Trang Giới thiệu -->

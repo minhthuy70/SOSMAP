@@ -6633,6 +6633,338 @@ function renderHealthFacilities() {
   }).join('');
 }
 
+// Fire & Infrastructure System
+var fireReports = [];
+var infrastructureReports = [];
+var fireIncidents = [];
+
+var fireTypes = {
+  fire: 'Cháy',
+  explosion: 'Nổ',
+  smoke: 'Khói',
+  gas_leak: 'Rò rỉ gas'
+};
+
+var buildingTypes = {
+  residential: 'Nhà ở',
+  apartment: 'Chung cư',
+  commercial: 'Tòa nhà thương mại',
+  industrial: 'Nhà xưởng/kho',
+  school: 'Trường học',
+  hospital: 'Bệnh viện',
+  market: 'Chợ',
+  other: 'Khác'
+};
+
+var dangerLevels = {
+  low: 'Thấp',
+  medium: 'Trung bình',
+  high: 'Cao',
+  critical: 'Rất cao'
+};
+
+function initializeFireSystem() {
+  // Load fire reports from localStorage
+  var savedFireReports = localStorage.getItem('sosmap_fire_reports');
+  if (savedFireReports) {
+    fireReports = JSON.parse(savedFireReports);
+  }
+
+  // Load infrastructure reports
+  var savedInfraReports = localStorage.getItem('sosmap_infrastructure_reports');
+  if (savedInfraReports) {
+    infrastructureReports = JSON.parse(savedInfraReports);
+  }
+
+  updateFireAlerts();
+}
+
+function updateFireAlerts() {
+  var alertsDiv = document.getElementById('fireAlerts');
+  if (!alertsDiv) return;
+
+  var activeFires = fireReports.filter(function(r) {
+    return r.status !== 'resolved' && r.status !== 'cancelled';
+  });
+
+  if (activeFires.length === 0) {
+    alertsDiv.innerHTML = `
+      <div class="fire-alert-item info">
+        <span class="alert-icon">ℹ️</span>
+        <span class="alert-text">Không có sự cố nào trong khu vực</span>
+      </div>
+    `;
+    return;
+  }
+
+  alertsDiv.innerHTML = activeFires.map(function(report) {
+    var level = report.dangerLevel;
+    var alertClass = level === 'critical' ? 'critical' : level === 'high' ? 'warning' : 'info';
+    var icon = level === 'critical' ? '🔥' : level === 'high' ? '⚠️' : 'ℹ️';
+
+    return `
+      <div class="fire-alert-item ${alertClass}">
+        <span class="alert-icon">${icon}</span>
+        <span class="alert-text">${fireTypes[report.type]} - ${buildingTypes[report.buildingType]}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function createFireReport(data) {
+  var report = {
+    id: 'FIRE-' + Date.now(),
+    type: data.type,
+    buildingType: data.buildingType,
+    dangerLevel: data.dangerLevel,
+    trappedPeople: data.trappedPeople,
+    accessDirection: data.accessDirection,
+    location: data.location,
+    description: data.description,
+    contact: data.contact,
+    hasImage: data.hasImage,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    assignedTo: null,
+    windDirection: null,
+    spreadRisk: null
+  };
+
+  fireReports.push(report);
+  saveFireReports();
+  updateFireAlerts();
+
+  // Add marker to map
+  if (data.location && data.location.lat && data.location.lng) {
+    var marker = L.marker([data.location.lat, data.location.lng], {
+      icon: L.divIcon({
+        className: 'fire-marker',
+        html: '<div style="background: #e74c3c; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); animation: pulse 2s infinite;"></div>',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      })
+    })
+    .addTo(map)
+    .bindPopup('<b>🔥 Cháy nổ</b><br>' + fireTypes[data.type] + '<br>' + buildingTypes[data.buildingType]);
+  }
+
+  // Send browser notification
+  if (Notification.permission === 'granted') {
+    new Notification('🔥 Báo cáo cháy nổ: ' + report.id, {
+      body: report.description,
+      icon: '/favicon.ico',
+      requireInteraction: true
+    });
+  }
+
+  alert('Đã gửi báo cáo cháy nổ! Mã báo cáo: ' + report.id);
+  logActivity('fire_report', 'Báo cáo cháy nổ: ' + report.id);
+
+  return report;
+}
+
+function createInfrastructureReport(data) {
+  var report = {
+    id: 'INFRA-' + Date.now(),
+    type: data.type,
+    location: data.location,
+    description: data.description,
+    responsibleUnit: data.responsibleUnit,
+    contact: data.contact,
+    priority: data.priority,
+    hasImage: data.hasImage,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    assignedTo: null,
+    resolvedAt: null
+  };
+
+  infrastructureReports.push(report);
+  saveInfrastructureReports();
+
+  alert('Đã gửi báo cáo sự cố hạ tầng! Mã báo cáo: ' + report.id);
+  logActivity('infrastructure_report', 'Báo cáo sự cố hạ tầng: ' + report.id);
+
+  return report;
+}
+
+function saveFireReports() {
+  localStorage.setItem('sosmap_fire_reports', JSON.stringify(fireReports));
+}
+
+function saveInfrastructureReports() {
+  localStorage.setItem('sosmap_infrastructure_reports', JSON.stringify(infrastructureReports));
+}
+
+// Fire Report Modal Event Listeners
+document.getElementById('reportFireBtn').addEventListener('click', function() {
+  document.getElementById('fireReportModal').style.display = 'block';
+  getFireLocation();
+});
+
+document.getElementById('closeFireReportModal').addEventListener('click', function() {
+  document.getElementById('fireReportModal').style.display = 'none';
+});
+
+document.getElementById('cancelFireReportBtn').addEventListener('click', function() {
+  document.getElementById('fireReportModal').style.display = 'none';
+});
+
+document.getElementById('getFireLocationBtn').addEventListener('click', function() {
+  getFireLocation();
+});
+
+function getFireLocation() {
+  var locationInput = document.getElementById('fireLocation');
+  var latInput = document.getElementById('fireLat');
+  var lngInput = document.getElementById('fireLng');
+
+  locationInput.value = 'Đang lấy vị trí...';
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        latInput.value = lat;
+        lngInput.value = lng;
+        locationInput.value = lat.toFixed(6) + ', ' + lng.toFixed(6);
+      },
+      function(error) {
+        locationInput.value = 'Không thể lấy vị trí';
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  } else {
+    locationInput.value = 'Geolocation không được hỗ trợ';
+  }
+}
+
+document.getElementById('submitFireReportBtn').addEventListener('click', function() {
+  var type = document.getElementById('fireType').value;
+  var buildingType = document.getElementById('fireBuildingType').value;
+  var dangerLevel = document.getElementById('fireDangerLevel').value;
+  var trappedPeople = parseInt(document.getElementById('fireTrappedPeople').value) || 0;
+  var accessDirection = document.getElementById('fireAccessDirection').value;
+  var description = document.getElementById('fireDescription').value;
+  var contact = document.getElementById('fireContact').value;
+  var hasImage = document.getElementById('fireImage').files.length > 0;
+
+  var lat = document.getElementById('fireLat').value;
+  var lng = document.getElementById('fireLng').value;
+
+  if (!type || !buildingType || !dangerLevel || !description || !contact) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  var fireData = {
+    type: type,
+    buildingType: buildingType,
+    dangerLevel: dangerLevel,
+    trappedPeople: trappedPeople,
+    accessDirection: accessDirection,
+    location: lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null,
+    description: description,
+    contact: contact,
+    hasImage: hasImage
+  };
+
+  createFireReport(fireData);
+  document.getElementById('fireReportModal').style.display = 'none';
+  document.getElementById('fireReportForm').reset();
+});
+
+// Infrastructure Report Modal Event Listeners
+document.getElementById('reportInfrastructureBtn').addEventListener('click', function() {
+  document.getElementById('infrastructureReportModal').style.display = 'block';
+  getInfraLocation();
+});
+
+document.getElementById('closeInfrastructureReportModal').addEventListener('click', function() {
+  document.getElementById('infrastructureReportModal').style.display = 'none';
+});
+
+document.getElementById('cancelInfrastructureReportBtn').addEventListener('click', function() {
+  document.getElementById('infrastructureReportModal').style.display = 'none';
+});
+
+document.getElementById('getInfraLocationBtn').addEventListener('click', function() {
+  getInfraLocation();
+});
+
+function getInfraLocation() {
+  var locationInput = document.getElementById('infraLocation');
+  var latInput = document.getElementById('infraLat');
+  var lngInput = document.getElementById('infraLng');
+
+  locationInput.value = 'Đang lấy vị trí...';
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        latInput.value = lat;
+        lngInput.value = lng;
+        locationInput.value = lat.toFixed(6) + ', ' + lng.toFixed(6);
+      },
+      function(error) {
+        locationInput.value = 'Không thể lấy vị trí';
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  } else {
+    locationInput.value = 'Geolocation không được hỗ trợ';
+  }
+}
+
+document.getElementById('submitInfrastructureReportBtn').addEventListener('click', function() {
+  var type = document.getElementById('infraType').value;
+  var description = document.getElementById('infraDescription').value;
+  var responsibleUnit = document.getElementById('infraResponsibleUnit').value;
+  var contact = document.getElementById('infraContact').value;
+  var priority = document.getElementById('infraPriority').value;
+  var hasImage = document.getElementById('infraImage').files.length > 0;
+
+  var lat = document.getElementById('infraLat').value;
+  var lng = document.getElementById('infraLng').value;
+
+  if (!type || !description || !contact) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  var infraData = {
+    type: type,
+    location: lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null,
+    description: description,
+    responsibleUnit: responsibleUnit,
+    contact: contact,
+    priority: priority,
+    hasImage: hasImage
+  };
+
+  createInfrastructureReport(infraData);
+  document.getElementById('infrastructureReportModal').style.display = 'none';
+  document.getElementById('infrastructureReportForm').reset();
+});
+
+// Initialize fire system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeFireSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {
