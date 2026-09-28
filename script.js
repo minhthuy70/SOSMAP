@@ -6965,6 +6965,189 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeFireSystem();
 });
 
+// Public Safety System
+var trafficConditions = [
+  { id: 'tc1', type: 'blocked', road: 'Đường Nguyễn Huệ', status: 'Đường cấm (do ngập nước)', direction: 'Từ Quận 1 → Quận 3' },
+  { id: 'tc2', type: 'one_way', road: 'Đường Lê Duẩn', status: 'Một chiều tạm thời', direction: 'Chỉ hướng đi từ Bắc → Nam' },
+  { id: 'tc3', type: 'blocked_point', road: 'Ngã tư Phạm Ngọc Thạch', status: 'Điểm chặn (do sự cố)', direction: 'Đóng toàn bộ' },
+  { id: 'tc4', type: 'priority', road: 'Đường Xa lộ Hà Nội', status: 'Tuyến ưu tiên cấp cứu', direction: 'Ưu tiên xe 115, 114' },
+  { id: 'tc5', type: 'priority', road: 'Đường Nguyễn Văn Linh', status: 'Tuyến ưu tiên cấp cứu', direction: 'Ưu tiên xe 115, 114' },
+  { id: 'tc6', type: 'congestion', road: 'Đường Cộng Hòa', status: 'Kẹt xe nặng', delay: 'Chậm 30 phút' },
+  { id: 'tc7', type: 'congestion', road: 'Đường Nguyễn Trãi', status: 'Kẹt xe trung bình', delay: 'Chậm 15 phút' }
+];
+
+var environmentReports = [];
+var environmentAlerts = [
+  { type: 'heat', level: 'warning', message: 'Cảnh báo nắng nóng gay gắt (32-35°C)' },
+  { type: 'air', level: 'info', message: 'Không có cảnh báo bụi mịn' },
+  { type: 'water', level: 'info', message: 'Không có cảnh báo ô nhiễm nguồn nước' }
+];
+
+var envReportTypes = {
+  air_pollution: 'Ô nhiễm không khí',
+  dust: 'Bụi mịn',
+  water_pollution: 'Ô nhiễm nguồn nước',
+  oil_spill: 'Tràn dầu',
+  chemical_spill: 'Hóa chất tràn',
+  hazardous_waste: 'Chất thải nguy hại',
+  dangerous_animal: 'Động vật nguy hiểm',
+  affected_animal: 'Động vật bị ảnh hưởng'
+};
+
+function initializeSafetySystem() {
+  // Load environment reports from localStorage
+  var savedEnvReports = localStorage.getItem('sosmap_environment_reports');
+  if (savedEnvReports) {
+    environmentReports = JSON.parse(savedEnvReports);
+  }
+
+  updateSafetyAlerts();
+}
+
+function updateSafetyAlerts() {
+  var alertsDiv = document.getElementById('safetyAlerts');
+  if (!alertsDiv) return;
+
+  alertsDiv.innerHTML = environmentAlerts.map(function(alert) {
+    var alertClass = alert.level === 'warning' ? 'warning' : alert.level === 'danger' ? 'danger' : 'info';
+    var icon = alert.level === 'warning' ? '⚠️' : alert.level === 'danger' ? '🔴' : 'ℹ️';
+
+    return `
+      <div class="safety-alert-item ${alertClass}">
+        <span class="alert-icon">${icon}</span>
+        <span class="alert-text">${alert.message}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function createEnvironmentReport(data) {
+  var report = {
+    id: 'ENV-' + Date.now(),
+    type: data.type,
+    location: data.location,
+    description: data.description,
+    contact: data.contact,
+    hasImage: data.hasImage,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    assignedTo: null,
+    resolvedAt: null
+  };
+
+  environmentReports.push(report);
+  saveEnvironmentReports();
+
+  alert('Đã gửi báo cáo môi trường! Mã báo cáo: ' + report.id);
+  logActivity('environment_report', 'Báo cáo môi trường: ' + report.id);
+
+  return report;
+}
+
+function saveEnvironmentReports() {
+  localStorage.setItem('sosmap_environment_reports', JSON.stringify(environmentReports));
+}
+
+// Traffic Modal Event Listeners
+document.getElementById('trafficBtn').addEventListener('click', function() {
+  document.getElementById('trafficModal').style.display = 'block';
+});
+
+document.getElementById('closeTrafficModal').addEventListener('click', function() {
+  document.getElementById('trafficModal').style.display = 'none';
+});
+
+document.getElementById('closeTrafficBtn').addEventListener('click', function() {
+  document.getElementById('trafficModal').style.display = 'none';
+});
+
+document.getElementById('trafficFilter') && document.getElementById('trafficFilter').addEventListener('change', function() {
+  var filter = this.value;
+  // Filter traffic conditions based on type
+  // TODO: Implement filter logic
+});
+
+// Environment Modal Event Listeners
+document.getElementById('environmentBtn').addEventListener('click', function() {
+  document.getElementById('environmentModal').style.display = 'block';
+  getEnvLocation();
+});
+
+document.getElementById('closeEnvironmentModal').addEventListener('click', function() {
+  document.getElementById('environmentModal').style.display = 'none';
+});
+
+document.getElementById('closeEnvironmentBtn').addEventListener('click', function() {
+  document.getElementById('environmentModal').style.display = 'none';
+});
+
+document.getElementById('getEnvLocationBtn').addEventListener('click', function() {
+  getEnvLocation();
+});
+
+function getEnvLocation() {
+  var locationInput = document.getElementById('envReportLocation');
+  var latInput = document.getElementById('envLat');
+  var lngInput = document.getElementById('envLng');
+
+  locationInput.value = 'Đang lấy vị trí...';
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        latInput.value = lat;
+        lngInput.value = lng;
+        locationInput.value = lat.toFixed(6) + ', ' + lng.toFixed(6);
+      },
+      function(error) {
+        locationInput.value = 'Không thể lấy vị trí';
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  } else {
+    locationInput.value = 'Geolocation không được hỗ trợ';
+  }
+}
+
+document.getElementById('submitEnvironmentReportBtn').addEventListener('click', function() {
+  var type = document.getElementById('envReportType').value;
+  var description = document.getElementById('envReportDescription').value;
+  var contact = document.getElementById('envReportContact').value;
+  var hasImage = document.getElementById('envReportImage').files.length > 0;
+
+  var lat = document.getElementById('envLat').value;
+  var lng = document.getElementById('envLng').value;
+
+  if (!type || !description || !contact) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  var envData = {
+    type: type,
+    location: lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null,
+    description: description,
+    contact: contact,
+    hasImage: hasImage
+  };
+
+  createEnvironmentReport(envData);
+  document.getElementById('environmentModal').style.display = 'none';
+  document.getElementById('environmentReportForm').reset();
+});
+
+// Initialize safety system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeSafetySystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {

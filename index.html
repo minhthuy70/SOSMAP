@@ -605,6 +605,38 @@
           </div>
         </div>
 
+        <!-- Public Safety Panel -->
+        <div class="safety-panel" id="safetyPanel">
+          <h3>An toàn công cộng</h3>
+          <div class="safety-controls">
+            <button class="safety-btn" id="trafficBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="3" width="15" height="13"></rect>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+              </svg>
+              Giao thông
+            </button>
+            <button class="safety-btn" id="environmentBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+              </svg>
+              Môi trường
+            </button>
+          </div>
+          <div class="safety-alerts" id="safetyAlerts">
+            <div class="safety-alert-item info">
+              <span class="alert-icon">ℹ️</span>
+              <span class="alert-text">Chất lượng không khí: Tốt</span>
+            </div>
+            <div class="safety-alert-item info">
+              <span class="alert-icon">ℹ️</span>
+              <span class="alert-text">Không có cảnh báo môi trường</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -2658,6 +2690,265 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="cancelInfrastructureReportBtn">Hủy</button>
             <button type="button" class="btn btn-primary" id="submitInfrastructureReportBtn">Gửi báo cáo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Traffic Information Modal -->
+      <div class="modal" id="trafficModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>Thông tin giao thông khẩn cấp</h3>
+            <button class="modal-close" id="closeTrafficModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="traffic-filters">
+              <select id="trafficFilter">
+                <option value="all">Tất cả</option>
+                <option value="blocked">Đường cấm</option>
+                <option value="one_way">Một chiều tạm thời</option>
+                <option value="blocked_point">Điểm chặn</option>
+                <option value="priority">Tuyến ưu tiên</option>
+                <option value="congestion">Điểm kẹt xe</option>
+              </select>
+            </div>
+            <div class="traffic-info">
+              <div class="traffic-section">
+                <h4>Đường cấm / Một chiều tạm thời / Điểm chặn</h4>
+                <div class="traffic-list">
+                  <div class="traffic-item blocked">
+                    <div class="traffic-road">Đường Nguyễn Huệ</div>
+                    <div class="traffic-status">Đường cấm (do ngập nước)</div>
+                    <div class="traffic-direction">Từ Quận 1 → Quận 3</div>
+                  </div>
+                  <div class="traffic-item one_way">
+                    <div class="traffic-road">Đường Lê Duẩn</div>
+                    <div class="traffic-status">Một chiều tạm thời</div>
+                    <div class="traffic-direction">Chỉ hướng đi từ Bắc → Nam</div>
+                  </div>
+                  <div class="traffic-item blocked_point">
+                    <div class="traffic-road">Ngã tư Phạm Ngọc Thạch</div>
+                    <div class="traffic-status">Điểm chặn (do sự cố)</div>
+                    <div class="traffic-direction">Đóng toàn bộ</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="traffic-section">
+                <h4>Tuyến ưu tiên xe cứu thương và cứu hỏa</h4>
+                <div class="traffic-list">
+                  <div class="traffic-item priority">
+                    <div class="traffic-road">Đường Xa lộ Hà Nội</div>
+                    <div class="traffic-status">Tuyến ưu tiên cấp cứu</div>
+                    <div class="traffic-direction">Ưu tiên xe 115, 114</div>
+                  </div>
+                  <div class="traffic-item priority">
+                    <div class="traffic-road">Đường Nguyễn Văn Linh</div>
+                    <div class="traffic-status">Tuyến ưu tiên cấp cứu</div>
+                    <div class="traffic-direction">Ưu tiên xe 115, 114</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="traffic-section">
+                <h4>Điểm kẹt xe do sóng thần</h4>
+                <div class="traffic-list">
+                  <div class="traffic-item congestion">
+                    <div class="traffic-road">Đường Cộng Hòa</div>
+                    <div class="traffic-status">Kẹt xe nặng</div>
+                    <div class="traffic-delay">Chậm 30 phút</div>
+                  </div>
+                  <div class="traffic-item congestion">
+                    <div class="traffic-road">Đường Nguyễn Trãi</div>
+                    <div class="traffic-status">Kẹt xe trung bình</div>
+                    <div class="traffic-delay">Chậm 15 phút</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="traffic-section">
+                <h4>Trạm xăng, trạm sạc và điểm sửa xe còn hoạt động</h4>
+                <div class="traffic-list">
+                  <div class="traffic-item service">
+                    <div class="traffic-road">Trạm xăng Petrolimco - Q1</div>
+                    <div class="traffic-status">Đang hoạt động</div>
+                    <div class="traffic-fuel">Còn xăng, dầu</div>
+                  </div>
+                  <div class="traffic-item service">
+                    <div class="traffic-road">Trạm sạc xe điện VinFast</div>
+                    <div class="traffic-status">Đang hoạt động</div>
+                    <div class="traffic-fuel">Cổng sạc hoạt động</div>
+                  </div>
+                  <div class="traffic-item service">
+                    <div class="traffic-road">Tiệm sửa xe Honda</div>
+                    <div class="traffic-status">Đang hoạt động</div>
+                    <div class="traffic-fuel">Sửa xe máy, ô tô</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="traffic-section">
+                <h4>Điểm tàu, phà, cầu phào và bến xe thay thế</h4>
+                <div class="traffic-list">
+                  <div class="traffic-item alternate">
+                    <div class="traffic-road">Bến tàu sông Sài Gòn</div>
+                    <div class="traffic-status">Đang hoạt động</div>
+                    <div class="traffic-info">Thay thế cầu Bình Lợi</div>
+                  </div>
+                  <div class="traffic-item alternate">
+                    <div class="traffic-road">Bến phà Cat Lái</div>
+                    <div class="traffic-status">Đang hoạt động</div>
+                    <div class="traffic-info">Thay thế cầu Rạch Chiếc</div>
+                  </div>
+                  <div class="traffic-item alternate">
+                    <div class="traffic-road">Bến xe tạm Q3</div>
+                    <div class="traffic-status">Đang hoạt động</div>
+                    <div class="traffic-info">Thay thế bến xe chính</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="traffic-guidance">
+              <h4>Hướng dẫn tránh vào vùng nguy hiểm</h4>
+              <div class="guidance-box">
+                <p>⚠️ Tránh đi qua các khu vực:</p>
+                <ul>
+                  <li>Khu vực ngập nước sâu (>1m)</li>
+                  <li>Khu vực có sự cố cháy nổ</li>
+                  <li>Khu vực sạt lở đất</li>
+                  <li>Khu vực có cây đổ, biển báo hỏng</li>
+                </ul>
+                <p>📍 Tham khảo bản đồ cập nhật trong thời gian thực</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeTrafficBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Environment Safety Modal -->
+      <div class="modal" id="environmentModal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+          <div class="modal-header">
+            <h3>An toàn môi trường</h3>
+            <button class="modal-close" id="closeEnvironmentModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="environment-indicators">
+              <div class="env-indicator">
+                <div class="env-icon">🌫️</div>
+                <div class="env-label">Chất lượng không khí</div>
+                <div class="env-value good">Tốt (AQI: 45)</div>
+              </div>
+              <div class="env-indicator">
+                <div class="env-icon">💧</div>
+                <div class="env-label">Chất lượng nước</div>
+                <div class="env-value good">An toàn</div>
+              </div>
+              <div class="env-indicator">
+                <div class="env-icon">🌡️</div>
+                <div class="env-label">Nhiệt độ</div>
+                <div class="env-value warning">32°C (Cảnh báo nắng nóng)</div>
+              </div>
+            </div>
+
+            <div class="environment-alerts">
+              <h4>Cảnh báo môi trường</h4>
+              <div class="env-alert-list">
+                <div class="env-alert-item warning">
+                  <span class="alert-icon">⚠️</span>
+                  <span class="alert-text">Cảnh báo nắng nóng gay gắt (32-35°C)</span>
+                </div>
+                <div class="env-alert-item info">
+                  <span class="alert-icon">ℹ️</span>
+                  <span class="alert-text">Không có cảnh báo bụi mịn</span>
+                </div>
+                <div class="env-alert-item info">
+                  <span class="alert-icon">ℹ️</span>
+                  <span class="alert-text">Không có cảnh báo ô nhiễm nguồn nước</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="environment-report">
+              <h4>Báo cáo sự cố môi trường</h4>
+              <form id="environmentReportForm">
+                <div class="form-group">
+                  <label for="envReportType">Loại sự cố *</label>
+                  <select id="envReportType" required>
+                    <option value="">-- Chọn loại --</option>
+                    <option value="air_pollution">Ô nhiễm không khí</option>
+                    <option value="dust">Bụi mịn</option>
+                    <option value="water_pollution">Ô nhiễm nguồn nước</option>
+                    <option value="oil_spill">Tràn dầu</option>
+                    <option value="chemical_spill">Hóa chất tràn</option>
+                    <option value="hazardous_waste">Chất thải nguy hại</option>
+                    <option value="dangerous_animal">Động vật nguy hiểm</option>
+                    <option value="affected_animal">Động vật bị ảnh hưởng</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="envReportLocation">Vị trí sự cố *</label>
+                  <div class="location-input-group">
+                    <input type="text" id="envReportLocation" readonly placeholder="Đang lấy vị trí...">
+                    <button type="button" class="btn btn-secondary" id="getEnvLocationBtn">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                      </svg>
+                      Lấy GPS
+                    </button>
+                  </div>
+                  <input type="hidden" id="envLat">
+                  <input type="hidden" id="envLng">
+                </div>
+
+                <div class="form-group">
+                  <label for="envReportDescription">Mô tả chi tiết *</label>
+                  <textarea id="envReportDescription" rows="4" required placeholder="Mô tả tình trạng sự cố, mức độ nghiêm trọng..."></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="envReportContact">Người liên hệ *</label>
+                  <input type="text" id="envReportContact" required placeholder="Tên và số điện thoại">
+                </div>
+
+                <div class="form-group">
+                  <label for="envReportImage">Tải ảnh minh chứng</label>
+                  <input type="file" id="envReportImage" accept="image/*" multiple>
+                  <div class="image-preview" id="envReportImagePreview"></div>
+                </div>
+              </form>
+            </div>
+
+            <div class="safe-areas">
+              <h4>Khu vực an toàn</h4>
+              <div class="safe-areas-list">
+                <div class="safe-area-item">
+                  <div class="safe-area-name">Điểm cấp nước sạch</div>
+                  <div class="safe-area-address">Công viên Tao Đàn, Q1</div>
+                  <div class="safe-area-status">Đang hoạt động</div>
+                </div>
+                <div class="safe-area-item">
+                  <div class="safe-area-name">Nhà vệ sinh công cộng</div>
+                  <div class="safe-area-address">Công viên 30/4, Q1</div>
+                  <div class="safe-area-status">Đang hoạt động</div>
+                </div>
+                <div class="safe-area-item">
+                  <div class="safe-area-name">Trạm bơm nước khẩn cấp</div>
+                  <div class="safe-area-address">Trạm bơm Nhà Bè</div>
+                  <div class="safe-area-status">Đang hoạt động</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeEnvironmentBtn">Đóng</button>
+            <button type="button" class="btn btn-primary" id="submitEnvironmentReportBtn">Gửi báo cáo</button>
           </div>
         </div>
       </div>

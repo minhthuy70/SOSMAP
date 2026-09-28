@@ -3709,6 +3709,358 @@ body, html {
   }
 }
 
+/* Public Safety Panel */
+.safety-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.safety-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.safety-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.safety-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: #005BAC;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.safety-btn:hover {
+  background: #004a8a;
+}
+
+.safety-btn svg {
+  flex-shrink: 0;
+}
+
+.safety-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.safety-alert-item {
+  padding: 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.safety-alert-item.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.safety-alert-item.danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.safety-alert-item.info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+/* Traffic Information Styles */
+.traffic-filters {
+  margin-bottom: 20px;
+}
+
+.traffic-filters select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.traffic-info {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.traffic-section {
+  margin-bottom: 25px;
+}
+
+.traffic-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 15px;
+  color: #333;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 8px;
+}
+
+.traffic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.traffic-item {
+  padding: 12px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  border-left: 4px solid;
+}
+
+.traffic-item.blocked {
+  border-left-color: #e74c3c;
+  background: #fff0f0;
+}
+
+.traffic-item.one_way {
+  border-left-color: #f39c12;
+  background: #fffaf0;
+}
+
+.traffic-item.blocked_point {
+  border-left-color: #9b59b6;
+  background: #f5f0ff;
+}
+
+.traffic-item.priority {
+  border-left-color: #2ecc71;
+  background: #f0fff4;
+}
+
+.traffic-item.congestion {
+  border-left-color: #e67e22;
+  background: #fff5f0;
+}
+
+.traffic-item.service {
+  border-left-color: #3498db;
+  background: #f0f8ff;
+}
+
+.traffic-item.alternate {
+  border-left-color: #1abc9c;
+  background: #f0fffa;
+}
+
+.traffic-road {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.traffic-status {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.traffic-direction,
+.traffic-delay,
+.traffic-fuel,
+.traffic-info {
+  font-size: 12px;
+  color: #999;
+}
+
+.traffic-guidance {
+  margin-top: 25px;
+  padding: 15px;
+  background: #fff3cd;
+  border-radius: 8px;
+  border: 1px solid #ffc107;
+}
+
+.traffic-guidance h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #856404;
+}
+
+.guidance-box p {
+  margin: 8px 0;
+  font-size: 13px;
+  color: #856404;
+}
+
+.guidance-box ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.guidance-box li {
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #856404;
+}
+
+/* Environment Safety Styles */
+.environment-indicators {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.env-indicator {
+  padding: 15px;
+  border-radius: 8px;
+  background: #f8f9fa;
+  text-align: center;
+}
+
+.env-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.env-label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.env-value {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.env-value.good {
+  color: #2ecc71;
+}
+
+.env-value.warning {
+  color: #f39c12;
+}
+
+.env-value.danger {
+  color: #e74c3c;
+}
+
+.environment-alerts {
+  margin-bottom: 25px;
+}
+
+.environment-alerts h4 {
+  margin: 0 0 15px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.env-alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.env-alert-item {
+  padding: 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.env-alert-item.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.env-alert-item.danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.env-alert-item.info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.environment-report {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.environment-report h4 {
+  margin: 0 0 15px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.safe-areas h4 {
+  margin: 0 0 15px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.safe-areas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.safe-area-item {
+  padding: 12px;
+  border-radius: 6px;
+  background: #f0fff4;
+  border-left: 4px solid #2ecc71;
+}
+
+.safe-area-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.safe-area-address {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.safe-area-status {
+  font-size: 12px;
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+/* Responsive Safety Panel */
+@media (max-width: 768px) {
+  .safety-controls {
+    flex-direction: column;
+  }
+
+  .environment-indicators {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* System Status Panel */
 .system-status-panel {
   background: white;
