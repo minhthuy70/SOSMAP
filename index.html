@@ -699,6 +699,35 @@
           </div>
         </div>
 
+        <!-- Governance Panel -->
+        <div class="governance-panel" id="governancePanel">
+          <h3>Quản trị địa phương</h3>
+          <div class="governance-controls">
+            <button class="governance-btn" id="governanceDashboardBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="9" y1="21" x2="9" y2="9"></line>
+              </svg>
+              Dashboard
+            </button>
+            <button class="governance-btn" id="governanceAssignmentsBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 1.44 2.3 3.3 3.3 0 0 1 3.3 0 0 1 2.3-3.3L22 19.92"></path>
+                <line x1="22" y1="16.92" x2="12" y2="16.92"></line>
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 1.44 2.3 3.3 3.3 0 0 1 3.3 0 0 1 2.3-3.3L22 19.92"></path>
+              </svg>
+              Phân công
+            </button>
+          </div>
+          <div class="governance-alerts" id="governanceAlerts">
+            <div class="governance-alert-item info">
+              <span class="alert-icon">ℹ️</span>
+              <span class="alert-text">Hệ thống hoạt động bình thường</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -3294,6 +3323,229 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeCommunityFeedBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Governance Dashboard Modal -->
+      <div class="modal" id="governanceDashboardModal" style="display: none;">
+        <div class="modal-content" style="max-width: 1100px;">
+          <div class="modal-header">
+            <h3>Dashboard Quản trị địa phương</h3>
+            <button class="modal-close" id="closeGovernanceDashboardModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="governance-level-selector">
+              <select id="governanceLevel">
+                <option value="province">Tỉnh/Thành phố</option>
+                <option value="district">Quận/Huyện</option>
+                <option value="commune">Xã/Phường</option>
+                <option value="village">Thôn/Bản</option>
+              </select>
+              <select id="governanceLocation">
+                <option value="hcm">TP. Hồ Chí Minh</option>
+                <option value="hanoi">TP. Hà Nội</option>
+                <option value="danang">TP. Đà Nẵng</option>
+              </select>
+            </div>
+
+            <div class="governance-dashboard">
+              <div class="dashboard-stats">
+                <div class="stat-card">
+                  <div class="stat-icon">📊</div>
+                  <div class="stat-value">156</div>
+                  <div class="stat-label">Sự cố đang xử lý</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon">⏱️</div>
+                  <div class="stat-value">23</div>
+                  <div class="stat-label">Quá hạn cam kết</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon">🔄</div>
+                  <div class="stat-value">12</div>
+                  <div class="stat-label">Đang chờ chuyển giao</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon">📈</div>
+                  <div class="stat-value">89%</div>
+                  <div class="stat-label">Độ sẵn sàng</div>
+                </div>
+              </div>
+
+              <div class="dashboard-grid">
+                <div class="dashboard-section">
+                  <h4>Danh sách đơn vị hành chính</h4>
+                  <div class="admin-units-list">
+                    <div class="admin-unit-item">
+                      <div class="unit-name">Quận 1</div>
+                      <div class="unit-status active">Đang hoạt động</div>
+                      <div class="unit-duty">Đang trực</div>
+                    </div>
+                    <div class="admin-unit-item">
+                      <div class="unit-name">Quận 3</div>
+                      <div class="unit-status active">Đang hoạt động</div>
+                      <div class="unit-duty">Đang trực</div>
+                    </div>
+                    <div class="admin-unit-item">
+                      <div class="unit-name">Quận 5</div>
+                      <div class="unit-status warning">Vắng trực</div>
+                      <div class="unit-duty">-</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dashboard-section">
+                  <h4>Cơ quan đầu mối theo loại sự cố</h4>
+                  <div class="lead-agencies-list">
+                    <div class="agency-item">
+                      <div class="agency-type">Giao thông</div>
+                      <div class="agency-name">Sở Giao thông Vận tải</div>
+                      <div class="agency-contact">1900 xxxx</div>
+                    </div>
+                    <div class="agency-item">
+                      <div class="agency-type">Y tế</div>
+                      <div class="agency-name">Sở Y tế</div>
+                      <div class="agency-contact">1900 xxxx</div>
+                    </div>
+                    <div class="agency-item">
+                      <div class="agency-type">Công an</div>
+                      <div class="agency-name">Công an TP</div>
+                      <div class="agency-contact">113</div>
+                    </div>
+                    <div class="agency-item">
+                      <div class="agency-type">PCCC</div>
+                      <div class="agency-name">Cảnh sát PCCC</div>
+                      <div class="agency-contact">114</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dashboard-section">
+                  <h4>Kênh liên lạc khẩn cấp</h4>
+                  <div class="emergency-channels">
+                    <div class="channel-item">
+                      <div class="channel-name">Hotline chính</div>
+                      <div class="channel-number">1900 xxxx</div>
+                      <div class="channel-status active">Đang hoạt động</div>
+                    </div>
+                    <div class="channel-item">
+                      <div class="channel-name">Ca trực</div>
+                      <div class="channel-number">090 xxx xxx</div>
+                      <div class="channel-status active">Đang hoạt động</div>
+                    </div>
+                    <div class="channel-item">
+                      <div class="channel-name">Zalo OA</div>
+                      <div class="channel-number">@sosmap_zalo</div>
+                      <div class="channel-status active">Đang hoạt động</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dashboard-section">
+                  <h4>Sự cố vượt cấp cơ sở</h4>
+                  <div class="escalated-incidents">
+                    <div class="escalated-item">
+                      <div class="incident-id">INC-001</div>
+                      <div class="incident-type">Cháy nổ</div>
+                  <div class="incident-level">Vượt cấp</div>
+                      <div class="incident-action">Đã chuyển tỉnh</div>
+                    </div>
+                    <div class="escalated-item">
+                      <div class="incident-id">INC-002</div>
+                      <div class="incident-type">Ngập lụt</div>
+                      <div class="incident-level">Vượt cấp</div>
+                      <div class="incident-action">Đã chuyển huyện</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeGovernanceDashboardBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Governance Assignments Modal -->
+      <div class="modal" id="governanceAssignmentsModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>Phân công nhiệm vụ liên cơ quan</h3>
+            <button class="modal-close" id="closeGovernanceAssignmentsModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="assignment-form">
+              <div class="form-group">
+                <label for="assignmentIncident">Sự cố cần phân công *</label>
+                <select id="assignmentIncident" required>
+                  <option value="">-- Chọn sự cố --</option>
+                  <option value="inc1">INC-001 - Cháy nổ Q1</option>
+                  <option value="inc2">INC-002 - Ngập lụt Q3</option>
+                  <option value="inc3">INC-003 - Tai nạn giao thông Q5</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="assignmentAgencies">Cơ quan liên quan *</label>
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="agency" value="traffic">
+                    <span>Giao thông</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="agency" value="health">
+                    <span>Y tế</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="agency" value="police">
+                    <span>Công an</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="agency" value="fire">
+                    <span>PCCC</span>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" name="agency" value="military">
+                    <span>Quân đội</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="assignmentDeadline">Cam kết thời gian phản hồi *</label>
+                <input type="datetime-local" id="assignmentDeadline" required>
+              </div>
+
+              <div class="form-group">
+                <label for="assignmentNotes">Ghi chú</label>
+                <textarea id="assignmentNotes" rows="3" placeholder="Ghi chú chi tiết về nhiệm vụ..."></textarea>
+              </div>
+
+              <button class="btn btn-primary" id="createAssignmentBtn">Tạo nhiệm vụ</button>
+            </div>
+
+            <div class="existing-assignments">
+              <h4>Nhiệm vụ đang thực hiện</h4>
+              <div class="assignments-list">
+                <div class="assignment-item">
+                  <div class="assignment-incident">INC-001 - Cháy nổ Q1</div>
+                  <div class="assignment-agencies">Giao thông, PCCC, Công an</div>
+                  <div class="assignment-deadline">Hạn: 30/09/2024 14:00</div>
+                  <div class="assignment-status in-progress">Đang thực hiện</div>
+                </div>
+                <div class="assignment-item">
+                  <div class="assignment-incident">INC-002 - Ngập lụt Q3</div>
+                  <div class="assignment-agencies">Giao thông, Y tế</div>
+                  <div class="assignment-deadline">Hạn: 30/09/2024 16:00</div>
+                  <div class="assignment-status overdue">Quá hạn</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeGovernanceAssignmentsBtn">Đóng</button>
           </div>
         </div>
       </div>

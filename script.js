@@ -7900,6 +7900,210 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeCommunitySystem();
 });
 
+// Governance System
+var adminUnits = [
+  { id: 'unit1', name: 'Quận 1', level: 'district', status: 'active', duty: 'Đang trực', boundary: 'Q1', phone: '028 3839 xxxx' },
+  { id: 'unit2', name: 'Quận 3', level: 'district', status: 'active', duty: 'Đang trực', boundary: 'Q3', phone: '028 3823 xxxx' },
+  { id: 'unit3', name: 'Quận 5', level: 'district', status: 'warning', duty: '-', boundary: 'Q5', phone: '028 3838 xxxx' }
+];
+
+var leadAgencies = [
+  { id: 'agency1', type: 'traffic', name: 'Sở Giao thông Vận tải', phone: '1900 xxxx', email: 'sgtvt@hcmc.gov.vn' },
+  { id: 'agency2', type: 'health', name: 'Sở Y tế', phone: '1900 xxxx', email: 'syte@hcmc.gov.vn' },
+  { id: 'agency3', type: 'police', name: 'Công an TP', phone: '113', email: 'canhcm@hcmc.gov.vn' },
+  { id: 'agency4', type: 'fire', name: 'Cảnh sát PCCC', phone: '114', email: 'pccc@hcmc.gov.vn' }
+];
+
+var emergencyChannels = [
+  { id: 'channel1', name: 'Hotline chính', number: '1900 xxxx', status: 'active' },
+  { id: 'channel2', name: 'Ca trực', number: '090 xxx xxx', status: 'active' },
+  { id: 'channel3', name: 'Zalo OA', number: '@sosmap_zalo', status: 'active' }
+];
+
+var interAgencyAssignments = [];
+var escalatedIncidents = [];
+
+var governanceLevels = {
+  province: 'Tỉnh/Thành phố',
+  district: 'Quận/Huyện',
+  commune: 'Xã/Phường',
+  village: 'Thôn/Bản'
+};
+
+function initializeGovernanceSystem() {
+  // Load assignments from localStorage
+  var savedAssignments = localStorage.getItem('sosmap_inter_agency_assignments');
+  if (savedAssignments) {
+    interAgencyAssignments = JSON.parse(savedAssignments);
+  }
+
+  // Load escalated incidents
+  var savedEscalated = localStorage.getItem('sosmap_escalated_incidents');
+  if (savedEscalated) {
+    escalatedIncidents = JSON.parse(savedEscalated);
+  }
+
+  updateGovernanceAlerts();
+}
+
+function updateGovernanceAlerts() {
+  var alertsDiv = document.getElementById('governanceAlerts');
+  if (!alertsDiv) return;
+
+  var overdueAssignments = interAgencyAssignments.filter(function(a) {
+    return a.status === 'in_progress' && new Date(a.deadline) < new Date();
+  }).length;
+
+  if (overdueAssignments > 0) {
+    alertsDiv.innerHTML = `
+      <div class="governance-alert-item warning">
+        <span class="alert-icon">⚠️</span>
+        <span class="alert-text">${overdueAssignments} nhiệm vụ quá hạn cam kết</span>
+      </div>
+    `;
+  } else {
+    alertsDiv.innerHTML = `
+      <div class="governance-alert-item info">
+        <span class="alert-icon">ℹ️</span>
+        <span class="alert-text">Hệ thống hoạt động bình thường</span>
+      </div>
+    `;
+  }
+}
+
+function createInterAgencyAssignment(data) {
+  var assignment = {
+    id: 'IA-' + Date.now(),
+    incidentId: data.incidentId,
+    agencies: data.agencies,
+    deadline: data.deadline,
+    notes: data.notes,
+    status: 'in_progress',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    completedAt: null,
+    history: []
+  };
+
+  assignment.history.push({
+    action: 'created',
+    timestamp: new Date().toISOString(),
+    note: 'Nhiệm vụ liên cơ quan được tạo'
+  });
+
+  interAgencyAssignments.push(assignment);
+  saveInterAgencyAssignments();
+  updateGovernanceAlerts();
+
+  alert('Đã tạo nhiệm vụ liên cơ quan! Mã nhiệm vụ: ' + assignment.id);
+  logActivity('inter_agency_assignment', 'Tạo nhiệm vụ liên cơ quan: ' + assignment.id);
+
+  return assignment;
+}
+
+function escalateIncident(incidentId, fromLevel, toLevel, reason) {
+  var escalation = {
+    id: 'ESC-' + Date.now(),
+    incidentId: incidentId,
+    fromLevel: fromLevel,
+    toLevel: toLevel,
+    reason: reason,
+    escalatedAt: new Date().toISOString(),
+    acknowledged: false,
+    acknowledgedAt: null
+  };
+
+  escalatedIncidents.push(escalation);
+  saveEscalatedIncidents();
+
+  alert('Đã chuyển giao sự cố lên cấp cao hơn!');
+  logActivity('incident_escalation', 'Chuyển giao sự cố: ' + incidentId);
+
+  return escalation;
+}
+
+function saveInterAgencyAssignments() {
+  localStorage.setItem('sosmap_inter_agency_assignments', JSON.stringify(interAgencyAssignments));
+}
+
+function saveEscalatedIncidents() {
+  localStorage.setItem('sosmap_escalated_incidents', JSON.stringify(escalatedIncidents));
+}
+
+// Governance Dashboard Modal Event Listeners
+document.getElementById('governanceDashboardBtn').addEventListener('click', function() {
+  document.getElementById('governanceDashboardModal').style.display = 'block';
+});
+
+document.getElementById('closeGovernanceDashboardModal').addEventListener('click', function() {
+  document.getElementById('governanceDashboardModal').style.display = 'none';
+});
+
+document.getElementById('closeGovernanceDashboardBtn').addEventListener('click', function() {
+  document.getElementById('governanceDashboardModal').style.display = 'none';
+});
+
+document.getElementById('governanceLevel') && document.getElementById('governanceLevel').addEventListener('change', function() {
+  var level = this.value;
+  // Update dashboard based on level
+  // TODO: Implement level-specific dashboard
+});
+
+document.getElementById('governanceLocation') && document.getElementById('governanceLocation').addEventListener('change', function() {
+  var location = this.value;
+  // Update dashboard based on location
+  // TODO: Implement location-specific dashboard
+});
+
+// Governance Assignments Modal Event Listeners
+document.getElementById('governanceAssignmentsBtn').addEventListener('click', function() {
+  document.getElementById('governanceAssignmentsModal').style.display = 'block';
+});
+
+document.getElementById('closeGovernanceAssignmentsModal').addEventListener('click', function() {
+  document.getElementById('governanceAssignmentsModal').style.display = 'none';
+});
+
+document.getElementById('closeGovernanceAssignmentsBtn').addEventListener('click', function() {
+  document.getElementById('governanceAssignmentsModal').style.display = 'none';
+});
+
+document.getElementById('createAssignmentBtn') && document.getElementById('createAssignmentBtn').addEventListener('click', function() {
+  var incidentId = document.getElementById('assignmentIncident').value;
+  var deadline = document.getElementById('assignmentDeadline').value;
+  var notes = document.getElementById('assignmentNotes').value;
+
+  var agencies = [];
+  document.querySelectorAll('input[name="agency"]:checked').forEach(function(checkbox) {
+    agencies.push(checkbox.value);
+  });
+
+  if (!incidentId || !deadline || agencies.length === 0) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  var assignmentData = {
+    incidentId: incidentId,
+    agencies: agencies,
+    deadline: new Date(deadline).toISOString(),
+    notes: notes
+  };
+
+  createInterAgencyAssignment(assignmentData);
+  document.getElementById('assignmentIncident').value = '';
+  document.getElementById('assignmentDeadline').value = '';
+  document.getElementById('assignmentNotes').value = '';
+  document.querySelectorAll('input[name="agency"]').forEach(function(cb) {
+    cb.checked = false;
+  });
+});
+
+// Initialize governance system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeGovernanceSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {
