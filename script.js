@@ -7148,6 +7148,370 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeSafetySystem();
 });
 
+// Missing Persons System
+var missingPersons = [];
+var missingPersonSightings = [];
+
+var missingPriorities = {
+  low: 'Thấp',
+  medium: 'Trung bình',
+  high: 'Cao',
+  critical: 'Khẩn cấp'
+};
+
+var healthRisks = {
+  none: 'Không có',
+  low: 'Thấp',
+  medium: 'Trung bình',
+  high: 'Cao',
+  critical: 'Rất cao'
+};
+
+function initializeMissingPersonsSystem() {
+  // Load missing persons from localStorage
+  var savedMissing = localStorage.getItem('sosmap_missing_persons');
+  if (savedMissing) {
+    missingPersons = JSON.parse(savedMissing);
+  }
+
+  updateMissingAlerts();
+}
+
+function updateMissingAlerts() {
+  var alertsDiv = document.getElementById('missingAlerts');
+  if (!alertsDiv) return;
+
+  var activeMissing = missingPersons.filter(function(p) {
+    return p.status === 'missing';
+  });
+
+  if (activeMissing.length === 0) {
+    alertsDiv.innerHTML = `
+      <div class="missing-alert-item info">
+        <span class="alert-icon">ℹ️</span>
+        <span class="alert-text">Không có người mất tích nào</span>
+      </div>
+    `;
+    return;
+  }
+
+  alertsDiv.innerHTML = activeMissing.map(function(person) {
+    var level = person.priority;
+    var alertClass = level === 'critical' ? 'critical' : level === 'high' ? 'warning' : 'info';
+    var icon = level === 'critical' ? '🔴' : level === 'high' ? '⚠️' : 'ℹ️';
+
+    return `
+      <div class="missing-alert-item ${alertClass}">
+        <span class="alert-icon">${icon}</span>
+        <span class="alert-text">${person.name} (${person.age} tuổi) - ${missingPriorities[level]}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function createMissingPersonReport(data) {
+  var report = {
+    id: 'MISS-' + Date.now(),
+    name: data.name,
+    age: data.age,
+    gender: data.gender,
+    physicalDescription: data.physicalDescription,
+    clothing: data.clothing,
+    lastLocation: data.lastLocation,
+    lastSeenTime: data.lastSeenTime,
+    healthRisk: data.healthRisk,
+    priority: data.priority,
+    reporterName: data.reporterName,
+    reporterContact: data.reporterContact,
+    reporterRelation: data.reporterRelation,
+    hasPhoto: data.hasPhoto,
+    sensitiveInfo: data.sensitiveInfo,
+    status: 'missing',
+    verified: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    foundAt: null,
+    history: [],
+    sightings: []
+  };
+
+  // Add initial history entry
+  report.history.push({
+    action: 'created',
+    timestamp: new Date().toISOString(),
+    note: 'Báo cáo người mất tích được tạo',
+    source: 'reporter'
+  });
+
+  missingPersons.push(report);
+  saveMissingPersons();
+  updateMissingAlerts();
+
+  // Send browser notification
+  if (Notification.permission === 'granted') {
+    new Notification('🔍 Báo cáo người mất tích: ' + report.name, {
+      body: report.physicalDescription,
+      icon: '/favicon.ico',
+      requireInteraction: true
+    });
+  }
+
+  alert('Đã gửi báo cáo người mất tích! Mã báo cáo: ' + report.id);
+  logActivity('missing_person_report', 'Báo cáo người mất tích: ' + report.id);
+
+  return report;
+}
+
+function markMissingPersonFound(personId) {
+  var person = missingPersons.find(function(p) {
+    return p.id === personId;
+  });
+
+  if (!person) {
+    alert('Không tìm thấy thông tin người mất tích');
+    return;
+  }
+
+  if (!confirm('Xác nhận đã tìm thấy người này?')) {
+    return;
+  }
+
+  person.status = 'found';
+  person.foundAt = new Date().toISOString();
+  person.history.push({
+    action: 'found',
+    timestamp: new Date().toISOString(),
+    note: 'Đã tìm thấy người mất tích',
+    source: 'system'
+  });
+
+  saveMissingPersons();
+  updateMissingAlerts();
+  renderMissingPersonsList();
+
+  alert('Đã đánh dấu là đã tìm thấy!');
+  logActivity('missing_person_found', 'Đã tìm thấy: ' + personId);
+}
+
+function addSighting(personId, sightingData) {
+  var person = missingPersons.find(function(p) {
+    return p.id === personId;
+  });
+
+  if (!person) {
+    alert('Không tìm thấy thông tin người mất tích');
+    return;
+  }
+
+  var sighting = {
+    id: 'SIGHT-' + Date.now(),
+    location: sightingData.location,
+    time: sightingData.time,
+    description: sightingData.description,
+    reporter: sightingData.reporter,
+    contact: sightingData.contact,
+    timestamp: new Date().toISOString(),
+    verified: false
+  };
+
+  person.sightings.push(sighting);
+  person.history.push({
+    action: 'sighting',
+    timestamp: new Date().toISOString(),
+    note: 'Nhận được thông tin nhìn thấy',
+    source: 'community'
+  });
+
+  saveMissingPersons();
+
+  alert('Đã gửi thông tin nhìn thấy!');
+  logActivity('missing_person_sighting', 'Thông tin nhìn thấy: ' + personId);
+}
+
+function saveMissingPersons() {
+  localStorage.setItem('sosmap_missing_persons', JSON.stringify(missingPersons));
+}
+
+// Missing Person Report Modal Event Listeners
+document.getElementById('reportMissingBtn').addEventListener('click', function() {
+  document.getElementById('missingPersonModal').style.display = 'block';
+  getMissingLocation();
+});
+
+document.getElementById('closeMissingPersonModal').addEventListener('click', function() {
+  document.getElementById('missingPersonModal').style.display = 'none';
+});
+
+document.getElementById('cancelMissingPersonBtn').addEventListener('click', function() {
+  document.getElementById('missingPersonModal').style.display = 'none';
+});
+
+document.getElementById('getMissingLocationBtn').addEventListener('click', function() {
+  getMissingLocation();
+});
+
+function getMissingLocation() {
+  var locationInput = document.getElementById('missingLastLocation');
+  var latInput = document.getElementById('missingLat');
+  var lngInput = document.getElementById('missingLng');
+
+  locationInput.value = 'Đang lấy vị trí...';
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        latInput.value = lat;
+        lngInput.value = lng;
+        locationInput.value = lat.toFixed(6) + ', ' + lng.toFixed(6);
+      },
+      function(error) {
+        locationInput.value = 'Không thể lấy vị trí';
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  } else {
+    locationInput.value = 'Geolocation không được hỗ trợ';
+  }
+}
+
+document.getElementById('submitMissingPersonBtn').addEventListener('click', function() {
+  var name = document.getElementById('missingName').value;
+  var age = parseInt(document.getElementById('missingAge').value);
+  var gender = document.getElementById('missingGender').value;
+  var physicalDescription = document.getElementById('missingPhysicalDescription').value;
+  var clothing = document.getElementById('missingClothing').value;
+  var lastSeenTime = document.getElementById('missingLastSeenTime').value;
+  var healthRisk = document.getElementById('missingHealthRisk').value;
+  var priority = document.getElementById('missingPriority').value;
+  var reporterName = document.getElementById('missingReporterName').value;
+  var reporterContact = document.getElementById('missingReporterContact').value;
+  var reporterRelation = document.getElementById('missingReporterRelation').value;
+  var hasPhoto = document.getElementById('missingPhoto').files.length > 0;
+  var sensitiveInfo = document.getElementById('missingSensitiveInfo').checked;
+
+  var lat = document.getElementById('missingLat').value;
+  var lng = document.getElementById('missingLng').value;
+
+  if (!name || !age || !gender || !physicalDescription || !lastSeenTime || !reporterName || !reporterContact) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  var missingData = {
+    name: name,
+    age: age,
+    gender: gender,
+    physicalDescription: physicalDescription,
+    clothing: clothing,
+    lastLocation: lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null,
+    lastSeenTime: new Date(lastSeenTime).toISOString(),
+    healthRisk: healthRisk,
+    priority: priority,
+    reporterName: reporterName,
+    reporterContact: reporterContact,
+    reporterRelation: reporterRelation,
+    hasPhoto: hasPhoto,
+    sensitiveInfo: sensitiveInfo
+  };
+
+  createMissingPersonReport(missingData);
+  document.getElementById('missingPersonModal').style.display = 'none';
+  document.getElementById('missingPersonForm').reset();
+});
+
+// Missing Persons List Modal Event Listeners
+document.getElementById('viewMissingListBtn').addEventListener('click', function() {
+  renderMissingPersonsList();
+  document.getElementById('missingListModal').style.display = 'block';
+});
+
+document.getElementById('closeMissingListModal').addEventListener('click', function() {
+  document.getElementById('missingListModal').style.display = 'none';
+});
+
+document.getElementById('closeMissingListBtn').addEventListener('click', function() {
+  document.getElementById('missingListModal').style.display = 'none';
+});
+
+function renderMissingPersonsList() {
+  var list = document.getElementById('missingPersonsList');
+  if (!list) return;
+
+  var statusFilter = document.getElementById('missingStatusFilter').value;
+  var priorityFilter = document.getElementById('missingPriorityFilter').value;
+
+  var filteredPersons = missingPersons.filter(function(p) {
+    var statusMatch = statusFilter === 'all' || p.status === statusFilter;
+    var priorityMatch = priorityFilter === 'all' || p.priority === priorityFilter;
+    return statusMatch && priorityMatch;
+  });
+
+  if (filteredPersons.length === 0) {
+    list.innerHTML = '<div class="empty-state"><p>Không có người mất tích nào</p></div>';
+    return;
+  }
+
+  list.innerHTML = filteredPersons.map(function(person) {
+    var priorityLabel = missingPriorities[person.priority] || person.priority;
+    var statusLabel = person.status === 'missing' ? 'Đang tìm kiếm' : person.status === 'found' ? 'Đã tìm thấy' : 'Đã hủy';
+    var displayName = person.sensitiveInfo ? person.name.substring(0, 1) + '***' : person.name;
+
+    return `
+      <div class="missing-person-item ${person.status}">
+        <div class="missing-person-header">
+          <div class="missing-person-name">${displayName} (${person.age} tuổi)</div>
+          <span class="missing-person-badge ${person.priority}">${priorityLabel}</span>
+        </div>
+        <div class="missing-person-details">
+          <strong>Giới tính:</strong> ${person.gender === 'male' ? 'Nam' : person.gender === 'female' ? 'Nữ' : 'Khác'}<br>
+          <strong>Đặc điểm:</strong> ${person.physicalDescription}<br>
+          ${person.clothing ? '<strong>Quần áo:</strong> ' + person.clothing + '<br>' : ''}
+          <strong>Vị trí cuối:</strong> ${person.lastLocation ? person.lastLocation.lat.toFixed(6) + ', ' + person.lastLocation.lng.toFixed(6) : 'Chưa có'}<br>
+          <strong>Thời gian:</strong> ${new Date(person.lastSeenTime).toLocaleString('vi-VN')}<br>
+          <strong>Nguy cơ sức khỏe:</strong> ${healthRisks[person.healthRisk]}<br>
+          <strong>Người báo cáo:</strong> ${person.reporterName} (${person.reporterRelation || 'Không rõ'})
+        </div>
+        <div class="missing-person-meta">
+          <span>Mã: ${person.id}</span>
+          <span>Trạng thái: ${statusLabel}</span>
+        </div>
+        <div class="missing-person-actions">
+          <button class="missing-action-btn" onclick="viewMissingPersonDetails('${person.id}')">Chi tiết</button>
+          ${person.status === 'missing' ? `<button class="missing-action-btn" onclick="markMissingPersonFound('${person.id}')">Đã tìm thấy</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function viewMissingPersonDetails(personId) {
+  var person = missingPersons.find(function(p) {
+    return p.id === personId;
+  });
+
+  if (!person) {
+    alert('Không tìm thấy thông tin người mất tích');
+    return;
+  }
+
+  // TODO: Show detailed modal with full information, history, and sightings
+  alert('Chi tiết người mất tích: ' + person.name);
+}
+
+document.getElementById('missingStatusFilter') && document.getElementById('missingStatusFilter').addEventListener('change', renderMissingPersonsList);
+document.getElementById('missingPriorityFilter') && document.getElementById('missingPriorityFilter').addEventListener('change', renderMissingPersonsList);
+
+// Initialize missing persons system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeMissingPersonsSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {

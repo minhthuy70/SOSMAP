@@ -637,6 +637,36 @@
           </div>
         </div>
 
+        <!-- Missing Persons Panel -->
+        <div class="missing-panel" id="missingPanel">
+          <h3>Người mất tích</h3>
+          <div class="missing-controls">
+            <button class="missing-btn" id="reportMissingBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              Báo cáo mất tích
+            </button>
+            <button class="missing-btn" id="viewMissingListBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              Danh sách
+            </button>
+          </div>
+          <div class="missing-alerts" id="missingAlerts">
+            <div class="missing-alert-item info">
+              <span class="alert-icon">ℹ️</span>
+              <span class="alert-text">Không có người mất tích nào</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -2949,6 +2979,162 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeEnvironmentBtn">Đóng</button>
             <button type="button" class="btn btn-primary" id="submitEnvironmentReportBtn">Gửi báo cáo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Missing Person Report Modal -->
+      <div class="modal" id="missingPersonModal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+          <div class="modal-header">
+            <h3>🔍 Báo cáo người mất tích</h3>
+            <button class="modal-close" id="closeMissingPersonModal">×</button>
+          </div>
+          <div class="modal-body">
+            <form id="missingPersonForm">
+              <div class="form-group">
+                <label for="missingName">Họ tên người mất tích *</label>
+                <input type="text" id="missingName" required placeholder="Nhập họ tên đầy đủ">
+              </div>
+
+              <div class="form-group">
+                <label for="missingAge">Tuổi *</label>
+                <input type="number" id="missingAge" min="0" required placeholder="Tuổi">
+              </div>
+
+              <div class="form-group">
+                <label for="missingGender">Giới tính *</label>
+                <select id="missingGender" required>
+                  <option value="">-- Chọn --</option>
+                  <option value="male">Nam</option>
+                  <option value="female">Nữ</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="missingPhysicalDescription">Đặc điểm nhận dạng *</label>
+                <textarea id="missingPhysicalDescription" rows="3" required placeholder="Chiều cao, cân nặng, màu tóc, mắt, đặc điểm đặc biệt..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="missingClothing">Quần áo mặc khi mất tích</label>
+                <input type="text" id="missingClothing" placeholder="Mô tả quần áo, màu sắc...">
+              </div>
+
+              <div class="form-group">
+                <label for="missingLastLocation">Vị trí nhìn thấy cuối cùng *</label>
+                <div class="location-input-group">
+                  <input type="text" id="missingLastLocation" readonly placeholder="Đang lấy vị trí...">
+                  <button type="button" class="btn btn-secondary" id="getMissingLocationBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                    </svg>
+                    Lấy GPS
+                  </button>
+                </div>
+                <input type="hidden" id="missingLat">
+                <input type="hidden" id="missingLng">
+              </div>
+
+              <div class="form-group">
+                <label for="missingLastSeenTime">Thời gian nhìn thấy cuối cùng *</label>
+                <input type="datetime-local" id="missingLastSeenTime" required>
+              </div>
+
+              <div class="form-group">
+                <label for="missingHealthRisk">Nguy cơ sức khỏe</label>
+                <select id="missingHealthRisk">
+                  <option value="none">Không có</option>
+                  <option value="low">Thấp</option>
+                  <option value="medium">Trung bình</option>
+                  <option value="high">Cao</option>
+                  <option value="critical">Rất cao</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="missingPriority">Mức độ khẩn cấp *</label>
+                <select id="missingPriority" required>
+                  <option value="low">Thấp</option>
+                  <option value="medium" selected>Trung bình</option>
+                  <option value="high">Cao</option>
+                  <option value="critical">Khẩn cấp</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="missingReporterName">Người báo cáo *</label>
+                <input type="text" id="missingReporterName" required placeholder="Họ tên người báo cáo">
+              </div>
+
+              <div class="form-group">
+                <label for="missingReporterContact">Số điện thoại liên hệ *</label>
+                <input type="tel" id="missingReporterContact" required placeholder="Số điện thoại">
+              </div>
+
+              <div class="form-group">
+                <label for="missingReporterRelation">Mối quan hệ với người mất tích</label>
+                <input type="text" id="missingReporterRelation" placeholder="Ví dụ: Bố mẹ, vợ/chồng, bạn bè...">
+              </div>
+
+              <div class="form-group">
+                <label for="missingPhoto">Tải ảnh người mất tích</label>
+                <input type="file" id="missingPhoto" accept="image/*" multiple>
+                <div class="image-preview" id="missingPhotoPreview"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="missingSensitiveInfo">
+                  <span>Đây là trẻ em hoặc người dễ bị tổn thương (thông tin sẽ được ẩn)</span>
+                </label>
+              </div>
+
+              <div class="alert-warning">
+                <strong>⚠️ Lưu ý:</strong> Thông tin sẽ được xác minh trước khi phát hành công khai. Thông tin nhạy cảm của trẻ em sẽ được ẩn để bảo vệ.
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelMissingPersonBtn">Hủy</button>
+            <button type="button" class="btn btn-primary" id="submitMissingPersonBtn">🔍 Gửi báo cáo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Missing Persons List Modal -->
+      <div class="modal" id="missingListModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>Danh sách người mất tích</h3>
+            <button class="modal-close" id="closeMissingListModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="missing-filters">
+              <select id="missingStatusFilter">
+                <option value="all">Tất cả trạng thái</option>
+                <option value="missing">Đang tìm kiếm</option>
+                <option value="found">Đã tìm thấy</option>
+                <option value="cancelled">Đã hủy</option>
+              </select>
+              <select id="missingPriorityFilter">
+                <option value="all">Tất cả mức độ</option>
+                <option value="critical">Khẩn cấp</option>
+                <option value="high">Cao</option>
+                <option value="medium">Trung bình</option>
+                <option value="low">Thấp</option>
+              </select>
+            </div>
+            <div class="missing-persons-list" id="missingPersonsList">
+              <div class="empty-state">
+                <p>Không có người mất tích nào</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeMissingListBtn">Đóng</button>
           </div>
         </div>
       </div>

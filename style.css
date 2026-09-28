@@ -4061,6 +4061,214 @@ body, html {
   }
 }
 
+/* Missing Persons Panel */
+.missing-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.missing-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.missing-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.missing-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: #005BAC;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.missing-btn:hover {
+  background: #004a8a;
+}
+
+.missing-btn svg {
+  flex-shrink: 0;
+}
+
+.missing-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.missing-alert-item {
+  padding: 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.missing-alert-item.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.missing-alert-item.critical {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.missing-alert-item.info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+/* Missing Persons List Styles */
+.missing-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.missing-filters select {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.missing-persons-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.missing-person-item {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: #f8f9fa;
+  border-left: 4px solid;
+}
+
+.missing-person-item.missing {
+  border-left-color: #e74c3c;
+  background: #fff0f0;
+}
+
+.missing-person-item.found {
+  border-left-color: #2ecc71;
+  background: #f0fff4;
+}
+
+.missing-person-item.cancelled {
+  border-left-color: #95a5a6;
+  background: #f5f5f5;
+}
+
+.missing-person-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.missing-person-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #333;
+}
+
+.missing-person-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.missing-person-badge.critical {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.missing-person-badge.high {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.missing-person-badge.medium {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.missing-person-badge.low {
+  background: #d4edda;
+  color: #155724;
+}
+
+.missing-person-details {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.missing-person-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #999;
+}
+
+.missing-person-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.missing-action-btn {
+  padding: 4px 10px;
+  font-size: 12px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.missing-action-btn:hover {
+  background: #f8f9fa;
+  border-color: #005BAC;
+}
+
+/* Responsive Missing Panel */
+@media (max-width: 768px) {
+  .missing-controls {
+    flex-direction: column;
+  }
+
+  .missing-filters {
+    flex-direction: column;
+  }
+}
+
 /* System Status Panel */
 .system-status-panel {
   background: white;
