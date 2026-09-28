@@ -7512,6 +7512,394 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeMissingPersonsSystem();
 });
 
+// Community System
+var communityReports = [];
+var reportChannels = ['web', 'sms', 'zalo_oa', 'hotline'];
+var verificationStatus = {
+  unverified: 'Chưa xác minh',
+  verified: 'Đã xác minh',
+  corrected: 'Đã đính chính',
+  rejected: 'Đã từ chối'
+};
+
+function initializeCommunitySystem() {
+  // Load community reports from localStorage
+  var savedReports = localStorage.getItem('sosmap_community_reports');
+  if (savedReports) {
+    communityReports = JSON.parse(savedReports);
+  }
+
+  updateCommunityStats();
+}
+
+function updateCommunityStats() {
+  var statsDiv = document.getElementById('communityStats');
+  if (!statsDiv) return;
+
+  var today = new Date().toDateString();
+  var todayReports = communityReports.filter(function(r) {
+    return new Date(r.createdAt).toDateString() === today;
+  }).length;
+
+  var pendingReports = communityReports.filter(function(r) {
+    return r.status === 'pending';
+  }).length;
+
+  statsDiv.innerHTML = `
+    <div class="stat-item">
+      <span class="stat-value">${todayReports}</span>
+      <span class="stat-label">Phản ánh hôm nay</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">${pendingReports}</span>
+      <span class="stat-label">Đang xử lý</span>
+    </div>
+  `;
+}
+
+function createQuickReport(data) {
+  var report = {
+    id: 'QUICK-' + Date.now(),
+    type: data.type,
+    priority: data.priority,
+    content: data.content,
+    location: data.location,
+    contact: data.contact,
+    hasMedia: data.hasMedia,
+    language: data.language,
+    anonymous: data.anonymous,
+    channel: 'web',
+    status: 'pending',
+    verificationStatus: 'unverified',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    verifiedBy: null,
+    verifiedAt: null,
+    correction: null,
+    history: [],
+    sources: [],
+    duplicateOf: null,
+    spamScore: 0
+  };
+
+  // Check for duplicates
+  var duplicate = checkDuplicateReport(report);
+  if (duplicate) {
+    report.duplicateOf = duplicate.id;
+    report.spamScore += 50;
+  }
+
+  // Check for spam
+  var spamScore = calculateSpamScore(report);
+  report.spamScore = spamScore;
+
+  // Add initial history entry
+  report.history.push({
+    action: 'created',
+    timestamp: new Date().toISOString(),
+    note: 'Phản ánh nhanh được tạo',
+    channel: report.channel
+  });
+
+  communityReports.push(report);
+  saveCommunityReports();
+  updateCommunityStats();
+
+  // Send browser notification for critical reports
+  if (data.priority === 'critical' && Notification.permission === 'granted') {
+    new Notification('🚨 Phản ánh khẩn cấp', {
+      body: data.content,
+      icon: '/favicon.ico',
+      requireInteraction: true
+    });
+  }
+
+  alert('Đã gửi phản ánh! Mã phản ánh: ' + report.id);
+  logActivity('community_report', 'Phản ánh cộng đồng: ' + report.id);
+
+  return report;
+}
+
+function checkDuplicateReport(report) {
+  // Check for similar content or location
+  return communityReports.find(function(r) {
+    var timeDiff = new Date(report.createdAt) - new Date(r.createdAt);
+    var isRecent = timeDiff < 3600000; // Within 1 hour
+    var isSimilarLocation = report.location && r.location &&
+      Math.abs(report.location.lat - r.location.lat) < 0.001 &&
+      Math.abs(report.location.lng - r.location.lng) < 0.001;
+    var isSimilarContent = report.content && r.content &&
+      report.content.substring(0, 50) === r.content.substring(0, 50);
+
+    return isRecent && (isSimilarLocation || isSimilarContent);
+  });
+}
+
+function calculateSpamScore(report) {
+  var score = 0;
+
+  // Check for duplicate content
+  if (report.duplicateOf) {
+    score += 50;
+  }
+
+  // Check for short content
+  if (report.content && report.content.length < 20) {
+    score += 20;
+  }
+
+  // Check for excessive uppercase
+  if (report.content && report.content.length > 0) {
+    var uppercaseRatio = (report.content.match(/[A-Z]/g) || []).length / report.content.length;
+    if (uppercaseRatio > 0.5) {
+      score += 30;
+    }
+  }
+
+  return score;
+}
+
+function verifyReport(reportId, verifiedBy, notes) {
+  var report = communityReports.find(function(r) {
+    return r.id === reportId;
+  });
+
+  if (!report) {
+    alert('Không tìm thấy phản ánh');
+    return;
+  }
+
+  report.verificationStatus = 'verified';
+  report.verifiedBy = verifiedBy;
+  report.verifiedAt = new Date().toISOString();
+  report.history.push({
+    action: 'verified',
+    timestamp: new Date().toISOString(),
+    note: notes || 'Đã xác minh',
+    verifiedBy: verifiedBy
+  });
+
+  saveCommunityReports();
+  renderCommunityFeed();
+
+  alert('Đã xác minh phản ánh!');
+  logActivity('report_verify', 'Xác minh phản ánh: ' + reportId);
+}
+
+function correctReport(reportId, correction, correctedBy) {
+  var report = communityReports.find(function(r) {
+    return r.id === reportId;
+  });
+
+  if (!report) {
+    alert('Không tìm thấy phản ánh');
+    return;
+  }
+
+  report.verificationStatus = 'corrected';
+  report.correction = {
+    originalContent: report.content,
+    correctedContent: correction,
+    correctedBy: correctedBy,
+    correctedAt: new Date().toISOString()
+  };
+  report.history.push({
+    action: 'corrected',
+    timestamp: new Date().toISOString(),
+    note: 'Đã đính chính thông tin',
+    correctedBy: correctedBy
+  });
+
+  saveCommunityReports();
+  renderCommunityFeed();
+
+  alert('Đã đính chính phản ánh!');
+  logActivity('report_correct', 'Đính chính phản ánh: ' + reportId);
+}
+
+function addSourceToReport(reportId, source) {
+  var report = communityReports.find(function(r) {
+    return r.id === reportId;
+  });
+
+  if (!report) {
+    alert('Không tìm thấy phản ánh');
+    return;
+  }
+
+  report.sources.push({
+    type: source.type,
+    contact: source.contact,
+    timestamp: new Date().toISOString(),
+    verified: false
+  });
+
+  report.history.push({
+    action: 'source_added',
+    timestamp: new Date().toISOString(),
+    note: 'Thêm nguồn xác minh',
+    source: source.type
+  });
+
+  saveCommunityReports();
+
+  alert('Đã thêm nguồn xác minh!');
+}
+
+function saveCommunityReports() {
+  localStorage.setItem('sosmap_community_reports', JSON.stringify(communityReports));
+}
+
+// Quick Report Modal Event Listeners
+document.getElementById('quickReportBtn').addEventListener('click', function() {
+  document.getElementById('quickReportModal').style.display = 'block';
+  getQuickLocation();
+});
+
+document.getElementById('closeQuickReportModal').addEventListener('click', function() {
+  document.getElementById('quickReportModal').style.display = 'none';
+});
+
+document.getElementById('cancelQuickReportBtn').addEventListener('click', function() {
+  document.getElementById('quickReportModal').style.display = 'none';
+});
+
+document.getElementById('getQuickLocationBtn').addEventListener('click', function() {
+  getQuickLocation();
+});
+
+function getQuickLocation() {
+  var locationInput = document.getElementById('quickReportLocation');
+  var latInput = document.getElementById('quickLat');
+  var lngInput = document.getElementById('quickLng');
+
+  locationInput.value = 'Đang lấy vị trí...';
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        var lat = position.coords.latitude;
+        var lng = position.coords.longitude;
+        latInput.value = lat;
+        lngInput.value = lng;
+        locationInput.value = lat.toFixed(6) + ', ' + lng.toFixed(6);
+      },
+      function(error) {
+        locationInput.value = 'Không thể lấy vị trí';
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  } else {
+    locationInput.value = 'Geolocation không được hỗ trợ';
+  }
+}
+
+document.getElementById('submitQuickReportBtn').addEventListener('click', function() {
+  var type = document.getElementById('quickReportType').value;
+  var priority = document.getElementById('quickReportPriority').value;
+  var content = document.getElementById('quickReportContent').value;
+  var contact = document.getElementById('quickReportContact').value;
+  var hasMedia = document.getElementById('quickReportMedia').files.length > 0;
+  var language = document.getElementById('quickReportLanguage').value;
+  var anonymous = document.getElementById('quickReportAnonymous').checked;
+
+  var lat = document.getElementById('quickLat').value;
+  var lng = document.getElementById('quickLng').value;
+
+  if (!type || !priority || !content) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  var quickData = {
+    type: type,
+    priority: priority,
+    content: content,
+    location: lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null,
+    contact: contact,
+    hasMedia: hasMedia,
+    language: language,
+    anonymous: anonymous
+  };
+
+  createQuickReport(quickData);
+  document.getElementById('quickReportModal').style.display = 'none';
+  document.getElementById('quickReportForm').reset();
+});
+
+// Community Feed Modal Event Listeners
+document.getElementById('communityFeedBtn').addEventListener('click', function() {
+  renderCommunityFeed();
+  document.getElementById('communityFeedModal').style.display = 'block';
+});
+
+document.getElementById('closeCommunityFeedModal').addEventListener('click', function() {
+  document.getElementById('communityFeedModal').style.display = 'none';
+});
+
+document.getElementById('closeCommunityFeedBtn').addEventListener('click', function() {
+  document.getElementById('communityFeedModal').style.display = 'none';
+});
+
+function renderCommunityFeed() {
+  var feed = document.getElementById('communityFeed');
+  if (!feed) return;
+
+  var typeFilter = document.getElementById('feedTypeFilter').value;
+  var priorityFilter = document.getElementById('feedPriorityFilter').value;
+
+  var filteredReports = communityReports.filter(function(r) {
+    var typeMatch = typeFilter === 'all' || r.verificationStatus === typeFilter;
+    var priorityMatch = priorityFilter === 'all' || r.priority === priorityFilter;
+    return typeMatch && priorityMatch;
+  });
+
+  if (filteredReports.length === 0) {
+    feed.innerHTML = '<div class="empty-state"><p>Không có phản ánh nào</p></div>';
+    return;
+  }
+
+  feed.innerHTML = filteredReports.map(function(report) {
+    var statusLabel = verificationStatus[report.verificationStatus] || report.verificationStatus;
+    var displayName = report.anonymous ? 'Ẩn danh' : 'Người dùng';
+
+    return `
+      <div class="feed-item ${report.verificationStatus}">
+        <div class="feed-header">
+          <div class="feed-type">${report.type} - Mức độ: ${report.priority}</div>
+          <span class="feed-badge ${report.verificationStatus}">${statusLabel}</span>
+        </div>
+        <div class="feed-content">
+          ${report.correction ? '<strong>Đã đính chính:</strong> ' + report.correction.correctedContent : report.content}
+        </div>
+        <div class="feed-meta">
+          <span>${displayName}</span>
+          <span>${new Date(report.createdAt).toLocaleString('vi-VN')}</span>
+          <span>Mã: ${report.id}</span>
+        </div>
+        ${report.verificationStatus === 'unverified' ? `
+        <div class="feed-actions">
+          <button class="feed-action-btn" onclick="verifyReport('${report.id}', 'admin', 'Đã xác minh')">Xác minh</button>
+          <button class="feed-action-btn" onclick="correctReport('${report.id}', 'Thông tin chính xác...', 'admin')">Đính chính</button>
+        </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('feedTypeFilter') && document.getElementById('feedTypeFilter').addEventListener('change', renderCommunityFeed);
+document.getElementById('feedPriorityFilter') && document.getElementById('feedPriorityFilter').addEventListener('change', renderCommunityFeed);
+
+// Initialize community system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeCommunitySystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {
