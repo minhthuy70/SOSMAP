@@ -8104,6 +8104,297 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeGovernanceSystem();
 });
 
+// Planning & Drills System
+var emergencyPlans = [];
+var activeDrill = null;
+var drillHistory = [];
+
+var planTypes = {
+  flood: 'Bão lũ',
+  epidemic: 'Dịch bệnh',
+  fire: 'Cháy nổ',
+  earthquake: 'Động đất',
+  other: 'Khác'
+};
+
+function initializePlanningSystem() {
+  // Load plans from localStorage
+  var savedPlans = localStorage.getItem('sosmap_emergency_plans');
+  if (savedPlans) {
+    emergencyPlans = JSON.parse(savedPlans);
+  }
+
+  // Load drill history
+  var savedDrills = localStorage.getItem('sosmap_drill_history');
+  if (savedDrills) {
+    drillHistory = JSON.parse(savedDrills);
+  }
+
+  updatePlanningAlerts();
+}
+
+function updatePlanningAlerts() {
+  var alertsDiv = document.getElementById('planningAlerts');
+  if (!alertsDiv) return;
+
+  if (activeDrill) {
+    alertsDiv.innerHTML = `
+      <div class="planning-alert-item warning">
+        <span class="alert-icon">🎯</span>
+        <span class="alert-text">Đang diễn tập: ${activeDrill.planName}</span>
+      </div>
+    `;
+  } else {
+    alertsDiv.innerHTML = `
+      <div class="planning-alert-item info">
+        <span class="alert-icon">ℹ️</span>
+        <span class="alert-text">Không có diễn tập nào đang diễn ra</span>
+      </div>
+    `;
+  }
+}
+
+function createEmergencyPlan(data) {
+  var plan = {
+    id: 'PLAN-' + Date.now(),
+    type: data.type,
+    name: data.name,
+    area: data.area,
+    participants: data.participants,
+    timeline: data.timeline,
+    tasks: data.tasks,
+    resources: data.resources,
+    contact: data.contact,
+    isDrill: data.isDrill,
+    version: 1,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: 'active'
+  };
+
+  emergencyPlans.push(plan);
+  saveEmergencyPlans();
+
+  alert('Đã tạo phương án! Mã phương án: ' + plan.id);
+  logActivity('plan_create', 'Tạo phương án: ' + plan.id);
+
+  return plan;
+}
+
+function startDrill(planId, startTime, participants) {
+  var plan = emergencyPlans.find(function(p) {
+    return p.id === planId;
+  });
+
+  if (!plan) {
+    alert('Không tìm thấy phương án');
+    return;
+  }
+
+  activeDrill = {
+    id: 'DRILL-' + Date.now(),
+    planId: planId,
+    planName: plan.name,
+    startTime: new Date(startTime).toISOString(),
+    participants: participants,
+    status: 'in_progress',
+    responseTimes: [],
+    readinessScores: [],
+    evaluation: null,
+    lessons: null,
+    recommendations: null,
+    endedAt: null
+  };
+
+  updatePlanningAlerts();
+
+  alert('Đã bắt đầu diễn tập!');
+  logActivity('drill_start', 'Bắt đầu diễn tập: ' + activeDrill.id);
+
+  return activeDrill;
+}
+
+function endDrill(evaluation, lessons, recommendations) {
+  if (!activeDrill) {
+    alert('Không có diễn tập nào đang diễn ra');
+    return;
+  }
+
+  activeDrill.status = 'completed';
+  activeDrill.endedAt = new Date().toISOString();
+  activeDrill.evaluation = evaluation;
+  activeDrill.lessons = lessons;
+  activeDrill.recommendations = recommendations;
+
+  drillHistory.push(activeDrill);
+  saveDrillHistory();
+
+  var completedDrill = activeDrill;
+  activeDrill = null;
+  updatePlanningAlerts();
+
+  alert('Đã kết thúc diễn tập và lưu báo cáo!');
+  logActivity('drill_end', 'Kết thúc diễn tập: ' + completedDrill.id);
+
+  return completedDrill;
+}
+
+function recordResponseTime(unitId, responseTime) {
+  if (!activeDrill) return;
+
+  activeDrill.responseTimes.push({
+    unitId: unitId,
+    responseTime: responseTime,
+    timestamp: new Date().toISOString()
+  });
+}
+
+function recordReadinessScore(unitId, score) {
+  if (!activeDrill) return;
+
+  activeDrill.readinessScores.push({
+    unitId: unitId,
+    score: score,
+    timestamp: new Date().toISOString()
+  });
+}
+
+function saveEmergencyPlans() {
+  localStorage.setItem('sosmap_emergency_plans', JSON.stringify(emergencyPlans));
+}
+
+function saveDrillHistory() {
+  localStorage.setItem('sosmap_drill_history', JSON.stringify(drillHistory));
+}
+
+// Create Plan Modal Event Listeners
+document.getElementById('createPlanBtn').addEventListener('click', function() {
+  document.getElementById('createPlanModal').style.display = 'block';
+});
+
+document.getElementById('closeCreatePlanModal').addEventListener('click', function() {
+  document.getElementById('createPlanModal').style.display = 'none';
+});
+
+document.getElementById('cancelCreatePlanBtn').addEventListener('click', function() {
+  document.getElementById('createPlanModal').style.display = 'none';
+});
+
+document.getElementById('submitCreatePlanBtn').addEventListener('click', function() {
+  var type = document.getElementById('planType').value;
+  var name = document.getElementById('planName').value;
+  var area = document.getElementById('planArea').value;
+  var participants = document.getElementById('planParticipants').value;
+  var timeline = document.getElementById('planTimeline').value;
+  var tasks = document.getElementById('planTasks').value;
+  var resources = document.getElementById('planResources').value;
+  var contact = document.getElementById('planContact').value;
+  var isDrill = document.getElementById('planIsDrill').checked;
+
+  if (!type || !name || !area || !participants || !contact) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  var planData = {
+    type: type,
+    name: name,
+    area: area,
+    participants: participants,
+    timeline: timeline,
+    tasks: tasks,
+    resources: resources,
+    contact: contact,
+    isDrill: isDrill
+  };
+
+  createEmergencyPlan(planData);
+  document.getElementById('createPlanModal').style.display = 'none';
+  document.getElementById('createPlanForm').reset();
+});
+
+// Drill Modal Event Listeners
+document.getElementById('startDrillBtn').addEventListener('click', function() {
+  document.getElementById('drillModal').style.display = 'block';
+});
+
+document.getElementById('closeDrillModal').addEventListener('click', function() {
+  document.getElementById('drillModal').style.display = 'none';
+});
+
+document.getElementById('closeDrillBtn').addEventListener('click', function() {
+  document.getElementById('drillModal').style.display = 'none';
+});
+
+document.getElementById('startDrillBtn') && document.getElementById('startDrillBtn').addEventListener('click', function() {
+  var planId = document.getElementById('drillPlan').value;
+  var startTime = document.getElementById('drillStartTime').value;
+  var participants = document.getElementById('drillParticipants').value;
+
+  if (!planId || !startTime || !participants) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  startDrill(planId, startTime, participants);
+
+  document.getElementById('drillSetup').style.display = 'none';
+  document.getElementById('drillMonitoring').style.display = 'block';
+
+  // Start elapsed time counter
+  var elapsedCounter = 0;
+  var elapsedInterval = setInterval(function() {
+    if (!activeDrill || activeDrill.status !== 'in_progress') {
+      clearInterval(elapsedInterval);
+      return;
+    }
+    elapsedCounter++;
+    document.getElementById('drillElapsedTime').textContent = elapsedCounter + ' phút';
+  }, 60000); // Update every minute
+
+  document.getElementById('drillStartTimeDisplay').textContent = new Date(startTime).toLocaleString('vi-VN');
+});
+
+document.getElementById('simulateAlertBtn') && document.getElementById('simulateAlertBtn').addEventListener('click', function() {
+  if (!activeDrill) return;
+
+  // Simulate alert
+  if (Notification.permission === 'granted') {
+    new Notification('📢 Diễn tập cảnh báo', {
+      body: 'Đây là mô phỏng cảnh báo cho diễn tập: ' + activeDrill.planName,
+      icon: '/favicon.ico'
+    });
+  }
+
+  alert('Đã mô phỏng cảnh báo!');
+  logActivity('drill_simulate_alert', 'Mô phỏng cảnh báo: ' + activeDrill.id);
+});
+
+document.getElementById('endDrillBtn') && document.getElementById('endDrillBtn').addEventListener('click', function() {
+  document.getElementById('drillMonitoring').style.display = 'none';
+  document.getElementById('drillReport').style.display = 'block';
+});
+
+document.getElementById('submitDrillReportBtn') && document.getElementById('submitDrillReportBtn').addEventListener('click', function() {
+  var evaluation = document.getElementById('drillEvaluation').value;
+  var lessons = document.getElementById('drillLessons').value;
+  var recommendations = document.getElementById('drillRecommendations').value;
+
+  endDrill(evaluation, lessons, recommendations);
+
+  document.getElementById('drillModal').style.display = 'none';
+  document.getElementById('drillReport').style.display = 'none';
+  document.getElementById('drillSetup').style.display = 'block';
+  document.getElementById('drillEvaluation').value = '';
+  document.getElementById('drillLessons').value = '';
+  document.getElementById('drillRecommendations').value = '';
+});
+
+// Initialize planning system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializePlanningSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {

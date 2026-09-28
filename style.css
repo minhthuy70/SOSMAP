@@ -4815,6 +4815,216 @@ body, html {
   }
 }
 
+/* Planning & Drills Panel */
+.planning-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.planning-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.planning-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.planning-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: #005BAC;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.planning-btn:hover {
+  background: #004a8a;
+}
+
+.planning-btn svg {
+  flex-shrink: 0;
+}
+
+.planning-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.planning-alert-item {
+  padding: 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.planning-alert-item.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.planning-alert-item.critical {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.planning-alert-item.info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+/* Drill Monitoring Styles */
+.drill-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.drill-info {
+  font-size: 13px;
+  color: #666;
+}
+
+.drill-status-text {
+  font-weight: 600;
+  color: #005BAC;
+}
+
+.drill-simulation {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #fff3cd;
+  border-radius: 8px;
+}
+
+.drill-simulation h5 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #856404;
+}
+
+.response-times-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.response-time-item {
+  padding: 10px;
+  border-radius: 6px;
+  background: white;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.response-time-unit {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.response-time-value {
+  font-size: 13px;
+  color: #666;
+}
+
+.readiness-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.readiness-item {
+  padding: 10px;
+  border-radius: 6px;
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.readiness-item .unit-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.readiness-score {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2ecc71;
+}
+
+.drill-report {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f0fff4;
+  border-radius: 8px;
+  border: 1px solid #2ecc71;
+}
+
+.drill-report h4 {
+  margin: 0 0 15px 0;
+  font-size: 15px;
+  color: #155724;
+}
+
+.drill-report .form-group {
+  margin-bottom: 15px;
+}
+
+.drill-report label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #333;
+  font-weight: 600;
+}
+
+.drill-report select,
+.drill-report textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+/* Responsive Planning Panel */
+@media (max-width: 768px) {
+  .planning-controls {
+    flex-direction: column;
+  }
+
+  .drill-status {
+    flex-direction: column;
+  }
+}
+
 /* System Status Panel */
 .system-status-panel {
   background: white;

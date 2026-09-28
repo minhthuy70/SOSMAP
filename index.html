@@ -728,6 +728,35 @@
           </div>
         </div>
 
+        <!-- Planning & Drills Panel -->
+        <div class="planning-panel" id="planningPanel">
+          <h3>Phương án & Diễn tập</h3>
+          <div class="planning-controls">
+            <button class="planning-btn" id="createPlanBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              Tạo phương án
+            </button>
+            <button class="planning-btn" id="startDrillBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              Bắt đầu diễn tập
+            </button>
+          </div>
+          <div class="planning-alerts" id="planningAlerts">
+            <div class="planning-alert-item info">
+              <span class="alert-icon">ℹ️</span>
+              <span class="alert-text">Không có diễn tập nào đang diễn ra</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -3546,6 +3575,189 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeGovernanceAssignmentsBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Plan Modal -->
+      <div class="modal" id="createPlanModal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+          <div class="modal-header">
+            <h3>📋 Tạo phương án ứng phó</h3>
+            <button class="modal-close" id="closeCreatePlanModal">×</button>
+          </div>
+          <div class="modal-body">
+            <form id="createPlanForm">
+              <div class="form-group">
+                <label for="planType">Loại phương án *</label>
+                <select id="planType" required>
+                  <option value="">-- Chọn loại --</option>
+                  <option value="flood">Bão lũ</option>
+                  <option value="epidemic">Dịch bệnh</option>
+                  <option value="fire">Cháy nổ</option>
+                  <option value="earthquake">Động đất</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="planName">Tên phương án *</label>
+                <input type="text" id="planName" required placeholder="Tên phương án">
+              </div>
+
+              <div class="form-group">
+                <label for="planArea">Địa bàn áp dụng *</label>
+                <input type="text" id="planArea" required placeholder="Khu vực áp dụng">
+              </div>
+
+              <div class="form-group">
+                <label for="planParticipants">Lực lượng tham gia *</label>
+                <input type="text" id="planParticipants" required placeholder="Số lượng và loại lực lượng">
+              </div>
+
+              <div class="form-group">
+                <label for="planTimeline">Thời gian thực hiện</label>
+                <input type="text" id="planTimeline" placeholder="Thời gian dự kiến">
+              </div>
+
+              <div class="form-group">
+                <label for="planTasks">Danh sách nhiệm vụ</label>
+                <textarea id="planTasks" rows="5" placeholder="Liệt kê các nhiệm vụ chi tiết..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="planResources">Tài nguyên cần thiết</label>
+                <textarea id="planResources" rows="3" placeholder="Liệt kê tài nguyên, vật tư..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="planContact">Người phụ trách *</label>
+                <input type="text" id="planContact" required placeholder="Tên và số điện thoại">
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="planIsDrill">
+                  <span>Đây là phương án diễn tập (không hiển thị nhầm với dữ liệu thật)</span>
+                </label>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelCreatePlanBtn">Hủy</button>
+            <button type="button" class="btn btn-primary" id="submitCreatePlanBtn">💾 Lưu phương án</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drill Modal -->
+      <div class="modal" id="drillModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>🎯 Diễn tập ứng phó</h3>
+            <button class="modal-close" id="closeDrillModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="drill-setup">
+              <h4>Thiết lập diễn tập</h4>
+              <div class="form-group">
+                <label for="drillPlan">Chọn phương án *</label>
+                <select id="drillPlan" required>
+                  <option value="">-- Chọn phương án --</option>
+                  <option value="plan1">Phương án bão lũ Q1</option>
+                  <option value="plan2">Phương án cháy nổ Q3</option>
+                  <option value="plan3">Phương án dịch bệnh Q5</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="drillStartTime">Thời gian bắt đầu *</label>
+                <input type="datetime-local" id="drillStartTime" required>
+              </div>
+
+              <div class="form-group">
+                <label for="drillParticipants">Đơn vị tham gia *</label>
+                <input type="text" id="drillParticipants" required placeholder="Liệt kê đơn vị tham gia">
+              </div>
+
+              <button class="btn btn-primary" id="startDrillBtn">🚀 Bắt đầu diễn tập</button>
+            </div>
+
+            <div class="drill-monitoring" id="drillMonitoring" style="display: none;">
+              <h4>Giám sát diễn tập</h4>
+              <div class="drill-status">
+                <div class="drill-info">
+                  <span>Trạng thái: </span>
+                  <span class="drill-status-text" id="drillStatusText">Đang diễn tập</span>
+                </div>
+                <div class="drill-info">
+                  <span>Thời gian bắt đầu: </span>
+                  <span id="drillStartTimeDisplay">-</span>
+                </div>
+                <div class="drill-info">
+                  <span>Thời gian chạy: </span>
+                  <span id="drillElapsedTime">0 phút</span>
+                </div>
+              </div>
+
+              <div class="drill-simulation">
+                <h5>Mô phỏng cảnh báo</h5>
+                <button class="btn btn-warning" id="simulateAlertBtn">📢 Mô phỏng cảnh báo</button>
+              </div>
+
+              <div class="drill-response-times">
+                <h5>Thời gian phản hồi</h5>
+                <div class="response-times-list" id="responseTimesList">
+                  <div class="empty-state">
+                    <p>Chưa có dữ liệu phản hồi</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="drill-readiness">
+                <h5>Chấm điểm sẵn sàng</h5>
+                <div class="readiness-scores" id="readinessScores">
+                  <div class="readiness-item">
+                    <span class="unit-name">Đơn vị A</span>
+                    <span class="readiness-score">85%</span>
+                  </div>
+                  <div class="readiness-item">
+                    <span class="unit-name">Đơn vị B</span>
+                    <span class="readiness-score">92%</span>
+                  </div>
+                </div>
+              </div>
+
+              <button class="btn btn-danger" id="endDrillBtn">⏹️ Kết thúc diễn tập</button>
+            </div>
+
+            <div class="drill-report" id="drillReport" style="display: none;">
+              <h4>Báo cáo rút kinh nghiệm</h4>
+              <div class="form-group">
+                <label for="drillEvaluation">Đánh giá tổng quan</label>
+                <select id="drillEvaluation">
+                  <option value="excellent">Xuất sắc</option>
+                  <option value="good">Tốt</option>
+                  <option value="fair">Trung bình</option>
+                  <option value="poor">Kém</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="drillLessons">Bài học rút ra</label>
+                <textarea id="drillLessons" rows="4" placeholder="Liệt kê bài học và điểm cần cải thiện..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="drillRecommendations">Khuyến nghị</label>
+                <textarea id="drillRecommendations" rows="3" placeholder="Khuyến nghị cho lần diễn tập sau..."></textarea>
+              </div>
+
+              <button class="btn btn-primary" id="submitDrillReportBtn">📝 Lưu báo cáo</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeDrillBtn">Đóng</button>
           </div>
         </div>
       </div>
