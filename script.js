@@ -11100,6 +11100,280 @@ document.addEventListener('DOMContentLoaded', function() {
   setupLazyMarkers();
 });
 
+// Mobile & Accessibility Improvements
+var mobileSettings = {
+  sidebarOpen: false,
+  fontSize: 'medium',
+  highContrast: false,
+  reducedMotion: false
+};
+
+function initializeMobileFeatures() {
+  // Load mobile settings from localStorage
+  var savedSettings = localStorage.getItem('sosmap_mobile_settings');
+  if (savedSettings) {
+    mobileSettings = JSON.parse(savedSettings);
+  }
+
+  // Apply saved settings
+  applyFontSize(mobileSettings.fontSize);
+  applyHighContrast(mobileSettings.highContrast);
+  applyReducedMotion(mobileSettings.reducedMotion);
+
+  // Setup mobile toggle button
+  setupSidebarToggle();
+
+  // Setup FAB
+  setupFAB();
+
+  // Setup keyboard navigation
+  setupKeyboardNavigation();
+
+  // Setup ARIA live regions
+  setupARIALiveRegions();
+}
+
+function setupSidebarToggle() {
+  var toggleBtn = document.querySelector('.sidebar-toggle');
+  var sidebar = document.querySelector('.sidebar');
+  var navbarNav = document.querySelector('.navbar-nav');
+
+  if (toggleBtn && sidebar) {
+    toggleBtn.addEventListener('click', function() {
+      mobileSettings.sidebarOpen = !mobileSettings.sidebarOpen;
+      sidebar.classList.toggle('active', mobileSettings.sidebarOpen);
+      navbarNav.classList.toggle('active', mobileSettings.sidebarOpen);
+      saveMobileSettings();
+    });
+  }
+
+  // Close sidebar when clicking outside
+  document.addEventListener('click', function(e) {
+    if (mobileSettings.sidebarOpen && 
+        !sidebar.contains(e.target) && 
+        !toggleBtn.contains(e.target) &&
+        !navbarNav.contains(e.target)) {
+      mobileSettings.sidebarOpen = false;
+      sidebar.classList.remove('active');
+      navbarNav.classList.remove('active');
+      saveMobileSettings();
+    }
+  });
+}
+
+function setupFAB() {
+  var fab = document.getElementById('quickReportFab');
+  if (fab) {
+    fab.addEventListener('click', function() {
+      // Open report modal or navigate to report section
+      var reportSection = document.getElementById('report-section');
+      if (reportSection) {
+        // Hide all sections
+        document.querySelectorAll('.content-section').forEach(function(section) {
+          section.classList.remove('active');
+        });
+        // Show report section
+        reportSection.classList.add('active');
+        // Update nav links
+        document.querySelectorAll('.nav-link').forEach(function(link) {
+          link.classList.remove('active');
+        });
+        var reportLink = document.querySelector('[data-section="report"]');
+        if (reportLink) {
+          reportLink.classList.add('active');
+        }
+      }
+    });
+  }
+}
+
+function setupKeyboardNavigation() {
+  // Enable keyboard navigation for modal
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      // Close all modals
+      document.querySelectorAll('.modal').forEach(function(modal) {
+        modal.style.display = 'none';
+      });
+    }
+
+    // Tab navigation focus trap in modals
+    if (e.key === 'Tab') {
+      var openModal = document.querySelector('.modal[style*="display: block"]');
+      if (openModal) {
+        var focusableElements = openModal.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        var firstElement = focusableElements[0];
+        var lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    }
+  });
+}
+
+function setupARIALiveRegions() {
+  var ariaLive = document.getElementById('ariaLiveRegion');
+  if (ariaLive) {
+    // Function to announce messages to screen readers
+    window.announceToScreenReader = function(message) {
+      ariaLive.textContent = message;
+      setTimeout(function() {
+        ariaLive.textContent = '';
+      }, 1000);
+    };
+  }
+}
+
+function applyFontSize(size) {
+  var html = document.documentElement;
+  html.classList.remove('font-small', 'font-medium', 'font-large', 'font-xlarge');
+  html.classList.add('font-' + size);
+}
+
+function applyHighContrast(enabled) {
+  if (enabled) {
+    document.body.classList.add('high-contrast');
+  } else {
+    document.body.classList.remove('high-contrast');
+  }
+}
+
+function applyReducedMotion(enabled) {
+  if (enabled) {
+    document.body.classList.add('reduced-motion');
+  } else {
+    document.body.classList.remove('reduced-motion');
+  }
+}
+
+// Font size controls
+document.getElementById('fontSmall').addEventListener('click', function() {
+  mobileSettings.fontSize = 'small';
+  applyFontSize('small');
+  saveMobileSettings();
+});
+
+document.getElementById('fontMedium').addEventListener('click', function() {
+  mobileSettings.fontSize = 'medium';
+  applyFontSize('medium');
+  saveMobileSettings();
+});
+
+document.getElementById('fontLarge').addEventListener('click', function() {
+  mobileSettings.fontSize = 'large';
+  applyFontSize('large');
+  saveMobileSettings();
+});
+
+document.getElementById('fontXLarge').addEventListener('click', function() {
+  mobileSettings.fontSize = 'xlarge';
+  applyFontSize('xlarge');
+  saveMobileSettings();
+});
+
+// Accessibility toggle
+document.getElementById('accessibilityToggle').addEventListener('click', function() {
+  var controls = document.getElementById('fontSizeControls');
+  controls.classList.toggle('active');
+});
+
+// Save mobile settings
+function saveMobileSettings() {
+  localStorage.setItem('sosmap_mobile_settings', JSON.stringify(mobileSettings));
+}
+
+// Touch gesture support for map
+function setupTouchGestures() {
+  var map = document.getElementById('map');
+  if (!map) return;
+
+  var touchStartX = 0;
+  var touchStartY = 0;
+
+  map.addEventListener('touchstart', function(e) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  map.addEventListener('touchend', function(e) {
+    var touchEndX = e.changedTouches[0].clientX;
+    var touchEndY = e.changedTouches[0].clientY;
+    var diffX = touchEndX - touchStartX;
+    var diffY = touchEndY - touchStartY;
+
+    // Simple swipe detection
+    if (Math.abs(diffX) > 50 || Math.abs(diffY) > 50) {
+      announceToScreenReader('Thao tác vuốt bản đồ');
+    }
+  }, { passive: true });
+}
+
+// Camera capture support
+function captureCamera(callback) {
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      .then(function(stream) {
+        if (callback) callback(stream);
+      })
+      .catch(function(error) {
+        console.error('Camera capture error:', error);
+        alert('Không thể truy cập camera: ' + error.message);
+      });
+  } else {
+    alert('Trình duyệt không hỗ trợ truy cập camera');
+  }
+}
+
+// GPS capture with high accuracy
+function captureGPS(callback) {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        if (callback) callback(position);
+      },
+      function(error) {
+        console.error('GPS capture error:', error);
+        alert('Không thể lấy vị trí: ' + error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  } else {
+    alert('Trình duyệt không hỗ trợ GPS');
+  }
+}
+
+// Offline detection and notification
+function setupOfflineDetection() {
+  window.addEventListener('online', function() {
+    announceToScreenReader('Đã kết nối lại mạng');
+    logActivity('network_status', 'Online');
+  });
+
+  window.addEventListener('offline', function() {
+    announceToScreenReader('Đã mất kết nối mạng');
+    logActivity('network_status', 'Offline');
+  });
+}
+
+// Initialize mobile features on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeMobileFeatures();
+  setupTouchGestures();
+  setupOfflineDetection();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {

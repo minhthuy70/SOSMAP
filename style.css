@@ -7586,6 +7586,440 @@ body, html {
   }
 }
 
+/* Mobile Responsive Improvements */
+@media (max-width: 768px) {
+  /* Navbar mobile improvements */
+  .navbar-nav {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: white;
+    flex-direction: column;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+    z-index: 999;
+  }
+
+  .navbar-nav.active {
+    transform: translateY(0);
+  }
+
+  .navbar-nav .nav-link {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+  }
+
+  /* Sidebar improvements */
+  .sidebar {
+    position: fixed;
+    right: -320px;
+    top: 60px;
+    bottom: 0;
+    width: 320px;
+    z-index: 998;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .sidebar.active {
+    right: 0;
+  }
+
+  .sidebar-toggle {
+    display: block;
+    position: fixed;
+    right: 20px;
+    top: 80px;
+    z-index: 999;
+    background: #005BAC;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  /* Map improvements for mobile */
+  #map {
+    height: calc(100vh - 60px);
+  }
+
+  .leaflet-control-zoom {
+    display: none;
+  }
+
+  /* Touch-optimized buttons */
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 16px;
+  }
+
+  /* Form improvements */
+  .form-control {
+    font-size: 16px; /* Prevent iOS zoom */
+    padding: 12px;
+  }
+
+  /* Modal improvements */
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: 5% auto;
+  }
+
+  /* Panel improvements */
+  .panel {
+    margin-bottom: 10px;
+  }
+
+  .panel-btn {
+    padding: 15px;
+    font-size: 14px;
+  }
+}
+
+/* Floating Action Button (FAB) */
+.fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #005BAC;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,91,172,0.4);
+  cursor: pointer;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0,91,172,0.5);
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+.fab svg {
+  width: 28px;
+  height: 28px;
+}
+
+@media (min-width: 769px) {
+  .fab {
+    display: none;
+  }
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: block;
+  }
+}
+
+/* Touch Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects for touch devices */
+  .btn:hover {
+    transform: none;
+  }
+
+  .panel-btn:hover {
+    transform: none;
+  }
+
+  /* Increase tap targets */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Larger clickable areas */
+  .panel-btn {
+    padding: 20px;
+  }
+
+  .modal-close {
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+  }
+}
+
+/* Accessibility Improvements */
+/* Focus indicators */
+button:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 3px solid #005BAC;
+  outline-offset: 2px;
+}
+
+/* Skip link styling */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #005BAC;
+  color: white;
+  padding: 8px 16px;
+  z-index: 10000;
+  transition: top 0.3s;
+}
+
+.skip-to-content:focus {
+  top: 0;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn {
+    border: 2px solid currentColor;
+  }
+
+  .panel-btn {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Screen reader only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Touch-friendly map controls */
+.leaflet-bar {
+  touch-action: manipulation;
+}
+
+.leaflet-control-zoom a {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  font-size: 20px;
+}
+
+/* Mobile-first responsive breakpoints */
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+
+  .navbar-header h1 {
+    font-size: 18px;
+  }
+
+  .sidebar {
+    width: 100%;
+    right: -100%;
+  }
+
+  .sidebar.active {
+    right: 0;
+  }
+
+  .modal-content {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    max-height: 100vh;
+  }
+
+  .panel-btn {
+    padding: 12px;
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .sidebar {
+    width: 280px;
+  }
+}
+
+/* Landscape mobile optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .navbar {
+    height: 50px;
+  }
+
+  .navbar-nav {
+    top: 50px;
+  }
+
+  #map {
+    height: calc(100vh - 50px);
+  }
+
+  .sidebar {
+    top: 50px;
+  }
+}
+
+/* Font size controls */
+.font-size-controls {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 1000;
+  display: none;
+}
+
+.font-size-controls.active {
+  display: block;
+}
+
+.font-size-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e9ecef;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.font-size-btn:hover {
+  background: #f8f9fa;
+}
+
+.font-size-btn:active {
+  background: #e9ecef;
+}
+
+.accessibility-toggle {
+  position: fixed;
+  top: 20px;
+  right: 80px;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Font size classes */
+html.font-small {
+  font-size: 14px;
+}
+
+html.font-medium {
+  font-size: 16px;
+}
+
+html.font-large {
+  font-size: 18px;
+}
+
+html.font-xlarge {
+  font-size: 20px;
+}
+
+/* High contrast mode */
+body.high-contrast {
+  background: #000;
+  color: #fff;
+}
+
+body.high-contrast .navbar {
+  background: #000;
+  border-bottom: 2px solid #fff;
+}
+
+body.high-contrast .sidebar {
+  background: #000;
+  border: 2px solid #fff;
+}
+
+body.high-contrast .btn {
+  background: #000;
+  border: 2px solid #fff;
+  color: #fff;
+}
+
+body.high-contrast .btn-primary {
+  background: #fff;
+  color: #000;
+}
+
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast textarea {
+  background: #000;
+  border: 2px solid #fff;
+  color: #fff;
+}
+
+/* Reduced motion */
+body.reduced-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Screen reader announcements */
+.aria-live {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 /* System Status Panel */
 .system-status-panel {
   background: white;
