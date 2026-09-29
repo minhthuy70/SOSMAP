@@ -10151,6 +10151,415 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeMultiHazardSystem();
 });
 
+// Flood & Evacuation System
+var floodData = {
+  waterLevel: 2.5,
+  waterStatus: 'Cảnh báo',
+  shelters: [
+    {
+      id: 'shelter1',
+      name: 'Trạm bơm Nhà Bè',
+      location: 'Quận Nhà Bè, TP.HCM',
+      capacity: 500,
+      current: 423,
+      amenities: ['water', 'electricity', 'medical', 'toilet'],
+      lat: 10.75,
+      lng: 106.65
+    },
+    {
+      id: 'shelter2',
+      name: 'Trường học Q1',
+      location: 'Quận 1, TP.HCM',
+      capacity: 800,
+      current: 800,
+      amenities: ['water', 'electricity', 'medical', 'toilet'],
+      lat: 10.78,
+      lng: 106.68
+    },
+    {
+      id: 'shelter3',
+      name: 'Trung tâm văn hóa Q3',
+      location: 'Quận 3, TP.HCM',
+      capacity: 600,
+      current: 390,
+      amenities: ['water', 'electricity', 'medical'],
+      lat: 10.77,
+      lng: 106.69
+    }
+  ],
+  stations: [
+    { id: 'station1', name: 'Trạm Nhà Bè', level: 2.5, status: 'warning' },
+    { id: 'station2', name: 'Trạm Bình Chánh', level: 3.8, status: 'danger' },
+    { id: 'station3', name: 'Trạm Củ Chi', level: 1.2, status: 'safe' },
+    { id: 'station4', name: 'Trạm Long An', level: 4.5, status: 'critical' }
+  ],
+  routes: [
+    {
+      id: 'route1',
+      name: 'Tuyến sơ tán A - Khu dân cư Nhà Bè',
+      start: 'Khu dân cư Nhà Bè',
+      end: 'Trạm bơm Nhà Bè',
+      type: 'avoid_flood',
+      transport: 'walking + rescue_vehicle',
+      status: 'active'
+    },
+    {
+      id: 'route2',
+      name: 'Tuyến sơ tán B - Khu dân cư Bình Chánh',
+      start: 'Khu dân cư Bình Chánh',
+      end: 'Trường học Bình Chánh',
+      type: 'avoid_landslide',
+      transport: 'rescue_vehicle',
+      status: 'blocked'
+    }
+  ],
+  blockedRoads: [
+    { name: 'Đường Nguyễn Văn Linh - đoạn qua Bình Chánh', reason: 'Ngập nước 1.5m', time: '2 giờ trước' },
+    { name: 'Đường Hà Nội - đoạn qua Củ Chi', reason: 'Sạt lở đất', time: '5 giờ trước' }
+  ],
+  evacuees: [
+    {
+      id: 'evacuee1',
+      familyName: 'Hộ gia đình Nguyễn Văn A',
+      address: '123 Đường ABC, Quận Nhà Bè',
+      people: 5,
+      vulnerable: { children: 2, elderly: 1, disabled: 0, pregnant: 0 },
+      status: 'evacuating',
+      shelter: null
+    },
+    {
+      id: 'evacuee2',
+      familyName: 'Hộ gia đình Trần Thị B',
+      address: '456 Đường XYZ, Quận Bình Chánh',
+      people: 3,
+      vulnerable: { children: 0, elderly: 0, disabled: 1, pregnant: 0 },
+      status: 'pending',
+      shelter: null
+    },
+    {
+      id: 'evacuee3',
+      familyName: 'Hộ gia đình Lê Văn C',
+      address: '789 Đường DEF, Quận 3',
+      people: 4,
+      vulnerable: { children: 0, elderly: 0, disabled: 0, pregnant: 1 },
+      status: 'arrived',
+      shelter: 'shelter3'
+    }
+  ],
+  totalEvacuated: 3456
+};
+
+function initializeFloodSystem() {
+  // Load flood data from localStorage
+  var savedFloodData = localStorage.getItem('sosmap_flood');
+  if (savedFloodData) {
+    floodData = JSON.parse(savedFloodData);
+  }
+
+  updateFloodStatus();
+}
+
+function updateFloodStatus() {
+  var statusDiv = document.getElementById('floodStatus');
+  if (!statusDiv) return;
+
+  statusDiv.innerHTML = `
+    <div class="status-item">
+      <span class="status-label">Mực nước:</span>
+      <span class="status-value">${floodData.waterLevel}m (${floodData.waterStatus})</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Điểm trú an:</span>
+      <span class="status-value">${floodData.shelters.length} điểm</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Người sơ tán:</span>
+      <span class="status-value">${floodData.totalEvacuated.toLocaleString()}</span>
+    </div>
+  `;
+}
+
+function updateWaterLevel(level) {
+  floodData.waterLevel = parseFloat(level);
+
+  if (level < 2) {
+    floodData.waterStatus = 'An toàn';
+  } else if (level < 3) {
+    floodData.waterStatus = 'Cảnh báo';
+  } else if (level < 4) {
+    floodData.waterStatus = 'Nguy hiểm';
+  } else {
+    floodData.waterStatus = 'Rất nguy hiểm';
+  }
+
+  saveFloodData();
+  updateFloodStatus();
+
+  logActivity('water_level_updated', 'Cập nhật mực nước: ' + level + 'm');
+}
+
+function addShelter(data) {
+  var shelter = {
+    id: 'shelter' + Date.now(),
+    name: data.name,
+    location: data.location,
+    capacity: parseInt(data.capacity),
+    current: 0,
+    amenities: data.amenities,
+    lat: data.lat,
+    lng: data.lng
+  };
+
+  floodData.shelters.push(shelter);
+  saveFloodData();
+
+  alert('Đã thêm điểm trú an!');
+  logActivity('shelter_added', 'Thêm điểm trú an: ' + data.name);
+
+  return shelter;
+}
+
+function updateShelterCapacity(shelterId, change) {
+  var shelter = floodData.shelters.find(function(s) {
+    return s.id === shelterId;
+  });
+
+  if (!shelter) {
+    alert('Không tìm thấy điểm trú an');
+    return;
+  }
+
+  shelter.current += change;
+  if (shelter.current < 0) shelter.current = 0;
+  if (shelter.current > shelter.capacity) shelter.current = shelter.capacity;
+
+  saveFloodData();
+
+  logActivity('shelter_capacity_updated', 'Cập nhật sức chỗ: ' + shelter.name);
+}
+
+function addRoute(data) {
+  var route = {
+    id: 'route' + Date.now(),
+    name: data.name,
+    start: data.start,
+    end: data.end,
+    type: data.type,
+    transport: data.transport,
+    status: 'active'
+  };
+
+  floodData.routes.push(route);
+  saveFloodData();
+
+  alert('Đã thêm tuyến sơ tán!');
+  logActivity('route_added', 'Thêm tuyến sơ tán: ' + data.name);
+
+  return route;
+}
+
+function blockRoute(routeId, reason) {
+  var route = floodData.routes.find(function(r) {
+    return r.id === routeId;
+  });
+
+  if (!route) {
+    alert('Không tìm thấy tuyến sơ tán');
+    return;
+  }
+
+  route.status = 'blocked';
+
+  floodData.blockedRoads.push({
+    name: route.name,
+    reason: reason,
+    time: 'Vừa xong'
+  });
+
+  saveFloodData();
+
+  alert('Đã chặn tuyến sơ tán!');
+  logActivity('route_blocked', 'Chặn tuyến: ' + route.name);
+}
+
+function addEvacuee(data) {
+  var evacuee = {
+    id: 'evacuee' + Date.now(),
+    familyName: data.familyName,
+    address: data.address,
+    people: parseInt(data.people),
+    vulnerable: data.vulnerable,
+    status: 'pending',
+    shelter: null
+  };
+
+  floodData.evacuees.push(evacuee);
+  saveFloodData();
+
+  alert('Đã thêm người sơ tán!');
+  logActivity('evacuee_added', 'Thêm người sơ tán: ' + data.familyName);
+
+  return evacuee;
+}
+
+function confirmEvacueeArrival(evacueeId, shelterId) {
+  var evacuee = floodData.evacuees.find(function(e) {
+    return e.id === evacueeId;
+  });
+
+  if (!evacuee) {
+    alert('Không tìm thấy người sơ tán');
+    return;
+  }
+
+  var shelter = floodData.shelters.find(function(s) {
+    return s.id === shelterId;
+  });
+
+  if (!shelter) {
+    alert('Không tìm thấy điểm trú an');
+    return;
+  }
+
+  if (shelter.current >= shelter.capacity) {
+    alert('Điểm trú an đã đầy!');
+    return;
+  }
+
+  evacuee.status = 'arrived';
+  evacuee.shelter = shelterId;
+  shelter.current++;
+
+  floodData.totalEvacuated++;
+  saveFloodData();
+  updateFloodStatus();
+
+  alert('Đã xác nhận đến nơi!');
+  logActivity('evacuee_arrived', 'Xác nhận đến nơi: ' + evacuee.familyName);
+}
+
+function requestPickup(evacueeId) {
+  var evacuee = floodData.evacuees.find(function(e) {
+    return e.id === evacueeId;
+  });
+
+  if (!evacuee) {
+    alert('Không tìm thấy người sơ tán');
+    return;
+  }
+
+  alert('Đã đăng ký yêu cầu đón don cho: ' + evacuee.familyName);
+  logActivity('pickup_requested', 'Đăng ký đón don: ' + evacuee.familyName);
+}
+
+function saveFloodData() {
+  localStorage.setItem('sosmap_flood', JSON.stringify(floodData));
+}
+
+// Flood Panel Event Listeners
+document.getElementById('floodMapBtn').addEventListener('click', function() {
+  document.getElementById('floodMapModal').style.display = 'block';
+});
+
+document.getElementById('evacuationPlanBtn').addEventListener('click', function() {
+  document.getElementById('evacuationPlanModal').style.display = 'block';
+});
+
+document.getElementById('closeFloodMapModal').addEventListener('click', function() {
+  document.getElementById('floodMapModal').style.display = 'none';
+});
+
+document.getElementById('closeFloodMapBtn').addEventListener('click', function() {
+  document.getElementById('floodMapModal').style.display = 'none';
+});
+
+document.getElementById('closeEvacuationPlanModal').addEventListener('click', function() {
+  document.getElementById('evacuationPlanModal').style.display = 'none';
+});
+
+document.getElementById('closeEvacuationPlanBtn').addEventListener('click', function() {
+  document.getElementById('evacuationPlanModal').style.display = 'none';
+});
+
+// Flood map controls
+document.getElementById('floodWaterLevel').addEventListener('change', function() {
+  updateWaterLevel(this.value);
+});
+
+// Evacuation tab switching
+document.querySelectorAll('.evacuation-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.evacuation-tab').forEach(function(t) {
+      t.classList.remove('active');
+    });
+
+    this.classList.add('active');
+
+    document.querySelectorAll('.evacuation-tab-content').forEach(function(content) {
+      content.style.display = 'none';
+    });
+
+    var tabName = this.getAttribute('data-tab');
+    document.getElementById(tabName + '-tab').style.display = 'block';
+  });
+});
+
+// Evacuation action buttons
+document.getElementById('addShelterBtn').addEventListener('click', function() {
+  var name = prompt('Nhập tên điểm trú an:');
+  if (!name) return;
+
+  var location = prompt('Nhập địa chỉ:');
+  if (!location) return;
+
+  var capacity = prompt('Nhập sức chứa:');
+  if (!capacity) return;
+
+  addShelter({
+    name: name,
+    location: location,
+    capacity: capacity,
+    amenities: ['water', 'electricity'],
+    lat: 10.77,
+    lng: 106.69
+  });
+});
+
+document.getElementById('addRouteBtn').addEventListener('click', function() {
+  alert('Chức năng thêm tuyến sơ tán sẽ được mở rộng trong phiên bản tiếp theo');
+});
+
+document.getElementById('addEvacueeBtn').addEventListener('click', function() {
+  var familyName = prompt('Nhập tên hộ gia đình:');
+  if (!familyName) return;
+
+  var address = prompt('Nhập địa chỉ:');
+  if (!address) return;
+
+  var people = prompt('Nhập số người:');
+  if (!people) return;
+
+  addEvacuee({
+    familyName: familyName,
+    address: address,
+    people: people,
+    vulnerable: { children: 0, elderly: 0, disabled: 0, pregnant: 0 }
+  });
+});
+
+document.getElementById('confirmArrivalBtn').addEventListener('click', function() {
+  alert('Chọn người sơ tán từ danh sách để xác nhận đến nơi');
+});
+
+document.getElementById('pickupRequestBtn').addEventListener('click', function() {
+  alert('Chọn người sơ tán từ danh sách để đăng ký đón don');
+});
+
+// Initialize flood system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeFloodSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {

@@ -900,6 +900,42 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
         </div>
 
+        <!-- Flood & Evacuation Panel -->
+        <div class="flood-panel" id="floodPanel">
+          <h3>Bão lũ & Sơ tán</h3>
+          <div class="flood-controls">
+            <button class="flood-btn" id="floodMapBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+              </svg>
+              Bản đồ nguy cơ
+            </button>
+            <button class="flood-btn" id="evacuationPlanBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              Kế hoạch sơ tán
+            </button>
+          </div>
+          <div class="flood-status" id="floodStatus">
+            <div class="status-item">
+              <span class="status-label">Mực nước:</span>
+              <span class="status-value">2.5m (Cảnh báo)</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Điểm trú an:</span>
+              <span class="status-value">12 điểm</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Người sơ tán:</span>
+              <span class="status-value">3,456</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Multi-Hazard Incidents Panel -->
         <div class="multihazard-panel" id="multihazardPanel">
           <h3>Sự cố đa rủi ro</h3>
@@ -5502,6 +5538,387 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeHeatMapBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flood Risk Map Modal -->
+      <div class="modal" id="floodMapModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>🗺️ Bản đồ nguy cơ ngập lũ</h3>
+            <button class="modal-close" id="closeFloodMapModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="flood-map-controls">
+              <div class="control-group">
+                <label>Loại hiển thị:</label>
+                <select class="form-control" id="floodMapType">
+                  <option value="inundation">Vùng ngập theo mực nước</option>
+                  <option value="flow">Hướng dòng chảy</option>
+                  <option value="flash_flood">Vùng nguy cơ lũ quét</option>
+                  <option value="landslide">Vùng nguy cơ sạt lở</option>
+                  <option value="water_level">Mực nước trạm quan trắc</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label>Mực nước:</label>
+                <select class="form-control" id="floodWaterLevel">
+                  <option value="1">1m</option>
+                  <option value="2">2m</option>
+                  <option value="3" selected>3m</option>
+                  <option value="4">4m</option>
+                  <option value="5">5m</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label>Thời gian:</label>
+                <select class="form-control" id="floodForecastTime">
+                  <option value="current">Hiện tại</option>
+                  <option value="6h">6 giờ tới</option>
+                  <option value="12h">12 giờ tới</option>
+                  <option value="24h">24 giờ tới</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flood-map-layers">
+              <div class="layer-toggle">
+                <label class="toggle-label">
+                  <input type="checkbox" id="showDams" checked>
+                  <span>Hồ đập</span>
+                </label>
+                <label class="toggle-label">
+                  <input type="checkbox" id="showBridges" checked>
+                  <span>Cầu</span>
+                </label>
+                <label class="toggle-label">
+                  <input type="checkbox" id="showTunnels" checked>
+                  <span>Ham</span>
+                </label>
+                <label class="toggle-label">
+                  <input type="checkbox" id="showSafeZones" checked>
+                  <span>Vùng an toàn</span>
+                </label>
+                <label class="toggle-label">
+                  <input type="checkbox" id="showDangerZones" checked>
+                  <span>Vùng cấm vào</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="flood-map-container" id="floodMapContainer" style="height: 400px; background: #e6f3ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 2px solid #005BAC;">
+              <div class="flood-map-placeholder">
+                <p style="color: #005BAC; font-weight: 600;">Bản đồ nguy cơ ngập lũ</p>
+                <p style="color: #666; font-size: 12px;">Yêu cầu thư viện bản đồ chuyên dụng để hiển thị chi tiết</p>
+              </div>
+            </div>
+
+            <div class="flood-map-legend">
+              <div class="legend-item">
+                <div class="legend-color" style="background: #90EE90;"></div>
+                <span>An toàn</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: #FFD700;"></div>
+                <span>Cảnh báo</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: #FF6347;"></div>
+                <span>Nguy hiểm</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: #00008B;"></div>
+                <span>Rất nguy hiểm</span>
+              </div>
+            </div>
+
+            <div class="flood-stations">
+              <h4>Mực nước tại trạm quan trắc</h4>
+              <div class="stations-grid">
+                <div class="station-card warning">
+                  <div class="station-name">Trạm Nhà Bè</div>
+                  <div class="station-level">2.5m</div>
+                  <div class="station-status">Cảnh báo</div>
+                </div>
+                <div class="station-card danger">
+                  <div class="station-name">Trạm Bình Chánh</div>
+                  <div class="station-level">3.8m</div>
+                  <div class="station-status">Nguy hiểm</div>
+                </div>
+                <div class="station-card safe">
+                  <div class="station-name">Trạm Củ Chi</div>
+                  <div class="station-level">1.2m</div>
+                  <div class="station-status">An toàn</div>
+                </div>
+                <div class="station-card critical">
+                  <div class="station-name">Trạm Long An</div>
+                  <div class="station-level">4.5m</div>
+                  <div class="station-status">Rất nguy hiểm</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeFloodMapBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Evacuation Plan Modal -->
+      <div class="modal" id="evacuationPlanModal" style="display: none;">
+        <div class="modal-content" style="max-width: 1000px;">
+          <div class="modal-header">
+            <h3>🚨 Kế hoạch sơ tán</h3>
+            <button class="modal-close" id="closeEvacuationPlanModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="evacuation-tabs">
+              <button class="evacuation-tab active" data-tab="shelters">Điểm trú an</button>
+              <button class="evacuation-tab" data-tab="routes">Tuyến sơ tán</button>
+              <button class="evacuation-tab" data-tab="people">Danh sách sơ tán</button>
+            </div>
+
+            <div class="evacuation-tab-content" id="shelters-tab">
+              <div class="evacuation-actions">
+                <button class="btn btn-primary" id="addShelterBtn">Thêm điểm trú an</button>
+              </div>
+
+              <div class="shelters-list">
+                <div class="shelter-card">
+                  <div class="shelter-header">
+                    <div class="shelter-info">
+                      <h4>Trạm bơm Nhà Bè</h4>
+                      <p>Quận Nhà Bè, TP.HCM</p>
+                    </div>
+                    <div class="shelter-capacity">
+                      <div class="capacity-bar">
+                        <div class="capacity-fill" style="width: 85%;"></div>
+                      </div>
+                      <span class="capacity-text">423/500 (85%)</span>
+                    </div>
+                  </div>
+                  <div class="shelter-amenities">
+                    <span class="amenity-tag">🚿 Nước sạch</span>
+                    <span class="amenity-tag">⚡ Điện</span>
+                    <span class="amenity-tag">🏥 Y tế</span>
+                    <span class="amenity-tag">🚻 Nhà vệ sinh</span>
+                  </div>
+                  <div class="shelter-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;">Xem chi tiết</button>
+                    <button class="btn btn-secondary" style="font-size: 12px;">Đường đi</button>
+                  </div>
+                </div>
+
+                <div class="shelter-card full">
+                  <div class="shelter-header">
+                    <div class="shelter-info">
+                      <h4>Trường học Q1</h4>
+                      <p>Quận 1, TP.HCM</p>
+                    </div>
+                    <div class="shelter-capacity">
+                      <div class="capacity-bar">
+                        <div class="capacity-fill" style="width: 100%; background: #dc3545;"></div>
+                      </div>
+                      <span class="capacity-text full">800/800 (Đầy)</span>
+                    </div>
+                  </div>
+                  <div class="shelter-amenities">
+                    <span class="amenity-tag">🚿 Nước sạch</span>
+                    <span class="amenity-tag">⚡ Điện</span>
+                    <span class="amenity-tag">🏥 Y tế</span>
+                    <span class="amenity-tag">🚻 Nhà vệ sinh</span>
+                  </div>
+                  <div class="shelter-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;">Xem chi tiết</button>
+                    <button class="btn btn-secondary" style="font-size: 12px;">Đường đi</button>
+                  </div>
+                </div>
+
+                <div class="shelter-card">
+                  <div class="shelter-header">
+                    <div class="shelter-info">
+                      <h4>Trung tâm văn hóa Q3</h4>
+                      <p>Quận 3, TP.HCM</p>
+                    </div>
+                    <div class="shelter-capacity">
+                      <div class="capacity-bar">
+                        <div class="capacity-fill" style="width: 65%;"></div>
+                      </div>
+                      <span class="capacity-text">390/600 (65%)</span>
+                    </div>
+                  </div>
+                  <div class="shelter-amenities">
+                    <span class="amenity-tag">🚿 Nước sạch</span>
+                    <span class="amenity-tag">⚡ Điện</span>
+                    <span class="amenity-tag">🏥 Y tế</span>
+                  </div>
+                  <div class="shelter-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;">Xem chi tiết</button>
+                    <button class="btn btn-secondary" style="font-size: 12px;">Đường đi</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="evacuation-tab-content" id="routes-tab" style="display: none;">
+              <div class="evacuation-actions">
+                <button class="btn btn-primary" id="addRouteBtn">Thêm tuyến sơ tán</button>
+              </div>
+
+              <div class="routes-list">
+                <div class="route-card">
+                  <div class="route-header">
+                    <h4>Tuyến sơ tán A - Khu dân cư Nhà Bè</h4>
+                    <span class="route-status active">Đang hoạt động</span>
+                  </div>
+                  <div class="route-details">
+                    <div class="route-item">
+                      <span class="route-label">Điểm xuất phát:</span>
+                      <span class="route-value">Khu dân cư Nhà Bè</span>
+                    </div>
+                    <div class="route-item">
+                      <span class="route-label">Điểm tập kết:</span>
+                      <span class="route-value">Trạm bơm Nhà Bè</span>
+                    </div>
+                    <div class="route-item">
+                      <span class="route-label">Loại tuyến:</span>
+                      <span class="route-value">Tránh vùng ngập</span>
+                    </div>
+                    <div class="route-item">
+                      <span class="route-label">Phương tiện:</span>
+                      <span class="route-value">Đi bộ + Xe cứu hộ</span>
+                    </div>
+                  </div>
+                  <div class="route-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;">Xem trên bản đồ</button>
+                    <button class="btn btn-secondary" style="font-size: 12px;">Chỉ dẫn</button>
+                  </div>
+                </div>
+
+                <div class="route-card">
+                  <div class="route-header">
+                    <h4>Tuyến sơ tán B - Khu dân cư Bình Chánh</h4>
+                    <span class="route-status blocked">Đang chặn</span>
+                  </div>
+                  <div class="route-details">
+                    <div class="route-item">
+                      <span class="route-label">Điểm xuất phát:</span>
+                      <span class="route-value">Khu dân cư Bình Chánh</span>
+                    </div>
+                    <div class="route-item">
+                      <span class="route-label">Điểm tập kết:</span>
+                      <span class="route-value">Trường học Bình Chánh</span>
+                    </div>
+                    <div class="route-item">
+                      <span class="route-label">Loại tuyến:</span>
+                      <span class="route-value">Tránh vùng sạt lở</span>
+                    </div>
+                    <div class="route-item">
+                      <span class="route-label">Phương tiện:</span>
+                      <span class="route-value">Xe cứu hộ</span>
+                    </div>
+                  </div>
+                  <div class="route-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;">Xem trên bản đồ</button>
+                    <button class="btn btn-secondary" style="font-size: 12px;">Tuyến thay thế</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="blocked-roads">
+                <h4>Tuyến đường bị chặn (thời gian thực)</h4>
+                <div class="blocked-road-item">
+                  <span class="road-name">Đường Nguyễn Văn Linh - đoạn qua Bình Chánh</span>
+                  <span class="road-reason">Ngập nước 1.5m</span>
+                  <span class="road-time">2 giờ trước</span>
+                </div>
+                <div class="blocked-road-item">
+                  <span class="road-name">Đường Hà Nội - đoạn qua Củ Chi</span>
+                  <span class="road-reason">Sạt lở đất</span>
+                  <span class="road-time">5 giờ trước</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="evacuation-tab-content" id="people-tab" style="display: none;">
+              <div class="evacuation-actions">
+                <button class="btn btn-primary" id="addEvacueeBtn">Thêm người sơ tán</button>
+                <button class="btn btn-secondary" id="confirmArrivalBtn">Xác nhận đến nơi</button>
+                <button class="btn btn-secondary" id="pickupRequestBtn">Đăng ký đón don</button>
+              </div>
+
+              <div class="evacuee-filters">
+                <div class="filter-group">
+                  <label>Trạng thái:</label>
+                  <select class="form-control" id="evacueeStatusFilter">
+                    <option value="all">Tất cả</option>
+                    <option value="pending">Chưa sơ tán</option>
+                    <option value="evacuating">Đang sơ tán</option>
+                    <option value="arrived">Đã đến nơi</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label>Điểm trú an:</label>
+                  <select class="form-control" id="evacueeShelterFilter">
+                    <option value="all">Tất cả</option>
+                    <option value="shelter1">Trạm bơm Nhà Bè</option>
+                    <option value="shelter2">Trường học Q1</option>
+                    <option value="shelter3">Trung tâm văn hóa Q3</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="evacuee-list">
+                <div class="evacuee-card">
+                  <div class="evacuee-info">
+                    <h4>Hộ gia đình Nguyễn Văn A</h4>
+                    <p>Địa chỉ: 123 Đường ABC, Quận Nhà Bè</p>
+                    <p>Số người: 5 (2 trẻ em, 1 người già)</p>
+                  </div>
+                  <div class="evacuee-status">
+                    <span class="status-badge active">Đang sơ tán</span>
+                  </div>
+                  <div class="evacuee-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;">Xem chi tiết</button>
+                    <button class="btn btn-primary" style="font-size: 12px;">Xác nhận đến nơi</button>
+                  </div>
+                </div>
+
+                <div class="evacuee-card">
+                  <div class="evacuee-info">
+                    <h4>Hộ gia đình Trần Thị B</h4>
+                    <p>Địa chỉ: 456 Đường XYZ, Quận Bình Chánh</p>
+                    <p>Số người: 3 (1 người khuyết tật)</p>
+                  </div>
+                  <div class="evacuee-status">
+                    <span class="status-badge pending">Chưa sơ tán</span>
+                  </div>
+                  <div class="evacuee-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;">Xem chi tiết</button>
+                    <button class="btn btn-primary" style="font-size: 12px;">Sơ tán</button>
+                  </div>
+                </div>
+
+                <div class="evacuee-card">
+                  <div class="evacuee-info">
+                    <h4>Hộ gia đình Lê Văn C</h4>
+                    <p>Địa chỉ: 789 Đường DEF, Quận 3</p>
+                    <p>Số người: 4 (1 phụ nữ mang thai)</p>
+                  </div>
+                  <div class="evacuee-status">
+                    <span class="status-badge resolved">Đã đến nơi</span>
+                  </div>
+                  <div class="evacuee-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;">Xem chi tiết</button>
+                    <button class="btn btn-secondary" style="font-size: 12px;">Đăng ký đón don</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeEvacuationPlanBtn">Đóng</button>
           </div>
         </div>
       </div>
