@@ -1023,6 +1023,43 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
         </div>
 
+        <!-- Geolocation & Integration Panel -->
+        <div class="geolocation-panel" id="geolocationPanel">
+          <h3>Địa lý & Tích hợp</h3>
+          <div class="geolocation-controls">
+            <button class="geolocation-btn" id="reverseGeocodingBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-9-13-9-9 7 9 13 9 13zm-9-9a9 9 0 1 1 18 0 9 9 0 0 1-18 0 9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              Reverse Geocoding
+            </button>
+            <button class="geolocation-btn" id="dataSourcesBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+              Nguồn dữ liệu
+            </button>
+          </div>
+          <div class="geolocation-status" id="geolocationStatus">
+            <div class="status-item">
+              <span class="status-label">API Traffic:</span>
+              <span class="status-value success">Đang hoạt động</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Data Sync:</span>
+              <span class="status-value">Đồng bộ</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Camera Online:</span>
+              <span class="status-value">148/156</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -6294,6 +6331,303 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closePerformanceMonitorBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reverse Geocoding Modal -->
+      <div class="modal" id="reverseGeocodingModal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+          <div class="modal-header">
+            <h3>📍 Reverse Geocoding</h3>
+            <button class="modal-close" id="closeReverseGeocodingModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="latitudeInput">Vĩ độ (Latitude):</label>
+              <input type="number" class="form-control" id="latitudeInput" placeholder="Ví dụ: 10.7769" step="0.000001">
+            </div>
+            <div class="form-group">
+              <label for="longitudeInput">Kinh độ (Longitude):</label>
+              <input type="number" class="form-control" id="longitudeInput" placeholder="Ví dụ: 106.7009" step="0.000001">
+            </div>
+            <div class="form-group">
+              <label for="coordinateSystem">Hệ toạ độ:</label>
+              <select class="form-control" id="coordinateSystem">
+                <option value="WGS84">WGS84 (thường dùng)</option>
+                <option value="VN2000">VN-2000 (Việt Nam)</option>
+              <option value="UTM">UTM</option>
+              <option value="GCJ02">GCJ-02</option>
+              <option value="GK42F">GK42F</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <button class="btn btn-primary" id="convertToAddressBtn">🔄 Chuyển đổi sang địa chỉ</button>
+            </div>
+
+            <div class="geocoding-result" id="geocodingResult" style="display: none;">
+              <h4>Kết quả:</h4>
+              <div class="result-item">
+                <span class="result-label">Địa chỉ:</span>
+                <span class="result-value" id="addressResult"></span>
+              </div>
+              <div class="result-item">
+                <span class="result-label">Đường:</span>
+                <span class="result-value" id="streetResult"></span>
+              </div>
+              <div class="result-item">
+                <span class="result-label">Phường/Xã:</span>
+                <span class="result-value" id="wardResult"></span>
+              </div>
+              <div class="result-item">
+                <span class="result-label">Quận/Huyện:</span>
+                <span class="result-value" id="districtResult"></span>
+              </div>
+              <div class="result-item">
+                <span class="result-label">Tỉnh/Thành phố:</span>
+                <span class="result-value" id="provinceResult"></span>
+              </div>
+              <div class="result-item">
+                <span class="result-label">Phạm vi Việt Nam:</span>
+                <span class="result-value" id="inVietnamResult"></span>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeReverseGeocodingBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Sources Modal -->
+      <div class="modal" id="dataSourcesModal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+          <div class="modal-header">
+            <h3>🔗 Nguồn dữ liệu tích hợp</h3>
+            <button class="modal-close" id="closeDataSourcesModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="data-sources-tabs">
+              <button class="data-sources-tab active" data-tab="traffic">Giao thông</button>
+              <button class="data-sources-tab" data-tab="camera">Camera</button>
+              <button class="data-sources-tab" data-tab="stations">Trạm quan trắc</button>
+              <button class="data-sources-tab" data-tab="logs">Logs</button>
+            </div>
+
+            <div class="data-sources-tab-content" id="traffic-tab">
+              <div class="data-source-actions">
+                <button class="btn btn-primary" id="syncTrafficBtn">🔄 Đồng bộ ngay</button>
+                <button class="btn btn-secondary" id="configureTrafficApiBtn">⚙️ Cấu hình API</button>
+              </div>
+
+              <div class="data-source-status">
+                <h4>API Giao thông thời gian thực</h4>
+                <div class="status-grid">
+                  <div class="status-card">
+                    <div class="status-icon">🟢</div>
+                    <div class="status-info">
+                      <h5>Trạng thái</h5>
+                      <p>Đang hoạt động</p>
+                    </div>
+                  </div>
+                  <div class="status-card">
+                    <div class="status-icon">⏱️</div>
+                    <div class="status-info">
+                      <h5>Lần cập nhật cuối</h5>
+                      <p>2 phút trước</p>
+                    </div>
+                  </div>
+                  <div class="status-card">
+                    <div class="status-icon">📊</div>
+                    <div class="status-info">
+                      <h5>Sự cố đã đồng bộ</h5>
+                      <p>156 sự cố</p>
+                    </div>
+                  </div>
+                  <div class="status-card">
+                    <div class="status-icon">⚡</div>
+                    <div class="status-info">
+                      <h5>Độ trễ trung bình</h5>
+                      <p>350ms</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="data-source-table">
+                <h4>Sự cố đã đồng bộ</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Loại</th>
+                      <th>Vị trí</th>
+                      <th>Thời gian</th>
+                      <th>Trạng thái</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>TRF-001</td>
+                      <td>Tai nạn</td>
+                      <td>Quận 1</td>
+                      <td>10:45</td>
+                      <td class="status-ok">Đã đồng bộ</td>
+                    </tr>
+                    <tr>
+                      <td>TRF-002</td>
+                      <td>Kẹt xe</td>
+                      <td>Quận 3</td>
+                      <td>10:42</td>
+                      <td class="status-ok">Đã đồng bộ</td>
+                    </tr>
+                    <tr>
+                      <td>TRF-003</td>
+                      <td>Ngập nước</td>
+                      <td>Quận 7</td>
+                      <td>10:40</td>
+                      <td class="status-warning">Chờ xử lý</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="data-sources-tab-content" id="camera-tab" style="display: none;">
+              <div class="data-source-actions">
+                <button class="btn btn-primary" id="syncCameraBtn">🔄 Đồng bộ camera</button>
+              </div>
+
+              <div class="camera-grid">
+                <div class="camera-card online">
+                  <div class="camera-icon">📹</div>
+                  <div class="camera-info">
+                    <h5>Camera Nguyễn Văn Linh</h5>
+                    <p>Quận 7 - Km 12+5</p>
+                    <span class="camera-status online">Online</span>
+                  </div>
+                </div>
+                <div class="camera-card online">
+                  <div class="camera-icon">📹</div>
+                  <div class="camera-info">
+                    <h5>Camera Hà Nội</h5>
+                    <p>Quận 1 - Km 8+3</p>
+                    <span class="camera-status online">Online</span>
+                  </div>
+                </div>
+                <div class="camera-card offline">
+                  <div class="camera-icon">📹</div>
+                  <div class="camera-info">
+                    <h5>Camera Lê Duẩnh</h5>
+                    <p>Quận Bình Thạnh - Km 15+7</p>
+                    <span class="camera-status offline">Offline</span>
+                  </div>
+                </div>
+                <div class="camera-card online">
+                  <div class="camera-icon">📹</div>
+                  <div class="camera-info">
+                    <h5>Camera Xa lộ Hà Nội</h5>
+                    <p>Quận 2 - Km 5+2</p>
+                    <span class="camera-status online">Online</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="camera-stats">
+                <div class="stat-item">
+                  <span class="stat-label">Tổng camera:</span>
+                  <span class="stat-value">156</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Online:</span>
+                  <span class="stat-value success">148</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Offline:</span>
+                  <span class="stat-value warning">8</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="data-sources-tab-content" id="stations-tab" style="display: none;">
+              <div class="data-source-actions">
+                <button class="btn btn-primary" id="syncStationsBtn">🔄 Đồng bộ trạm</button>
+              </div>
+
+              <div class="stations-list">
+                <div class="station-item">
+                  <div class="station-icon">🌧️</div>
+                  <div class="station-info">
+                    <h5>Trạm đo mưa Nhà Bè</h5>
+                    <p>Mực nước: 2.5m</p>
+                    <span class="station-status">Cảnh báo</span>
+                  </div>
+                </div>
+                <div class="station-item">
+                  <div class="station-icon">🌊</div>
+                  <div class="station-info">
+                    <h5>Trạm mực nước Bình Chánh</h5>
+                    <p>Mực nước: 3.8m</p>
+                    <span class="station-status danger">Nguy hiểm</span>
+                  </div>
+                </div>
+                <div class="station-item">
+                  <div class="station-icon">🌡️</div>
+                  <div class="station-info">
+                    <h5>Trạm nhiệt độ Củ Chi</h5>
+                    <p>Nhiệt độ: 35°C</p>
+                    <span class="station-status success">Bình thường</span>
+                  </div>
+                </div>
+                <div class="station-item">
+                  <div class="station-icon">💨</div>
+                  <div class="station-info">
+                    <h5>Trạm chất lượng không khí</h5>
+                    <p>AQI: 45</p>
+                    <span class="station-status success">Bình thường</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="data-sources-tab-content" id="logs-tab" style="display: none;">
+              <div class="sync-logs">
+                <h4>Nhật ký đồng bộ</h4>
+                <div class="log-filters">
+                  <select class="form-control" id="logTypeFilter">
+                    <option value="all">Tất cả</option>
+                    <option value="traffic">Giao thông</option>
+                    <option value="camera">Camera</option>
+                    <option value="stations">Trạm quan trắc</option>
+                  </select>
+                </div>
+                <div class="log-list">
+                  <div class="log-item success">
+                    <span class="log-time">10:45:23</span>
+                    <span class="log-type">Traffic</span>
+                    <span class="log-message">Đồng bộ 45 sự cố thành công</span>
+                  </div>
+                  <div class="log-item success">
+                    <span class="log-time">10:44:15</span>
+                    <span class="log-type">Camera</span>
+                    <span class="log-message">Đồng bộ 148 camera thành công</span>
+                  </div>
+                  <div class="log-item warning">
+                    <span class="log-time">10:43:00</span>
+                    <span class="log-type">Stations</span>
+                    <span class="log-message">1 trạm không phản hồi (timeout)</span>
+                  </div>
+                  <div class="log-item error">
+                    <span class="log-time">10:42:30</span>
+                    <span class="log-type">Traffic</span>
+                    <span class="log-message">API response timeout (5000ms)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeDataSourcesBtn">Đóng</button>
           </div>
         </div>
       </div>

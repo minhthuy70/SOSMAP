@@ -11374,6 +11374,349 @@ document.addEventListener('DOMContentLoaded', function() {
   setupOfflineDetection();
 });
 
+// Geolocation & Integration System
+var geolocationData = {
+  apiStatus: {
+    traffic: 'active',
+    camera: 'active',
+    stations: 'active'
+  },
+  lastSync: {
+    traffic: new Date().toISOString(),
+    camera: new Date().toISOString(),
+    stations: new Date().toISOString()
+  },
+  syncLogs: [],
+  trafficIncidents: [
+    { id: 'TRF-001', type: 'Tai nạn', location: 'Quận 1', time: '10:45', status: 'synced' },
+    { id: 'TRF-002', type: 'Kẹt xe', location: 'quận 3', time: '10:42', status: 'synced' },
+    { id: 'TRF-003', type: 'Ngập nước', location: 'Quận 7', time: '10:40', status: 'pending' }
+  ],
+  cameras: [
+    { id: 'CAM001', name: 'Camera Nguyễn Văn Linh', location: 'Quận 7', km: '12+5', status: 'online' },
+    { id: 'CAM002', name: 'Camera Hà Nội', location: 'Quận 1', km: '8+3', status: 'online' },
+    { id: 'CAM003', name: 'Camera Lê Duẩnh', location: 'Quận Bình Thạnh', km: '15+7', status: 'offline' },
+    { id: 'CAM004', name: 'Camera Xa lộ Hà Nội', location: 'Quận 2', km: '5+2', status: 'online' }
+  ],
+  stations: [
+    { id: 'STN001', name: 'Trạm đo mưa Nhà Bè', type: 'rain', value: '2.5m', unit: 'mực nước', status: 'warning' },
+    { id: 'STN002', name: 'Trạm mực nước Bình Chánh', type: 'water', value: '3.8m', unit: 'mực nước', status: 'danger' },
+    { id: 'STN003', name: 'Trạm nhiệt độ Củ Chi', type: 'temperature', value: '35°C', unit: 'nhiệt độ', status: 'success' },
+    { id: 'STN004', name: 'Trạm chất lượng không khí', type: 'air', value: '45', unit: 'AQI', status: 'success' }
+  ]
+};
+
+function initializeGeolocationSystem() {
+  // Load geolocation data from localStorage
+  var savedData = localStorage.getItem('sosmap_geolocation');
+  if (savedData) {
+    geolocationData = JSON.parse(savedData);
+  }
+
+  updateGeolocationStatus();
+}
+
+function updateGeolocationStatus() {
+  var statusDiv = document.getElementById('geolocationStatus');
+  if (!statusDiv) return;
+
+  var onlineCameras = geolocationData.cameras.filter(function(c) {
+    return c.status === 'online';
+  }).length;
+
+  statusDiv.innerHTML = `
+    <div class="status-item">
+      <span class="status-label">API Traffic:</span>
+      <span class="status-value ${geolocationData.apiStatus.traffic === 'active' ? 'success' : 'warning'}">${geolocationData.apiStatus.traffic === 'active' ? 'Đang hoạt động' : 'Tắt'}</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Data Sync:</span>
+      <span class="status-value">Đồng bộ</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Camera Online:</span>
+      <span class="status-value">${onlineCameras}/${geolocationData.cameras.length}</span>
+    </div>
+  `;
+}
+
+// Reverse Geocoding
+function reverseGeocoding(lat, lng, coordinateSystem) {
+  // Simulate reverse geocoding
+  var result = {
+    address: '',
+    street: '',
+    ward: '',
+    district: '',
+    province: '',
+    inVietnam: false
+  };
+
+  // Check if coordinates are within Vietnam bounds
+  // Vietnam bounds approximately: lat 8-23, lng 102-110
+  var inVietnam = lat >= 8 && lat <= 23 && lng >= 102 && lng <= 110;
+  result.inVietnam = inVietnam;
+
+  if (inVietnam) {
+    // Simulate address lookup based on coordinates
+    if (lat > 10.7 && lat < 10.8 && lng > 106.6 && lng < 106.8) {
+      result.address = 'Quận 1, Thành phố Hồ Chí Minh';
+      result.street = 'Đường Nguyễn Huệ';
+      result.ward = 'Phường Bến Nghé';
+      result.district = 'Quận 1';
+      result.province = 'Thành phố Hồ Chí Minh';
+    } else if (lat > 10.75 && lat < 10.78 && lng > 106.65 && lng < 106.7) {
+      result.address = 'Quận 7, Thành phố Hồ Chí Minh';
+      result.street = 'Đường Nguyễn Văn Linh';
+      result.ward = 'Phường Hiệp Thành';
+      result.district = 'Quận 7';
+      result.province = 'Thành phố Hồ Chí Minh';
+    } else if (lat > 21.0 && lat < 21.1 && lng > 105.8 && lng < 106.0) {
+      result.address = 'Quận Hoàn Kiếm, Thành phố Hà Nội';
+      result.street = 'Đường Trần Hưng Đạo';
+      result.ward = 'Phường Đồng Xuân';
+      result.district = 'Quận Hoàn Kiếm';
+      result.province = 'Thành phố Hà Nội';
+    } else {
+      result.address = 'Việt Nam';
+      result.street = 'Đường chưa xác định';
+      result.ward = 'Phường chưa xác định';
+      result.district = 'Quận/Huyện chưa xác định';
+      result.province = 'Tỉnh/Thành phố chưa xác định';
+    }
+  } else {
+    result.address = 'Ngoài phạm vi Việt Nam';
+    result.street = 'N/A';
+    result.ward = 'N/A';
+    result.district = 'N/A';
+    result.province = 'N/A';
+  }
+
+  return result;
+}
+
+function convertCoordinateSystem(lat, lng, fromSystem, toSystem) {
+  // Simulate coordinate system conversion
+  // In production, use proper coordinate transformation libraries
+  var converted = { lat: lat, lng: lng };
+
+  if (fromSystem !== toSystem) {
+    // Simple offset simulation (not accurate)
+    if (toSystem === 'VN2000') {
+      converted.lat += 0.0001;
+      converted.lng += 0.0001;
+    } else if (toSystem === 'UTM') {
+      // Would require proper UTM conversion
+      console.log('UTM conversion requires proper library');
+    }
+  }
+
+  return converted;
+}
+
+function checkVietnamBounds(lat, lng) {
+  // Vietnam bounds approximately
+  return lat >= 8 && lat <= 23 && lng >= 102 && lng <= 110;
+}
+
+// API Integration
+function syncTrafficData() {
+  // Simulate API call to traffic data source
+  var newIncidents = Math.floor(Math.random() * 10);
+  
+  geolocationData.trafficIncidents.push({
+    id: 'TRF-' + Date.now(),
+    type: 'Tai nạn',
+    location: 'Quận ' + (Math.floor(Math.random() * 7) + 1),
+    time: new Date().toLocaleTimeString('vi-VN'),
+    status: 'synced'
+  });
+
+  geolocationData.lastSync.traffic = new Date().toISOString();
+  saveGeolocationData();
+
+  addSyncLog('traffic', 'success', 'Đồng bộ ' + newIncidents + ' sự cố thành công');
+  updateGeolocationStatus();
+
+  logActivity('traffic_sync', 'Đồng bộ dữ liệu giao thông');
+}
+
+function syncCameraData() {
+  // Simulate camera sync
+  var onlineCount = geolocationData.cameras.filter(function(c) {
+    return c.status === 'online';
+  }).length;
+
+  addSyncLog('camera', 'success', 'Đồng bộ ' + onlineCount + ' camera thành công');
+  updateGeolocationStatus();
+
+  logActivity('camera_sync', 'Đồng bộ dữ liệu camera');
+}
+
+function syncStationData() {
+  // Simulate station sync
+  var syncedCount = geolocationData.stations.length;
+  var failedCount = Math.floor(Math.random() * 2);
+
+  if (failedCount > 0) {
+    addSyncLog('stations', 'warning', failedCount + ' trạm không phản hồi (timeout)');
+  }
+
+  addSyncLog('stations', 'success', 'Đồng bộ ' + (syncedCount - failedCount) + ' trạm thành công');
+  updateGeolocationStatus();
+
+  logActivity('stations_sync', 'Đồng bộ dữ liệu trạm quan trắc');
+}
+
+function addSyncLog(type, status, message) {
+  var log = {
+    time: new Date().toLocaleTimeString('vi-VN'),
+    type: type,
+    status: status,
+    message: message
+  };
+
+  geolocationData.syncLogs.unshift(log);
+  if (geolocationData.syncLogs.length > 50) {
+    geolocationData.syncLogs.pop();
+  }
+
+  saveGeolocationData();
+}
+
+function checkDataValidity(data, dataType) {
+  // Simulate data validity check
+  var validity = {
+    isValid: true,
+    issues: [],
+    latency: 0
+  };
+
+  if (dataType === 'traffic') {
+    validity.latency = Math.floor(Math.random() * 500) + 100;
+    if (validity.latency > 1000) {
+      validity.isValid = false;
+      validity.issues.push('API response timeout');
+    }
+  } else if (dataType === 'camera') {
+    validity.latency = Math.floor(Math.random() * 300) + 50;
+  }
+
+  return validity;
+}
+
+function saveGeolocationData() {
+  localStorage.setItem('sosmap_geolocation', JSON.stringify(geolocationData));
+}
+
+// Geolocation Panel Event Listeners
+document.getElementById('reverseGeocodingBtn').addEventListener('click', function() {
+  document.getElementById('reverseGeocodingModal').style.display = 'block';
+});
+
+document.getElementById('dataSourcesBtn').addEventListener('click', function() {
+  document.getElementById('dataSourcesModal').style.display = 'block';
+});
+
+document.getElementById('closeReverseGeocodingModal').addEventListener('click', function() {
+  document.getElementById('reverseGeocodingModal').style.display = 'none';
+});
+
+document.getElementById('closeReverseGeocodingBtn').addEventListener('click', function() {
+  document.getElementById('reverseGeocodingModal').style.display = 'none';
+});
+
+document.getElementById('closeDataSourcesModal').addEventListener('click', function() {
+  document.getElementById('dataSourcesModal').style.display = 'none';
+});
+
+document.getElementById('closeDataSourcesBtn').addEventListener('click', function() {
+  document.getElementById('dataSourcesModal').style.display = 'none';
+});
+
+document.getElementById('convertToAddressBtn').addEventListener('click', function() {
+  var lat = parseFloat(document.getElementById('latitudeInput').value);
+  var lng = parseFloat(document.getElementById('longitudeInput').value);
+  var system = document.getElementById('coordinateSystem').value;
+
+  if (isNaN(lat) || isNaN(lng)) {
+    alert('Vui lòng nhập vĩ độ và kinh độ hợp lệ');
+    return;
+  }
+
+  var result = reverseGeocoding(lat, lng, system);
+
+  document.getElementById('geocodingResult').style.display = 'block';
+  document.getElementById('addressResult').textContent = result.address;
+  document.getElementById('streetResult').textContent = result.street;
+  document.getElementById('wardResult').textContent = result.ward;
+  document.getElementById('districtResult').textContent = result.district;
+  document.getElementById('provinceResult').textContent = result.province;
+  document.getElementById('inVietnamResult').textContent = result.inVietnam ? 'Có' : 'Không';
+
+  logActivity('reverse_geocoding', 'Reverse geocoding: ' + lat + ', ' + lng);
+});
+
+// Data sources tab switching
+document.querySelectorAll('.data-sources-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.data-sources-tab').forEach(function(t) {
+      t.classList.remove('active');
+    });
+
+    this.classList.add('active');
+
+    document.querySelectorAll('.data-sources-tab-content').forEach(function(content) {
+      content.style.display = 'none';
+    });
+
+    var tabName = this.getAttribute('data-tab');
+    document.getElementById(tabName + '-tab').style.display = 'block';
+  });
+});
+
+// Sync buttons
+document.getElementById('syncTrafficBtn').addEventListener('click', function() {
+  syncTrafficData();
+});
+
+document.getElementById('syncCameraBtn').addEventListener('click', function() {
+  syncCameraData();
+});
+
+document.getElementById('syncStationsBtn').addEventListener('click', function() {
+  syncStationData();
+});
+
+document.getElementById('configureTrafficApiBtn').addEventListener('click', function() {
+  alert('Chức năng cấu hình API sẽ được mở rộng trong phiên bản tiếp theo');
+});
+
+// Log filter
+document.getElementById('logTypeFilter').addEventListener('change', function() {
+  var filterType = this.value;
+  var logList = document.querySelector('.log-list');
+  var logs = geolocationData.syncLogs.filter(function(log) {
+    return filterType === 'all' || log.type === filterType;
+  });
+
+  logList.innerHTML = logs.map(function(log) {
+    var statusClass = log.status === 'success' ? 'success' : log.status === 'warning' ? 'warning' : 'error';
+    return `
+      <div class="log-item ${statusClass}">
+        <span class="log-time">${log.time}</span>
+        <span class="log-type">${log.type}</span>
+        <span class="log-message">${log.message}</span>
+      </div>
+    `;
+  }).join('');
+});
+
+// Initialize geolocation system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeGeolocationSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {
