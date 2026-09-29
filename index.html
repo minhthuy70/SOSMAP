@@ -757,6 +757,38 @@
           </div>
         </div>
 
+        <!-- Resilient Access Panel -->
+        <div class="resilient-panel" id="resilientPanel">
+          <h3>Offline & Đề dự phòng</h3>
+          <div class="resilient-controls">
+            <button class="resilient-btn" id="downloadOfflineBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Tải bản đồ offline
+            </button>
+            <button class="resilient-btn" id="viewEmergencyContactsBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 1.44 2.3 3.3 3.3 0 0 1 3.3 0 0 1 2.3-3.3L22 19.92"></path>
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 1.44 2.3 3.3 3.3 0 0 1 3.3 0 0 1 2.3-3.3L22 19.92"></path>
+              </svg>
+              Số điện thoại khẩn cấp
+            </button>
+          </div>
+          <div class="resilient-status" id="resilientStatus">
+            <div class="connection-status online">
+              <span class="status-icon">🟢</span>
+              <span class="status-text">Đang kết nối</span>
+            </div>
+            <div class="offline-data">
+              <span class="data-icon">📦</span>
+              <span class="data-text">Dữ liệu offline: Đã tải</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -3758,6 +3790,128 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeDrillBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Contacts Modal -->
+      <div class="modal" id="emergencyContactsModal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+          <div class="modal-header">
+            <h3>📞 Số điện thoại khẩn cấp</h3>
+            <button class="modal-close" id="closeEmergencyContactsModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="emergency-contacts-list">
+              <div class="contact-category">
+                <h4>Cấp cứu & Cứu hộ</h4>
+                <div class="contact-item">
+                  <div class="contact-name">Cấp cứu</div>
+                  <div class="contact-number">115</div>
+                  <div class="contact-actions">
+                    <button class="btn btn-primary" style="font-size: 12px;" onclick="callEmergency('115')">Gọi</button>
+                  </div>
+                </div>
+                <div class="contact-item">
+                  <div class="contact-name">Cứu hỏa</div>
+                  <div class="contact-number">114</div>
+                  <div class="contact-actions">
+                    <button class="btn btn-primary" style="font-size: 12px;" onclick="callEmergency('114')">Gọi</button>
+                  </div>
+                </div>
+                <div class="contact-item">
+                  <div class="contact-name">Cảnh sát</div>
+                  <div class="contact-number">113</div>
+                  <div class="contact-actions">
+                    <button class="btn btn-primary" style="font-size: 12px;" onclick="callEmergency('113')">Gọi</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="contact-category">
+                <h4>Cơ quan địa phương</h4>
+                <div class="contact-item">
+                  <div class="contact-name">UBND Quận 1</div>
+                  <div class="contact-number">028 3822 xxxx</div>
+                  <div class="contact-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;" onclick="callEmergency('028 3822 xxxx')">Gọi</button>
+                  </div>
+                </div>
+                <div class="contact-item">
+                  <div class="contact-name">Công an Q1</div>
+                  <div class="contact-number">028 3839 xxxx</div>
+                  <div class="contact-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;" onclick="callEmergency('028 3839 xxxx')">Gọi</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="contact-category">
+                <h4>Dịch vụ công ích</h4>
+                <div class="contact-item">
+                  <div class="contact-name">Điện lực khẩn cấp</div>
+                  <div class="contact-number">1900 xxxx</div>
+                  <div class="contact-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;" onclick="callEmergency('1900 xxxx')">Gọi</button>
+                  </div>
+                </div>
+                <div class="contact-item">
+                  <div class="contact-name">Nước sạch khẩn cấp</div>
+                  <div class="contact-number">1900 xxxx</div>
+                  <div class="contact-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;" onclick="callEmergency('1900 xxxx')">Gọi</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="contact-category">
+                <h4>Điểm trú an</h4>
+                <div class="contact-item">
+                  <div class="contact-name">Trạm bơm Nhà Bè</div>
+                  <div class="contact-number">090 xxx xxx</div>
+                  <div class="contact-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;" onclick="callEmergency('090 xxx xxx')">Gọi</button>
+                  </div>
+                </div>
+                <div class="contact-item">
+                  <div class="contact-name">Điểm cấp nước Công viên Tao Đàn</div>
+                  <div class="contact-number">091 xxx xxx</div>
+                  <div class="contact-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;" onclick="callEmergency('091 xxx xxx')">Gọi</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="offline-guide">
+              <h4>Hướng dẫn khi mất kết nối</h4>
+              <div class="guide-box">
+                <p><strong>📱 Khi không có kết nối mạng:</strong></p>
+                <ul>
+                  <li>Sử dụng số điện thoại đã lưu offline</li>
+                  <li>Gọi trực tiếp đến số điện thoại khẩn cấp</li>
+                  <li>Sử dụng bản đồ đã tải trước</li>
+                  <li>Gửi yêu cầu qua SMS nếu có thể</li>
+                </ul>
+                <p><strong>🆘 Sơ cứu cơ bản:</strong></p>
+                <ul>
+                  <li>CPR: 30 lần nén, 2 lần thở mỗi phút</li>
+                  <li>Hội máu: Áp trực tiếp vào vết thương</li>
+                  <li>Cháy: Hạ thấp thân, bò lăn ra khỏi ngọn lửa</li>
+                  <li>Ngập nước: Không cố bơi, chờ lực cứu hộ</li>
+                </ul>
+                <p><strong>🛡️ Phòng chống:</strong></p>
+                <ul>
+                  <li>Tìm nơi cao và kiên cố</li>
+                  <li>Chuẩn bị lương thực, nước, thuốc</li>
+                  <li>Lắng nghe thông tin từ cơ quan chức năng</li>
+                  <li>Hạn chế di chuyển khi có bão/lũ</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeEmergencyContactsBtn">Đóng</button>
           </div>
         </div>
       </div>

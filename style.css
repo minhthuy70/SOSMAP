@@ -5025,6 +5025,188 @@ body, html {
   }
 }
 
+/* Resilient Access Panel */
+.resilient-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.resilient-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resilient-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.resilient-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: #005BAC;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.resilient-btn:hover {
+  background: #004a8a;
+}
+
+.resilient-btn svg {
+  flex-shrink: 0;
+}
+
+.resilient-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.connection-status {
+  padding: 10px;
+  border-radius: 6px;
+  background: #f0fff4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.connection-status.offline {
+  background: #fff0f0;
+}
+
+.status-icon {
+  font-size: 16px;
+}
+
+.status-text {
+  font-weight: 600;
+}
+
+.offline-data {
+  padding: 10px;
+  border-radius: 6px;
+  background: #f0f8ff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.data-icon {
+  font-size: 16px;
+}
+
+.data-text {
+  font-weight: 600;
+}
+
+/* Emergency Contacts Styles */
+.emergency-contacts-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.contact-category {
+  margin-bottom: 20px;
+}
+
+.contact-category h4 {
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  color: #333;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 8px;
+}
+
+.contact-item {
+  padding: 12px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contact-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+}
+
+.contact-number {
+  font-size: 16px;
+  font-weight: 600;
+  color: #005BAC;
+}
+
+.contact-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.offline-guide {
+  margin-top: 20px;
+  padding: 15px;
+  background: #fff3cd;
+  border-radius: 8px;
+  border: 1px solid #ffc107;
+}
+
+.offline-guide h4 {
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  color: #856404;
+}
+
+.guide-box p {
+  margin: 8px 0;
+  font-size: 13px;
+  color: #856404;
+}
+
+.guide-box ul {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.guide-box li {
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #856404;
+}
+
+/* Responsive Resilient Panel */
+@media (max-width: 768px) {
+  .resilient-controls {
+    flex-direction: column;
+  }
+
+  .contact-item {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
 /* System Status Panel */
 .system-status-panel {
   background: white;

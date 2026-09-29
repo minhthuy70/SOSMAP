@@ -8395,6 +8395,204 @@ document.addEventListener('DOMContentLoaded', function() {
   initializePlanningSystem();
 });
 
+// Resilient Access System
+var offlineData = {
+  emergencyContacts: [
+    { id: 'contact1', name: 'Cấp cứu', number: '115', category: 'emergency' },
+    { id: 'contact2', name: 'Cứu hỏa', number: '114', category: 'emergency' },
+    { id: 'contact3', name: 'Cảnh sát', number: '113', category: 'emergency' },
+    { id: 'contact4', name: 'UBND Quận 1', number: '028 3822 xxxx', category: 'local' },
+    { id: 'contact5', name: 'Công an Q1', number: '028 3839 xxxx', category: 'local' },
+    { id: 'contact6', name: 'Điện lực khẩn cấp', number: '1900 xxxx', category: 'utility' },
+    { id: 'contact7', name: 'Nước sạch khẩn cấp', number: '1900 xxxx', category: 'utility' },
+    { id: 'contact8', name: 'Trạm bơm Nhà Bè', number: '090 xxx xxx', category: 'shelter' },
+    { id: 'contact9', name: 'Điểm cấp nước Công viên Tao Đàn', number: '091 xxx xxx', category: 'shelter' }
+  ],
+  offlineReports: [],
+  lastSyncTime: null,
+  isOnline: true
+};
+
+var offlinePriorityLevels = {
+  critical: 'Khẩn cấp',
+  high: 'Cao',
+  medium: 'Trung bình',
+  low: 'Thấp'
+};
+
+function initializeResilientSystem() {
+  // Load offline data from localStorage
+  var savedContacts = localStorage.getItem('sosmap_emergency_contacts');
+  if (savedContacts) {
+    offlineData.emergencyContacts = JSON.parse(savedContacts);
+  }
+
+  var savedReports = localStorage.getItem('sosmap_offline_reports');
+  if (savedReports) {
+    offlineData.offlineReports = JSON.parse(savedReports);
+  }
+
+  var savedSyncTime = localStorage.getItem('sosmap_last_sync');
+  if (savedSyncTime) {
+    offlineData.lastSyncTime = savedSyncTime;
+  }
+
+  // Monitor connection status
+  window.addEventListener('online', function() {
+    offlineData.isOnline = true;
+    updateResilientStatus();
+    syncOfflineData();
+  });
+
+  window.addEventListener('offline', function() {
+    offlineData.isOnline = false;
+    updateResilientStatus();
+  });
+
+  updateResilientStatus();
+}
+
+function updateResilientStatus() {
+  var statusDiv = document.getElementById('resilientStatus');
+  if (!statusDiv) return;
+
+  var connectionClass = offlineData.isOnline ? 'online' : 'offline';
+  var connectionIcon = offlineData.isOnline ? '🟢' : '🔴';
+  var connectionText = offlineData.isOnline ? 'Đang kết nối' : 'Mất kết nối';
+
+  var hasOfflineData = offlineData.emergencyContacts.length > 0;
+  var dataIcon = hasOfflineData ? '📦' : '📭';
+  var dataText = hasOfflineData ? 'Dữ liệu offline: Đã tải' : 'Dữ liệu offline: Chưa tải';
+
+  statusDiv.innerHTML = `
+    <div class="connection-status ${connectionClass}">
+      <span class="status-icon">${connectionIcon}</span>
+      <span class="status-text">${connectionText}</span>
+    </div>
+    <div class="offline-data">
+      <span class="data-icon">${dataIcon}</span>
+      <span class="data-text">${dataText}</span>
+    </div>
+  `;
+}
+
+function downloadOfflineMap() {
+  // Simulate downloading offline map data
+  var offlineMapData = {
+    version: '1.0',
+    downloadedAt: new Date().toISOString(),
+    contacts: offlineData.emergencyContacts,
+    shelters: [
+      { name: 'Trạm bơm Nhà Bè', location: { lat: 10.75, lng: 106.65 }, phone: '090 xxx xxx' },
+      { name: 'Điểm cấp nước Công viên Tao Đàn', location: { lat: 10.78, lng: 106.70 }, phone: '091 xxx xxx' }
+    ],
+    emergencyGuides: {
+      cpr: '30 lần nén, 2 lần thở mỗi phút',
+      bleeding: 'Áp trực tiếp vào vết thương',
+      fire: 'Hạ thấp thân, bò lăn ra khỏi ngọn lửa',
+      flood: 'Không cố bơi, chờ lực cứu hộ'
+    }
+  };
+
+  localStorage.setItem('sosmap_offline_map', JSON.stringify(offlineMapData));
+  offlineData.lastSyncTime = new Date().toISOString();
+  localStorage.setItem('sosmap_last_sync', offlineData.lastSyncTime);
+
+  alert('Đã tải bản đồ offline! Dữ liệu sẽ có sẵn khi mất kết nối.');
+  logActivity('offline_download', 'Tải bản đồ offline');
+  updateResilientStatus();
+}
+
+function createOfflineReport(data) {
+  var report = {
+    id: 'OFF-' + Date.now(),
+    type: data.type,
+    content: data.content,
+    location: data.location,
+    priority: data.priority,
+    contact: data.contact,
+    timestamp: new Date().toISOString(),
+    synced: false,
+    syncedAt: null
+  };
+
+  offlineData.offlineReports.push(report);
+  saveOfflineReports();
+
+  if (!offlineData.isOnline) {
+    // Try to send via SMS (simulated)
+    sendSMSReport(report);
+  }
+
+  alert('Đã tạo phản ánh ' + (offlineData.isOnline ? 'online' : 'offline') + '! Mã: ' + report.id);
+  logActivity('offline_report', 'Tạo phản ánh offline: ' + report.id);
+
+  return report;
+}
+
+function sendSMSReport(report) {
+  // Simulate SMS sending
+  console.log('Sending SMS report:', report);
+  // In production, this would call an SMS API
+  logActivity('sms_sent', 'Gửi SMS: ' + report.id);
+}
+
+function syncOfflineData() {
+  if (offlineData.offlineReports.length === 0) {
+    return;
+  }
+
+  var syncedCount = 0;
+  offlineData.offlineReports.forEach(function(report) {
+    if (!report.synced) {
+      // Sync with server
+      report.synced = true;
+      report.syncedAt = new Date().toISOString();
+      syncedCount++;
+    }
+  });
+
+  if (syncedCount > 0) {
+    saveOfflineReports();
+    alert('Đã đồng bộ ' + syncedCount + ' phản ánh từ offline!');
+    logActivity('offline_sync', 'Đồng bộ offline: ' + syncedCount + ' phản ánh');
+  }
+
+  offlineData.lastSyncTime = new Date().toISOString();
+  localStorage.setItem('sosmap_last_sync', offlineData.lastSyncTime);
+}
+
+function saveOfflineReports() {
+  localStorage.setItem('sosmap_offline_reports', JSON.stringify(offlineData.offlineReports));
+}
+
+function callEmergency(number) {
+  alert('Đang gọi: ' + number);
+  logActivity('emergency_call', 'Gọi khẩn cấp: ' + number);
+}
+
+// Resilient Panel Event Listeners
+document.getElementById('downloadOfflineBtn').addEventListener('click', function() {
+  downloadOfflineMap();
+});
+
+document.getElementById('viewEmergencyContactsBtn').addEventListener('click', function() {
+  document.getElementById('emergencyContactsModal').style.display = 'block';
+});
+
+document.getElementById('closeEmergencyContactsModal').addEventListener('click', function() {
+  document.getElementById('emergencyContactsModal').style.display = 'none';
+});
+
+document.getElementById('closeEmergencyContactsBtn').addEventListener('click', function() {
+  document.getElementById('emergencyContactsModal').style.display = 'none';
+});
+
+// Initialize resilient system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeResilientSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {
