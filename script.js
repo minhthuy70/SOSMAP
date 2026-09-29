@@ -12082,6 +12082,350 @@ document.getElementById('exportStatsBtn').addEventListener('click', function() {
 // Make viewIncidentDetail available globally
 window.viewIncidentDetail = viewIncidentDetail;
 
+// Account & Access Control System
+var accountData = {
+  currentUser: {
+    id: 'USR001',
+    name: 'Nguyễn Văn A',
+    email: 'nguyenvana@example.com',
+    phone: '0901234567',
+    address: '123 Đường ABC, Quận 1, TP.HCM',
+    role: 'admin',
+    createdAt: '01/01/2026'
+  },
+  users: [
+    { id: 'USR001', name: 'Nguyễn Văn A', email: 'nguyenvana@example.com', role: 'admin' },
+    { id: 'USR002', name: 'Trần Thị B', email: 'tranthib@example.com', role: 'staff' },
+    { id: 'USR003', name: 'Lê Văn C', email: 'levanc@example.com', role: 'reporter' },
+    { id: 'USR004', name: 'Phạm Thị D', email: 'phamthid@example.com', role: 'viewer' }
+  ],
+  loginHistory: [
+    { time: '15/01/2026 10:45', ip: '192.168.1.100', device: 'Chrome / Windows', status: 'success' },
+    { time: '14/01/2026 15:30', ip: '192.168.1.100', device: 'Chrome / Windows', status: 'success' },
+    { time: '13/01/2026 09:15', ip: '192.168.1.101', device: 'Firefox / Mac', status: 'warning' }
+  ],
+  auditLog: [
+    { time: '15/01/2026 10:45:23', user: 'nguyenvana@example.com', action: 'login', detail: 'Đăng nhập thành công', ip: '192.168.1.100', device: 'Chrome / Windows' },
+    { time: '15/01/2026 10:30:15', user: 'tranthib@example.com', action: 'update', detail: 'Cập nhật sự cố INC-001', ip: '192.168.1.101', device: 'Firefox / Mac' },
+    { time: '15/01/2026 10:15:00', user: 'levanc@example.com', action: 'create', detail: 'Tạo phản ánh mới', ip: '192.168.1.102', device: 'Safari / iOS' },
+    { time: '15/01/2026 09:45:30', user: 'nguyenvana@example.com', action: 'logout', detail: 'Đăng xuất', ip: '192.168.1.100', device: 'Chrome / Windows' },
+    { time: '15/01/2026 09:30:00', user: 'phamthid@example.com', action: 'login', detail: 'Đăng nhập thành công', ip: '192.168.1.103', device: 'Edge / Windows' }
+  ],
+  auditFilters: {
+    user: 'all',
+    action: 'all',
+    dateFrom: '',
+    dateTo: ''
+  },
+  actionsToday: 23
+};
+
+function initializeAccountSystem() {
+  // Load account data from localStorage
+  var savedData = localStorage.getItem('sosmap_account');
+  if (savedData) {
+    accountData = JSON.parse(savedData);
+  }
+
+  updateAccountStatus();
+}
+
+function updateAccountStatus() {
+  var statusDiv = document.getElementById('accountStatus');
+  if (!statusDiv) return;
+
+  var roleLabels = {
+    viewer: 'Viewer',
+    reporter: 'Reporter',
+    staff: 'Staff',
+    admin: 'Admin'
+  };
+
+  statusDiv.innerHTML = `
+    <div class="status-item">
+      <span class="status-label">Đăng nhập:</span>
+      <span class="status-value success">Đã đăng nhập</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Vai trò:</span>
+      <span class="status-value">${roleLabels[accountData.currentUser.role] || accountData.currentUser.role}</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Thao tác hôm nay:</span>
+      <span class="status-value">${accountData.actionsToday}</span>
+    </div>
+  `;
+}
+
+function saveProfile() {
+  var name = document.getElementById('profileName').value;
+  var email = document.getElementById('profileEmail').value;
+  var phone = document.getElementById('profilePhone').value;
+  var address = document.getElementById('profileAddress').value;
+
+  accountData.currentUser.name = name;
+  accountData.currentUser.email = email;
+  accountData.currentUser.phone = phone;
+  accountData.currentUser.address = address;
+
+  saveAccountData();
+  updateAccountStatus();
+
+  // Add to audit log
+  addAuditLog('update', 'Cập nhật hồ sơ tài khoản');
+
+  alert('Đã lưu thông tin hồ sơ!');
+}
+
+function updatePassword() {
+  var currentPassword = document.getElementById('currentPassword').value;
+  var newPassword = document.getElementById('newPassword').value;
+  var confirmPassword = document.getElementById('confirmPassword').value;
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    alert('Vui lòng nhập đầy đủ thông tin');
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    alert('Mật khẩu mới không khớp');
+    return;
+  }
+
+  if (newPassword.length < 8) {
+    alert('Mật khẩu phải có ít nhất 8 ký tự');
+    return;
+  }
+
+  // Simulate password update
+  alert('Đã cập nhật mật khẩu thành công!');
+
+  // Clear inputs
+  document.getElementById('currentPassword').value = '';
+  document.getElementById('newPassword').value = '';
+  document.getElementById('confirmPassword').value = '';
+
+  // Add to audit log
+  addAuditLog('update', 'Đổi mật khẩu');
+
+  logActivity('password_changed', 'Đổi mật khẩu');
+}
+
+function forgotPassword() {
+  var email = accountData.currentUser.email;
+  alert('Đã gửi email khôi phục mật khẩu đến: ' + email);
+  
+  // Add to audit log
+  addAuditLog('update', 'Yêu cầu khôi phục mật khẩu');
+}
+
+function deleteAccount() {
+  if (confirm('Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác.')) {
+    alert('Để xóa tài khoản, vui lòng liên hệ quản trị viên hoặc gửi yêu cầu qua email.');
+    
+    // Add to audit log
+    addAuditLog('delete', 'Yêu cầu xóa tài khoản');
+  }
+}
+
+function saveRoles() {
+  var roleSelects = document.querySelectorAll('.role-select');
+  var changes = [];
+
+  roleSelects.forEach(function(select, index) {
+    var user = accountData.users[index];
+    if (user && user.role !== select.value) {
+      changes.push({
+        user: user.email,
+        oldRole: user.role,
+        newRole: select.value
+      });
+      user.role = select.value;
+    }
+  });
+
+  if (changes.length > 0) {
+    saveAccountData();
+    
+    changes.forEach(function(change) {
+      addAuditLog('update', 'Thay đổi vai trò: ' + change.user + ' từ ' + change.oldRole + ' sang ' + change.newRole);
+    });
+
+    alert('Đã lưu thay đổi phân quyền!');
+  } else {
+    alert('Không có thay đổi nào được lưu.');
+  }
+}
+
+function addAuditLog(action, detail) {
+  var log = {
+    time: new Date().toLocaleString('vi-VN'),
+    user: accountData.currentUser.email,
+    action: action,
+    detail: detail,
+    ip: '192.168.1.' + Math.floor(Math.random() * 255),
+    device: 'Chrome / Windows'
+  };
+
+  accountData.auditLog.unshift(log);
+  if (accountData.auditLog.length > 100) {
+    accountData.auditLog.pop();
+  }
+
+  accountData.actionsToday++;
+  saveAccountData();
+}
+
+function filterAuditLog() {
+  var filtered = accountData.auditLog.filter(function(log) {
+    var matchUser = accountData.auditFilters.user === 'all' || log.user === accountData.auditFilters.user;
+    var matchAction = accountData.auditFilters.action === 'all' || log.action === accountData.auditFilters.action;
+    return matchUser && matchAction;
+  });
+
+  return filtered;
+}
+
+function renderAuditTable() {
+  var filtered = filterAuditLog();
+  var auditTable = document.querySelector('.audit-table tbody');
+  if (!auditTable) return;
+
+  var actionLabels = {
+    login: 'Đăng nhập',
+    logout: 'Đăng xuất',
+    create: 'Tạo',
+    update: 'Cập nhật',
+    delete: 'Xóa'
+  };
+
+  auditTable.innerHTML = filtered.slice(0, 10).map(function(log) {
+    return `
+      <tr>
+        <td>${log.time}</td>
+        <td>${log.user}</td>
+        <td><span class="action-badge ${log.action}">${actionLabels[log.action] || log.action}</span></td>
+        <td>${log.detail}</td>
+        <td>${log.ip}</td>
+        <td>${log.device}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function exportAuditLog() {
+  var filtered = filterAuditLog();
+  var csv = 'Thời gian,Người dùng,Hành động,Chi tiết,IP,Thiết bị\n';
+
+  filtered.forEach(function(log) {
+    csv += log.time + ',' + log.user + ',' + log.action + ',' + log.detail + ',' + log.ip + ',' + log.device + '\n';
+  });
+
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'audit_log_' + new Date().toISOString().split('T')[0] + '.csv';
+  link.click();
+
+  logActivity('audit_exported', 'Xuất audit log: ' + filtered.length + ' records');
+}
+
+function saveAccountData() {
+  localStorage.setItem('sosmap_account', JSON.stringify(accountData));
+}
+
+// Account Panel Event Listeners
+document.getElementById('accountProfileBtn').addEventListener('click', function() {
+  document.getElementById('accountProfileModal').style.display = 'block';
+});
+
+document.getElementById('accountSecurityBtn').addEventListener('click', function() {
+  document.getElementById('accountSecurityModal').style.display = 'block';
+});
+
+document.getElementById('accountRolesBtn').addEventListener('click', function() {
+  document.getElementById('accountRolesModal').style.display = 'block';
+});
+
+document.getElementById('accountAuditBtn').addEventListener('click', function() {
+  document.getElementById('accountAuditModal').style.display = 'block';
+  renderAuditTable();
+});
+
+document.getElementById('closeAccountProfileModal').addEventListener('click', function() {
+  document.getElementById('accountProfileModal').style.display = 'none';
+});
+
+document.getElementById('closeAccountProfileBtn').addEventListener('click', function() {
+  document.getElementById('accountProfileModal').style.display = 'none';
+});
+
+document.getElementById('closeAccountSecurityModal').addEventListener('click', function() {
+  document.getElementById('accountSecurityModal').style.display = 'none';
+});
+
+document.getElementById('closeAccountSecurityBtn').addEventListener('click', function() {
+  document.getElementById('accountSecurityModal').style.display = 'none';
+});
+
+document.getElementById('closeAccountRolesModal').addEventListener('click', function() {
+  document.getElementById('accountRolesModal').style.display = 'none';
+});
+
+document.getElementById('closeAccountRolesBtn').addEventListener('click', function() {
+  document.getElementById('accountRolesModal').style.display = 'none';
+});
+
+document.getElementById('closeAccountAuditModal').addEventListener('click', function() {
+  document.getElementById('accountAuditModal').style.display = 'none';
+});
+
+document.getElementById('closeAccountAuditBtn').addEventListener('click', function() {
+  document.getElementById('accountAuditModal').style.display = 'none';
+});
+
+document.getElementById('saveProfileBtn').addEventListener('click', function() {
+  saveProfile();
+});
+
+document.getElementById('changePasswordBtn').addEventListener('click', function() {
+  document.getElementById('accountSecurityModal').style.display = 'none';
+  document.getElementById('accountSecurityModal').style.display = 'block';
+});
+
+document.getElementById('updatePasswordBtn').addEventListener('click', function() {
+  updatePassword();
+});
+
+document.getElementById('forgotPasswordBtn').addEventListener('click', function() {
+  forgotPassword();
+});
+
+document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+  deleteAccount();
+});
+
+document.getElementById('saveRolesBtn').addEventListener('click', function() {
+  saveRoles();
+});
+
+document.getElementById('applyAuditFiltersBtn').addEventListener('click', function() {
+  accountData.auditFilters.user = document.getElementById('auditUserFilter').value;
+  accountData.auditFilters.action = document.getElementById('auditActionFilter').value;
+  accountData.auditFilters.dateFrom = document.getElementById('auditDateFrom').value;
+  accountData.auditFilters.dateTo = document.getElementById('auditDateTo').value;
+  renderAuditTable();
+});
+
+document.getElementById('exportAuditBtn').addEventListener('click', function() {
+  exportAuditLog();
+});
+
+// Initialize account system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeAccountSystem();
+});
+
 // Initialize incident admin on page load
 document.addEventListener('DOMContentLoaded', function() {
   initializeIncidentAdmin();

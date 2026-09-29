@@ -1100,6 +1100,57 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
         </div>
 
+        <!-- Account & Access Control Panel -->
+        <div class="account-panel" id="accountPanel">
+          <h3>Tài khoản & Phân quyền</h3>
+          <div class="account-controls">
+            <button class="account-btn" id="accountProfileBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              Hồ sơ
+            </button>
+            <button class="account-btn" id="accountSecurityBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              Bảo mật
+            </button>
+            <button class="account-btn" id="accountRolesBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              Phân quyền
+            </button>
+            <button class="account-btn" id="accountAuditBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              Audit log
+            </button>
+          </div>
+          <div class="account-status" id="accountStatus">
+            <div class="status-item">
+              <span class="status-label">Đăng nhập:</span>
+              <span class="status-value success">Đã đăng nhập</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Vai trò:</span>
+              <span class="status-value">Admin</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Thao tác hôm nay:</span>
+              <span class="status-value">23</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -7168,6 +7219,375 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeIncidentStatsBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Profile Modal -->
+      <div class="modal" id="accountProfileModal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+          <div class="modal-header">
+            <h3>👤 Hồ sơ tài khoản</h3>
+            <button class="modal-close" id="closeAccountProfileModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="profile-section">
+              <div class="profile-avatar">
+                <div class="avatar-placeholder">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <button class="btn btn-secondary btn-sm">Thay đổi avatar</button>
+              </div>
+
+              <div class="profile-info">
+                <div class="form-group">
+                  <label for="profileName">Họ và tên:</label>
+                  <input type="text" class="form-control" id="profileName" value="Nguyễn Văn A">
+                </div>
+                <div class="form-group">
+                  <label for="profileEmail">Email:</label>
+                  <input type="email" class="form-control" id="profileEmail" value="nguyenvana@example.com">
+                </div>
+                <div class="form-group">
+                  <label for="profilePhone">Số điện thoại:</label>
+                  <input type="tel" class="form-control" id="profilePhone" value="0901234567">
+                </div>
+                <div class="form-group">
+                  <label for="profileAddress">Địa chỉ:</label>
+                  <input type="text" class="form-control" id="profileAddress" value="123 Đường ABC, Quận 1, TP.HCM">
+                </div>
+                <div class="form-group">
+                  <label for="profileRole">Vai trò:</label>
+                  <input type="text" class="form-control" id="profileRole" value="Admin" disabled>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-actions">
+              <button class="btn btn-primary" id="saveProfileBtn">💾 Lưu thay đổi</button>
+              <button class="btn btn-secondary" id="changePasswordBtn">🔐 Đổi mật khẩu</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" id="deleteAccountBtn">🗑️ Xóa tài khoản</button>
+            <button type="button" class="btn btn-secondary" id="closeAccountProfileBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Security Modal -->
+      <div class="modal" id="accountSecurityModal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+          <div class="modal-header">
+            <h3>🔐 Bảo mật tài khoản</h3>
+            <button class="modal-close" id="closeAccountSecurityModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="security-section">
+              <h4>Đổi mật khẩu</h4>
+              <div class="form-group">
+                <label for="currentPassword">Mật khẩu hiện tại:</label>
+                <input type="password" class="form-control" id="currentPassword" placeholder="Nhập mật khẩu hiện tại">
+              </div>
+              <div class="form-group">
+                <label for="newPassword">Mật khẩu mới:</label>
+                <input type="password" class="form-control" id="newPassword" placeholder="Nhập mật khẩu mới">
+              </div>
+              <div class="form-group">
+                <label for="confirmPassword">Xác nhận mật khẩu mới:</label>
+                <input type="password" class="form-control" id="confirmPassword" placeholder="Nhập lại mật khẩu mới">
+              </div>
+              <button class="btn btn-primary" id="updatePasswordBtn">Cập nhật mật khẩu</button>
+            </div>
+
+            <div class="security-section">
+              <h4>Khôi phục mật khẩu</h4>
+              <p class="security-desc">Nếu bạn quên mật khẩu, có thể khôi phục qua email đăng ký.</p>
+              <button class="btn btn-secondary" id="forgotPasswordBtn">📧 Gửi email khôi phục</button>
+            </div>
+
+            <div class="security-section">
+              <h4>Lịch sử đăng nhập</h4>
+              <div class="login-history">
+                <div class="history-item">
+                  <span class="history-time">15/01/2026 10:45</span>
+                  <span class="history-ip">192.168.1.100</span>
+                  <span class="history-device">Chrome / Windows</span>
+                  <span class="history-status success">Thành công</span>
+                </div>
+                <div class="history-item">
+                  <span class="history-time">14/01/2026 15:30</span>
+                  <span class="history-ip">192.168.1.100</span>
+                  <span class="history-device">Chrome / Windows</span>
+                  <span class="history-status success">Thành công</span>
+                </div>
+                <div class="history-item">
+                  <span class="history-time">13/01/2026 09:15</span>
+                  <span class="history-ip">192.168.1.101</span>
+                  <span class="history-device">Firefox / Mac</span>
+                  <span class="history-status warning">Khác IP</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeAccountSecurityBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Roles Modal -->
+      <div class="modal" id="accountRolesModal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+          <div class="modal-header">
+            <h3>🛡️ Phân quyền & Vai trò</h3>
+            <button class="modal-close" id="closeAccountRolesModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="roles-section">
+              <h4>Roles available in system</h4>
+              <div class="roles-grid">
+                <div class="role-card">
+                  <div class="role-icon">👁️</div>
+                  <div class="role-info">
+                    <h5>Viewer</h5>
+                    <p>Chỉ xem bản đồ và thông báo</p>
+                    <ul class="role-permissions">
+                      <li>Xem bản đồ</li>
+                      <li>Xem thông báo</li>
+                      <li>Xem sự cố công khai</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="role-card">
+                  <div class="role-icon">✏️</div>
+                  <div class="role-info">
+                    <h5>Reporter</h5>
+                    <p>Gửi phản ánh sự cố</p>
+                    <ul class="role-permissions">
+                      <li>Tất cả quyền Viewer</li>
+                      <li>Gửi phản ánh</li>
+                      <li>Xem phản ánh của mình</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="role-card">
+                  <div class="role-icon">👨‍💼</div>
+                  <div class="role-info">
+                    <h5>Staff</h5>
+                    <p>Nhân viên tiếp nhận và xử lý</p>
+                    <ul class="role-permissions">
+                      <li>Tất cả quyền Reporter</li>
+                      <li>Tiếp nhận phản ánh</li>
+                      <li>Phân công xử lý</li>
+                      <li>Cập nhật trạng thái</li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="role-card">
+                  <div class="role-icon">👑</div>
+                  <div class="role-info">
+                    <h5>Admin</h5>
+                    <p>Quản trị viên toàn quyền</p>
+                    <ul class="role-permissions">
+                      <li>Tất cả quyền Staff</li>
+                      <li>Quản lý người dùng</li>
+                      <li>Phân quyền</li>
+                      <li>Cấu hình hệ thống</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="roles-section">
+              <h4>Phân quyền người dùng</h4>
+              <div class="user-roles-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Email</th>
+                      <th>Tên</th>
+                      <th>Vai trò hiện tại</th>
+                      <th>Thay đổi vai trò</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>nguyenvana@example.com</td>
+                      <td>Nguyễn Văn A</td>
+                      <td><span class="role-badge admin">Admin</span></td>
+                      <td>
+                        <select class="form-control role-select">
+                          <option value="viewer">Viewer</option>
+                          <option value="reporter">Reporter</option>
+                          <option value="staff">Staff</option>
+                          <option value="admin" selected>Admin</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>tranthib@example.com</td>
+                      <td>Trần Thị B</td>
+                      <td><span class="role-badge staff">Staff</span></td>
+                      <td>
+                        <select class="form-control role-select">
+                          <option value="viewer">Viewer</option>
+                          <option value="reporter">Reporter</option>
+                          <option value="staff" selected>Staff</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>levanc@example.com</td>
+                      <td>Lê Văn C</td>
+                      <td><span class="role-badge reporter">Reporter</span></td>
+                      <td>
+                        <select class="form-control role-select">
+                          <option value="viewer">Viewer</option>
+                          <option value="reporter" selected>Reporter</option>
+                          <option value="staff">Staff</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>phamthid@example.com</td>
+                      <td>Phạm Thị D</td>
+                      <td><span class="role-badge viewer">Viewer</span></td>
+                      <td>
+                        <select class="form-control role-select">
+                          <option value="viewer" selected>Viewer</option>
+                          <option value="reporter">Reporter</option>
+                          <option value="staff">Staff</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <button class="btn btn-primary" id="saveRolesBtn">💾 Lưu thay đổi phân quyền</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeAccountRolesBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Audit Log Modal -->
+      <div class="modal" id="accountAuditModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>📋 Audit Log - Nhật ký hoạt động</h3>
+            <button class="modal-close" id="closeAccountAuditModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="audit-filters">
+              <div class="filter-group">
+                <label for="auditUserFilter">Người dùng:</label>
+                <select class="form-control" id="auditUserFilter">
+                  <option value="all">Tất cả</option>
+                  <option value="nguyenvana@example.com">Nguyễn Văn A</option>
+                  <option value="tranthib@example.com">Trần Thị B</option>
+                  <option value="levanc@example.com">Lê Văn C</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="auditActionFilter">Hành động:</label>
+                <select class="form-control" id="auditActionFilter">
+                  <option value="all">Tất cả</option>
+                  <option value="login">Đăng nhập</option>
+                  <option value="logout">Đăng xuất</option>
+                  <option value="create">Tạo</option>
+                  <option value="update">Cập nhật</option>
+                  <option value="delete">Xóa</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="auditDateFrom">Từ ngày:</label>
+                <input type="date" class="form-control" id="auditDateFrom">
+              </div>
+              <div class="filter-group">
+                <label for="auditDateTo">Đến ngày:</label>
+                <input type="date" class="form-control" id="auditDateTo">
+              </div>
+              <div class="filter-group">
+                <button class="btn btn-primary" id="applyAuditFiltersBtn">Lọc</button>
+                <button class="btn btn-secondary" id="exportAuditBtn">📥 Xuất log</button>
+              </div>
+            </div>
+
+            <div class="audit-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Thời gian</th>
+                    <th>Người dùng</th>
+                    <th>Hành động</th>
+                    <th>Chi tiết</th>
+                    <th>IP</th>
+                    <th>Thiết bị</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>15/01/2026 10:45:23</td>
+                    <td>nguyenvana@example.com</td>
+                    <td><span class="action-badge login">Đăng nhập</span></td>
+                    <td>Đăng nhập thành công</td>
+                    <td>192.168.1.100</td>
+                    <td>Chrome / Windows</td>
+                  </tr>
+                  <tr>
+                    <td>15/01/2026 10:30:15</td>
+                    <td>tranthib@example.com</td>
+                    <td><span class="action-badge update">Cập nhật</span></td>
+                    <td>Cập nhật sự cố INC-001</td>
+                    <td>192.168.1.101</td>
+                    <td>Firefox / Mac</td>
+                  </tr>
+                  <tr>
+                    <td>15/01/2026 10:15:00</td>
+                    <td>levanc@example.com</td>
+                    <td><span class="action-badge create">Tạo</span></td>
+                    <td>Tạo phản ánh mới</td>
+                    <td>192.168.1.102</td>
+                    <td>Safari / iOS</td>
+                  </tr>
+                  <tr>
+                    <td>15/01/2026 09:45:30</td>
+                    <td>nguyenvana@example.com</td>
+                    <td><span class="action-badge logout">Đăng xuất</span></td>
+                    <td>Đăng xuất</td>
+                    <td>192.168.1.100</td>
+                    <td>Chrome / Windows</td>
+                  </tr>
+                  <tr>
+                    <td>15/01/2026 09:30:00</td>
+                    <td>phamthid@example.com</td>
+                    <td><span class="action-badge login">Đăng nhập</span></td>
+                    <td>Đăng nhập thành công</td>
+                    <td>192.168.1.103</td>
+                    <td>Edge / Windows</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="audit-pagination">
+              <button class="btn btn-secondary" id="auditPrevPageBtn">Trang trước</button>
+              <span class="page-info">Trang 1 / 15</span>
+              <button class="btn btn-secondary" id="auditNextPageBtn">Trang sau</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeAccountAuditBtn">Đóng</button>
           </div>
         </div>
       </div>
