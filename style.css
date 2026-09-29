@@ -9400,6 +9400,352 @@ body.reduced-motion * {
   }
 }
 
+/* Incident Reporting Panel */
+.incident-reporting-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.incident-reporting-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.incident-reporting-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.incident-reporting-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 12px;
+  background: #005BAC;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.incident-reporting-btn:hover {
+  background: #004a8a;
+}
+
+.incident-reporting-btn svg {
+  flex-shrink: 0;
+}
+
+.incident-reporting-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.incident-reporting-status .status-item {
+  padding: 10px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.incident-reporting-status .status-label {
+  color: #666;
+  font-weight: 600;
+}
+
+.incident-reporting-status .status-value {
+  color: #333;
+  font-weight: 600;
+}
+
+.incident-reporting-status .status-value.success {
+  color: #28a745;
+}
+
+.incident-reporting-status .status-value.warning {
+  color: #ffc107;
+}
+
+/* Form Styles */
+.required {
+  color: #dc3545;
+}
+
+.location-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.location-input-group .form-control {
+  flex: 1;
+}
+
+.coordinates-display {
+  margin-top: 10px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.coordinates-label {
+  font-weight: 600;
+  color: #666;
+}
+
+.coordinates-value {
+  color: #333;
+  font-family: monospace;
+}
+
+.form-hint {
+  margin: 5px 0 0 0;
+  font-size: 11px;
+  color: #999;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  margin: 0;
+}
+
+/* My Reports Styles */
+.my-reports-filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.my-reports-filters .filter-group {
+  flex: 1;
+}
+
+.my-reports-filters .filter-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+}
+
+.my-reports-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.my-reports-table th {
+  background: #005BAC;
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.my-reports-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.my-reports-table tr:hover {
+  background: #f8f9fa;
+}
+
+.status-badge.pending {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.received {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.status-badge.processing {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.resolved {
+  background: #28a745;
+  color: white;
+}
+
+.status-badge.rejected {
+  background: #dc3545;
+  color: white;
+}
+
+/* Report Detail Styles */
+.report-detail-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.report-detail-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Verification Styles */
+.verification-filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.verification-filters .filter-group {
+  flex: 1;
+}
+
+.verification-filters .filter-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+}
+
+.verification-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.verification-table th {
+  background: #005BAC;
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.verification-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.verification-table tr:hover {
+  background: #f8f9fa;
+}
+
+.reliability-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.reliability-badge.high {
+  background: #d4edda;
+  color: #155724;
+}
+
+.reliability-badge.medium {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.reliability-badge.low {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.verification-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.verification-badge.pending {
+  background: #d4edda;
+  color: #155724;
+}
+
+.verification-badge.verified {
+  background: #28a745;
+  color: white;
+}
+
+.verification-badge.duplicate {
+  background: #ffc107;
+  color: #856404;
+}
+
+.verification-badge.invalid {
+  background: #dc3545;
+  color: white;
+}
+
+/* Responsive Incident Reporting */
+@media (max-width: 768px) {
+  .incident-reporting-controls {
+    flex-direction: column;
+  }
+
+  .location-input-group {
+    flex-direction: column;
+  }
+
+  .my-reports-filters {
+    flex-direction: column;
+  }
+
+  .my-reports-filters .filter-group {
+    min-width: 100%;
+  }
+
+  .my-reports-table {
+    overflow-x: auto;
+  }
+
+  .verification-filters {
+    flex-direction: column;
+  }
+
+  .verification-filters .filter-group {
+    min-width: 100%;
+  }
+
+  .verification-table {
+    overflow-x: auto;
+  }
+}
+
 /* System Status Panel */
 .system-status-panel {
   background: white;

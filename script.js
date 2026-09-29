@@ -12426,6 +12426,537 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeAccountSystem();
 });
 
+// Incident Reporting System
+var incidentReportingData = {
+  myReports: [
+    { id: 'RPT-001', type: 'accident', title: 'Tai nạn tại ngã tư', content: 'Có tai nạn giao thông tại ngã tư, cần sự hỗ trợ', location: 'Quận 1, TP.HCM', coordinates: '10.7769, 106.7009', status: 'processing', createdAt: '15/01/2026 10:45', userId: 'USR001', evidence: [{ type: 'image', name: 'anh_tai_nan.jpg' }], history: [{ time: '15/01/2026 10:45', action: 'Tạo phản ánh', user: 'Nguyễn Văn A' }, { time: '15/01/2026 11:00', action: 'Đã tiếp nhận', user: 'Staff' }, { time: '15/01/2026 12:30', action: 'Đang xử lý', user: 'Staff' }] },
+    { id: 'RPT-002', type: 'flood', title: 'Ngập đường Nguyễn Văn Linh', content: 'Ngập nước sâu 0.5m', location: 'Quận 7, TP.HCM', coordinates: '10.7569, 106.6809', status: 'resolved', createdAt: '14/01/2026 15:20', userId: 'USR001', evidence: [], history: [{ time: '14/01/2026 15:20', action: 'Tạo phản ánh', user: 'Nguyễn Văn A' }, { time: '14/01/2026 16:00', action: 'Đã giải quyết', user: 'Staff' }] },
+    { id: 'RPT-003', type: 'congestion', title: 'Kẹt xe đường Hà Nội', content: 'Kẹt xe kéo dài 2km', location: 'Quận 1, TP.HCM', coordinates: '10.7869, 106.6909', status: 'pending', createdAt: '15/01/2026 09:30', userId: 'USR001', evidence: [], history: [{ time: '15/01/2026 09:30', action: 'Tạo phản ánh', user: 'Nguyễn Văn A' }] }
+  ],
+  verificationQueue: [
+    { id: 'RPT-001', type: 'accident', title: 'Tai nạn tại ngã tư', userId: 'USR001', userName: 'Nguyễn Văn A', reliability: 'high', verificationStatus: 'verified', verifiedBy: 'USR002', verifiedAt: '15/01/2026 11:00' },
+    { id: 'RPT-002', type: 'flood', title: 'Ngập đường Nguyễn Văn Linh', userId: 'USR002', userName: 'Trần Thị Y', reliability: 'medium', verificationStatus: 'pending', verifiedBy: null, verifiedAt: null },
+    { id: 'RPT-003', type: 'congestion', title: 'Kẹt xe đường Hà Nội', userId: 'USR003', userName: 'Lê Văn Z', reliability: 'low', verificationStatus: 'duplicate', verifiedBy: 'USR004', verifiedAt: '15/01/2026 10:00' }
+  ],
+  filters: {
+    status: 'all',
+    verificationStatus: 'all',
+    reliability: 'all'
+  }
+};
+
+function initializeIncidentReporting() {
+  // Load incident reporting data from localStorage
+  var savedData = localStorage.getItem('sosmap_incident_reporting');
+  if (savedData) {
+    incidentReportingData = JSON.parse(savedData);
+  }
+
+  updateIncidentReportingStatus();
+}
+
+function updateIncidentReportingStatus() {
+  var statusDiv = document.getElementById('incidentReportingStatus');
+  if (!statusDiv) return;
+
+  var myReports = incidentReportingData.myReports;
+  var processing = myReports.filter(function(r) {
+    return r.status === 'processing' || r.status === 'pending' || r.status === 'received';
+  }).length;
+  var resolved = myReports.filter(function(r) {
+    return r.status === 'resolved';
+  }).length;
+
+  statusDiv.innerHTML = `
+    <div class="status-item">
+      <span class="status-label">Phản ánh của tôi:</span>
+      <span class="status-value">${myReports.length}</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Đang xử lý:</span>
+      <span class="status-value warning">${processing}</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Đã giải quyết:</span>
+      <span class="status-value success">${resolved}</span>
+    </div>
+  `;
+}
+
+function submitReport() {
+  var type = document.getElementById('reportType').value;
+  var title = document.getElementById('reportTitle').value;
+  var content = document.getElementById('reportContent').value;
+  var location = document.getElementById('reportLocation').value;
+  var contactName = document.getElementById('reportContactName').value;
+  var contactPhone = document.getElementById('reportContactPhone').value;
+  var contactEmail = document.getElementById('reportContactEmail').value;
+  var isAnonymous = document.getElementById('reportAnonymous').checked;
+
+  // Validation
+  if (!type || !title || !content) {
+    alert('Vui lòng điền các trường bắt buộc (*)');
+    return;
+  }
+
+  // Generate report ID
+  var reportId = 'RPT-' + String(incidentReportingData.myReports.length + 1).padStart(3, '0');
+
+  // Create report
+  var report = {
+    id: reportId,
+    type: type,
+    title: title,
+    content: content,
+    location: location || 'Chưa có địa chỉ',
+    coordinates: document.getElementById('coordinatesValue').textContent || '',
+    status: 'pending',
+    createdAt: new Date().toLocaleString('vi-VN'),
+    userId: accountData.currentUser.id,
+    userName: isAnonymous ? 'Ẩn danh' : accountData.currentUser.name,
+    contactInfo: isAnonymous ? null : {
+      name: contactName,
+      phone: contactPhone,
+      email: contactEmail
+    },
+    evidence: [],
+    history: [{
+      time: new Date().toLocaleString('vi-VN'),
+      action: 'Tạo phản ánh',
+      user: accountData.currentUser.name
+    }]
+  };
+
+  incidentReportingData.myReports.unshift(report);
+  saveIncidentReportingData();
+  updateIncidentReportingStatus();
+
+  // Add to audit log
+  addAuditLog('create', 'Tạo phản ánh: ' + reportId);
+
+  alert('Đã gửi phản ánh thành công! Mã số: ' + reportId);
+
+  // Reset form
+  resetReportForm();
+
+  // Close modal
+  document.getElementById('createReportModal').style.display = 'none';
+
+  logActivity('report_created', 'Tạo phản ánh: ' + reportId);
+}
+
+function resetReportForm() {
+  document.getElementById('reportType').value = '';
+  document.getElementById('reportTitle').value = '';
+  document.getElementById('reportContent').value = '';
+  document.getElementById('reportLocation').value = '';
+  document.getElementById('coordinatesDisplay').style.display = 'none';
+  document.getElementById('coordinatesValue').textContent = '';
+  document.getElementById('reportImage').value = '';
+  document.getElementById('reportVideo').value = '';
+  document.getElementById('reportContactName').value = '';
+  document.getElementById('reportContactPhone').value = '';
+  document.getElementById('reportContactEmail').value = '';
+  document.getElementById('reportAnonymous').checked = false;
+}
+
+function selectLocationOnMap() {
+  // Simulate location selection
+  alert('Chọn vị trí trên bản đồ (tính năng demo)');
+  document.getElementById('reportLocation').value = 'Quận 1, TP.HCM';
+  document.getElementById('coordinatesDisplay').style.display = 'block';
+  document.getElementById('coordinatesValue').textContent = '10.7769, 106.7009';
+}
+
+function useGpsLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        var lat = position.coords.latitude.toFixed(6);
+        var lng = position.coords.longitude.toFixed(6);
+        document.getElementById('reportLocation').value = 'Vị trí GPS';
+        document.getElementById('coordinatesDisplay').style.display = 'block';
+        document.getElementById('coordinatesValue').textContent = lat + ', ' + lng;
+      },
+      function(error) {
+        alert('Không thể lấy vị trí GPS: ' + error.message);
+      }
+    );
+  } else {
+    alert('Trình duyệt không hỗ trợ GPS');
+  }
+}
+
+function renderMyReports() {
+  var filtered = incidentReportingData.myReports.filter(function(report) {
+    return incidentReportingData.filters.status === 'all' || report.status === incidentReportingData.filters.status;
+  });
+
+  var tableBody = document.getElementById('myReportsTableBody');
+  if (!tableBody) return;
+
+  var typeLabels = {
+    accident: 'Tai nạn',
+    congestion: 'Kẹt xe',
+    flood: 'Ngập nước',
+    obstacle: 'Vật cản',
+    road_damage: 'Hỏng đường',
+    traffic_light: 'Hỏng đèn',
+    other: 'Khác'
+  };
+
+  var statusLabels = {
+    pending: 'Chờ tiếp nhận',
+    received: 'Đã tiếp nhận',
+    processing: 'Đang xử lý',
+    resolved: 'Đã giải quyết',
+    rejected: 'Đã từ chối'
+  };
+
+  tableBody.innerHTML = filtered.map(function(report) {
+    var canEdit = report.status === 'pending';
+    var canCancel = report.status === 'pending';
+
+    return `
+      <tr>
+        <td>${report.id}</td>
+        <td>${typeLabels[report.type] || report.type}</td>
+        <td>${report.title}</td>
+        <td>${report.location}</td>
+        <td><span class="status-badge ${report.status}">${statusLabels[report.status]}</span></td>
+        <td>${report.createdAt}</td>
+        <td>
+          <button class="btn btn-sm btn-primary" onclick="viewMyReportDetail('${report.id}')">Xem</button>
+          ${canEdit ? '<button class="btn btn-sm btn-secondary" onclick="editMyReport(\'' + report.id + '\')">Sửa</button>' : ''}
+          ${canCancel ? '<button class="btn btn-sm btn-danger" onclick="cancelMyReport(\'' + report.id + '\')">Hủy</button>' : ''}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function viewMyReportDetail(reportId) {
+  var report = incidentReportingData.myReports.find(function(r) {
+    return r.id === reportId;
+  });
+
+  if (!report) return;
+
+  document.getElementById('myReportDetailId').textContent = report.id;
+  document.getElementById('detailReportType').textContent = report.type;
+  document.getElementById('detailReportTitle').textContent = report.title;
+  document.getElementById('detailReportContent').textContent = report.content;
+  document.getElementById('detailReportLocation').textContent = report.location;
+  document.getElementById('detailReportCoordinates').textContent = report.coordinates || 'N/A';
+  document.getElementById('detailReportStatus').textContent = report.status;
+  document.getElementById('detailReportCreatedAt').textContent = report.createdAt;
+
+  // Render evidence
+  var evidenceList = document.getElementById('detailReportEvidence');
+  if (report.evidence && report.evidence.length > 0) {
+    evidenceList.innerHTML = report.evidence.map(function(e) {
+      var icon = e.type === 'image' ? '📷' : e.type === 'video' ? '📹' : '📄';
+      return `
+        <div class="evidence-item">
+          <span class="evidence-icon">${icon}</span>
+          <span class="evidence-name">${e.name}</span>
+          <button class="btn btn-sm btn-secondary">Xem</button>
+        </div>
+      `;
+    }).join('');
+  } else {
+    evidenceList.innerHTML = '<p style="color: #999; font-size: 13px;">Không có minh chứng</p>';
+  }
+
+  // Render history
+  var historyList = document.getElementById('detailReportHistory');
+  historyList.innerHTML = report.history.map(function(h) {
+    return `
+      <div class="history-item">
+        <span class="history-time">${h.time}</span>
+        <span class="history-action">${h.action}</span>
+        <span class="history-user">${h.user}</span>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('myReportDetailModal').style.display = 'block';
+}
+
+function editMyReport(reportId) {
+  var report = incidentReportingData.myReports.find(function(r) {
+    return r.id === reportId;
+  });
+
+  if (!report) return;
+
+  // Populate create report form with existing data
+  document.getElementById('reportType').value = report.type;
+  document.getElementById('reportTitle').value = report.title;
+  document.getElementById('reportContent').value = report.content;
+  document.getElementById('reportLocation').value = report.location;
+
+  // Store the report ID being edited
+  document.getElementById('createReportModal').setAttribute('data-editing', reportId);
+
+  // Change submit button text
+  document.getElementById('submitReportBtn').textContent = '💾 Cập nhật phản ánh';
+
+  document.getElementById('createReportModal').style.display = 'block';
+}
+
+function cancelMyReport(reportId) {
+  if (confirm('Bạn có chắc chắn muốn hủy phản ánh này?')) {
+    var report = incidentReportingData.myReports.find(function(r) {
+      return r.id === reportId;
+    });
+
+    if (report) {
+      report.status = 'rejected';
+      report.history.push({
+        time: new Date().toLocaleString('vi-VN'),
+        action: 'Hủy phản ánh',
+        user: accountData.currentUser.name
+      });
+
+      saveIncidentReportingData();
+      updateIncidentReportingStatus();
+      renderMyReports();
+
+      addAuditLog('update', 'Hủy phản ánh: ' + reportId);
+
+      alert('Đã hủy phản ánh!');
+    }
+  }
+}
+
+function addAdditionalInfo() {
+  var additionalInfo = document.getElementById('additionalInfo').value;
+  var additionalImage = document.getElementById('additionalImage').files;
+
+  if (!additionalInfo && additionalImage.length === 0) {
+    alert('Vui lòng nhập thông tin bổ sung hoặc tải ảnh');
+    return;
+  }
+
+  var reportId = document.getElementById('myReportDetailId').textContent;
+  var report = incidentReportingData.myReports.find(function(r) {
+    return r.id === reportId;
+  });
+
+  if (report) {
+    if (additionalInfo) {
+      report.content += '\n\n[Bổ sung ' + new Date().toLocaleString('vi-VN') + ']: ' + additionalInfo;
+    }
+
+    if (additionalImage.length > 0) {
+      for (var i = 0; i < additionalImage.length; i++) {
+        report.evidence.push({
+          type: 'image',
+          name: additionalImage[i].name
+        });
+      }
+    }
+
+    report.history.push({
+      time: new Date().toLocaleString('vi-VN'),
+      action: 'Bổ sung thông tin',
+      user: accountData.currentUser.name
+    });
+
+    saveIncidentReportingData();
+
+    alert('Đã gửi bổ sung!');
+    document.getElementById('additionalInfo').value = '';
+    document.getElementById('additionalImage').value = '';
+
+    addAuditLog('update', 'Bổ sung thông tin phản ánh: ' + reportId);
+  }
+}
+
+function renderVerificationQueue() {
+  var filtered = incidentReportingData.verificationQueue.filter(function(report) {
+    var matchStatus = incidentReportingData.filters.verificationStatus === 'all' || report.verificationStatus === incidentReportingData.filters.verificationStatus;
+    var matchReliability = incidentReportingData.filters.reliability === 'all' || report.reliability === incidentReportingData.filters.reliability;
+    return matchStatus && matchReliability;
+  });
+
+  var tableBody = document.getElementById('verificationTableBody');
+  if (!tableBody) return;
+
+  var typeLabels = {
+    accident: 'Tai nạn',
+    congestion: 'Kẹt xe',
+    flood: 'Ngập nước',
+    obstacle: 'Vật cản',
+    road_damage: 'Hỏng đường',
+    traffic_light: 'Hỏng đèn',
+    other: 'Khác'
+  };
+
+  var verificationStatusLabels = {
+    pending: 'Chờ xác minh',
+    verified: 'Đã xác minh',
+    duplicate: 'Trùng lặp',
+    invalid: 'Không hợp lệ'
+  };
+
+  var reliabilityLabels = {
+    high: 'Cao',
+    medium: 'Trung bình',
+    low: 'Thấp'
+  };
+
+  tableBody.innerHTML = filtered.map(function(report) {
+    var isPending = report.verificationStatus === 'pending';
+
+    return `
+      <tr>
+        <td>${report.id}</td>
+        <td>${typeLabels[report.type] || report.type}</td>
+        <td>${report.title}</td>
+        <td>${report.userName}</td>
+        <td><span class="reliability-badge ${report.reliability}">${reliabilityLabels[report.reliability]}</span></td>
+        <td><span class="verification-badge ${report.verificationStatus}">${verificationStatusLabels[report.verificationStatus]}</span></td>
+        <td>${report.verifiedBy || '-'}</td>
+        <td>
+          <button class="btn btn-sm btn-secondary" onclick="viewVerificationDetail('${report.id}')">Xem</button>
+          ${isPending ? `
+            <button class="btn btn-sm btn-primary" onclick="verifyReport('${report.id}', 'verified')">✓ Xác minh</button>
+            <button class="btn btn-sm btn-warning" onclick="verifyReport('${report.id}', 'duplicate')">🔁 Trùng</button>
+            <button class="btn btn-sm btn-danger" onclick="verifyReport('${report.id}', 'invalid')">✗ Không hợp lệ</button>
+          ` : ''}
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function verifyReport(reportId, status) {
+  var report = incidentReportingData.verificationQueue.find(function(r) {
+    return r.id === reportId;
+  });
+
+  if (report) {
+    report.verificationStatus = status;
+    report.verifiedBy = accountData.currentUser.id;
+    report.verifiedAt = new Date().toLocaleString('vi-VN');
+
+    saveIncidentReportingData();
+    renderVerificationQueue();
+
+    addAuditLog('update', 'Xác minh phản ánh: ' + reportId + ' - ' + status);
+
+    alert('Đã xác minh phản ánh!');
+  }
+}
+
+function viewVerificationDetail(reportId) {
+  // Open report detail modal
+  viewMyReportDetail(reportId);
+}
+
+function saveIncidentReportingData() {
+  localStorage.setItem('sosmap_incident_reporting', JSON.stringify(incidentReportingData));
+}
+
+// Incident Reporting Event Listeners
+document.getElementById('createReportBtn').addEventListener('click', function() {
+  document.getElementById('createReportModal').style.display = 'block';
+  document.getElementById('createReportModal').removeAttribute('data-editing');
+  document.getElementById('submitReportBtn').textContent = '📤 Gửi phản ánh';
+});
+
+document.getElementById('myReportsBtn').addEventListener('click', function() {
+  document.getElementById('myReportsModal').style.display = 'block';
+  renderMyReports();
+});
+
+document.getElementById('verificationBtn').addEventListener('click', function() {
+  document.getElementById('verificationModal').style.display = 'block';
+  renderVerificationQueue();
+});
+
+document.getElementById('closeCreateReportModal').addEventListener('click', function() {
+  document.getElementById('createReportModal').style.display = 'none';
+});
+
+document.getElementById('resetReportBtn').addEventListener('click', function() {
+  resetReportForm();
+});
+
+document.getElementById('submitReportBtn').addEventListener('click', function() {
+  var editingId = document.getElementById('createReportModal').getAttribute('data-editing');
+  if (editingId) {
+    // Update existing report
+    submitReport();
+    document.getElementById('createReportModal').removeAttribute('data-editing');
+    document.getElementById('submitReportBtn').textContent = '📤 Gửi phản ánh';
+  } else {
+    // Create new report
+    submitReport();
+  }
+});
+
+document.getElementById('selectLocationBtn').addEventListener('click', function() {
+  selectLocationOnMap();
+});
+
+document.getElementById('useGpsBtn').addEventListener('click', function() {
+  useGpsLocation();
+});
+
+document.getElementById('closeMyReportsModal').addEventListener('click', function() {
+  document.getElementById('myReportsModal').style.display = 'none';
+});
+
+document.getElementById('closeMyReportsBtn').addEventListener('click', function() {
+  document.getElementById('myReportsModal').style.display = 'none';
+});
+
+document.getElementById('closeMyReportDetailModal').addEventListener('click', function() {
+  document.getElementById('myReportDetailModal').style.display = 'none';
+});
+
+document.getElementById('closeMyReportDetailBtn').addEventListener('click', function() {
+  document.getElementById('myReportDetailModal').style.display = 'none';
+});
+
+document.getElementById('addAdditionalInfoBtn').addEventListener('click', function() {
+  addAdditionalInfo();
+});
+
+document.getElementById('applyMyReportsFiltersBtn').addEventListener('click', function() {
+  incidentReportingData.filters.status = document.getElementById('myReportsStatusFilter').value;
+  renderMyReports();
+});
+
+document.getElementById('closeVerificationModal').addEventListener('click', function() {
+  document.getElementById('verificationModal').style.display = 'none';
+});
+
+document.getElementById('closeVerificationBtn').addEventListener('click', function() {
+  document.getElementById('verificationModal').style.display = 'none';
+});
+
+document.getElementById('applyVerificationFiltersBtn').addEventListener('click', function() {
+  incidentReportingData.filters.verificationStatus = document.getElementById('verificationStatusFilter').value;
+  incidentReportingData.filters.reliability = document.getElementById('verificationReliabilityFilter').value;
+  renderVerificationQueue();
+});
+
+// Make functions available globally
+window.viewMyReportDetail = viewMyReportDetail;
+window.editMyReport = editMyReport;
+window.cancelMyReport = cancelMyReport;
+window.verifyReport = verifyReport;
+window.viewVerificationDetail = viewVerificationDetail;
+
+// Initialize incident reporting on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeIncidentReporting();
+});
+
 // Initialize incident admin on page load
 document.addEventListener('DOMContentLoaded', function() {
   initializeIncidentAdmin();

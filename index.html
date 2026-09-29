@@ -1151,6 +1151,51 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
         </div>
 
+        <!-- Incident Reporting Panel -->
+        <div class="incident-reporting-panel" id="incidentReportingPanel">
+          <h3>Phản ánh sự cố</h3>
+          <div class="incident-reporting-controls">
+            <button class="incident-reporting-btn" id="createReportBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Tạo phản ánh
+            </button>
+            <button class="incident-reporting-btn" id="myReportsBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              Phản ánh của tôi
+            </button>
+            <button class="incident-reporting-btn" id="verificationBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              Xác minh
+            </button>
+          </div>
+          <div class="incident-reporting-status" id="incidentReportingStatus">
+            <div class="status-item">
+              <span class="status-label">Phản ánh của tôi:</span>
+              <span class="status-value">5</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Đang xử lý:</span>
+              <span class="status-value warning">2</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Đã giải quyết:</span>
+              <span class="status-value success">3</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -7588,6 +7633,364 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeAccountAuditBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Report Modal -->
+      <div class="modal" id="createReportModal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+          <div class="modal-header">
+            <h3>📝 Tạo phản ánh sự cố</h3>
+            <button class="modal-close" id="closeCreateReportModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="reportType">Loại sự cố: <span class="required">*</span></label>
+              <select class="form-control" id="reportType" required>
+                <option value="">-- Chọn loại sự cố --</option>
+                <option value="accident">Tai nạn giao thông</option>
+                <option value="congestion">Kẹt xe / Ùn tắc</option>
+                <option value="flood">Ngập nước</option>
+                <option value="obstacle">Vật cản / Rác</option>
+                <option value="road_damage">Hỏng đường / Cầu</option>
+                <option value="traffic_light">Hỏng đèn giao thông</option>
+                <option value="other">Sự cố khác</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="reportTitle">Tiêu đề: <span class="required">*</span></label>
+              <input type="text" class="form-control" id="reportTitle" placeholder="Nhập tiêu đề ngắn gọn" required>
+            </div>
+
+            <div class="form-group">
+              <label for="reportContent">Nội dung chi tiết: <span class="required">*</span></label>
+              <textarea class="form-control" id="reportContent" rows="4" placeholder="Mô tả chi tiết về sự cố..." required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="reportLocation">Vị trí:</label>
+              <div class="location-input-group">
+                <input type="text" class="form-control" id="reportLocation" placeholder="Nhập địa chỉ hoặc chọn trên bản đồ">
+                <button class="btn btn-secondary" id="selectLocationBtn">📍 Chọn trên bản đồ</button>
+                <button class="btn btn-secondary" id="useGpsBtn">🛰️ Dùng GPS</button>
+              </div>
+              <div class="coordinates-display" id="coordinatesDisplay" style="display: none;">
+                <span class="coordinates-label">Toạ độ:</span>
+                <span class="coordinates-value" id="coordinatesValue"></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="reportImage">Ảnh minh chứng:</label>
+              <input type="file" class="form-control" id="reportImage" accept="image/*" multiple>
+              <p class="form-hint">Có thể tải lên nhiều ảnh (tối đa 5MB mỗi ảnh)</p>
+            </div>
+
+            <div class="form-group">
+              <label for="reportVideo">Video minh chứng:</label>
+              <input type="file" class="form-control" id="reportVideo" accept="video/*">
+              <p class="form-hint">Tối đa 50MB mỗi video</p>
+            </div>
+
+            <div class="form-group">
+              <label for="reportContactName">Tên người liên hệ:</label>
+              <input type="text" class="form-control" id="reportContactName" placeholder="Tên của bạn">
+            </div>
+
+            <div class="form-group">
+              <label for="reportContactPhone">Số điện thoại:</label>
+              <input type="tel" class="form-control" id="reportContactPhone" placeholder="Số điện thoại để liên hệ">
+            </div>
+
+            <div class="form-group">
+              <label for="reportContactEmail">Email:</label>
+              <input type="email" class="form-control" id="reportContactEmail" placeholder="Email để nhận thông báo">
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="reportAnonymous">
+                <span>Gửi ẩn danh (không hiển thị thông tin liên hệ)</span>
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="resetReportBtn">🔄 Đặt lại</button>
+            <button type="button" class="btn btn-primary" id="submitReportBtn">📤 Gửi phản ánh</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Reports Modal -->
+      <div class="modal" id="myReportsModal" style="display: none;">
+        <div class="modal-content" style="max-width: 1000px;">
+          <div class="modal-header">
+            <h3>📋 Phản ánh của tôi</h3>
+            <button class="modal-close" id="closeMyReportsModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="my-reports-filters">
+              <div class="filter-group">
+                <label for="myReportsStatusFilter">Trạng thái:</label>
+                <select class="form-control" id="myReportsStatusFilter">
+                  <option value="all">Tất cả</option>
+                  <option value="pending">Chờ tiếp nhận</option>
+                  <option value="received">Đã tiếp nhận</option>
+                  <option value="processing">Đang xử lý</option>
+                  <option value="resolved">Đã giải quyết</option>
+                  <option value="rejected">Đã từ chối</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <button class="btn btn-primary" id="applyMyReportsFiltersBtn">Lọc</button>
+              </div>
+            </div>
+
+            <div class="my-reports-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mã số</th>
+                    <th>Loại</th>
+                    <th>Tiêu đề</th>
+                    <th>Vị trí</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="myReportsTableBody">
+                  <tr>
+                    <td>RPT-001</td>
+                    <td>Tai nạn</td>
+                    <td>Tai nạn tại ngã tư</td>
+                    <td>Quận 1</td>
+                    <td><span class="status-badge processing">Đang xử lý</span></td>
+                    <td>15/01/2026</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" onclick="viewMyReportDetail('RPT-001')">Xem</button>
+                      <button class="btn btn-sm btn-secondary" onclick="editMyReport('RPT-001')">Sửa</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>RPT-002</td>
+                    <td>Ngập nước</td>
+                    <td>Ngập đường Nguyễn Văn Linh</td>
+                    <td>Quận 7</td>
+                    <td><span class="status-badge resolved">Đã giải quyết</span></td>
+                    <td>14/01/2026</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" onclick="viewMyReportDetail('RPT-002')">Xem</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>RPT-003</td>
+                    <td>Kẹt xe</td>
+                    <td>Kẹt xe đường Hà Nội</td>
+                    <td>Quận 1</td>
+                    <td><span class="status-badge pending">Chờ tiếp nhận</span></td>
+                    <td>15/01/2026</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" onclick="viewMyReportDetail('RPT-003')">Xem</button>
+                      <button class="btn btn-sm btn-secondary" onclick="editMyReport('RPT-003')">Sửa</button>
+                      <button class="btn btn-sm btn-danger" onclick="cancelMyReport('RPT-003')">Hủy</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeMyReportsBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Report Detail Modal -->
+      <div class="modal" id="myReportDetailModal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+          <div class="modal-header">
+            <h3>📄 Chi tiết phản ánh: <span id="myReportDetailId">RPT-001</span></h3>
+            <button class="modal-close" id="closeMyReportDetailModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="report-detail-section">
+              <h4>Thông tin phản ánh</h4>
+              <div class="detail-item">
+                <span class="detail-label">Loại sự cố:</span>
+                <span class="detail-value" id="detailReportType">Tai nạn</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Tiêu đề:</span>
+                <span class="detail-value" id="detailReportTitle">Tai nạn tại ngã tư</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Nội dung:</span>
+                <span class="detail-value" id="detailReportContent">Có tai nạn giao thông tại ngã tư, cần sự hỗ trợ</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Vị trí:</span>
+                <span class="detail-value" id="detailReportLocation">Quận 1, TP.HCM</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Toạ độ:</span>
+                <span class="detail-value" id="detailReportCoordinates">10.7769, 106.7009</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Trạng thái:</span>
+                <span class="detail-value" id="detailReportStatus">Đang xử lý</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Ngày tạo:</span>
+                <span class="detail-value" id="detailReportCreatedAt">15/01/2026 10:45</span>
+              </div>
+            </div>
+
+            <div class="report-detail-section">
+              <h4>Minh chứng</h4>
+              <div class="evidence-list" id="detailReportEvidence">
+                <div class="evidence-item">
+                  <span class="evidence-icon">📷</span>
+                  <span class="evidence-name">anh_tai_nan.jpg</span>
+                  <button class="btn btn-sm btn-secondary">Xem</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="report-detail-section">
+              <h4>Lịch sử thay đổi</h4>
+              <div class="history-list" id="detailReportHistory">
+                <div class="history-item">
+                  <span class="history-time">15/01/2026 10:45</span>
+                  <span class="history-action">Tạo phản ánh</span>
+                  <span class="history-user">Nguyễn Văn A</span>
+                </div>
+                <div class="history-item">
+                  <span class="history-time">15/01/2026 11:00</span>
+                  <span class="history-action">Đã tiếp nhận</span>
+                  <span class="history-user">Staff</span>
+                </div>
+                <div class="history-item">
+                  <span class="history-time">15/01/2026 12:30</span>
+                  <span class="history-action">Đang xử lý</span>
+                  <span class="history-user">Staff</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="report-detail-section">
+              <h4>Bổ sung thông tin</h4>
+              <div class="form-group">
+                <label for="additionalInfo">Thông tin bổ sung:</label>
+                <textarea class="form-control" id="additionalInfo" rows="3" placeholder="Thêm thông tin mới..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="additionalImage">Ảnh bổ sung:</label>
+                <input type="file" class="form-control" id="additionalImage" accept="image/*" multiple>
+              </div>
+              <button class="btn btn-primary" id="addAdditionalInfoBtn">➕ Gửi bổ sung</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeMyReportDetailBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verification Modal -->
+      <div class="modal" id="verificationModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>✅ Xác minh phản ánh</h3>
+            <button class="modal-close" id="closeVerificationModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="verification-filters">
+              <div class="filter-group">
+                <label for="verificationStatusFilter">Trạng thái xác minh:</label>
+                <select class="form-control" id="verificationStatusFilter">
+                  <option value="all">Tất cả</option>
+                  <option value="pending">Chờ xác minh</option>
+                  <option value="verified">Đã xác minh</option>
+                  <option value="duplicate">Trùng lặp</option>
+                  <option value="invalid">Không hợp lệ</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="verificationReliabilityFilter">Độ tin cậy:</label>
+                <select class="form-control" id="verificationReliabilityFilter">
+                  <option value="all">Tất cả</option>
+                  <option value="high">Cao</option>
+                  <option value="medium">Trung bình</option>
+                  <option value="low">Thấp</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <button class="btn btn-primary" id="applyVerificationFiltersBtn">Lọc</button>
+              </div>
+            </div>
+
+            <div class="verification-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mã số</th>
+                    <th>Loại</th>
+                    <th>Tiêu đề</th>
+                    <th>Người gửi</th>
+                    <th>Độ tin cậy</th>
+                    <th>Trạng thái xác minh</th>
+                    <th>Người xác minh</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="verificationTableBody">
+                  <tr>
+                    <td>RPT-001</td>
+                    <td>Tai nạn</td>
+                    <td>Tai nạn tại ngã tư</td>
+                    <td>Nguyễn Văn A</td>
+                    <td><span class="reliability-badge high">Cao</span></td>
+                    <td><span class="verification-badge verified">Đã xác minh</span></td>
+                    <td>Trần Thị B</td>
+                    <td>
+                      <button class="btn btn-sm btn-secondary" onclick="viewVerificationDetail('RPT-001')">Xem</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>RPT-002</td>
+                    <td>Ngập nước</td>
+                    <td>Ngập đường Nguyễn Văn Linh</td>
+                    <td>Trần Thị Y</td>
+                    <td><span class="reliability-badge medium">Trung bình</span></td>
+                    <td><span class="verification-badge pending">Chờ xác minh</span></td>
+                    <td>-</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" onclick="verifyReport('RPT-001', 'verified')">✓ Xác minh</button>
+                      <button class="btn btn-sm btn-warning" onclick="verifyReport('RPT-001', 'duplicate')">🔁 Trùng</button>
+                      <button class="btn btn-sm btn-danger" onclick="verifyReport('RPT-001', 'invalid')">✗ Không hợp lệ</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>RPT-003</td>
+                    <td>Kẹt xe</td>
+                    <td>Kẹt xe đường Hà Nội</td>
+                    <td>Lê Văn Z</td>
+                    <td><span class="reliability-badge low">Thấp</span></td>
+                    <td><span class="verification-badge duplicate">Trùng lặp</span></td>
+                    <td>Phạm Thị D</td>
+                    <td>
+                      <button class="btn btn-sm btn-secondary" onclick="viewVerificationDetail('RPT-003')">Xem</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeVerificationBtn">Đóng</button>
           </div>
         </div>
       </div>
