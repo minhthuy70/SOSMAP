@@ -5786,6 +5786,590 @@ body, html {
   }
 }
 
+/* Operations Panel */
+.operations-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.operations-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.operations-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.operations-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: #005BAC;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.operations-btn:hover {
+  background: #004a8a;
+}
+
+.operations-btn svg {
+  flex-shrink: 0;
+}
+
+.operations-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-item {
+  padding: 10px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.status-label {
+  color: #666;
+  font-weight: 600;
+}
+
+.status-value {
+  color: #333;
+  font-weight: 600;
+}
+
+.status-value.success {
+  color: #28a745;
+}
+
+/* Shift Management Styles */
+.shift-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.shift-schedule {
+  margin-bottom: 20px;
+}
+
+.shift-schedule h4 {
+  margin: 0 0 15px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.shift-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.shift-day {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  border: 1px solid #e9ecef;
+}
+
+.shift-day.current {
+  border: 2px solid #005BAC;
+  background: #f0f8ff;
+}
+
+.day-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.day-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: #333;
+}
+
+.day-date {
+  color: #666;
+  font-size: 13px;
+}
+
+.current-badge {
+  padding: 2px 8px;
+  background: #005BAC;
+  color: white;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.shift-row {
+  display: flex;
+  gap: 10px;
+}
+
+.shift-slot {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  background: white;
+  border: 1px solid #e9ecef;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.shift-slot.active {
+  border: 2px solid #005BAC;
+  background: #f0f8ff;
+}
+
+.shift-time {
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+}
+
+.shift-staff {
+  font-size: 13px;
+  color: #333;
+}
+
+.shift-status {
+  font-size: 11px;
+  color: #005BAC;
+  font-weight: 600;
+}
+
+.current-shift-info {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.current-shift-info h4 {
+  margin: 0 0 15px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.shift-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+/* System Monitoring Styles */
+.monitoring-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.monitoring-tab {
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.monitoring-tab.active {
+  background: #005BAC;
+  color: white;
+}
+
+.monitoring-tab:hover:not(.active) {
+  background: #e9ecef;
+}
+
+.monitoring-tab-content {
+  display: block;
+}
+
+.monitoring-tab-content[style*="display: none"] {
+  display: none;
+}
+
+.monitoring-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.monitor-card {
+  padding: 15px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.monitor-card.success {
+  border-left: 4px solid #28a745;
+}
+
+.monitor-card.warning {
+  border-left: 4px solid #ffc107;
+}
+
+.monitor-card.error {
+  border-left: 4px solid #dc3545;
+}
+
+.monitor-icon {
+  font-size: 24px;
+}
+
+.monitor-info h4 {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.monitor-info p {
+  margin: 0 0 5px 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.monitor-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #005BAC;
+}
+
+.performance-chart {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.performance-chart h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.chart-bars {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  height: 150px;
+}
+
+.chart-bar-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.bar-container {
+  flex: 1;
+  width: 40px;
+  background: #e9ecef;
+  border-radius: 4px;
+  display: flex;
+  align-items: flex-end;
+  padding: 4px;
+}
+
+.bar-label {
+  font-size: 11px;
+  color: #666;
+}
+
+/* Request Queue Styles */
+.queue-stats {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.queue-stat {
+  flex: 1;
+  padding: 15px;
+  border-radius: 8px;
+  background: #f8f9fa;
+  text-align: center;
+}
+
+.queue-stat .stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #005BAC;
+  margin-bottom: 5px;
+}
+
+.queue-stat .stat-label {
+  font-size: 12px;
+  color: #666;
+}
+
+.queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.queue-item {
+  padding: 12px;
+  border-radius: 6px;
+  background: white;
+  border: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.queue-item.urgent {
+  border-left: 4px solid #dc3545;
+}
+
+.queue-item.high {
+  border-left: 4px solid #ffc107;
+}
+
+.queue-item.medium {
+  border-left: 4px solid #005BAC;
+}
+
+.queue-item.low {
+  border-left: 4px solid #6c757d;
+}
+
+.queue-id {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  min-width: 100px;
+}
+
+.queue-type {
+  flex: 1;
+  font-size: 13px;
+  color: #666;
+}
+
+.queue-time {
+  font-size: 12px;
+  color: #666;
+  min-width: 60px;
+}
+
+.queue-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.queue-status.warning {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Alerts List Styles */
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.alert-item {
+  padding: 15px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #e9ecef;
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.alert-item.critical {
+  border-left: 4px solid #dc3545;
+}
+
+.alert-item.warning {
+  border-left: 4px solid #ffc107;
+}
+
+.alert-item.info {
+  border-left: 4px solid #005BAC;
+}
+
+.alert-icon {
+  font-size: 24px;
+}
+
+.alert-info {
+  flex: 1;
+}
+
+.alert-info h5 {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.alert-info p {
+  margin: 0 0 5px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.alert-time {
+  font-size: 11px;
+  color: #999;
+}
+
+.alert-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* System Logs Styles */
+.log-filters {
+  margin-bottom: 15px;
+}
+
+.log-filter {
+  padding: 8px 12px;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.log-item {
+  padding: 10px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.log-item.error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.log-item.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.log-item.info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.log-time {
+  min-width: 80px;
+  color: #666;
+}
+
+.log-level {
+  min-width: 60px;
+  font-weight: 600;
+}
+
+.log-message {
+  flex: 1;
+  color: #333;
+}
+
+/* Responsive Operations Panel */
+@media (max-width: 768px) {
+  .operations-controls {
+    flex-direction: column;
+  }
+
+  .shift-row {
+    flex-direction: column;
+  }
+
+  .monitoring-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .queue-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .queue-id {
+    min-width: auto;
+  }
+
+  .queue-time {
+    min-width: auto;
+  }
+
+  .alert-item {
+    flex-direction: column;
+  }
+
+  .alert-actions {
+    width: 100%;
+  }
+
+  .alert-actions .btn {
+    flex: 1;
+  }
+
+  .chart-bars {
+    gap: 10px;
+  }
+
+  .bar-container {
+    width: 30px;
+  }
+}
+
 /* System Status Panel */
 .system-status-panel {
   background: white;

@@ -9283,6 +9283,393 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeIntegrationsSystem();
 });
 
+// Operations & Quality Management System
+var operationsData = {
+  currentShift: {
+    name: 'Ca Sáng',
+    time: '08:00-16:00',
+    staff: ['Trần Văn T', 'Lê Thị U'],
+    processed: 45,
+    pending: 12
+  },
+  shifts: [
+    { day: 'Thứ 2', date: '15/01', morning: ['Nguyễn Văn A', 'Trần Thị B'], afternoon: ['Lê Văn C', 'Phạm Thị D'], night: ['Hoàng Văn E', 'Nguyễn Thị F'] },
+    { day: 'Thứ 3', date: '16/01', morning: ['Trần Văn G', 'Lê Thị H'], afternoon: ['Phạm Văn I', 'Nguyễn Thị K'], night: ['Hoàng Văn L', 'Trần Thị M'] },
+    { day: 'Thứ 4', date: '17/01', morning: ['Nguyễn Văn N', 'Phạm Thị O'], afternoon: ['Lê Văn P', 'Trần Thị Q'], night: ['Hoàng Văn R', 'Nguyễn Thị S'] },
+    { day: 'Thứ 5', date: '18/01', morning: ['Trần Văn T', 'Lê Thị U'], afternoon: ['Phạm Văn V', 'Nguyễn Thị W'], night: ['Hoàng Văn X', 'Trần Thị Y'] }
+  ],
+  systemStatus: {
+    server: { status: 'active', uptime: '99.9%' },
+    api: { status: 'active', responseTime: '45ms' },
+    database: { status: 'active', queries: '2,345/s' },
+    memory: { status: 'warning', usage: '75%' },
+    storage: { status: 'active', usage: '45%' },
+    alerts: { status: 'active', delay: '2s' }
+  },
+  requestQueue: {
+    waiting: 23,
+    processing: 45,
+    overdue: 12,
+    items: [
+      { id: 'REQ-001234', type: 'Cứu hộ khẩn cấp', time: '45 phút', status: 'overdue', priority: 'urgent' },
+      { id: 'REQ-001235', type: 'Báo cáo cháy', time: '20 phút', status: 'processing', priority: 'high' },
+      { id: 'REQ-001236', type: 'Sự cố hạ tầng', time: '15 phút', status: 'waiting', priority: 'medium' },
+      { id: 'REQ-001237', type: 'Phản ánh cộng đồng', time: '10 phút', status: 'waiting', priority: 'low' }
+    ]
+  },
+  alerts: [
+    { id: 'alert1', type: 'critical', icon: '🔴', title: 'Yêu cầu quá hạn', message: 'REQ-001234 đã quá hạn 45 phút chưa được phản hồi', time: '5 phút trước' },
+    { id: 'alert2', type: 'warning', icon: '🟡', title: 'Bộ nhớ cao', message: 'Sử dụng bộ nhớ đạt 75% dung lượng', time: '10 phút trước' },
+    { id: 'alert3', type: 'info', icon: '🔵', title: 'Sao lưu hoàn tất', message: 'Sao lưu dữ liệu hàng ngày đã hoàn tất', time: '1 giờ trước' }
+  ],
+  logs: [
+    { time: '10:45:23', level: 'ERROR', message: 'Database connection timeout' },
+    { time: '10:44:15', level: 'WARNING', message: 'High memory usage: 75%' },
+    { time: '10:43:00', level: 'INFO', message: 'Backup completed successfully' },
+    { time: '10:42:30', level: 'INFO', message: 'New API key created: sk_live_xxx' },
+    { time: '10:41:15', level: 'INFO', message: 'User login: admin@example.com' }
+  ],
+  backupSchedule: {
+    lastBackup: new Date().toISOString(),
+    nextBackup: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    status: 'completed'
+  },
+  staff: [
+    { id: 'staff1', name: 'Nguyễn Văn A', role: 'Trưởng ca', permissions: ['all'], trained: true },
+    { id: 'staff2', name: 'Trần Thị B', role: 'Nhân viên', permissions: ['incident', 'alert'], trained: true },
+    { id: 'staff3', name: 'Lê Văn C', role: 'Nhân viên', permissions: ['incident'], trained: false }
+  ],
+  documents: [
+    { id: 'doc1', name: 'Quy trình xử lý sự cố', type: 'procedure', updatedAt: '15/01/2024' },
+    { id: 'doc2', name: 'Danh sách liên lạc khẩn cấp', type: 'contact', updatedAt: '10/01/2024' },
+    { id: 'doc3', name: 'Hướng dẫn sử dụng hệ thống', type: 'guide', updatedAt: '20/01/2024' }
+  ]
+};
+
+function initializeOperationsSystem() {
+  // Load operations data from localStorage
+  var savedOperations = localStorage.getItem('sosmap_operations');
+  if (savedOperations) {
+    operationsData = JSON.parse(savedOperations);
+  }
+
+  updateOperationsStatus();
+  startMonitoring();
+}
+
+function updateOperationsStatus() {
+  var statusDiv = document.getElementById('operationsStatus');
+  if (!statusDiv) return;
+
+  statusDiv.innerHTML = `
+    <div class="status-item">
+      <span class="status-label">Ca trực hiện tại:</span>
+      <span class="status-value">${operationsData.currentShift.name} (${operationsData.currentShift.time})</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Hàng đợi:</span>
+      <span class="status-value">${operationsData.requestQueue.waiting} yêu cầu</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Máy chủ:</span>
+      <span class="status-value ${operationsData.systemStatus.server.status}">Đang hoạt động</span>
+    </div>
+  `;
+}
+
+function startMonitoring() {
+  // Check for overdue requests every minute
+  setInterval(function() {
+    checkOverdueRequests();
+  }, 60000);
+
+  // Check system health every 30 seconds
+  setInterval(function() {
+    checkSystemHealth();
+  }, 30000);
+
+  // Log system status every 5 minutes
+  setInterval(function() {
+    logSystemStatus();
+  }, 300000);
+}
+
+function checkOverdueRequests() {
+  var overdueCount = operationsData.requestQueue.items.filter(function(item) {
+    return item.status === 'overdue';
+  }).length;
+
+  if (overdueCount > 0) {
+    createAlert('warning', 'Yêu cầu quá hạn', overdueCount + ' yêu cầu đã quá hạn chưa được phản hồi');
+  }
+}
+
+function checkSystemHealth() {
+  // Simulate system health check
+  var health = {
+    server: operationsData.systemStatus.server.status === 'active',
+    api: operationsData.systemStatus.api.status === 'active',
+    database: operationsData.systemStatus.database.status === 'active'
+  };
+
+  if (!health.server || !health.api || !health.database) {
+    createAlert('critical', 'Lỗi hệ thống', 'Một hoặc nhiều dịch vụ không hoạt động');
+  }
+
+  // Check memory usage
+  if (parseInt(operationsData.systemStatus.memory.usage) > 80) {
+    createAlert('warning', 'Bộ nhớ cao', 'Sử dụng bộ nhớ đạt ' + operationsData.systemStatus.memory.usage);
+  }
+}
+
+function logSystemStatus() {
+  var log = {
+    time: new Date().toLocaleTimeString('vi-VN'),
+    level: 'INFO',
+    message: 'System health check: All services operational'
+  };
+
+  operationsData.logs.unshift(log);
+  if (operationsData.logs.length > 100) {
+    operationsData.logs.pop();
+  }
+
+  saveOperationsData();
+}
+
+function createAlert(type, title, message) {
+  var alert = {
+    id: 'alert' + Date.now(),
+    type: type,
+    icon: type === 'critical' ? '🔴' : type === 'warning' ? '🟡' : '🔵',
+    title: title,
+    message: message,
+    time: 'Vừa xong'
+  };
+
+  operationsData.alerts.unshift(alert);
+  if (operationsData.alerts.length > 50) {
+    operationsData.alerts.pop();
+  }
+
+  saveOperationsData();
+
+  // Show browser notification if supported
+  if (Notification.permission === 'granted') {
+    new Notification('SOSMAP Alert: ' + title, {
+      body: message,
+      icon: '/icon.png'
+    });
+  }
+}
+
+function createShift(day, date, morningStaff, afternoonStaff, nightStaff) {
+  var shift = {
+    day: day,
+    date: date,
+    morning: morningStaff,
+    afternoon: afternoonStaff,
+    night: nightStaff
+  };
+
+  operationsData.shifts.push(shift);
+  saveOperationsData();
+
+  alert('Đã tạo ca trực cho ' + day + ' ' + date);
+  logActivity('shift_created', 'Tạo ca trực: ' + day + ' ' + date);
+
+  return shift;
+}
+
+function assignStaffToShift(shiftId, staffId, shiftType) {
+  var shift = operationsData.shifts.find(function(s) {
+    return s.day === shiftId;
+  });
+
+  if (!shift) {
+    alert('Không tìm thấy ca trực');
+    return;
+  }
+
+  var staff = operationsData.staff.find(function(s) {
+    return s.id === staffId;
+  });
+
+  if (!staff) {
+    alert('Không tìm thấy nhân viên');
+    return;
+  }
+
+  shift[shiftType].push(staff.name);
+  saveOperationsData();
+
+  alert('Đã phân công ' + staff.name + ' vào ca ' + shiftType);
+  logActivity('staff_assigned', 'Phân công nhân viên: ' + staff.name);
+}
+
+function performBackup() {
+  operationsData.backupSchedule.lastBackup = new Date().toISOString();
+  operationsData.backupSchedule.nextBackup = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+  operationsData.backupSchedule.status = 'completed';
+
+  saveOperationsData();
+
+  createAlert('info', 'Sao lưu hoàn tất', 'Sao lưu dữ liệu đã hoàn tất');
+  logActivity('backup_completed', 'Sao lưu dữ liệu hoàn tất');
+}
+
+function testBackupRecovery() {
+  // Simulate backup recovery test
+  alert('Đang kiểm tra khôi phục từ bản sao lưu...');
+  logActivity('backup_test', 'Kiểm tra khôi phục bản sao lưu');
+
+  setTimeout(function() {
+    alert('Kiểm tra khôi phục thành công!');
+    createAlert('info', 'Kiểm tra khôi phục', 'Khôi phục từ bản sao lưu thành công');
+  }, 2000);
+}
+
+function testLoadCapacity() {
+  // Simulate load capacity test
+  alert('Đang kiểm tra sức chịu tải...');
+  logActivity('load_test', 'Kiểm tra sức chịu tải');
+
+  setTimeout(function() {
+    alert('Kiểm tra sức chịu tải hoàn tất! Hệ thống có thể xử lý 10,000 requests/phút');
+    createAlert('info', 'Kiểm tra tải', 'Sức chịu tải: 10,000 requests/phút');
+  }, 3000);
+}
+
+function testLegacyDevice() {
+  // Simulate legacy device test
+  alert('Đang kiểm tra khả năng truy cập trên thiết bị cũ...');
+  logActivity('legacy_test', 'Kiểm tra thiết bị cũ');
+
+  setTimeout(function() {
+    alert('Kiểm tra hoàn tất! Hệ thống tương thích với iOS 12+, Android 8+');
+    createAlert('info', 'Kiểm tra thiết bị cũ', 'Tương thích: iOS 12+, Android 8+');
+  }, 2000);
+}
+
+function addDocument(name, type) {
+  var document = {
+    id: 'doc' + Date.now(),
+    name: name,
+    type: type,
+    updatedAt: new Date().toLocaleDateString('vi-VN')
+  };
+
+  operationsData.documents.push(document);
+  saveOperationsData();
+
+  alert('Đã thêm tài liệu: ' + name);
+  logActivity('document_added', 'Thêm tài liệu: ' + name);
+
+  return document;
+}
+
+function trainStaff(staffId) {
+  var staff = operationsData.staff.find(function(s) {
+    return s.id === staffId;
+  });
+
+  if (!staff) {
+    alert('Không tìm thấy nhân viên');
+    return;
+  }
+
+  staff.trained = true;
+  saveOperationsData();
+
+  alert('Đã đào tạo ' + staff.name);
+  logActivity('staff_trained', 'Đào tạo nhân viên: ' + staff.name);
+}
+
+function grantPermission(staffId, permission) {
+  var staff = operationsData.staff.find(function(s) {
+    return s.id === staffId;
+  });
+
+  if (!staff) {
+    alert('Không tìm thấy nhân viên');
+    return;
+  }
+
+  if (!staff.permissions.includes(permission)) {
+    staff.permissions.push(permission);
+    saveOperationsData();
+
+    alert('Đã cấp quyền ' + permission + ' cho ' + staff.name);
+    logActivity('permission_granted', 'Cấp quyền: ' + permission + ' cho ' + staff.name);
+  }
+}
+
+function saveOperationsData() {
+  localStorage.setItem('sosmap_operations', JSON.stringify(operationsData));
+}
+
+// Operations Panel Event Listeners
+document.getElementById('shiftManagementBtn').addEventListener('click', function() {
+  document.getElementById('shiftManagementModal').style.display = 'block';
+});
+
+document.getElementById('systemMonitoringBtn').addEventListener('click', function() {
+  document.getElementById('systemMonitoringModal').style.display = 'block';
+});
+
+document.getElementById('closeShiftManagementModal').addEventListener('click', function() {
+  document.getElementById('shiftManagementModal').style.display = 'none';
+});
+
+document.getElementById('closeShiftManagementBtn').addEventListener('click', function() {
+  document.getElementById('shiftManagementModal').style.display = 'none';
+});
+
+document.getElementById('closeSystemMonitoringModal').addEventListener('click', function() {
+  document.getElementById('systemMonitoringModal').style.display = 'none';
+});
+
+document.getElementById('closeSystemMonitoringBtn').addEventListener('click', function() {
+  document.getElementById('systemMonitoringModal').style.display = 'none';
+});
+
+document.getElementById('createShiftBtn').addEventListener('click', function() {
+  var day = prompt('Nhập ngày (Thứ 2, Thứ 3...):');
+  if (!day) return;
+
+  var date = prompt('Nhập ngày tháng (DD/MM):');
+  if (!date) return;
+
+  createShift(day, date, [], [], []);
+});
+
+document.getElementById('assignStaffBtn').addEventListener('click', function() {
+  alert('Chức năng phân công nhân viên sẽ được mở rộng trong phiên bản tiếp theo');
+});
+
+// Monitoring tab switching
+document.querySelectorAll('.monitoring-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.monitoring-tab').forEach(function(t) {
+      t.classList.remove('active');
+    });
+
+    this.classList.add('active');
+
+    document.querySelectorAll('.monitoring-tab-content').forEach(function(content) {
+      content.style.display = 'none';
+    });
+
+    var tabName = this.getAttribute('data-tab');
+    document.getElementById(tabName + '-tab').style.display = 'block';
+  });
+});
+
+// Initialize operations system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeOperationsSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {

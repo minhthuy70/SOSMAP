@@ -866,6 +866,40 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
         </div>
 
+        <!-- Operations Panel -->
+        <div class="operations-panel" id="operationsPanel">
+          <h3>Quản lý vận hành</h3>
+          <div class="operations-controls">
+            <button class="operations-btn" id="shiftManagementBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              Ca trực
+            </button>
+            <button class="operations-btn" id="systemMonitoringBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              Giám sát hệ thống
+            </button>
+          </div>
+          <div class="operations-status" id="operationsStatus">
+            <div class="status-item">
+              <span class="status-label">Ca trực hiện tại:</span>
+              <span class="status-value">Ca Sáng (08:00-16:00)</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Hàng đợi:</span>
+              <span class="status-value">23 yêu cầu</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Máy chủ:</span>
+              <span class="status-value success">Đang hoạt động</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -4737,6 +4771,392 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeApiManagementBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shift Management Modal -->
+      <div class="modal" id="shiftManagementModal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+          <div class="modal-header">
+            <h3>🕐 Quản lý ca trực 24/7</h3>
+            <button class="modal-close" id="closeShiftManagementModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="shift-actions">
+              <button class="btn btn-primary" id="createShiftBtn">Tạo ca trực mới</button>
+              <button class="btn btn-secondary" id="assignStaffBtn">Phân công nhân viên</button>
+            </div>
+
+            <div class="shift-schedule">
+              <h4>Lịch trực tuần này</h4>
+              <div class="shift-calendar">
+                <div class="shift-day">
+                  <div class="day-header">
+                    <span class="day-name">Thứ 2</span>
+                    <span class="day-date">15/01</span>
+                  </div>
+                  <div class="shift-row">
+                    <div class="shift-slot morning">
+                      <span class="shift-time">08:00-16:00</span>
+                      <span class="shift-staff">Nguyễn Văn A, Trần Thị B</span>
+                    </div>
+                    <div class="shift-slot afternoon">
+                      <span class="shift-time">16:00-24:00</span>
+                      <span class="shift-staff">Lê Văn C, Phạm Thị D</span>
+                    </div>
+                    <div class="shift-slot night">
+                      <span class="shift-time">00:00-08:00</span>
+                      <span class="shift-staff">Hoàng Văn E, Nguyễn Thị F</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="shift-day">
+                  <div class="day-header">
+                    <span class="day-name">Thứ 3</span>
+                    <span class="day-date">16/01</span>
+                  </div>
+                  <div class="shift-row">
+                    <div class="shift-slot morning">
+                      <span class="shift-time">08:00-16:00</span>
+                      <span class="shift-staff">Trần Văn G, Lê Thị H</span>
+                    </div>
+                    <div class="shift-slot afternoon">
+                      <span class="shift-time">16:00-24:00</span>
+                      <span class="shift-staff">Phạm Văn I, Nguyễn Thị K</span>
+                    </div>
+                    <div class="shift-slot night">
+                      <span class="shift-time">00:00-08:00</span>
+                      <span class="shift-staff">Hoàng Văn L, Trần Thị M</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="shift-day">
+                  <div class="day-header">
+                    <span class="day-name">Thứ 4</span>
+                    <span class="day-date">17/01</span>
+                  </div>
+                  <div class="shift-row">
+                    <div class="shift-slot morning">
+                      <span class="shift-time">08:00-16:00</span>
+                      <span class="shift-staff">Nguyễn Văn N, Phạm Thị O</span>
+                    </div>
+                    <div class="shift-slot afternoon">
+                      <span class="shift-time">16:00-24:00</span>
+                      <span class="shift-staff">Lê Văn P, Trần Thị Q</span>
+                    </div>
+                    <div class="shift-slot night">
+                      <span class="shift-time">00:00-08:00</span>
+                      <span class="shift-staff">Hoàng Văn R, Nguyễn Thị S</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="shift-day current">
+                  <div class="day-header">
+                    <span class="day-name">Thứ 5</span>
+                    <span class="day-date">18/01</span>
+                    <span class="current-badge">Hôm nay</span>
+                  </div>
+                  <div class="shift-row">
+                    <div class="shift-slot morning active">
+                      <span class="shift-time">08:00-16:00</span>
+                      <span class="shift-staff">Trần Văn T, Lê Thị U</span>
+                      <span class="shift-status">Đang trực</span>
+                    </div>
+                    <div class="shift-slot afternoon">
+                      <span class="shift-time">16:00-24:00</span>
+                      <span class="shift-staff">Phạm Văn V, Nguyễn Thị W</span>
+                    </div>
+                    <div class="shift-slot night">
+                      <span class="shift-time">00:00-08:00</span>
+                      <span class="shift-staff">Hoàng Văn X, Trần Thị Y</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="current-shift-info">
+              <h4>Thông tin ca trực hiện tại</h4>
+              <div class="shift-details">
+                <div class="detail-item">
+                  <span class="detail-label">Ca:</span>
+                  <span class="detail-value">Ca Sáng</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Thời gian:</span>
+                  <span class="detail-value">08:00 - 16:00</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Nhân viên trực:</span>
+                  <span class="detail-value">Trần Văn T, Lê Thị U</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Yêu cầu đã xử lý:</span>
+                  <span class="detail-value">45</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Yêu cầu đang chờ:</span>
+                  <span class="detail-value">12</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeShiftManagementBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Monitoring Modal -->
+      <div class="modal" id="systemMonitoringModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>📊 Giám sát hệ thống</h3>
+            <button class="modal-close" id="closeSystemMonitoringModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="monitoring-tabs">
+              <button class="monitoring-tab active" data-tab="overview">Tổng quan</button>
+              <button class="monitoring-tab" data-tab="requests">Hàng đợi</button>
+              <button class="monitoring-tab" data-tab="alerts">Cảnh báo</button>
+              <button class="monitoring-tab" data-tab="logs">Logs</button>
+            </div>
+
+            <div class="monitoring-tab-content" id="overview-tab">
+              <div class="monitoring-grid">
+                <div class="monitor-card success">
+                  <div class="monitor-icon">🟢</div>
+                  <div class="monitor-info">
+                    <h4>Máy chủ</h4>
+                    <p>Đang hoạt động</p>
+                    <span class="monitor-value">Uptime: 99.9%</span>
+                  </div>
+                </div>
+
+                <div class="monitor-card success">
+                  <div class="monitor-icon">🟢</div>
+                  <div class="monitor-info">
+                    <h4>API</h4>
+                    <p>Đang hoạt động</p>
+                    <span class="monitor-value">Response: 45ms</span>
+                  </div>
+                </div>
+
+                <div class="monitor-card success">
+                  <div class="monitor-icon">🟢</div>
+                  <div class="monitor-info">
+                    <h4>Cơ sở dữ liệu</h4>
+                    <p>Đang hoạt động</p>
+                    <span class="monitor-value">Queries: 2,345/s</span>
+                  </div>
+                </div>
+
+                <div class="monitor-card warning">
+                  <div class="monitor-icon">🟡</div>
+                  <div class="monitor-info">
+                    <h4>Bộ nhớ</h4>
+                    <p>Cảnh báo</p>
+                    <span class="monitor-value">75% used</span>
+                  </div>
+                </div>
+
+                <div class="monitor-card success">
+                  <div class="monitor-icon">🟢</div>
+                  <div class="monitor-info">
+                    <h4>Lưu trữ</h4>
+                    <p>Đang hoạt động</p>
+                    <span class="monitor-value">45% used</span>
+                  </div>
+                </div>
+
+                <div class="monitor-card success">
+                  <div class="monitor-icon">🟢</div>
+                  <div class="monitor-info">
+                    <h4>Cảnh báo khẩn cấp</h4>
+                    <p>Đang hoạt động</p>
+                    <span class="monitor-value">Delay: 2s</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="performance-chart">
+                <h4>Hiệu suất hệ thống (24h)</h4>
+                <div class="chart-bars">
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 60%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">00:00</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 45%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">04:00</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 55%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">08:00</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 80%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">12:00</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 70%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">16:00</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 65%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">20:00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="monitoring-tab-content" id="requests-tab" style="display: none;">
+              <div class="request-queue">
+                <h4>Hàng đợi yêu cầu</h4>
+                <div class="queue-stats">
+                  <div class="queue-stat">
+                    <span class="stat-value">23</span>
+                    <span class="stat-label">Đang chờ</span>
+                  </div>
+                  <div class="queue-stat">
+                    <span class="stat-value">45</span>
+                    <span class="stat-label">Đang xử lý</span>
+                  </div>
+                  <div class="queue-stat">
+                    <span class="stat-value">12</span>
+                    <span class="stat-label">Quá hạn</span>
+                  </div>
+                </div>
+
+                <div class="queue-list">
+                  <div class="queue-item urgent">
+                    <div class="queue-id">REQ-001234</div>
+                    <div class="queue-type">Cứu hộ khẩn cấp</div>
+                    <div class="queue-time">45 phút</div>
+                    <div class="queue-status warning">Quá hạn</div>
+                  </div>
+                  <div class="queue-item high">
+                    <div class="queue-id">REQ-001235</div>
+                    <div class="queue-type">Báo cáo cháy</div>
+                    <div class="queue-time">20 phút</div>
+                    <div class="queue-status">Đang xử lý</div>
+                  </div>
+                  <div class="queue-item medium">
+                    <div class="queue-id">REQ-001236</div>
+                    <div class="queue-type">Sự cố hạ tầng</div>
+                    <div class="queue-time">15 phút</div>
+                    <div class="queue-status">Đang chờ</div>
+                  </div>
+                  <div class="queue-item low">
+                    <div class="queue-id">REQ-001237</div>
+                    <div class="queue-type">Phản ánh cộng đồng</div>
+                    <div class="queue-time">10 phút</div>
+                    <div class="queue-status">Đang chờ</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="monitoring-tab-content" id="alerts-tab" style="display: none;">
+              <div class="alerts-list">
+                <h4>Cảnh báo hệ thống</h4>
+                <div class="alert-item critical">
+                  <div class="alert-icon">🔴</div>
+                  <div class="alert-info">
+                    <h5>Yêu cầu quá hạn</h5>
+                    <p>REQ-001234 đã quá hạn 45 phút chưa được phản hồi</p>
+                    <span class="alert-time">5 phút trước</span>
+                  </div>
+                  <div class="alert-actions">
+                    <button class="btn btn-primary" style="font-size: 12px;">Xử lý</button>
+                  </div>
+                </div>
+
+                <div class="alert-item warning">
+                  <div class="alert-icon">🟡</div>
+                  <div class="alert-info">
+                    <h5>Bộ nhớ cao</h5>
+                    <p>Sử dụng bộ nhớ đạt 75% dung lượng</p>
+                    <span class="alert-time">10 phút trước</span>
+                  </div>
+                  <div class="alert-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;">Xem</button>
+                  </div>
+                </div>
+
+                <div class="alert-item info">
+                  <div class="alert-icon">🔵</div>
+                  <div class="alert-info">
+                    <h5>Sao lưu hoàn tất</h5>
+                    <p>Sao lưu dữ liệu hàng ngày đã hoàn tất</p>
+                    <span class="alert-time">1 giờ trước</span>
+                  </div>
+                  <div class="alert-actions">
+                    <button class="btn btn-secondary" style="font-size: 12px;">Xem</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="monitoring-tab-content" id="logs-tab" style="display: none;">
+              <div class="system-logs">
+                <h4>Logs hệ thống</h4>
+                <div class="log-filters">
+                  <select class="log-filter">
+                    <option value="all">Tất cả</option>
+                    <option value="error">Lỗi</option>
+                    <option value="warning">Cảnh báo</option>
+                    <option value="info">Thông tin</option>
+                  </select>
+                </div>
+                <div class="log-list">
+                  <div class="log-item error">
+                    <span class="log-time">10:45:23</span>
+                    <span class="log-level">ERROR</span>
+                    <span class="log-message">Database connection timeout</span>
+                  </div>
+                  <div class="log-item warning">
+                    <span class="log-time">10:44:15</span>
+                    <span class="log-level">WARNING</span>
+                    <span class="log-message">High memory usage: 75%</span>
+                  </div>
+                  <div class="log-item info">
+                    <span class="log-time">10:43:00</span>
+                    <span class="log-level">INFO</span>
+                    <span class="log-message">Backup completed successfully</span>
+                  </div>
+                  <div class="log-item info">
+                    <span class="log-time">10:42:30</span>
+                    <span class="log-level">INFO</span>
+                    <span class="log-message">New API key created: sk_live_xxx</span>
+                  </div>
+                  <div class="log-item info">
+                    <span class="log-time">10:41:15</span>
+                    <span class="log-level">INFO</span>
+                    <span class="log-message">User login: admin@example.com</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeSystemMonitoringBtn">Đóng</button>
           </div>
         </div>
       </div>
