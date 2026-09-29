@@ -789,6 +789,43 @@
           </div>
         </div>
 
+        <!-- Reporting Panel -->
+        <div class="reporting-panel" id="reportingPanel">
+          <h3>Báo cáo & Minh bạch</h3>
+          <div class="reporting-controls">
+            <button class="reporting-btn" id="reportingDashboardBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="9" y1="21" x2="9" y2="9"></line>
+              </svg>
+              Dashboard
+            </button>
+            <button class="reporting-btn" id="exportReportBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2 2h14a2 2 0 0 1 2-2z"></path>
+                <polyline points="17 8 12 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Xuất báo cáo
+            </button>
+          </div>
+          <div class="reporting-summary" id="reportingSummary">
+            <div class="summary-card">
+              <div class="summary-value">156</div>
+div class="summary-label">Sự cố tháng này</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value">1,234</div>
+              <div class="summary-label">Người được cứu hộ</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-value">89%</div>
+              <div class="summary-label">Đã giải quyết</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -3912,6 +3949,298 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeEmergencyContactsBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reporting Dashboard Modal -->
+      <div class="modal" id="reportingDashboardModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>📊 Dashboard Báo cáo</h3>
+            <button class="modal-close" id="closeReportingDashboardModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="reporting-tabs">
+              <button class="reporting-tab active" data-tab="incidents">Sự cố</button>
+              <button class="reporting-tab" data-tab="rescue">Cứu hộ</button>
+              <button class="reporting-tab" data-tab="relief">Cứu trợ</button>
+              <button class="reporting-tab" data-tab="health">Sức khỏe</button>
+              <button class="reporting-tab" data-tab="shelters">Điểm trú an</button>
+            </div>
+
+            <div class="reporting-tab-content" id="incidents-tab">
+              <div class="reporting-summary">
+                <div class="summary-card">
+                  <div class="summary-value" id="totalIncidents">156</div>
+                  <div class="summary-label">Tổng sự cố</div>
+                </div>
+                <div class="summary-card">
+                  <div class="summary-value" id="resolvedIncidents">139</div>
+                  <div class="summary-label">Đã giải quyết</div>
+                </div>
+                <div class="summary-card">
+                  <div class="summary-value" id="avgResponseTime">2.5h</div>
+                  <div class="summary-label">Thời gian phản hồi TB</div>
+                </div>
+              </div>
+
+              <div class="reporting-chart">
+                <h4>Sự cố theo loại</h4>
+                <div class="chart-bar">
+                  <div class="bar-label">Giao thông</div>
+                  <div class="bar-fill" style="width: 60%; background: #005BAC;">60</div>
+                </div>
+                <div class="chart-bar">
+                  <div class="bar-label">Hạ tầng</div>
+                  <div class="bar-fill" style="width: 40%; background: #28a745;">40</div>
+                </div>
+                <div class="chart-bar">
+                  <div class="bar-label">Cháy nổ</div>
+                  <div class="bar-fill" style="width: 25%; background: #dc3545;">25</div>
+                </div>
+                <div class="chart-bar">
+                  <div class="bar-label">Khác</div>
+                  <div class="bar-fill" style="width: 31%; background: #6c757d;">31</div>
+                </div>
+              </div>
+
+              <div class="reporting-table">
+                <h4>Sự cố theo địa bàn</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Địa bàn</th>
+                      <th>Số lượng</th>
+                      <th>Đã giải quyết</th>
+                      <th>Thời gian TB</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Quận 1</td>
+                      <td>45</td>
+                      <td>42</td>
+                      <td>2.1h</td>
+                    </tr>
+                    <tr>
+                      <td>Quận 3</td>
+                      <td>38</td>
+                      <td>35</td>
+                      <td>2.3h</td>
+                    </tr>
+                    <tr>
+                      <td>Quận 5</td>
+                      <td>32</td>
+                      <td>28</td>
+                      <td>2.8h</td>
+                    </tr>
+                    <tr>
+                      <td>Quận 7</td>
+                      <td>28</td>
+                      <td>24</td>
+                      <td>3.0h</td>
+                    </tr>
+                    <tr>
+                      <td>Quận Bình Thạnh</td>
+                      <td>13</td>
+                      <td>10</td>
+                      <td>2.5h</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="reporting-tab-content" id="rescue-tab" style="display: none;">
+              <div class="reporting-summary">
+                <div class="summary-card">
+                  <div class="summary-value" id="totalRescued">1,234</div>
+                  <div class="summary-label">Người được cứu hộ</div>
+                </div>
+                <div class="summary-card">
+                  <div class="summary-value" id="activeRescue">23</div>
+                  <div class="summary-label">Đang cứu hộ</div>
+                </div>
+                <div class="summary-card">
+                  <div class="summary-value" id="rescueTeams">12</div>
+                  <div class="summary-label">Đội cứu hộ</div>
+                </div>
+              </div>
+
+              <div class="reporting-chart">
+                <h4>Yêu cầu cứu hộ theo loại</h4>
+                <div class="chart-bar">
+                  <div class="bar-label">Mắc kẹt</div>
+                  <div class="bar-fill" style="width: 45%; background: #005BAC;">45</div>
+                </div>
+                <div class="chart-bar">
+                  <div class="bar-label">Bị thương</div>
+                  <div class="bar-fill" style="width: 35%; background: #dc3545;">35</div>
+                </div>
+                <div class="chart-bar">
+                  <div class="bar-label">Mất tích</div>
+                  <div class="bar-fill" style="width: 20%; background: #ffc107;">20</div>
+                </div>
+                <div class="chart-bar">
+                  <div class="bar-label">Cần y tế</div>
+                  <div class="bar-fill" style="width: 55%; background: #28a745;">55</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="reporting-tab-content" id="relief-tab" style="display: none;">
+              <div class="reporting-summary">
+                <div class="summary-card">
+                  <div class="summary-value" id="totalNeeds">89</div>
+                  <div class="summary-label">Nhu cầu cứu trợ</div>
+                </div>
+                <div class="summary-card">
+                  <div class="summary-value" id="fulfilledNeeds">67</div>
+                  <div class="summary-label">Đã đáp ứng</div>
+                </div>
+                <div class="summary-card">
+                  <div class="summary-value" id="donationAmount">2.5 tỷ</div>
+                  <div class="summary-label">Quyên góp</div>
+                </div>
+              </div>
+
+              <div class="reporting-table">
+                <h4>Tồn kho theo điểm cứu trợ</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Điểm cứu trợ</th>
+                      <th>Lương thực</th>
+                      <th>Nước uống</th>
+                      <th>Thuốc</th>
+                      <th>Trạng thái</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Kho chính HCM</td>
+                      <td>500 kg</td>
+                      <td>2000 L</td>
+                      <td>100 hộp</td>
+                      <td class="status-ok">Bình thường</td>
+                    </tr>
+                    <tr>
+                      <td>Kho Hà Nội</td>
+                      <td>300 kg</td>
+                      <td>1500 L</td>
+                      <td>80 hộp</td>
+                      <td class="status-ok">Bình thường</td>
+                    </tr>
+                    <tr>
+                      <td>Điểm tiếp nhận Đà Nẵng</td>
+                      <td>100 kg</td>
+                      <td>500 L</td>
+                      <td>30 hộp</td>
+                      <td class="status-warning">Cảnh báo</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="reporting-tab-content" id="health-tab" style="display: none;">
+              <div class="reporting-summary">
+                <div class="summary-card">
+                  <div class="summary-value" id="totalCases">234</div>
+                  <div class="summary-label">Ca bệnh</div>
+                </div>
+                <div class="summary-card">
+                  <div class="summary-value" id="quarantineCount">89</div>
+                  <div class="summary-label">Đang cách ly</div>
+                </div>
+                <div class="summary-card">
+                  <div class="summary-value" id="recoveredCount">145</div>
+                  <div class="summary-label">Đã hồi phục</div>
+                </div>
+              </div>
+
+              <div class="reporting-chart">
+                <h4>Ca bệnh theo loại</h4>
+                <div class="chart-bar">
+                  <div class="bar-label">Nghi ngờ</div>
+                  <div class="bar-fill" style="width: 35%; background: #ffc107;">35</div>
+                </div>
+                <div class="chart-bar">
+                  <div class="bar-label">Xác nhận</div>
+                  <div class="bar-fill" style="width: 54%; background: #dc3545;">54</div>
+                </div>
+                <div class="chart-bar">
+                  <div class="bar-label">Hồi phục</div>
+                  <div class="bar-fill" style="width: 145%; background: #28a745;">145</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="reporting-tab-content" id="shelters-tab" style="display: none;">
+              <div class="reporting-summary">
+                <div class="summary-card">
+                  <div class="summary-value" id="totalShelters">12</div>
+                  <div class="summary-label">Điểm trú an</div>
+                </div>
+                <div class="summary-card">
+                  <div class="summary-value" id="peopleInShelters">3,456</div>
+                  <div class="summary-label">Người đang trú</div>
+                </div>
+                <div class="summary-card">
+                  <div class="summary-value" id="arrivedToday">234</div>
+                  <div class="summary-label">Đến hôm nay</div>
+                </div>
+              </div>
+
+              <div class="reporting-table">
+                <h4>Lượng người đến/rời điểm trú an</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Điểm trú an</th>
+                      <th>Sức chứa</th>
+                      <th>Đang trú</th>
+                      <th>Đến hôm nay</th>
+                      <th>Rời hôm nay</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Trạm bơm Nhà Bè</td>
+                      <td>500</td>
+                      <td>423</td>
+                      <td>45</td>
+                      <td>12</td>
+                    </tr>
+                    <tr>
+                      <td>Trường học Q1</td>
+                      <td>800</td>
+                      <td>654</td>
+                      <td>89</td>
+                      <td>34</td>
+                    </tr>
+                    <tr>
+                      <td>Trung tâm văn hóa Q3</td>
+                      <td>600</td>
+                      <td>512</td>
+                      <td>67</td>
+                      <td>23</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="reporting-actions">
+              <button class="btn btn-primary" id="exportCSVBtn">📄 CSV</button>
+              <button class="btn btn-primary" id="exportExcelBtn">📊 Excel</button>
+              <button class="btn btn-primary" id="exportPDFBtn">📑 PDF</button>
+              <button class="btn btn-primary" id="exportMapBtn">🗺️ Bản đồ</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeReportingDashboardBtn">Đóng</button>
           </div>
         </div>
       </div>

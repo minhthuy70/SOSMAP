@@ -8593,6 +8593,382 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeResilientSystem();
 });
 
+// Privacy & Safety System (Additional features to complete the section)
+var dataDeletionRequests = [];
+var privacyConsents = [];
+var securityIncidents = [];
+
+function initializePrivacySystem() {
+  // Load deletion requests
+  var savedDeletions = localStorage.getItem('sosmap_deletion_requests');
+  if (savedDeletions) {
+    dataDeletionRequests = JSON.parse(savedDeletions);
+  }
+
+  // Load privacy consents
+  var savedConsents = localStorage.getItem('sosmap_privacy_consents');
+  if (savedConsents) {
+    privacyConsents = JSON.parse(savedConsents);
+  }
+
+  // Load security incidents
+  var savedIncidents = localStorage.getItem('sosmap_security_incidents');
+  if (savedIncidents) {
+    securityIncidents = JSON.parse(savedIncidents);
+  }
+}
+
+function requestDataDeletion(userId, reason) {
+  var request = {
+    id: 'DEL-' + Date.now(),
+    userId: userId,
+    reason: reason,
+    status: 'pending',
+    requestedAt: new Date().toISOString(),
+    processedAt: null,
+    deletedAt: null
+  };
+
+  dataDeletionRequests.push(request);
+  saveDeletionRequests();
+
+  alert('Đã gửi yêu cầu xóa dữ liệu! Mã yêu cầu: ' + request.id);
+  logActivity('data_deletion_request', 'Yêu cầu xóa dữ liệu: ' + request.id);
+
+  return request;
+}
+
+function processDataDeletion(requestId) {
+  var request = dataDeletionRequests.find(function(r) {
+    return r.id === requestId;
+  });
+
+  if (!request) {
+    alert('Không tìm thấy yêu cầu xóa');
+    return;
+  }
+
+  request.status = 'approved';
+  request.processedAt = new Date().toISOString();
+  request.deletedAt = new Date().toISOString();
+
+  // Delete user data (simulated)
+  deleteUserData(request.userId);
+
+  saveDeletionRequests();
+
+  alert('Đã xử lý yêu cầu xóa dữ liệu!');
+  logActivity('data_deletion_processed', 'Xóa dữ liệu: ' + requestId);
+}
+
+function deleteUserData(userId) {
+  // Simulate data deletion
+  localStorage.removeItem('sosmap_user_' + userId);
+  localStorage.removeItem('sosmap_incidents_' + userId);
+  // In production, this would delete from the database
+}
+
+function saveDeletionRequests() {
+  localStorage.setItem('sosmap_deletion_requests', JSON.stringify(dataDeletionRequests));
+}
+
+function createPrivacyConsent(userId, consentType, consentDetails) {
+  var consent = {
+    id: 'CONSENT-' + Date.now(),
+    userId: userId,
+    consentType: consentType,
+    consentDetails: consentDetails,
+    givenAt: new Date().toISOString(),
+    revokedAt: null,
+    version: '1.0'
+  };
+
+  privacyConsents.push(consent);
+  savePrivacyConsents();
+
+  logActivity('privacy_consent', 'Đồng ý bảo mật: ' + consent.id);
+
+  return consent;
+}
+
+function revokePrivacyConsent(consentId) {
+  var consent = privacyConsents.find(function(c) {
+    return c.id === consentId;
+  });
+
+  if (!consent) {
+    alert('Không tìm thấy đồng ý bảo mật');
+    return;
+  }
+
+  consent.revokedAt = new Date().toISOString();
+  savePrivacyConsents();
+
+  alert('Đã thu hồi đồng ý bảo mật!');
+  logActivity('privacy_consent_revoked', 'Thu hồi đồng ý: ' + consentId);
+}
+
+function savePrivacyConsents() {
+  localStorage.setItem('sosmap_privacy_consents', JSON.stringify(privacyConsents));
+}
+
+function reportSecurityIncident(type, description, severity) {
+  var incident = {
+    id: 'SEC-' + Date.now(),
+    type: type,
+    description: description,
+    severity: severity,
+    status: 'open',
+    reportedAt: new Date().toISOString(),
+    resolvedAt: null,
+    resolution: null
+  };
+
+  securityIncidents.push(incident);
+  saveSecurityIncidents();
+
+  alert('Đã báo cáo sự cố bảo mật! Mã sự cố: ' + incident.id);
+  logActivity('security_incident_report', 'Báo cáo sự cố bảo mật: ' + incident.id);
+
+  return incident;
+}
+
+function saveSecurityIncidents() {
+  localStorage.setItem('sosmap_security_incidents', JSON.stringify(securityIncidents));
+}
+
+// Initialize privacy system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializePrivacySystem();
+});
+
+// Reporting & Transparency System
+var reportingData = {
+  incidents: {
+    total: 156,
+    resolved: 139,
+    avgResponseTime: '2.5h',
+    byType: {
+      traffic: 60,
+      infrastructure: 40,
+      fire: 25,
+      other: 31
+    },
+    byArea: [
+      { area: 'Quận 1', total: 45, resolved: 42, avgTime: '2.1h' },
+      { area: 'Quận 3', total: 38, resolved: 35, avgTime: '2.3h' },
+      { area: 'Quận 5', total: 32, resolved: 28, avgTime: '2.8h' },
+      { area: 'Quận 7', total: 28, resolved: 24, avgTime: '3.0h' },
+      { area: 'Quận Bình Thạnh', total: 13, resolved: 10, avgTime: '2.5h' }
+    ]
+  },
+  rescue: {
+    totalRescued: 1234,
+    activeRescue: 23,
+    rescueTeams: 12,
+    byType: {
+      trapped: 45,
+      injured: 35,
+      missing: 20,
+      medical: 55
+    }
+  },
+  relief: {
+    totalNeeds: 89,
+    fulfilledNeeds: 67,
+    donationAmount: '2.5 tỷ',
+    inventory: [
+      { location: 'Kho chính HCM', food: '500 kg', water: '2000 L', medicine: '100 hộp', status: 'Bình thường' },
+      { location: 'Kho Hà Nội', food: '300 kg', water: '1500 L', medicine: '80 hộp', status: 'Bình thường' },
+      { location: 'Điểm tiếp nhận Đà Nẵng', food: '100 kg', water: '500 L', medicine: '30 hộp', status: 'Cảnh báo' }
+    ]
+  },
+  health: {
+    totalCases: 234,
+    quarantineCount: 89,
+    recoveredCount: 145,
+    byType: {
+      suspected: 35,
+      confirmed: 54,
+      recovered: 145
+    }
+  },
+  shelters: {
+    totalShelters: 12,
+    peopleInShelters: 3456,
+    arrivedToday: 234,
+    data: [
+      { name: 'Trạm bơm Nhà Bè', capacity: 500, current: 423, arrived: 45, departed: 12 },
+      { name: 'Trường học Q1', capacity: 800, current: 654, arrived: 89, departed: 34 },
+      { name: 'Trung tâm văn hóa Q3', capacity: 600, current: 512, arrived: 67, departed: 23 }
+    ]
+  }
+};
+
+function initializeReportingSystem() {
+  // Load reporting data from localStorage
+  var savedReportingData = localStorage.getItem('sosmap_reporting_data');
+  if (savedReportingData) {
+    reportingData = JSON.parse(savedReportingData);
+  }
+}
+
+function updateReportingDashboard() {
+  // Update incidents summary
+  document.getElementById('totalIncidents').textContent = reportingData.incidents.total;
+  document.getElementById('resolvedIncidents').textContent = reportingData.incidents.resolved;
+  document.getElementById('avgResponseTime').textContent = reportingData.incidents.avgResponseTime;
+
+  // Update rescue summary
+  document.getElementById('totalRescued').textContent = reportingData.rescue.totalRescued.toLocaleString();
+  document.getElementById('activeRescue').textContent = reportingData.rescue.activeRescue;
+  document.getElementById('rescueTeams').textContent = reportingData.rescue.rescueTeams;
+
+  // Update relief summary
+  document.getElementById('totalNeeds').textContent = reportingData.relief.totalNeeds;
+  document.getElementById('fulfilledNeeds').textContent = reportingData.relief.fulfilledNeeds;
+  document.getElementById('donationAmount').textContent = reportingData.relief.donationAmount;
+
+  // Update health summary
+  document.getElementById('totalCases').textContent = reportingData.health.totalCases;
+  document.getElementById('quarantineCount').textContent = reportingData.health.quarantineCount;
+  document.getElementById('recoveredCount').textContent = reportingData.health.recoveredCount;
+
+  // Update shelters summary
+  document.getElementById('totalShelters').textContent = reportingData.shelters.totalShelters;
+  document.getElementById('peopleInShelters').textContent = reportingData.shelters.peopleInShelters.toLocaleString();
+  document.getElementById('arrivedToday').textContent = reportingData.shelters.arrivedToday;
+}
+
+function exportReport(format) {
+  var timestamp = new Date().toISOString();
+  var filename = 'sosmap_report_' + new Date().getTime();
+
+  if (format === 'csv') {
+    exportCSV(filename);
+  } else if (format === 'excel') {
+    exportExcel(filename);
+  } else if (format === 'pdf') {
+    exportPDF(filename);
+  } else if (format === 'map') {
+    exportMap(filename);
+  }
+
+  logActivity('report_export', 'Xuất báo cáo: ' + format);
+}
+
+function exportCSV(filename) {
+  var csvContent = 'data:text/csv;charset=utf-8,';
+  csvContent += 'Loại,Số lượng,Đã giải quyết,Thời gian TB\n';
+  csvContent += 'Sự cố,' + reportingData.incidents.total + ',' + reportingData.incidents.resolved + ',' + reportingData.incidents.avgResponseTime + '\n';
+  csvContent += 'Cứu hộ,' + reportingData.rescue.totalRescued + ',' + reportingData.rescue.activeRescue + ' đang xử lý,-\n';
+  csvContent += 'Cứu trợ,' + reportingData.relief.totalNeeds + ',' + reportingData.relief.fulfilledNeeds + ',-\n';
+  csvContent += 'Sức khỏe,' + reportingData.health.totalCases + ',' + reportingData.health.recoveredCount + ' hồi phục,-\n';
+
+  var encodedUri = encodeURI(csvContent);
+  var link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', filename + '.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  alert('Đã xuất báo cáo CSV!');
+}
+
+function exportExcel(filename) {
+  // Simulate Excel export
+  alert('Đang xuất báo cáo Excel... (Chức năng này yêu cầu thư viện Excel)');
+  logActivity('excel_export', 'Xuất Excel: ' + filename);
+}
+
+function exportPDF(filename) {
+  // Simulate PDF export
+  alert('Đang xuất báo cáo PDF... (Chức năng này yêu cầu thư viện PDF)');
+  logActivity('pdf_export', 'Xuất PDF: ' + filename);
+}
+
+function exportMap(filename) {
+  // Simulate map export
+  alert('Đang xuất bản đồ báo cáo...');
+  logActivity('map_export', 'Xuất bản đồ: ' + filename);
+}
+
+function generatePublicIndex() {
+  var publicIndex = {
+    totalIncidents: reportingData.incidents.total,
+    resolvedRate: Math.round((reportingData.incidents.resolved / reportingData.incidents.total) * 100) + '%',
+    totalRescued: reportingData.rescue.totalRescued,
+    donationAmount: reportingData.relief.donationAmount,
+    updatedAt: new Date().toISOString()
+  };
+
+  return publicIndex;
+}
+
+// Reporting Panel Event Listeners
+document.getElementById('reportingDashboardBtn').addEventListener('click', function() {
+  document.getElementById('reportingDashboardModal').style.display = 'block';
+  updateReportingDashboard();
+});
+
+document.getElementById('exportReportBtn').addEventListener('click', function() {
+  document.getElementById('reportingDashboardModal').style.display = 'block';
+  updateReportingDashboard();
+});
+
+document.getElementById('closeReportingDashboardModal').addEventListener('click', function() {
+  document.getElementById('reportingDashboardModal').style.display = 'none';
+});
+
+document.getElementById('closeReportingDashboardBtn').addEventListener('click', function() {
+  document.getElementById('reportingDashboardModal').style.display = 'none';
+});
+
+// Tab switching
+document.querySelectorAll('.reporting-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    // Remove active class from all tabs
+    document.querySelectorAll('.reporting-tab').forEach(function(t) {
+      t.classList.remove('active');
+    });
+
+    // Add active class to clicked tab
+    this.classList.add('active');
+
+    // Hide all tab contents
+    document.querySelectorAll('.reporting-tab-content').forEach(function(content) {
+      content.style.display = 'none';
+    });
+
+    // Show selected tab content
+    var tabName = this.getAttribute('data-tab');
+    document.getElementById(tabName + '-tab').style.display = 'block';
+  });
+});
+
+// Export buttons
+document.getElementById('exportCSVBtn').addEventListener('click', function() {
+  exportReport('csv');
+});
+
+document.getElementById('exportExcelBtn').addEventListener('click', function() {
+  exportReport('excel');
+});
+
+document.getElementById('exportPDFBtn').addEventListener('click', function() {
+  exportReport('pdf');
+});
+
+document.getElementById('exportMapBtn').addEventListener('click', function() {
+  exportReport('map');
+});
+
+// Initialize reporting system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeReportingSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {
