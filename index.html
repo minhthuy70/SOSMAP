@@ -1060,6 +1060,46 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
         </div>
 
+        <!-- Incident Administration Panel -->
+        <div class="incident-admin-panel" id="incidentAdminPanel">
+          <h3>Quản trị sự cố</h3>
+          <div class="incident-admin-controls">
+            <button class="incident-admin-btn" id="incidentListBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+              Danh sách
+            </button>
+            <button class="incident-admin-btn" id="incidentStatsBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+              </svg>
+              Thống kê
+            </button>
+          </div>
+          <div class="incident-admin-status" id="incidentAdminStatus">
+            <div class="status-item">
+              <span class="status-label">Tổng sự cố:</span>
+              <span class="status-value">156</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Đang xử lý:</span>
+              <span class="status-value warning">23</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Đã giải quyết:</span>
+              <span class="status-value success">133</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -6628,6 +6668,506 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeDataSourcesBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Incident List Modal -->
+      <div class="modal" id="incidentListModal" style="display: none;">
+        <div class="modal-content" style="max-width: 1200px;">
+          <div class="modal-header">
+            <h3>📋 Danh sách sự cố</h3>
+            <button class="modal-close" id="closeIncidentListModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="incident-filters">
+              <div class="filter-group">
+                <label for="incidentSearch">Tìm kiếm:</label>
+                <input type="text" class="form-control" id="incidentSearch" placeholder="Tìm theo ID, địa chỉ, mô tả...">
+              </div>
+              <div class="filter-group">
+                <label for="incidentTypeFilter">Loại sự cố:</label>
+                <select class="form-control" id="incidentTypeFilter">
+                  <option value="all">Tất cả</option>
+                  <option value="traffic">Giao thông</option>
+                  <option value="flood">Ngập lũ</option>
+                  <option value="fire">Cháy nổ</option>
+                  <option value="health">Sức khỏe</option>
+                  <option value="infrastructure">Hạ tầng</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="incidentPriorityFilter">Mức độ ưu tiên:</label>
+                <select class="form-control" id="incidentPriorityFilter">
+                  <option value="all">Tất cả</option>
+                  <option value="low">Thấp</option>
+                  <option value="medium">Trung bình</option>
+                  <option value="high">Cao</option>
+                  <option value="critical">Khẩn cấp</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="incidentStatusFilter">Trạng thái:</label>
+                <select class="form-control" id="incidentStatusFilter">
+                  <option value="all">Tất cả</option>
+                  <option value="new">Mới</option>
+                  <option value="in_progress">Đang xử lý</option>
+                  <option value="resolved">Đã giải quyết</option>
+                  <option value="closed">Đã đóng</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="incidentDateFrom">Từ ngày:</label>
+                <input type="date" class="form-control" id="incidentDateFrom">
+              </div>
+              <div class="filter-group">
+                <label for="incidentDateTo">Đến ngày:</label>
+                <input type="date" class="form-control" id="incidentDateTo">
+              </div>
+              <div class="filter-group">
+                <button class="btn btn-primary" id="applyIncidentFiltersBtn">Lọc</button>
+                <button class="btn btn-secondary" id="resetIncidentFiltersBtn">Đặt lại</button>
+              </div>
+            </div>
+
+            <div class="incident-table-container">
+              <table class="incident-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Loại</th>
+                    <th>Mô tả</th>
+                    <th>Vị trí</th>
+                    <th>Ưu tiên</th>
+                    <th>Trạng thái</th>
+                    <th>Người xử lý</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="incidentTableBody">
+                  <tr>
+                    <td>INC-001</td>
+                    <td>Giao thông</td>
+                    <td>Tai nạn giao thông tại ngã tư</td>
+                    <td>Quận 1, TP.HCM</td>
+                    <td><span class="priority-badge high">Cao</span></td>
+                    <td><span class="status-badge in_progress">Đang xử lý</span></td>
+                    <td>Nguyễn Văn A</td>
+                    <td>15/01/2026</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" onclick="viewIncidentDetail('INC-001')">Xem</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>INC-002</td>
+                    <td>Ngập lũ</td>
+                    <td>Ngập nước sâu 0.5m</td>
+                    <td>Quận 7, TP.HCM</td>
+                    <td><span class="priority-badge medium">Trung bình</span></td>
+                    <td><span class="status-badge new">Mới</span></td>
+                    <td>-</td>
+                    <td>15/01/2026</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" onclick="viewIncidentDetail('INC-002')">Xem</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>INC-003</td>
+                    <td>Cháy nổ</td>
+                    <td>Cháy nhà kho khu công nghiệp</td>
+                    <td>Quận 12, TP.HCM</td>
+                    <td><span class="priority-badge critical">Khẩn cấp</span></td>
+                    <td><span class="status-badge resolved">Đã giải quyết</span></td>
+                    <td>Trần Thị B</td>
+                    <td>14/01/2026</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" onclick="viewIncidentDetail('INC-003')">Xem</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>INC-004</td>
+                    <td>Sức khỏe</td>
+                    <td>Cần cấp cứu khẩn cấp</td>
+                    <td>Quận 3, TP.HCM</td>
+                    <td><span class="priority-badge critical">Khẩn cấp</span></td>
+                    <td><span class="status-badge in_progress">Đang xử lý</span></td>
+                    <td>Lê Văn C</td>
+                    <td>15/01/2026</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" onclick="viewIncidentDetail('INC-004')">Xem</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>INC-005</td>
+                    <td>Hạ tầng</td>
+                    <td>Cây đổ chắn đường</td>
+                    <td>Quận 5, TP.HCM</td>
+                    <td><span class="priority-badge low">Thấp</span></td>
+                    <td><span class="status-badge closed">Đã đóng</span></td>
+                    <td>Phạm Thị D</td>
+                    <td>13/01/2026</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" onclick="viewIncidentDetail('INC-005')">Xem</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="incident-pagination">
+              <button class="btn btn-secondary" id="prevPageBtn">Trang trước</button>
+              <span class="page-info">Trang 1 / 10</span>
+              <button class="btn btn-secondary" id="nextPageBtn">Trang sau</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="exportIncidentsBtn">📥 Xuất CSV</button>
+            <button type="button" class="btn btn-secondary" id="closeIncidentListBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Incident Detail Modal -->
+      <div class="modal" id="incidentDetailModal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+          <div class="modal-header">
+            <h3>📄 Chi tiết sự cố: <span id="incidentDetailId">INC-001</span></h3>
+            <button class="modal-close" id="closeIncidentDetailModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="incident-detail-grid">
+              <div class="detail-section">
+                <h4>Thông tin cơ bản</h4>
+                <div class="detail-item">
+                  <span class="detail-label">Loại sự cố:</span>
+                  <span class="detail-value" id="detailType">Giao thông</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Mô tả:</span>
+                  <span class="detail-value" id="detailDescription">Tai nạn giao thông tại ngã tư</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Vị trí:</span>
+                  <span class="detail-value" id="detailLocation">Quận 1, TP.HCM</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Toạ độ:</span>
+                  <span class="detail-value" id="detailCoordinates">10.7769, 106.7009</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Mức độ ưu tiên:</span>
+                  <span class="detail-value" id="detailPriority">Cao</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Trạng thái:</span>
+                  <span class="detail-value" id="detailStatus">Đang xử lý</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Người báo cáo:</span>
+                  <span class="detail-value" id="detailReporter">Nguyễn Văn X</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Ngày tạo:</span>
+                  <span class="detail-value" id="detailCreatedAt">15/01/2026 10:45</span>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <h4>Xử lý</h4>
+                <div class="detail-item">
+                  <span class="detail-label">Người xử lý:</span>
+                  <select class="form-control" id="detailAssignee">
+                    <option value="">Chưa phân công</option>
+                    <option value="Nguyễn Văn A">Nguyễn Văn A</option>
+                    <option value="Trần Thị B">Trần Thị B</option>
+                    <option value="Lê Văn C">Lê Văn C</option>
+                    <option value="Phạm Thị D">Phạm Thị D</option>
+                  </select>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Cập nhật trạng thái:</span>
+                  <select class="form-control" id="detailStatusUpdate">
+                    <option value="new">Mới</option>
+                    <option value="in_progress">Đang xử lý</option>
+                    <option value="resolved">Đã giải quyết</option>
+                    <option value="closed">Đã đóng</option>
+                  </select>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Ghi chú nội bộ:</span>
+                  <textarea class="form-control" id="detailNotes" rows="3" placeholder="Thêm ghi chú..."></textarea>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Lịch sử thay đổi:</span>
+                  <div class="history-list" id="detailHistory">
+                    <div class="history-item">
+                      <span class="history-time">15/01/2026 10:45</span>
+                      <span class="history-action">Tạo sự cố</span>
+                      <span class="history-user">Nguyễn Văn X</span>
+                    </div>
+                    <div class="history-item">
+                      <span class="history-time">15/01/2026 11:00</span>
+                      <span class="history-action">Phân công cho Nguyễn Văn A</span>
+                      <span class="history-user">Admin</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="detail-section">
+                <h4>Minh chứng</h4>
+                <div class="evidence-list" id="detailEvidence">
+                  <div class="evidence-item">
+                    <span class="evidence-icon">📷</span>
+                    <span class="evidence-name">anh_tai_nan.jpg</span>
+                    <button class="btn btn-sm btn-secondary">Xem</button>
+                  </div>
+                  <div class="evidence-item">
+                    <span class="evidence-icon">📹</span>
+                    <span class="evidence-name">video_tai_nan.mp4</span>
+                    <button class="btn btn-sm btn-secondary">Xem</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="saveIncidentDetailBtn">💾 Lưu thay đổi</button>
+            <button type="button" class="btn btn-secondary" id="closeIncidentDetailBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Incident Statistics Modal -->
+      <div class="modal" id="incidentStatsModal" style="display: none;">
+        <div class="modal-content" style="max-width: 1000px;">
+          <div class="modal-header">
+            <h3>📊 Thống kê sự cố</h3>
+            <button class="modal-close" id="closeIncidentStatsModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="stats-filters">
+              <div class="filter-group">
+                <label for="statsDateFrom">Từ ngày:</label>
+                <input type="date" class="form-control" id="statsDateFrom">
+              </div>
+              <div class="filter-group">
+                <label for="statsDateTo">Đến ngày:</label>
+                <input type="date" class="form-control" id="statsDateTo">
+              </div>
+              <div class="filter-group">
+                <button class="btn btn-primary" id="applyStatsFiltersBtn">Lọc</button>
+                <button class="btn btn-secondary" id="exportStatsBtn">📥 Xuất báo cáo</button>
+              </div>
+            </div>
+
+            <div class="stats-summary">
+              <div class="stat-card">
+                <div class="stat-icon">📋</div>
+                <div class="stat-info">
+                  <h4>Tổng sự cố</h4>
+                  <p class="stat-value">156</p>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-info">
+                  <h4>Đang xử lý</h4>
+                  <p class="stat-value warning">23</p>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                  <h4>Đã giải quyết</h4>
+                  <p class="stat-value success">133</p>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-info">
+                  <h4>Thời gian TB</h4>
+                  <p class="stat-value">2.5h</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="stats-charts">
+              <div class="chart-section">
+                <h4>Sự cố theo loại</h4>
+                <div class="chart-bars">
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 70%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">Giao thông</span>
+                    <span class="bar-value">45</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 50%; background: #28a745;"></div>
+                    </div>
+                    <span class="bar-label">Ngập lũ</span>
+                    <span class="bar-value">32</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 40%; background: #dc3545;"></div>
+                    </div>
+                    <span class="bar-label">Cháy nổ</span>
+                    <span class="bar-value">25</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 30%; background: #ffc107;"></div>
+                    </div>
+                    <span class="bar-label">Sức khỏe</span>
+                    <span class="bar-value">18</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 25%; background: #6c757d;"></div>
+                    </div>
+                    <span class="bar-label">Hạ tầng</span>
+                    <span class="bar-value">15</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chart-section">
+                <h4>Sự cố theo khu vực</h4>
+                <div class="chart-bars">
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 60%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">Quận 1</span>
+                    <span class="bar-value">28</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 55%; background: #28a745;"></div>
+                    </div>
+                    <span class="bar-label">Quận 3</span>
+                    <span class="bar-value">25</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 50%; background: #dc3545;"></div>
+                    </div>
+                    <span class="bar-label">Quận 7</span>
+                    <span class="bar-value">22</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 45%; background: #ffc107;"></div>
+                    </div>
+                    <span class="bar-label">Quận 12</span>
+                    <span class="bar-value">20</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 40%; background: #6c757d;"></div>
+                    </div>
+                    <span class="bar-label">Quận 5</span>
+                    <span class="bar-value">18</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chart-section">
+                <h4>Sự cố theo trạng thái</h4>
+                <div class="chart-bars">
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 15%; background: #17a2b8;"></div>
+                    </div>
+                    <span class="bar-label">Mới</span>
+                    <span class="bar-value">23</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 15%; background: #ffc107;"></div>
+                    </div>
+                    <span class="bar-label">Đang xử lý</span>
+                    <span class="bar-value">23</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 85%; background: #28a745;"></div>
+                    </div>
+                    <span class="bar-label">Đã giải quyết</span>
+                    <span class="bar-value">133</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 5%; background: #6c757d;"></div>
+                    </div>
+                    <span class="bar-label">Đã đóng</span>
+                    <span class="bar-value">8</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chart-section">
+                <h4>Xu hướng theo thời gian</h4>
+                <div class="chart-bars">
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 40%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">T2</span>
+                    <span class="bar-value">12</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 60%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">T3</span>
+                    <span class="bar-value">18</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 80%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">T4</span>
+                    <span class="bar-value">24</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 70%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">T5</span>
+                    <span class="bar-value">21</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 50%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">T6</span>
+                    <span class="bar-value">15</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 90%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">T7</span>
+                    <span class="bar-value">27</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 100%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">CN</span>
+                    <span class="bar-value">30</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeIncidentStatsBtn">Đóng</button>
           </div>
         </div>
       </div>

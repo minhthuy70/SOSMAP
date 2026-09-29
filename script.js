@@ -11717,6 +11717,376 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeGeolocationSystem();
 });
 
+// Incident Administration System
+var incidentAdminData = {
+  incidents: [
+    { id: 'INC-001', type: 'traffic', description: 'Tai nạn giao thông tại ngã tư', location: 'Quận 1, TP.HCM', coordinates: '10.7769, 106.7009', priority: 'high', status: 'in_progress', assignee: 'Nguyễn Văn A', reporter: 'Nguyễn Văn X', createdAt: '15/01/2026 10:45', history: [{ time: '15/01/2026 10:45', action: 'Tạo sự cố', user: 'Nguyễn Văn X' }, { time: '15/01/2026 11:00', action: 'Phân công cho Nguyễn Văn A', user: 'Admin' }], evidence: [{ type: 'image', name: 'anh_tai_nan.jpg' }, { type: 'video', name: 'video_tai_nan.mp4' }] },
+    { id: 'INC-002', type: 'flood', description: 'Ngập nước sâu 0.5m', location: 'Quận 7, TP.HCM', coordinates: '10.7569, 106.6809', priority: 'medium', status: 'new', assignee: '', reporter: 'Trần Thị Y', createdAt: '15/01/2026 10:30', history: [{ time: '15/01/2026 10:30', action: 'Tạo sự cố', user: 'Trần Thị Y' }], evidence: [] },
+    { id: 'INC-003', type: 'fire', description: 'Cháy nhà kho khu công nghiệp', location: 'Quận 12, TP.HCM', coordinates: '10.8269, 106.6409', priority: 'critical', status: 'resolved', assignee: 'Trần Thị B', reporter: 'Lê Văn Z', createdAt: '14/01/2026 15:20', history: [{ time: '14/01/2026 15:20', action: 'Tạo sự cố', user: 'Lê Văn Z' }, { time: '14/01/2026 15:45', action: 'Phân công cho Trần Thị B', user: 'Admin' }, { time: '14/01/2026 18:30', action: 'Đã giải quyết', user: 'Trần Thị B' }], evidence: [{ type: 'image', name: 'anh_chay.jpg' }] },
+    { id: 'INC-004', type: 'health', description: 'Cần cấp cứu khẩn cấp', location: 'Quận 3, TP.HCM', coordinates: '10.7869, 106.6909', priority: 'critical', status: 'in_progress', assignee: 'Lê Văn C', reporter: 'Phạm Thị W', createdAt: '15/01/2026 09:15', history: [{ time: '15/01/2026 09:15', action: 'Tạo sự cố', user: 'Phạm Thị W' }, { time: '15/01/2026 09:20', action: 'Phân công cho Lê Văn C', user: 'Admin' }], evidence: [] },
+    { id: 'INC-005', type: 'infrastructure', description: 'Cây đổ chắn đường', location: 'Quận 5, TP.HCM', coordinates: '10.7669, 106.6709', priority: 'low', status: 'closed', assignee: 'Phạm Thị D', reporter: 'Hoàng Văn V', createdAt: '13/01/2026 14:00', history: [{ time: '13/01/2026 14:00', action: 'Tạo sự cố', user: 'Hoàng Văn V' }, { time: '13/01/2026 14:30', action: 'Phân công cho Phạm Thị D', user: 'Admin' }, { time: '13/01/2026 16:00', action: 'Đã giải quyết', user: 'Phạm Thị D' }, { time: '13/01/2026 16:30', action: 'Đã đóng', user: 'Admin' }], evidence: [{ type: 'image', name: 'anh_cay_do.jpg' }] }
+  ],
+  currentPage: 1,
+  itemsPerPage: 10,
+  filters: {
+    search: '',
+    type: 'all',
+    priority: 'all',
+    status: 'all',
+    dateFrom: '',
+    dateTo: ''
+  },
+  stats: {
+    total: 156,
+    inProgress: 23,
+    resolved: 133,
+    avgProcessingTime: 2.5
+  }
+};
+
+function initializeIncidentAdmin() {
+  // Load incident data from localStorage
+  var savedData = localStorage.getItem('sosmap_incident_admin');
+  if (savedData) {
+    incidentAdminData = JSON.parse(savedData);
+  }
+
+  updateIncidentAdminStatus();
+}
+
+function updateIncidentAdminStatus() {
+  var statusDiv = document.getElementById('incidentAdminStatus');
+  if (!statusDiv) return;
+
+  var inProgress = incidentAdminData.incidents.filter(function(i) {
+    return i.status === 'in_progress' || i.status === 'new';
+  }).length;
+
+  var resolved = incidentAdminData.incidents.filter(function(i) {
+    return i.status === 'resolved' || i.status === 'closed';
+  }).length;
+
+  statusDiv.innerHTML = `
+    <div class="status-item">
+      <span class="status-label">Tổng sự cố:</span>
+      <span class="status-value">${incidentAdminData.incidents.length}</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Đang xử lý:</span>
+      <span class="status-value warning">${inProgress}</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Đã giải quyết:</span>
+      <span class="status-value success">${resolved}</span>
+    </div>
+  `;
+}
+
+function filterIncidents() {
+  var filtered = incidentAdminData.incidents.filter(function(incident) {
+    var matchSearch = true;
+    if (incidentAdminData.filters.search) {
+      var search = incidentAdminData.filters.search.toLowerCase();
+      matchSearch = incident.id.toLowerCase().includes(search) ||
+                   incident.description.toLowerCase().includes(search) ||
+                   incident.location.toLowerCase().includes(search);
+    }
+
+    var matchType = incidentAdminData.filters.type === 'all' || incident.type === incidentAdminData.filters.type;
+    var matchPriority = incidentAdminData.filters.priority === 'all' || incident.priority === incidentAdminData.filters.priority;
+    var matchStatus = incidentAdminData.filters.status === 'all' || incident.status === incidentAdminData.filters.status;
+
+    return matchSearch && matchType && matchPriority && matchStatus;
+  });
+
+  return filtered;
+}
+
+function renderIncidentTable() {
+  var filtered = filterIncidents();
+  var tableBody = document.getElementById('incidentTableBody');
+  if (!tableBody) return;
+
+  var startIndex = (incidentAdminData.currentPage - 1) * incidentAdminData.itemsPerPage;
+  var endIndex = startIndex + incidentAdminData.itemsPerPage;
+  var pageData = filtered.slice(startIndex, endIndex);
+
+  tableBody.innerHTML = pageData.map(function(incident) {
+    var priorityLabels = {
+      low: 'Thấp',
+      medium: 'Trung bình',
+      high: 'Cao',
+      critical: 'Khẩn cấp'
+    };
+
+    var statusLabels = {
+      new: 'Mới',
+      in_progress: 'Đang xử lý',
+      resolved: 'Đã giải quyết',
+      closed: 'Đã đóng'
+    };
+
+    var typeLabels = {
+      traffic: 'Giao thông',
+      flood: 'Ngập lũ',
+      fire: 'Cháy nổ',
+      health: 'Sức khỏe',
+      infrastructure: 'Hạ tầng'
+    };
+
+    return `
+      <tr>
+        <td>${incident.id}</td>
+        <td>${typeLabels[incident.type] || incident.type}</td>
+        <td>${incident.description}</td>
+        <td>${incident.location}</td>
+        <td><span class="priority-badge ${incident.priority}">${priorityLabels[incident.priority]}</span></td>
+        <td><span class="status-badge ${incident.status}">${statusLabels[incident.status]}</span></td>
+        <td>${incident.assignee || '-'}</td>
+        <td>${incident.createdAt}</td>
+        <td>
+          <button class="btn btn-sm btn-primary" onclick="viewIncidentDetail('${incident.id}')">Xem</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Update pagination
+  var totalPages = Math.ceil(filtered.length / incidentAdminData.itemsPerPage);
+  document.querySelector('.page-info').textContent = 'Trang ' + incidentAdminData.currentPage + ' / ' + totalPages;
+}
+
+function viewIncidentDetail(incidentId) {
+  var incident = incidentAdminData.incidents.find(function(i) {
+    return i.id === incidentId;
+  });
+
+  if (!incident) return;
+
+  document.getElementById('incidentDetailId').textContent = incident.id;
+  document.getElementById('detailType').textContent = incident.type;
+  document.getElementById('detailDescription').textContent = incident.description;
+  document.getElementById('detailLocation').textContent = incident.location;
+  document.getElementById('detailCoordinates').textContent = incident.coordinates;
+  document.getElementById('detailPriority').textContent = incident.priority;
+  document.getElementById('detailStatus').textContent = incident.status;
+  document.getElementById('detailReporter').textContent = incident.reporter;
+  document.getElementById('detailCreatedAt').textContent = incident.createdAt;
+  document.getElementById('detailAssignee').value = incident.assignee || '';
+  document.getElementById('detailStatusUpdate').value = incident.status;
+
+  // Render history
+  var historyList = document.getElementById('detailHistory');
+  historyList.innerHTML = incident.history.map(function(h) {
+    return `
+      <div class="history-item">
+        <span class="history-time">${h.time}</span>
+        <span class="history-action">${h.action}</span>
+        <span class="history-user">${h.user}</span>
+      </div>
+    `;
+  }).join('');
+
+  // Render evidence
+  var evidenceList = document.getElementById('detailEvidence');
+  if (incident.evidence && incident.evidence.length > 0) {
+    evidenceList.innerHTML = incident.evidence.map(function(e) {
+      var icon = e.type === 'image' ? '📷' : e.type === 'video' ? '📹' : '📄';
+      return `
+        <div class="evidence-item">
+          <span class="evidence-icon">${icon}</span>
+          <span class="evidence-name">${e.name}</span>
+          <button class="btn btn-sm btn-secondary">Xem</button>
+        </div>
+      `;
+    }).join('');
+  } else {
+    evidenceList.innerHTML = '<p style="color: #999; font-size: 13px;">Không có minh chứng</p>';
+  }
+
+  document.getElementById('incidentDetailModal').style.display = 'block';
+}
+
+function saveIncidentDetail() {
+  var incidentId = document.getElementById('incidentDetailId').textContent;
+  var incident = incidentAdminData.incidents.find(function(i) {
+    return i.id === incidentId;
+  });
+
+  if (!incident) return;
+
+  var newAssignee = document.getElementById('detailAssignee').value;
+  var newStatus = document.getElementById('detailStatusUpdate').value;
+  var notes = document.getElementById('detailNotes').value;
+
+  // Check if status changed
+  if (newStatus !== incident.status) {
+    incident.history.push({
+      time: new Date().toLocaleString('vi-VN'),
+      action: 'Cập nhật trạng thái: ' + newStatus,
+      user: 'Admin'
+    });
+    incident.status = newStatus;
+  }
+
+  // Check if assignee changed
+  if (newAssignee !== incident.assignee) {
+    incident.history.push({
+      time: new Date().toLocaleString('vi-VN'),
+      action: 'Phân công cho ' + newAssignee,
+      user: 'Admin'
+    });
+    incident.assignee = newAssignee;
+  }
+
+  // Add notes if provided
+  if (notes) {
+    incident.history.push({
+      time: new Date().toLocaleString('vi-VN'),
+      action: 'Ghi chú: ' + notes,
+      user: 'Admin'
+    });
+  }
+
+  saveIncidentAdminData();
+  updateIncidentAdminStatus();
+  renderIncidentTable();
+
+  alert('Đã lưu thay đổi!');
+  logActivity('incident_updated', 'Cập nhật sự cố: ' + incidentId);
+}
+
+function exportIncidentsToCSV() {
+  var filtered = filterIncidents();
+  var csv = 'ID,Loại,Mô tả,Vị trí,Ưu tiên,Trạng thái,Người xử lý,Người báo cáo,Ngày tạo\n';
+
+  filtered.forEach(function(incident) {
+    csv += incident.id + ',' + incident.type + ',' + incident.description + ',' + incident.location + ',' + incident.priority + ',' + incident.status + ',' + incident.assignee + ',' + incident.reporter + ',' + incident.createdAt + '\n';
+  });
+
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'incidents_' + new Date().toISOString().split('T')[0] + '.csv';
+  link.click();
+
+  logActivity('incidents_exported', 'Xuất CSV: ' + filtered.length + ' sự cố');
+}
+
+function saveIncidentAdminData() {
+  localStorage.setItem('sosmap_incident_admin', JSON.stringify(incidentAdminData));
+}
+
+// Incident Administration Event Listeners
+document.getElementById('incidentListBtn').addEventListener('click', function() {
+  document.getElementById('incidentListModal').style.display = 'block';
+  renderIncidentTable();
+});
+
+document.getElementById('incidentStatsBtn').addEventListener('click', function() {
+  document.getElementById('incidentStatsModal').style.display = 'block';
+});
+
+document.getElementById('closeIncidentListModal').addEventListener('click', function() {
+  document.getElementById('incidentListModal').style.display = 'none';
+});
+
+document.getElementById('closeIncidentListBtn').addEventListener('click', function() {
+  document.getElementById('incidentListModal').style.display = 'none';
+});
+
+document.getElementById('closeIncidentDetailModal').addEventListener('click', function() {
+  document.getElementById('incidentDetailModal').style.display = 'none';
+});
+
+document.getElementById('closeIncidentDetailBtn').addEventListener('click', function() {
+  document.getElementById('incidentDetailModal').style.display = 'none';
+});
+
+document.getElementById('closeIncidentStatsModal').addEventListener('click', function() {
+  document.getElementById('incidentStatsModal').style.display = 'none';
+});
+
+document.getElementById('closeIncidentStatsBtn').addEventListener('click', function() {
+  document.getElementById('incidentStatsModal').style.display = 'none';
+});
+
+document.getElementById('applyIncidentFiltersBtn').addEventListener('click', function() {
+  incidentAdminData.filters.search = document.getElementById('incidentSearch').value;
+  incidentAdminData.filters.type = document.getElementById('incidentTypeFilter').value;
+  incidentAdminData.filters.priority = document.getElementById('incidentPriorityFilter').value;
+  incidentAdminData.filters.status = document.getElementById('incidentStatusFilter').value;
+  incidentAdminData.filters.dateFrom = document.getElementById('incidentDateFrom').value;
+  incidentAdminData.filters.dateTo = document.getElementById('incidentDateTo').value;
+  incidentAdminData.currentPage = 1;
+
+  renderIncidentTable();
+});
+
+document.getElementById('resetIncidentFiltersBtn').addEventListener('click', function() {
+  document.getElementById('incidentSearch').value = '';
+  document.getElementById('incidentTypeFilter').value = 'all';
+  document.getElementById('incidentPriorityFilter').value = 'all';
+  document.getElementById('incidentStatusFilter').value = 'all';
+  document.getElementById('incidentDateFrom').value = '';
+  document.getElementById('incidentDateTo').value = '';
+
+  incidentAdminData.filters = {
+    search: '',
+    type: 'all',
+    priority: 'all',
+    status: 'all',
+    dateFrom: '',
+    dateTo: ''
+  };
+  incidentAdminData.currentPage = 1;
+
+  renderIncidentTable();
+});
+
+document.getElementById('prevPageBtn').addEventListener('click', function() {
+  if (incidentAdminData.currentPage > 1) {
+    incidentAdminData.currentPage--;
+    renderIncidentTable();
+  }
+});
+
+document.getElementById('nextPageBtn').addEventListener('click', function() {
+  var filtered = filterIncidents();
+  var totalPages = Math.ceil(filtered.length / incidentAdminData.itemsPerPage);
+  if (incidentAdminData.currentPage < totalPages) {
+    incidentAdminData.currentPage++;
+    renderIncidentTable();
+  }
+});
+
+document.getElementById('saveIncidentDetailBtn').addEventListener('click', function() {
+  saveIncidentDetail();
+});
+
+document.getElementById('exportIncidentsBtn').addEventListener('click', function() {
+  exportIncidentsToCSV();
+});
+
+document.getElementById('applyStatsFiltersBtn').addEventListener('click', function() {
+  // Apply stats filters (simulated)
+  alert('Đã áp dụng bộ lọc thống kê');
+});
+
+document.getElementById('exportStatsBtn').addEventListener('click', function() {
+  // Export stats report (simulated)
+  alert('Đã xuất báo cáo thống kê');
+  logActivity('stats_exported', 'Xuất báo cáo thống kê');
+});
+
+// Make viewIncidentDetail available globally
+window.viewIncidentDetail = viewIncidentDetail;
+
+// Initialize incident admin on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeIncidentAdmin();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {
