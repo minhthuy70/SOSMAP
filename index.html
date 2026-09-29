@@ -826,6 +826,46 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
         </div>
 
+        <!-- Integrations Panel -->
+        <div class="integrations-panel" id="integrationsPanel">
+          <h3>Tích hợp hệ sinh thái</h3>
+          <div class="integrations-controls">
+            <button class="integrations-btn" id="manageIntegrationsBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+              Quản lý tích hợp
+            </button>
+            <button class="integrations-btn" id="apiManagementBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                <line x1="6" y1="18" x2="6.01" y2="18"></line>
+              </svg>
+              Quản lý API
+            </button>
+          </div>
+          <div class="integrations-status" id="integrationsStatus">
+            <div class="integration-item active">
+              <span class="integration-icon">📞</span>
+              <span class="integration-name">Tổng đài khẩn cấp</span>
+              <span class="integration-status">Đang hoạt động</span>
+            </div>
+            <div class="integration-item active">
+              <span class="integration-icon">🌤️</span>
+              <span class="integration-name">Khí tượng thủy văn</span>
+              <span class="integration-status">Đang hoạt động</span>
+            </div>
+            <div class="integration-item active">
+              <span class="integration-icon">🏥</span>
+              <span class="integration-name">Cơ sở y tế</span>
+              <span class="integration-status">Đang hoạt động</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Error Notification -->
         <div class="error-notification" id="errorNotification" style="display: none;">
           <div class="error-content">
@@ -4241,6 +4281,462 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeReportingDashboardBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Integrations Management Modal -->
+      <div class="modal" id="integrationsManagementModal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+          <div class="modal-header">
+            <h3>🔗 Quản lý tích hợp hệ sinh thái</h3>
+            <button class="modal-close" id="closeIntegrationsManagementModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="integrations-list">
+              <div class="integration-card">
+                <div class="integration-header">
+                  <div class="integration-icon-large">📞</div>
+                  <div class="integration-info">
+                    <h4>Tổng đài khẩn cấp</h4>
+                    <p>Tích hợp với hệ thống tổng đài 112, 113, 114, 115</p>
+                  </div>
+                  <div class="integration-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="integration-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Trạng thái:</span>
+                    <span class="detail-value success">Đang hoạt động</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Cuộc gọi hôm nay:</span>
+                    <span class="detail-value">234</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Thời gian phản hồi TB:</span>
+                    <span class="detail-value">15s</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="integration-card">
+                <div class="integration-header">
+                  <div class="integration-icon-large">🌤️</div>
+                  <div class="integration-info">
+                    <h4>Khí tượng thủy văn</h4>
+                    <p>Tích hợp bản tin khí tượng thủy văn từ cơ quan chức năng</p>
+                  </div>
+                  <div class="integration-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="integration-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Trạng thái:</span>
+                    <span class="detail-value success">Đang hoạt động</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Cập nhật cuối:</span>
+                    <span class="detail-value">5 phút trước</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Số lượng trạm:</span>
+                    <span class="detail-value">45 trạm</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="integration-card">
+                <div class="integration-header">
+                  <div class="integration-icon-large">🌧️</div>
+                  <div class="integration-info">
+                    <h4>Trạm đo mưa, mực nước</h4>
+                    <p>Tích hợp dữ liệu từ trạm đo tự động</p>
+                  </div>
+                  <div class="integration-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="integration-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Trạng thái:</span>
+                    <span class="detail-value success">Đang hoạt động</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Cập nhật cuối:</span>
+                    <span class="detail-value">Thời gian thực</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Số lượng trạm:</span>
+                    <span class="detail-value">89 trạm</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="integration-card">
+                <div class="integration-header">
+                  <div class="integration-icon-large">📹</div>
+                  <div class="integration-info">
+                    <h4>Camera giám sát</h4>
+                    <p>Tích hợp camera tại các điểm trọng yếu</p>
+                  </div>
+                  <div class="integration-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="integration-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Trạng thái:</span>
+                    <span class="detail-value success">Đang hoạt động</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Số lượng camera:</span>
+                    <span class="detail-value">156 camera</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Camera online:</span>
+                    <span class="detail-value">148/156</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="integration-card">
+                <div class="integration-header">
+                  <div class="integration-icon-large">🏥</div>
+                  <div class="integration-info">
+                    <h4>Cơ sở y tế & Tiêm chủng</h4>
+                    <p>Tích hợp hệ thống bệnh viện và tiêm chủng</p>
+                  </div>
+                  <div class="integration-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="integration-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Trạng thái:</span>
+                    <span class="detail-value success">Đang hoạt động</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Số lượng cơ sở:</span>
+                    <span class="detail-value">67 cơ sở</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Đồng bộ dữ liệu:</span>
+                    <span class="detail-value">Tự động</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="integration-card">
+                <div class="integration-header">
+                  <div class="integration-icon-large">🚒</div>
+                  <div class="integration-info">
+                    <h4>PCCC & Cứu nạn cứu hộ</h4>
+                    <p>Tích hợp hệ thống phòng cháy và cứu nạn</p>
+                  </div>
+                  <div class="integration-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="integration-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Trạng thái:</span>
+                    <span class="detail-value success">Đang hoạt động</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Số lượng đội:</span>
+                    <span class="detail-value">23 đội</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Đồng bộ dữ liệu:</span>
+                    <span class="detail-value">Thời gian thực</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="integration-card">
+                <div class="integration-header">
+                  <div class="integration-icon-large">📧</div>
+                  <div class="integration-info">
+                    <h4>SMS & Email Gateway</h4>
+                    <p>Tích hợp cổng gửi SMS và email thông báo</p>
+                  </div>
+                  <div class="integration-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="integration-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Trạng thái:</span>
+                    <span class="detail-value success">Đang hoạt động</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">SMS đã gửi hôm nay:</span>
+                    <span class="detail-value">1,234</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Email đã gửi hôm nay:</span>
+                    <span class="detail-value">567</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="integration-card">
+                <div class="integration-header">
+                  <div class="integration-icon-large">🗺️</div>
+                  <div class="integration-info">
+                    <h4>Bản đồ & Địa chính</h4>
+                    <p>Tích hợp bản đồ và dữ liệu địa chính</p>
+                  </div>
+                  <div class="integration-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="integration-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Trạng thái:</span>
+                    <span class="detail-value success">Đang hoạt động</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Nguồn dữ liệu:</span>
+                    <span class="detail-value">Leaflet OpenStreetMap</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Độ phân giải:</span>
+                    <span class="detail-value">Cao</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="integration-card">
+                <div class="integration-header">
+                  <div class="integration-icon-large">💳</div>
+                  <div class="integration-info">
+                    <h4>Thanh toán & Đối soát</h4>
+                    <p>Tích hợp cổng thanh toán và đối soát quyên góp</p>
+                  </div>
+                  <div class="integration-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="integration-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Trạng thái:</span>
+                    <span class="detail-value success">Đang hoạt động</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Giao dịch hôm nay:</span>
+                    <span class="detail-value">89 giao dịch</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Tổng giá trị:</span>
+                    <span class="detail-value">45.6 triệu</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="integration-card">
+                <div class="integration-header">
+                  <div class="integration-icon-large">📡</div>
+                  <div class="integration-info">
+                    <h4>IoT & Trạm cảnh báo</h4>
+                    <p>Tích hợp thiết bị IoT và trạm cảnh báo tự động</p>
+                  </div>
+                  <div class="integration-toggle">
+                    <label class="toggle-switch">
+                      <input type="checkbox" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div class="integration-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Trạng thái:</span>
+                    <span class="detail-value success">Đang hoạt động</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Số lượng thiết bị:</span>
+                    <span class="detail-value">234 thiết bị</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Thiết bị online:</span>
+                    <span class="detail-value">228/234</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeIntegrationsManagementBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- API Management Modal -->
+      <div class="modal" id="apiManagementModal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+          <div class="modal-header">
+            <h3>🔑 Quản lý API</h3>
+            <button class="modal-close" id="closeApiManagementModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="api-actions">
+              <button class="btn btn-primary" id="generateApiKeyBtn">Tạo API Key mới</button>
+            </div>
+
+            <div class="api-list">
+              <div class="api-card">
+                <div class="api-header">
+                  <div class="api-info">
+                    <h4>Cơ quan Y tế TP.HCM</h4>
+                    <p class="api-key">sk_live_xxxxxxxxxxxxxxxxxxxx</p>
+                  </div>
+                  <div class="api-status">
+                    <span class="status-badge active">Active</span>
+                  </div>
+                </div>
+                <div class="api-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Giới hạn lưu lượng:</span>
+                    <span class="detail-value">10,000 requests/ngày</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Đã sử dụng hôm nay:</span>
+                    <span class="detail-value">2,345 requests</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Ngày tạo:</span>
+                    <span class="detail-value">15/01/2024</span>
+                  </div>
+                </div>
+                <div class="api-actions-row">
+                  <button class="btn btn-secondary" style="font-size: 12px;">Xem chi tiết</button>
+                  <button class="btn btn-secondary" style="font-size: 12px;">Thu hồi</button>
+                </div>
+              </div>
+
+              <div class="api-card">
+                <div class="api-header">
+                  <div class="api-info">
+                    <h4>Công an Quận 1</h4>
+                    <p class="api-key">sk_live_yyyyyyyyyyyyyyyyyyyy</p>
+                  </div>
+                  <div class="api-status">
+                    <span class="status-badge active">Active</span>
+                  </div>
+                </div>
+                <div class="api-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Giới hạn lưu lượng:</span>
+                    <span class="detail-value">5,000 requests/ngày</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Đã sử dụng hôm nay:</span>
+                    <span class="detail-value">1,234 requests</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Ngày tạo:</span>
+                    <span class="detail-value">20/01/2024</span>
+                  </div>
+                </div>
+                <div class="api-actions-row">
+                  <button class="btn btn-secondary" style="font-size: 12px;">Xem chi tiết</button>
+                  <button class="btn btn-secondary" style="font-size: 12px;">Thu hồi</button>
+                </div>
+              </div>
+
+              <div class="api-card">
+                <div class="api-header">
+                  <div class="api-info">
+                    <h4>Tổ chức Y tế Red Cross</h4>
+                    <p class="api-key">sk_live_zzzzzzzzzzzzzzzzzzzz</p>
+                  </div>
+                  <div class="api-status">
+                    <span class="status-badge warning">Warning</span>
+                  </div>
+                </div>
+                <div class="api-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Giới hạn lưu lượng:</span>
+                    <span class="detail-value">3,000 requests/ngày</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Đã sử dụng hôm nay:</span>
+                    <span class="detail-value">2,890 requests</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Ngày tạo:</span>
+                    <span class="detail-value">10/01/2024</span>
+                  </div>
+                </div>
+                <div class="api-actions-row">
+                  <button class="btn btn-secondary" style="font-size: 12px;">Xem chi tiết</button>
+                  <button class="btn btn-secondary" style="font-size: 12px;">Thu hồi</button>
+                </div>
+              </div>
+
+              <div class="api-card">
+                <div class="api-header">
+                  <div class="api-info">
+                    <h4>Ứng dụng đối tác A</h4>
+                    <p class="api-key">sk_live_wwwwwwwwwwwwwwwwwwww</p>
+                  </div>
+                  <div class="api-status">
+                    <span class="status-badge revoked">Revoked</span>
+                  </div>
+                </div>
+                <div class="api-details">
+                  <div class="detail-item">
+                    <span class="detail-label">Giới hạn lưu lượng:</span>
+                    <span class="detail-value">2,000 requests/ngày</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Đã sử dụng hôm nay:</span>
+                    <span class="detail-value">0 requests</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Ngày thu hồi:</span>
+                    <span class="detail-value">05/02/2024</span>
+                  </div>
+                </div>
+                <div class="api-actions-row">
+                  <button class="btn btn-secondary" style="font-size: 12px;">Xem chi tiết</button>
+                  <button class="btn btn-secondary" style="font-size: 12px;">Xóa</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeApiManagementBtn">Đóng</button>
           </div>
         </div>
       </div>

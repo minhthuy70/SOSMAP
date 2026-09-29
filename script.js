@@ -8969,6 +8969,320 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeReportingSystem();
 });
 
+// Emergency Integrations System
+var integrationsData = {
+  emergencyCall: {
+    enabled: true,
+    callsToday: 234,
+    avgResponseTime: '15s',
+    status: 'active'
+  },
+  weather: {
+    enabled: true,
+    lastUpdate: '5 phút trước',
+    stations: 45,
+    status: 'active'
+  },
+  rainWater: {
+    enabled: true,
+    lastUpdate: 'Thời gian thực',
+    stations: 89,
+    status: 'active'
+  },
+  camera: {
+    enabled: true,
+    totalCameras: 156,
+    onlineCameras: 148,
+    status: 'active'
+  },
+  healthcare: {
+    enabled: true,
+    facilities: 67,
+    syncMode: 'Tự động',
+    status: 'active'
+  },
+  fireRescue: {
+    enabled: true,
+    teams: 23,
+    syncMode: 'Thời gian thực',
+    status: 'active'
+  },
+  smsEmail: {
+    enabled: true,
+    smsToday: 1234,
+    emailToday: 567,
+    status: 'active'
+  },
+  map: {
+    enabled: true,
+    source: 'Leaflet OpenStreetMap',
+    resolution: 'Cao',
+    status: 'active'
+  },
+  payment: {
+    enabled: true,
+    transactionsToday: 89,
+    totalValue: '45.6 triệu',
+    status: 'active'
+  },
+  iot: {
+    enabled: true,
+    devices: 234,
+    onlineDevices: 228,
+    status: 'active'
+  }
+};
+
+var apiKeys = [
+  {
+    id: 'api1',
+    name: 'Cơ quan Y tế TP.HCM',
+    key: 'sk_live_xxxxxxxxxxxxxxxxxxxx',
+    rateLimit: 10000,
+    usedToday: 2345,
+    createdAt: '15/01/2024',
+    status: 'active'
+  },
+  {
+    id: 'api2',
+    name: 'Công an Quận 1',
+    key: 'sk_live_yyyyyyyyyyyyyyyyyyyy',
+    rateLimit: 5000,
+    usedToday: 1234,
+    createdAt: '20/01/2024',
+    status: 'active'
+  },
+  {
+    id: 'api3',
+    name: 'Tổ chức Y tế Red Cross',
+    key: 'sk_live_zzzzzzzzzzzzzzzzzzzz',
+    rateLimit: 3000,
+    usedToday: 2890,
+    createdAt: '10/01/2024',
+    status: 'warning'
+  },
+  {
+    id: 'api4',
+    name: 'Ứng dụng đối tác A',
+    key: 'sk_live_wwwwwwwwwwwwwwwwwwww',
+    rateLimit: 2000,
+    usedToday: 0,
+    createdAt: '10/01/2024',
+    revokedAt: '05/02/2024',
+    status: 'revoked'
+  }
+];
+
+function initializeIntegrationsSystem() {
+  // Load integrations data from localStorage
+  var savedIntegrations = localStorage.getItem('sosmap_integrations');
+  if (savedIntegrations) {
+    integrationsData = JSON.parse(savedIntegrations);
+  }
+
+  // Load API keys from localStorage
+  var savedApiKeys = localStorage.getItem('sosmap_api_keys');
+  if (savedApiKeys) {
+    apiKeys = JSON.parse(savedApiKeys);
+  }
+
+  updateIntegrationsStatus();
+}
+
+function updateIntegrationsStatus() {
+  var statusDiv = document.getElementById('integrationsStatus');
+  if (!statusDiv) return;
+
+  var activeIntegrations = Object.keys(integrationsData).filter(function(key) {
+    return integrationsData[key].enabled;
+  });
+
+  var icons = {
+    emergencyCall: '📞',
+    weather: '🌤️',
+    healthcare: '🏥'
+  };
+
+  var names = {
+    emergencyCall: 'Tổng đài khẩn cấp',
+    weather: 'Khí tượng thủy văn',
+    healthcare: 'Cơ sở y tế'
+  };
+
+  var html = '';
+  activeIntegrations.slice(0, 3).forEach(function(key) {
+    html += `
+      <div class="integration-item active">
+        <span class="integration-icon">${icons[key] || '🔗'}</span>
+        <span class="integration-name">${names[key] || key}</span>
+        <span class="integration-status">Đang hoạt động</span>
+      </div>
+    `;
+  });
+
+  statusDiv.innerHTML = html;
+}
+
+function toggleIntegration(integrationKey) {
+  integrationsData[integrationKey].enabled = !integrationsData[integrationKey].enabled;
+  saveIntegrationsData();
+  updateIntegrationsStatus();
+
+  var status = integrationsData[integrationKey].enabled ? 'kích hoạt' : 'tắt';
+  alert('Đã ' + status + ' tích hợp ' + integrationKey);
+  logActivity('integration_toggle', 'Toggle tích hợp: ' + integrationKey);
+}
+
+function saveIntegrationsData() {
+  localStorage.setItem('sosmap_integrations', JSON.stringify(integrationsData));
+}
+
+function generateApiKey(organizationName, rateLimit) {
+  var newKey = {
+    id: 'api' + Date.now(),
+    name: organizationName,
+    key: 'sk_live_' + generateRandomString(24),
+    rateLimit: rateLimit,
+    usedToday: 0,
+    createdAt: new Date().toLocaleDateString('vi-VN'),
+    status: 'active'
+  };
+
+  apiKeys.push(newKey);
+  saveApiKeys();
+
+  alert('Đã tạo API Key mới! Mã: ' + newKey.key);
+  logActivity('api_key_created', 'Tạo API Key: ' + organizationName);
+
+  return newKey;
+}
+
+function generateRandomString(length) {
+  var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  var result = '';
+  for (var i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+function revokeApiKey(apiId) {
+  var apiKey = apiKeys.find(function(k) {
+    return k.id === apiId;
+  });
+
+  if (!apiKey) {
+    alert('Không tìm thấy API Key');
+    return;
+  }
+
+  apiKey.status = 'revoked';
+  apiKey.revokedAt = new Date().toLocaleDateString('vi-VN');
+  saveApiKeys();
+
+  alert('Đã thu hồi API Key!');
+  logActivity('api_key_revoked', 'Thu hồi API Key: ' + apiId);
+}
+
+function deleteApiKey(apiId) {
+  var index = apiKeys.findIndex(function(k) {
+    return k.id === apiId;
+  });
+
+  if (index === -1) {
+    alert('Không tìm thấy API Key');
+    return;
+  }
+
+  apiKeys.splice(index, 1);
+  saveApiKeys();
+
+  alert('Đã xóa API Key!');
+  logActivity('api_key_deleted', 'Xóa API Key: ' + apiId);
+}
+
+function saveApiKeys() {
+  localStorage.setItem('sosmap_api_keys', JSON.stringify(apiKeys));
+}
+
+function checkApiUsage(apiKey) {
+  var key = apiKeys.find(function(k) {
+    return k.key === apiKey;
+  });
+
+  if (!key) {
+    return { allowed: false, reason: 'Invalid API key' };
+  }
+
+  if (key.status === 'revoked') {
+    return { allowed: false, reason: 'API key revoked' };
+  }
+
+  if (key.usedToday >= key.rateLimit) {
+    return { allowed: false, reason: 'Rate limit exceeded' };
+  }
+
+  key.usedToday++;
+  saveApiKeys();
+
+  return { allowed: true, remaining: key.rateLimit - key.usedToday };
+}
+
+// Integrations Panel Event Listeners
+document.getElementById('manageIntegrationsBtn').addEventListener('click', function() {
+  document.getElementById('integrationsManagementModal').style.display = 'block';
+});
+
+document.getElementById('apiManagementBtn').addEventListener('click', function() {
+  document.getElementById('apiManagementModal').style.display = 'block';
+});
+
+document.getElementById('closeIntegrationsManagementModal').addEventListener('click', function() {
+  document.getElementById('integrationsManagementModal').style.display = 'none';
+});
+
+document.getElementById('closeIntegrationsManagementBtn').addEventListener('click', function() {
+  document.getElementById('integrationsManagementModal').style.display = 'none';
+});
+
+document.getElementById('closeApiManagementModal').addEventListener('click', function() {
+  document.getElementById('apiManagementModal').style.display = 'none';
+});
+
+document.getElementById('closeApiManagementBtn').addEventListener('click', function() {
+  document.getElementById('apiManagementModal').style.display = 'none';
+});
+
+document.getElementById('generateApiKeyBtn').addEventListener('click', function() {
+  var organizationName = prompt('Nhập tên tổ chức:');
+  if (!organizationName) return;
+
+  var rateLimit = prompt('Nhập giới hạn lưu lượng (requests/ngày):', '10000');
+  if (!rateLimit) return;
+
+  generateApiKey(organizationName, parseInt(rateLimit));
+});
+
+// Toggle switches for integrations
+document.querySelectorAll('.toggle-switch input').forEach(function(toggle) {
+  toggle.addEventListener('change', function() {
+    var card = this.closest('.integration-card');
+    var integrationName = card.querySelector('.integration-info h4').textContent;
+    var integrationKey = Object.keys(integrationsData).find(function(key) {
+      return key.toLowerCase().includes(integrationName.toLowerCase().split(' ')[0].toLowerCase());
+    });
+
+    if (integrationKey) {
+      toggleIntegration(integrationKey);
+    }
+  });
+});
+
+// Initialize integrations system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeIntegrationsSystem();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {
