@@ -7198,6 +7198,394 @@ body, html {
   }
 }
 
+/* Security & Performance Panel */
+.security-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.security-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.security-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.security-btn {
+  flex: 1;
+  padding: 8px 12px;
+  background: #005BAC;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.security-btn:hover {
+  background: #004a8a;
+}
+
+.security-btn svg {
+  flex-shrink: 0;
+}
+
+.security-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.security-status .status-item {
+  padding: 10px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.security-status .status-label {
+  color: #666;
+  font-weight: 600;
+}
+
+.security-status .status-value {
+  color: #333;
+  font-weight: 600;
+}
+
+.security-status .status-value.success {
+  color: #28a745;
+}
+
+/* Security Settings Styles */
+.security-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.security-section:last-child {
+  border-bottom: none;
+}
+
+.security-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.security-option {
+  margin-bottom: 15px;
+}
+
+.security-option label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+  font-weight: 600;
+}
+
+.security-option .form-control {
+  margin-bottom: 5px;
+}
+
+.security-desc {
+  margin: 5px 0 0 0;
+  font-size: 12px;
+  color: #999;
+}
+
+.security-option button {
+  margin-right: 10px;
+}
+
+/* Performance Monitor Styles */
+.performance-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.performance-tab {
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.performance-tab.active {
+  background: #005BAC;
+  color: white;
+}
+
+.performance-tab:hover:not(.active) {
+  background: #e9ecef;
+}
+
+.performance-tab-content {
+  display: block;
+}
+
+.performance-tab-content[style*="display: none"] {
+  display: none;
+}
+
+.performance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.perf-card {
+  padding: 15px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.perf-card.success {
+  border-left: 4px solid #28a745;
+}
+
+.perf-card.warning {
+  border-left: 4px solid #ffc107;
+}
+
+.perf-card.error {
+  border-left: 4px solid #dc3545;
+}
+
+.perf-icon {
+  font-size: 24px;
+}
+
+.perf-info h4 {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.perf-info p {
+  margin: 0 0 5px 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.perf-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #005BAC;
+}
+
+.performance-chart {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.performance-chart h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+/* API Metrics Table */
+.metrics-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.metrics-table th {
+  background: #005BAC;
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+}
+
+.metrics-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.metrics-table tr:hover {
+  background: #f8f9fa;
+}
+
+.metrics-table .status-ok {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.metrics-table .status-warning {
+  color: #ffc107;
+  font-weight: 600;
+}
+
+.metrics-table .status-error {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* Cache Stats */
+.cache-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.cache-item {
+  padding: 15px;
+  border-radius: 8px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.cache-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.cache-size {
+  font-size: 18px;
+  font-weight: 700;
+  color: #005BAC;
+  margin-bottom: 5px;
+}
+
+.cache-hits {
+  font-size: 12px;
+  color: #666;
+}
+
+.cache-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Error Logs */
+.error-filters {
+  margin-bottom: 15px;
+}
+
+.error-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.error-item {
+  padding: 12px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.error-item.critical {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.error-item.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.error-item.info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.error-time {
+  min-width: 80px;
+  color: #666;
+}
+
+.error-type {
+  min-width: 60px;
+  font-weight: 600;
+}
+
+.error-message {
+  flex: 1;
+  color: #333;
+}
+
+.error-count {
+  min-width: 50px;
+  text-align: right;
+  font-weight: 600;
+}
+
+/* Responsive Security Panel */
+@media (max-width: 768px) {
+  .security-controls {
+    flex-direction: column;
+  }
+
+  .performance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cache-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-table {
+    overflow-x: auto;
+  }
+
+  .error-item {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .error-time,
+  .error-type,
+  .error-count {
+    min-width: auto;
+  }
+}
+
 /* System Status Panel */
 .system-status-panel {
   background: white;

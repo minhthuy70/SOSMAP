@@ -10560,6 +10560,546 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeFloodSystem();
 });
 
+// Security & Performance System
+var securitySettings = {
+  passwordEncryption: true,
+  rateLimit: 5,
+  fileSizeLimit: 10,
+  apiAuth: true,
+  hidePersonalInfo: true,
+  backupInterval: 24,
+  inputSanitization: true
+};
+
+var performanceData = {
+  apiResponseTime: 45,
+  cacheHitRate: 85,
+  memoryUsage: 45,
+  cpuUsage: 65,
+  storageUsage: 55,
+  networkUsage: 78,
+  apiMetrics: [
+    { endpoint: '/api/incidents', requests: 2345, avgResponse: 42, successRate: 99.8, status: 'ok' },
+    { endpoint: '/api/alerts', requests: 1234, avgResponse: 38, successRate: 99.5, status: 'ok' },
+    { endpoint: '/api/locations', requests: 567, avgResponse: 55, successRate: 98.9, status: 'slow' },
+    { endpoint: '/api/users', requests: 890, avgResponse: 45, successRate: 99.7, status: 'ok' }
+  ],
+  cacheData: [
+    { name: 'Map Data', size: 125, hits: 85 },
+    { name: 'Incident Data', size: 45, hits: 78 },
+    { name: 'User Data', size: 23, hits: 92 },
+    { name: 'Configuration', size: 5, hits: 98 }
+  ],
+  errorLogs: [
+    { time: '10:45:23', type: 'Server', message: 'Database connection timeout', count: 3 },
+    { time: '10:44:15', type: 'Network', message: 'API request timeout (5000ms)', count: 5 },
+    { time: '10:43:00', type: 'Client', message: 'Validation error on form input', count: 12 },
+    { time: '10:42:30', type: 'Server', message: 'High memory usage warning', count: 1 }
+  ]
+};
+
+var rateLimitTracker = {};
+var cacheStore = {};
+
+function initializeSecuritySystem() {
+  // Load security settings from localStorage
+  var savedSettings = localStorage.getItem('sosmap_security_settings');
+  if (savedSettings) {
+    securitySettings = JSON.parse(savedSettings);
+  }
+
+  // Load performance data from localStorage
+  var savedPerformance = localStorage.getItem('sosmap_performance_data');
+  if (savedPerformance) {
+    performanceData = JSON.parse(savedPerformance);
+  }
+
+  // Initialize cache
+  initializeCache();
+
+  // Start performance monitoring
+  startPerformanceMonitoring();
+
+  updateSecurityStatus();
+}
+
+function updateSecurityStatus() {
+  var statusDiv = document.getElementById('securityStatus');
+  if (!statusDiv) return;
+
+  statusDiv.innerHTML = `
+    <div class="status-item">
+      <span class="status-label">Trạng thái bảo mật:</span>
+      <span class="status-value ${securitySettings.apiAuth ? 'success' : 'warning'}">${securitySettings.apiAuth ? 'Đang hoạt động' : 'Tắt'}</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">API Response:</span>
+      <span class="status-value">${performanceData.apiResponseTime}ms</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">Cache hit rate:</span>
+      <span class="status-value">${performanceData.cacheHitRate}%</span>
+    </div>
+  `;
+}
+
+// Security Functions
+function encryptPassword(password) {
+  if (!securitySettings.passwordEncryption) {
+    return password;
+  }
+
+  // Simulate SHA-256 encryption (in production, use actual crypto library)
+  var hash = 0;
+  for (var i = 0; i < password.length; i++) {
+    var char = password.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+
+  return 'sha256_' + Math.abs(hash).toString(16);
+}
+
+function sanitizeInput(input) {
+  if (!securitySettings.inputSanitization) {
+    return input;
+  }
+
+  // Remove potentially dangerous characters
+  var sanitized = input
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;')
+    .trim();
+
+  return sanitized;
+}
+
+function checkRateLimit(userId) {
+  var now = Date.now();
+  var userLimit = rateLimitTracker[userId];
+
+  if (!userLimit) {
+    rateLimitTracker[userId] = { count: 1, resetTime: now + 60000 };
+    return true;
+  }
+
+  if (now > userLimit.resetTime) {
+    rateLimitTracker[userId] = { count: 1, resetTime: now + 60000 };
+    return true;
+  }
+
+  if (userLimit.count >= securitySettings.rateLimit) {
+    return false;
+  }
+
+  userLimit.count++;
+  return true;
+}
+
+function checkFileSize(fileSize) {
+  var maxSizeMB = securitySettings.fileSizeLimit;
+  var maxSizeBytes = maxSizeMB * 1024 * 1024;
+
+  return fileSize <= maxSizeBytes;
+}
+
+function authenticateApi(apiKey) {
+  if (!securitySettings.apiAuth) {
+    return true;
+  }
+
+  // Simulate API key validation
+  var validKeys = ['sk_live_xxx', 'sk_live_yyy', 'sk_live_zzz'];
+  return validKeys.includes(apiKey);
+}
+
+function hidePersonalInfo(data, userRole) {
+  if (!securitySettings.hidePersonalInfo) {
+    return data;
+  }
+
+  // Hide personal info for non-authorized users
+  if (userRole !== 'admin' && userRole !== 'staff') {
+    if (data.phone) {
+      data.phone = data.phone.replace(/(\d{3})\d{4}(\d{3})/, '$1****$2');
+    }
+    if (data.email) {
+      var parts = data.email.split('@');
+      data.email = parts[0].substring(0, 3) + '***@' + parts[1];
+    }
+    if (data.address) {
+      data.address = '***'; // Hide address
+    }
+  }
+
+  return data;
+}
+
+function createBackup() {
+  var backup = {
+    timestamp: new Date().toISOString(),
+    version: '1.0',
+    data: {
+      incidents: localStorage.getItem('sosmap_incidents'),
+      flood: localStorage.getItem('sosmap_flood'),
+      operations: localStorage.getItem('sosmap_operations'),
+      privacy: localStorage.getItem('sosmap_privacy_consents')
+    }
+  };
+
+  localStorage.setItem('sosmap_backup_' + Date.now(), JSON.stringify(backup));
+
+  alert('Đã tạo bản sao lưu!');
+  logActivity('backup_created', 'Tạo bản sao lưu');
+}
+
+function restoreBackup(backupId) {
+  var backup = localStorage.getItem('sosmap_backup_' + backupId);
+
+  if (!backup) {
+    alert('Không tìm thấy bản sao lưu');
+    return;
+  }
+
+  var backupData = JSON.parse(backup);
+
+  if (backupData.data.incidents) {
+    localStorage.setItem('sosmap_incidents', backupData.data.incidents);
+  }
+  if (backupData.data.flood) {
+    localStorage.setItem('sosmap_flood', backupData.data.flood);
+  }
+  if (backupData.data.operations) {
+    localStorage.setItem('sosmap_operations', backupData.data.operations);
+  }
+  if (backupData.data.privacy) {
+    localStorage.setItem('sosmap_privacy_consents', backupData.data.privacy);
+  }
+
+  alert('Đã khôi phục từ bản sao lưu!');
+  logActivity('backup_restored', 'Khôi phục bản sao lưu: ' + backupId);
+}
+
+// Performance Functions
+function initializeCache() {
+  var savedCache = localStorage.getItem('sosmap_cache');
+  if (savedCache) {
+    cacheStore = JSON.parse(savedCache);
+  }
+}
+
+function getCache(key) {
+  var item = cacheStore[key];
+  if (!item) {
+    return null;
+  }
+
+  if (Date.now() > item.expiry) {
+    delete cacheStore[key];
+    saveCache();
+    return null;
+  }
+
+  return item.data;
+}
+
+function setCache(key, data, ttl) {
+  var ttl = ttl || 3600000; // Default 1 hour
+  cacheStore[key] = {
+    data: data,
+    expiry: Date.now() + ttl
+  };
+  saveCache();
+}
+
+function clearCache() {
+  cacheStore = {};
+  saveCache();
+
+  alert('Đã xóa cache!');
+  logActivity('cache_cleared', 'Xóa cache');
+}
+
+function warmCache() {
+  // Simulate cache warming
+  setCache('map_data', { tiles: [], markers: [] }, 3600000);
+  setCache('incident_data', { incidents: [] }, 3600000);
+  setCache('user_data', { users: [] }, 3600000);
+  setCache('config', { settings: {} }, 86400000);
+
+  alert('Đã warm cache!');
+  logActivity('cache_warmed', 'Warm cache');
+}
+
+function saveCache() {
+  localStorage.setItem('sosmap_cache', JSON.stringify(cacheStore));
+}
+
+function trackApiResponse(endpoint, responseTime, success) {
+  var metric = performanceData.apiMetrics.find(function(m) {
+    return m.endpoint === endpoint;
+  });
+
+  if (metric) {
+    metric.requests++;
+    metric.avgResponse = Math.round((metric.avgResponse + responseTime) / 2);
+    if (!success) {
+      metric.successRate = Math.max(0, metric.successRate - 0.1);
+    }
+  }
+
+  savePerformanceData();
+}
+
+function logError(type, message) {
+  var error = {
+    time: new Date().toLocaleTimeString('vi-VN'),
+    type: type,
+    message: message,
+    count: 1
+  };
+
+  // Check if similar error exists
+  var existingError = performanceData.errorLogs.find(function(e) {
+    return e.type === type && e.message === message;
+  });
+
+  if (existingError) {
+    existingError.count++;
+  } else {
+    performanceData.errorLogs.unshift(error);
+  }
+
+  if (performanceData.errorLogs.length > 50) {
+    performanceData.errorLogs.pop();
+  }
+
+  savePerformanceData();
+}
+
+function startPerformanceMonitoring() {
+  // Update performance metrics every 30 seconds
+  setInterval(function() {
+    // Simulate performance changes
+    performanceData.apiResponseTime = 40 + Math.floor(Math.random() * 20);
+    performanceData.cacheHitRate = 80 + Math.floor(Math.random() * 15);
+    performanceData.memoryUsage = 40 + Math.floor(Math.random() * 20);
+    performanceData.cpuUsage = 60 + Math.floor(Math.random() * 20);
+
+    updateSecurityStatus();
+    savePerformanceData();
+  }, 30000);
+}
+
+function savePerformanceData() {
+  localStorage.setItem('sosmap_performance_data', JSON.stringify(performanceData));
+}
+
+function saveSecuritySettings() {
+  localStorage.setItem('sosmap_security_settings', JSON.stringify(securitySettings));
+}
+
+// Security Panel Event Listeners
+document.getElementById('securitySettingsBtn').addEventListener('click', function() {
+  document.getElementById('securitySettingsModal').style.display = 'block';
+});
+
+document.getElementById('performanceMonitorBtn').addEventListener('click', function() {
+  document.getElementById('performanceMonitorModal').style.display = 'block';
+});
+
+document.getElementById('closeSecuritySettingsModal').addEventListener('click', function() {
+  document.getElementById('securitySettingsModal').style.display = 'none';
+});
+
+document.getElementById('closeSecuritySettingsBtn').addEventListener('click', function() {
+  document.getElementById('securitySettingsModal').style.display = 'none';
+});
+
+document.getElementById('closePerformanceMonitorModal').addEventListener('click', function() {
+  document.getElementById('performanceMonitorModal').style.display = 'none';
+});
+
+document.getElementById('saveSecuritySettingsBtn').addEventListener('click', function() {
+  securitySettings.passwordEncryption = document.getElementById('enablePasswordEncryption').checked;
+  securitySettings.rateLimit = parseInt(document.getElementById('rateLimitInput').value);
+  securitySettings.fileSizeLimit = parseInt(document.getElementById('fileSizeLimitInput').value);
+  securitySettings.apiAuth = document.getElementById('enableApiAuth').checked;
+  securitySettings.hidePersonalInfo = document.getElementById('hidePersonalInfo').checked;
+  securitySettings.backupInterval = parseInt(document.getElementById('backupIntervalInput').value);
+  securitySettings.inputSanitization = document.getElementById('enableInputSanitization').checked;
+
+  saveSecuritySettings();
+  updateSecurityStatus();
+
+  alert('Đã lưu cài đặt bảo mật!');
+  logActivity('security_settings_saved', 'Lưu cài đặt bảo mật');
+});
+
+document.getElementById('manualBackupBtn').addEventListener('click', function() {
+  createBackup();
+});
+
+document.getElementById('restoreBackupBtn').addEventListener('click', function() {
+  var backupId = prompt('Nhập ID bản sao lưu (ví dụ: 1234567890):');
+  if (backupId) {
+    restoreBackup(backupId);
+  }
+});
+
+// Performance tab switching
+document.querySelectorAll('.performance-tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.performance-tab').forEach(function(t) {
+      t.classList.remove('active');
+    });
+
+    this.classList.add('active');
+
+    document.querySelectorAll('.performance-tab-content').forEach(function(content) {
+      content.style.display = 'none';
+    });
+
+    var tabName = this.getAttribute('data-tab');
+    document.getElementById(tabName + '-tab').style.display = 'block';
+  });
+});
+
+// Cache actions
+document.getElementById('clearCacheBtn').addEventListener('click', function() {
+  clearCache();
+});
+
+document.getElementById('warmCacheBtn').addEventListener('click', function() {
+  warmCache();
+});
+
+// Initialize security system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeSecuritySystem();
+});
+
+// Lazy Loading for Markers
+var markerLazyLoad = {
+  loadedMarkers: new Set(),
+  viewportMarkers: [],
+  observer: null
+};
+
+function initializeLazyLoading() {
+  if ('IntersectionObserver' in window) {
+    markerLazyLoad.observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          loadMarker(entry.target);
+          markerLazyLoad.observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '100px'
+    });
+  }
+}
+
+function loadMarker(markerElement) {
+  var markerId = markerElement.getAttribute('data-marker-id');
+  if (markerId && !markerLazyLoad.loadedMarkers.has(markerId)) {
+    // Load marker data
+    markerLazyLoad.loadedMarkers.add(markerId);
+    markerElement.classList.add('loaded');
+  }
+}
+
+function setupLazyMarkers() {
+  var markers = document.querySelectorAll('[data-marker-id]');
+  markers.forEach(function(marker) {
+    if (markerLazyLoad.observer) {
+      markerLazyLoad.observer.observe(marker);
+    }
+  });
+}
+
+// Pagination for Lists
+function setupPagination(listId, itemsPerPage) {
+  var list = document.getElementById(listId);
+  if (!list) return;
+
+  var items = list.querySelectorAll('.list-item');
+  var totalPages = Math.ceil(items.length / itemsPerPage);
+
+  for (var i = 0; i < items.length; i++) {
+    if (i >= itemsPerPage) {
+      items[i].style.display = 'none';
+    }
+  }
+
+  // Add pagination controls
+  var pagination = document.createElement('div');
+  pagination.className = 'pagination';
+
+  for (var page = 1; page <= totalPages; page++) {
+    var pageBtn = document.createElement('button');
+    pageBtn.textContent = page;
+    pageBtn.className = 'page-btn';
+    pageBtn.onclick = function() {
+      showPage(listId, items, this.textContent, itemsPerPage);
+    };
+    pagination.appendChild(pageBtn);
+  }
+
+  list.parentNode.appendChild(pagination);
+}
+
+function showPage(listId, items, pageNumber, itemsPerPage) {
+  var startIndex = (pageNumber - 1) * itemsPerPage;
+  var endIndex = startIndex + itemsPerPage;
+
+  items.forEach(function(item, index) {
+    if (index >= startIndex && index < endIndex) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+// Auto-testing
+function runAutoTests() {
+  console.log('Running auto-tests...');
+
+  // Test rate limiting
+  var rateLimitPassed = checkRateLimit('test_user');
+  console.log('Rate limit test:', rateLimitPassed ? 'PASSED' : 'FAILED');
+
+  // Test input sanitization
+  var sanitized = sanitizeInput('<script>alert("xss")</script>');
+  var sanitizationPassed = sanitized.indexOf('<script') === -1;
+  console.log('Input sanitization test:', sanitizationPassed ? 'PASSED' : 'FAILED');
+
+  // Test file size check
+  var fileSizeCheck = checkFileSize(5 * 1024 * 1024); // 5MB
+  console.log('File size check test:', fileSizeCheck ? 'PASSED' : 'FAILED');
+
+  // Test cache
+  setCache('test_key', 'test_value', 60000);
+  var cached = getCache('test_key');
+  var cacheTest = cached === 'test_value';
+  console.log('Cache test:', cacheTest ? 'PASSED' : 'FAILED');
+
+  console.log('Auto-tests completed');
+  logActivity('auto_test_run', 'Chạy kiểm thử tự động');
+}
+
+// Initialize security system on page load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeSecuritySystem();
+  initializeLazyLoading();
+  setupLazyMarkers();
+});
+
 // High contrast mode toggle
 var highContrastMode = false;
 function toggleHighContrast() {

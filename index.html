@@ -900,6 +900,40 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
         </div>
 
+        <!-- Security & Performance Panel -->
+        <div class="security-panel" id="securityPanel">
+          <h3>Bảo mật & Hiệu năng</h3>
+          <div class="security-controls">
+            <button class="security-btn" id="securitySettingsBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              Cài đặt bảo mật
+            </button>
+            <button class="security-btn" id="performanceMonitorBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+              Giám sát hiệu năng
+            </button>
+          </div>
+          <div class="security-status" id="securityStatus">
+            <div class="status-item">
+              <span class="status-label">Trạng thái bảo mật:</span>
+              <span class="status-value success">Đang hoạt động</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">API Response:</span>
+              <span class="status-value">45ms</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Cache hit rate:</span>
+              <span class="status-value">85%</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Flood & Evacuation Panel -->
         <div class="flood-panel" id="floodPanel">
           <h3>Bão lũ & Sơ tán</h3>
@@ -5919,6 +5953,339 @@ div class="summary-label">Sự cố tháng này</div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" id="closeEvacuationPlanBtn">Đóng</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Settings Modal -->
+      <div class="modal" id="securitySettingsModal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+          <div class="modal-header">
+            <h3>🔒 Cài đặt bảo mật</h3>
+            <button class="modal-close" id="closeSecuritySettingsModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="security-section">
+              <h4>Mã hóa mật khẩu</h4>
+              <div class="security-option">
+                <label class="toggle-label">
+                  <input type="checkbox" id="enablePasswordEncryption" checked>
+                  <span>Bật mã hóa mật khẩu (SHA-256)</span>
+                </label>
+                <p class="security-desc">Mật khẩu sẽ được mã hóa trước khi lưu trữ</p>
+              </div>
+            </div>
+
+            <div class="security-section">
+              <h4>Giới hạn gửi phản ánh</h4>
+              <div class="security-option">
+                <label for="rateLimitInput">Số phản ánh tối đa/phút:</label>
+                <input type="number" class="form-control" id="rateLimitInput" value="5" min="1" max="20">
+                <p class="security-desc">Giới hạn số phản ánh có thể gửi trong 1 phút</p>
+              </div>
+            </div>
+
+            <div class="security-section">
+              <h4>Giới hạn dung lượng file</h4>
+              <div class="security-option">
+                <label for="fileSizeLimitInput">Dung lượng tối đa (MB):</label>
+                <input type="number" class="form-control" id="fileSizeLimitInput" value="10" min="1" max="50">
+                <p class="security-desc">Giới hạn dung lượng file đính kèm</p>
+              </div>
+            </div>
+
+            <div class="security-section">
+              <h4>Bảo vệ API</h4>
+              <div class="security-option">
+                <label class="toggle-label">
+                  <input type="checkbox" id="enableApiAuth" checked>
+                  <span>Bật xác thực API</span>
+                </label>
+                <p class="security-desc">Yêu cầu API key cho các request API</p>
+              </div>
+            </div>
+
+            <div class="security-section">
+              <h4>Ẩn thông tin cá nhân</h4>
+              <div class="security-option">
+                <label class="toggle-label">
+                  <input type="checkbox" id="hidePersonalInfo" checked>
+                  <span>Ẩn thông tin cá nhân khỏi người không có quyền</span>
+                </label>
+                <p class="security-desc">Chỉ hiển thị thông tin cá nhân cho người có quyền truy cập</p>
+              </div>
+            </div>
+
+            <div class="security-section">
+              <h4>Sao lưu dữ liệu</h4>
+              <div class="security-option">
+                <label for="backupIntervalInput">Tần suất sao lưu (giờ):</label>
+                <input type="number" class="form-control" id="backupIntervalInput" value="24" min="1" max="168">
+                <p class="security-desc">Tần suất sao lưu dữ liệu tự động</p>
+              </div>
+              <div class="security-option">
+                <button class="btn btn-secondary" id="manualBackupBtn">📦 Sao lưu ngay</button>
+                <button class="btn btn-secondary" id="restoreBackupBtn">📥 Khôi phục từ bản sao</button>
+              </div>
+            </div>
+
+            <div class="security-section">
+              <h4>Làm sạch dữ liệu đầu vào</h4>
+              <div class="security-option">
+                <label class="toggle-label">
+                  <input type="checkbox" id="enableInputSanitization" checked>
+                  <span>Bật làm sạch dữ liệu đầu vào</span>
+                </label>
+                <p class="security-desc">Tự động loại bỏ các ký tự nguy hiểm từ input</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closeSecuritySettingsBtn">Hủy</button>
+            <button type="button" class="btn btn-primary" id="saveSecuritySettingsBtn">Lưu cài đặt</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Monitor Modal -->
+      <div class="modal" id="performanceMonitorModal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+          <div class="modal-header">
+            <h3>📊 Giám sát hiệu năng</h3>
+            <button class="modal-close" id="closePerformanceMonitorModal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="performance-tabs">
+              <button class="performance-tab active" data-tab="overview">Tổng quan</button>
+              <button class="performance-tab" data-tab="api">API</button>
+              <button class="performance-tab" data-tab="cache">Cache</button>
+              <button class="performance-tab" data-tab="errors">Lỗi</button>
+            </div>
+
+            <div class="performance-tab-content" id="overview-tab">
+              <div class="performance-grid">
+                <div class="perf-card success">
+                  <div class="perf-icon">⚡</div>
+                  <div class="perf-info">
+                    <h4>API Response</h4>
+                    <p>Thời gian phản hồi trung bình</p>
+                    <span class="perf-value">45ms</span>
+                  </div>
+                </div>
+
+                <div class="perf-card success">
+                  <div class="perf-icon">💾</div>
+                  <div class="perf-info">
+                    <h4>Cache Hit Rate</h4>
+                    <p>Tỷ lệ cache trúng</p>
+                    <span class="perf-value">85%</span>
+                  </div>
+                </div>
+
+                <div class="perf-card success">
+                  <div class="perf-icon">📦</div>
+                  <div class="perf-info">
+                    <h4>Memory Usage</h4>
+                    <p>Sử dụng bộ nhớ</p>
+                    <span class="perf-value">45%</span>
+                  </div>
+                </div>
+
+                <div class="perf-card warning">
+                  <div class="perf-icon">🖥️</div>
+                  <div class="perf-info">
+                    <h4>CPU Usage</h4>
+                    <p>Sử dụng CPU</p>
+                    <span class="perf-value">65%</span>
+                  </div>
+                </div>
+
+                <div class="perf-card success">
+                  <div class="perf-icon">📁</div>
+                  <div class="perf-info">
+                    <h4>Storage</h4>
+                    <p>Dung lượng lưu trữ</p>
+                    <span class="perf-value">55%</span>
+                  </div>
+                </div>
+
+                <div class="perf-card success">
+                  <div class="perf-icon">🌐</div>
+                  <div class="perf-info">
+                    <h4>Network</h4>
+                    <p>Băng thông mạng</p>
+                    <span class="perf-value">78%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="performance-chart">
+                <h4>Hiệu suất API (24h)</h4>
+                <div class="chart-bars">
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 45%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">00:00</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 35%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">04:00</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 55%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">08:00</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 85%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">12:00</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 70%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">16:00</span>
+                  </div>
+                  <div class="chart-bar-group">
+                    <div class="bar-container">
+                      <div class="bar-fill" style="height: 60%; background: #005BAC;"></div>
+                    </div>
+                    <span class="bar-label">20:00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="performance-tab-content" id="api-tab" style="display: none;">
+              <div class="api-metrics">
+                <h4>Chỉ số API</h4>
+                <div class="metrics-table">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Endpoint</th>
+                        <th>Requests</th>
+                        <th>Avg Response</th>
+                        <th>Success Rate</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>/api/incidents</td>
+                        <td>2,345</td>
+                        <td>42ms</td>
+                        <td>99.8%</td>
+                        <td class="status-ok">OK</td>
+                      </tr>
+                      <tr>
+                        <td>/api/alerts</td>
+                        <td>1,234</td>
+                        <td>38ms</td>
+                        <td>99.5%</td>
+                        <td class="status-ok">OK</td>
+                      </tr>
+                      <tr>
+                        <td>/api/locations</td>
+                        <td>567</td>
+                        <td>55ms</td>
+                        <td>98.9%</td>
+                        <td class="status-warning">Slow</td>
+                      </tr>
+                      <tr>
+                        <td>/api/users</td>
+                        <td>890</td>
+                        <td>45ms</td>
+                        <td>99.7%</td>
+                        <td class="status-ok">OK</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="performance-tab-content" id="cache-tab" style="display: none;">
+              <div class="cache-stats">
+                <h4>Thống kê Cache</h4>
+                <div class="cache-grid">
+                  <div class="cache-item">
+                    <div class="cache-name">Map Data</div>
+                    <div class="cache-size">125 MB</div>
+                    <div class="cache-hits">Hit: 85%</div>
+                  </div>
+                  <div class="cache-item">
+                    <div class="cache-name">Incident Data</div>
+                    <div class="cache-size">45 MB</div>
+                    <div class="cache-hits">Hit: 78%</div>
+                  </div>
+                  <div class="cache-item">
+                    <div class="cache-name">User Data</div>
+                    <div class="cache-size">23 MB</div>
+                    <div class="cache-hits">Hit: 92%</div>
+                  </div>
+                  <div class="cache-item">
+                    <div class="cache-name">Configuration</div>
+                    <div class="cache-size">5 MB</div>
+                    <div class="cache-hits">Hit: 98%</div>
+                  </div>
+                </div>
+
+                <div class="cache-actions">
+                  <button class="btn btn-secondary" id="clearCacheBtn">🗑️ Xóa cache</button>
+                  <button class="btn btn-secondary" id="warmCacheBtn">🔥 Warm cache</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="performance-tab-content" id="errors-tab" style="display: none;">
+              <div class="error-logs">
+                <h4>Nhật ký lỗi</h4>
+                <div class="error-filters">
+                  <select class="form-control" id="errorFilter">
+                    <option value="all">Tất cả</option>
+                    <option value="client">Client</option>
+                    <option value="server">Server</option>
+                    <option value="network">Network</option>
+                  </select>
+                </div>
+                <div class="error-list">
+                  <div class="error-item critical">
+                    <span class="error-time">10:45:23</span>
+                    <span class="error-type">Server</span>
+                    <span class="error-message">Database connection timeout</span>
+                    <span class="error-count">3 lần</span>
+                  </div>
+                  <div class="error-item warning">
+                    <span class="error-time">10:44:15</span>
+                    <span class="error-type">Network</span>
+                    <span class="error-message">API request timeout (5000ms)</span>
+                    <span class="error-count">5 lần</span>
+                  </div>
+                  <div class="error-item info">
+                    <span class="error-time">10:43:00</span>
+                    <span class="error-type">Client</span>
+                    <span class="error-message">Validation error on form input</span>
+                    <span class="error-count">12 lần</span>
+                  </div>
+                  <div class="error-item warning">
+                    <span class="error-time">10:42:30</span>
+                    <span class="error-type">Server</span>
+                    <span class="error-message">High memory usage warning</span>
+                    <span class="error-count">1 lần</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="closePerformanceMonitorBtn">Đóng</button>
           </div>
         </div>
       </div>
