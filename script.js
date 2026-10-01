@@ -13040,7 +13040,256 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeIncidentReporting();
   initializeMobileMenu();
   initializeNavigationActiveState();
+  initializeOperationsSystem();
 });
+
+// Operations System
+var operationsData = {
+  systemStatus: 'online',
+  pendingRequests: 0,
+  overdueAlerts: 0,
+  serverStatus: {
+    cpu: 45,
+    memory: 65,
+    disk: 78,
+    network: 12,
+    apiResponse: 45,
+    activeConnections: 234
+  },
+  shiftSchedule: [
+    { id: 1, shift: 'Ca sáng', time: '6:00 - 14:00', staff: 'Nguyễn Văn A, Trần Thị B', status: 'active', contact: '0901234567' },
+    { id: 2, shift: 'Ca chiều', time: '14:00 - 22:00', staff: 'Lê Văn C, Phạm Thị D', status: 'upcoming', contact: '0902345678' },
+    { id: 3, shift: 'Ca đêm', time: '22:00 - 6:00', staff: 'Hoàng Văn E, Nguyễn Thị F', status: 'completed', contact: '0903456789' }
+  ],
+  lastBackup: null,
+  backupSize: 0,
+  versionHistory: [
+    { version: 'v1.0.0', date: '01/10/2026', changes: 'Bản phát hành đầu tiên' }
+  ]
+};
+
+function initializeOperationsSystem() {
+  // Load operations data from localStorage
+  var savedOps = localStorage.getItem('sosmap_operations');
+  if (savedOps) {
+    operationsData = JSON.parse(savedOps);
+  }
+
+  // Update operations panel
+  updateOperationsPanel();
+
+  // Initialize operations buttons
+  document.getElementById('shiftScheduleBtn').addEventListener('click', function() {
+    document.getElementById('shiftScheduleModal').style.display = 'block';
+  });
+
+  document.getElementById('serverStatusBtn').addEventListener('click', function() {
+    document.getElementById('serverStatusModal').style.display = 'block';
+  });
+
+  document.getElementById('backupBtn').addEventListener('click', function() {
+    document.getElementById('backupModal').style.display = 'block';
+  });
+
+  document.getElementById('loadTestBtn').addEventListener('click', function() {
+    document.getElementById('loadTestModal').style.display = 'block';
+  });
+
+  // Close modals
+  document.getElementById('closeShiftScheduleModal').addEventListener('click', function() {
+    document.getElementById('shiftScheduleModal').style.display = 'none';
+  });
+
+  document.getElementById('closeServerStatusModal').addEventListener('click', function() {
+    document.getElementById('serverStatusModal').style.display = 'none';
+  });
+
+  document.getElementById('closeBackupModal').addEventListener('click', function() {
+    document.getElementById('backupModal').style.display = 'none';
+  });
+
+  document.getElementById('closeLoadTestModal').addEventListener('click', function() {
+    document.getElementById('loadTestModal').style.display = 'none';
+  });
+
+  // Auto-update pending requests and overdue alerts
+  setInterval(updateOperationsPanel, 30000); // Update every 30 seconds
+}
+
+function updateOperationsPanel() {
+  // Update system status
+  var systemStatus = document.getElementById('systemStatus');
+  if (systemStatus) {
+    systemStatus.textContent = operationsData.systemStatus === 'online' ? 'Đang hoạt động' : 'Ngắt kết nối';
+    systemStatus.className = 'status-value ' + (operationsData.systemStatus === 'online' ? 'success' : 'error');
+  }
+
+  // Update pending requests
+  var pendingRequests = document.getElementById('pendingRequests');
+  if (pendingRequests) {
+    pendingRequests.textContent = operationsData.pendingRequests;
+    if (operationsData.pendingRequests > 50) {
+      pendingRequests.className = 'status-value warning';
+    } else if (operationsData.pendingRequests > 100) {
+      pendingRequests.className = 'status-value error';
+    }
+  }
+
+  // Update overdue alerts
+  var overdueAlerts = document.getElementById('overdueAlerts');
+  if (overdueAlerts) {
+    overdueAlerts.textContent = operationsData.overdueAlerts;
+    if (operationsData.overdueAlerts > 0) {
+      overdueAlerts.className = 'status-value error';
+    }
+  }
+
+  // Simulate updates
+  operationsData.pendingRequests = Math.floor(Math.random() * 20) + 5;
+  operationsData.overdueAlerts = Math.floor(Math.random() * 3);
+
+  saveOperationsData();
+}
+
+function saveOperationsData() {
+  localStorage.setItem('sosmap_operations', JSON.stringify(operationsData));
+}
+
+// Shift Schedule Functions
+function addShift() {
+  alert('Tính năng thêm ca trực (demo)');
+  logActivity('shift_add', 'Thêm ca trực mới');
+}
+
+function editShift() {
+  alert('Tính năng sửa lịch trực (demo)');
+  logActivity('shift_edit', 'Sửa lịch trực');
+}
+
+// Server Status Functions
+function refreshServerStatus() {
+  // Simulate refreshing server status
+  operationsData.serverStatus.cpu = Math.floor(Math.random() * 30) + 30;
+  operationsData.serverStatus.memory = Math.floor(Math.random() * 30) + 50;
+  operationsData.serverStatus.disk = Math.floor(Math.random() * 20) + 70;
+  operationsData.serverStatus.network = Math.floor(Math.random() * 20) + 5;
+  operationsData.serverStatus.apiResponse = Math.floor(Math.random() * 30) + 30;
+  operationsData.serverStatus.activeConnections = Math.floor(Math.random() * 100) + 150;
+
+  alert('Đã làm mới trạng thái máy chủ');
+  logActivity('server_status_refresh', 'Làm mới trạng thái máy chủ');
+}
+
+function viewServerLogs() {
+  alert('Tính năng xem logs máy chủ (demo)');
+  logActivity('server_logs_view', 'Xem logs máy chủ');
+}
+
+// Backup Functions
+function createBackup() {
+  var now = new Date();
+  operationsData.lastBackup = now.toLocaleString('vi-VN');
+  operationsData.backupSize = (Math.random() * 100 + 50).toFixed(2) + ' MB';
+
+  document.getElementById('lastBackupTime').textContent = operationsData.lastBackup;
+  document.getElementById('backupSize').textContent = operationsData.backupSize;
+
+  alert('Đã tạo bản sao lưu thành công!');
+  logActivity('backup_create', 'Tạo bản sao lưu');
+  saveOperationsData();
+}
+
+function restoreBackup() {
+  if (!confirm('Bạn có chắc muốn khôi phục từ bản sao lưu gần nhất?')) {
+    return;
+  }
+
+  alert('Đã khôi phục dữ liệu từ bản sao lưu!');
+  logActivity('backup_restore', 'Khôi phục từ bản sao lưu');
+}
+
+function configureBackup() {
+  alert('Tính năng cấu hình lịch sao lưu (demo)');
+  logActivity('backup_configure', 'Cấu hình lịch sao lưu');
+}
+
+// Load Test Functions
+function runLoadTest() {
+  var requests = parseInt(document.getElementById('loadTestRequests').value);
+  var users = parseInt(document.getElementById('loadTestUsers').value);
+
+  if (!requests || !users) {
+    alert('Vui lòng nhập số liệu hợp lệ');
+    return;
+  }
+
+  document.getElementById('loadTestResults').style.display = 'block';
+
+  // Simulate load test
+  var rps = Math.floor(requests / 10);
+  var avgResponse = Math.floor(Math.random() * 50) + 30;
+  var errorRate = (Math.random() * 5).toFixed(2);
+  var memoryUsage = Math.floor(Math.random() * 30) + 40;
+
+  document.getElementById('rpsValue').textContent = rps;
+  document.getElementById('rpsProgress').style.width = Math.min(rps / 10, 100) + '%';
+  document.getElementById('avgResponseValue').textContent = avgResponse + 'ms';
+  document.getElementById('errorRateValue').textContent = errorRate + '%';
+  document.getElementById('memoryUsageValue').textContent = memoryUsage + '%';
+
+  // Color coding
+  if (errorRate > 3) {
+    document.getElementById('errorRateValue').className = 'load-test-value error';
+  } else if (errorRate > 1) {
+    document.getElementById('errorRateValue').className = 'load-test-value warning';
+  }
+
+  if (memoryUsage > 80) {
+    document.getElementById('memoryUsageValue').className = 'load-test-value error';
+  } else if (memoryUsage > 60) {
+    document.getElementById('memoryUsageValue').className = 'load-test-value warning';
+  }
+
+  alert('Kiểm thử sức chịu tải hoàn thành!');
+  logActivity('load_test_run', 'Chạy kiểm thử sức chịu tải: ' + requests + ' requests, ' + users + ' users');
+}
+
+// Version Management Functions
+function createNewVersion() {
+  alert('Tính năng tạo phiên bản mới (demo)');
+  logActivity('version_create', 'Tạo phiên bản mới');
+}
+
+function rollbackVersion() {
+  if (!confirm('Bạn có chắc muốn rollback đến phiên bản trước?')) {
+    return;
+  }
+
+  alert('Đã rollback thành công!');
+  logActivity('version_rollback', 'Rollback phiên bản');
+}
+
+// Training Functions
+function assignTraining() {
+  alert('Tính năng phân công đào tạo (demo)');
+  logActivity('training_assign', 'Phân công đào tạo');
+}
+
+function viewTrainingProgress() {
+  alert('Tính năng xem tiến độ đào tạo (demo)');
+  logActivity('training_progress_view', 'Xem tiến độ đào tạo');
+}
+
+// Documents Functions
+function uploadDocument() {
+  alert('Tính năng tải tài liệu lên (demo)');
+  logActivity('document_upload', 'Tải tài liệu lên');
+}
+
+function addContact() {
+  alert('Tính năng thêm liên lạc (demo)');
+  logActivity('contact_add', 'Thêm liên lạc khẩn cấp');
+}
 
 // Mobile Menu Functionality
 function initializeMobileMenu() {

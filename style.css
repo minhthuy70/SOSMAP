@@ -11948,3 +11948,419 @@ body.high-contrast textarea {
   margin-right: 0;
 }
 
+
+
+/* Operations Panel */
+.operations-panel {
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.operations-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.operations-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.status-label {
+  font-size: 13px;
+  color: #666;
+}
+
+.status-value {
+  font-weight: 600;
+  font-size: 14px;
+  color: #005BAC;
+}
+
+.status-value.warning {
+  color: #f39c12;
+}
+
+.status-value.error {
+  color: #e74c3c;
+}
+
+.status-value.success {
+  color: #28a745;
+}
+
+.operations-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ops-btn {
+  padding: 10px;
+  background: #005BAC;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.ops-btn:hover {
+  background: #004a91;
+}
+
+.ops-btn.secondary {
+  background: #6c757d;
+}
+
+.ops-btn.secondary:hover {
+  background: #5a6268;
+}
+
+
+
+/* Shift Schedule Modal */
+.shift-schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.shift-schedule-table th,
+.shift-schedule-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.shift-schedule-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.shift-schedule-table td {
+  font-size: 13px;
+}
+
+.shift-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.shift-status.active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.shift-status.upcoming {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.shift-status.completed {
+  background: #e9ecef;
+  color: #6c757d;
+}
+
+/* Server Status */
+.server-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.server-status-item {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #28a745;
+}
+
+.server-status-item.warning {
+  border-left-color: #f39c12;
+}
+
+.server-status-item.error {
+  border-left-color: #e74c3c;
+}
+
+.server-status-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.server-status-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.server-status-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.server-status-indicator.online {
+  background: #28a745;
+}
+
+.server-status-indicator.warning {
+  background: #f39c12;
+}
+
+.server-status-indicator.offline {
+  background: #e74c3c;
+}
+
+/* Load Test Results */
+.load-test-results {
+  margin-top: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.load-test-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.load-test-metric:last-child {
+  margin-bottom: 0;
+}
+
+.load-test-label {
+  font-size: 13px;
+  color: #666;
+}
+
+.load-test-value {
+  font-weight: 600;
+  font-size: 14px;
+  color: #005BAC;
+}
+
+.load-test-progress {
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.load-test-progress-bar {
+  height: 100%;
+  background: #005BAC;
+  transition: width 0.3s ease;
+}
+
+.load-test-progress-bar.warning {
+  background: #f39c12;
+}
+
+.load-test-progress-bar.error {
+  background: #e74c3c;
+}
+
+/* Backup Status */
+.backup-status {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.backup-status p {
+  margin: 8px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.backup-status strong {
+  color: #666;
+}
+
+/* Load Test Form */
+.load-test-form {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.load-test-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+.load-test-form input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-size: 13px;
+}
+
+/* Version Info */
+.version-info {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.version-info p {
+  margin: 8px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.version-info strong {
+  color: #666;
+}
+
+.version-list ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.version-list li {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+/* Training List */
+.training-list {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.training-list h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.training-list ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.training-list li {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.employee-list h4 {
+  margin: 20px 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.employee-list table th,
+.employee-list table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.employee-list table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.employee-list table td {
+  font-size: 13px;
+}
+
+/* Documents Section */
+.documents-section {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.documents-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.documents-section ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.documents-section li {
+  margin: 5px 0;
+  font-size: 13px;
+}
+
+.documents-section a {
+  color: #005BAC;
+  text-decoration: none;
+}
+
+.documents-section a:hover {
+  text-decoration: underline;
+}
+
+.contacts-section h4 {
+  margin: 20px 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.contacts-section table th,
+.contacts-section table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.contacts-section table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.contacts-section table td {
+  font-size: 13px;
+}
+

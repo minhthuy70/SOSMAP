@@ -649,6 +649,31 @@
           </div>
         </div>
 
+        <!-- Operations Panel -->
+        <div class="operations-panel" id="operationsPanel">
+          <h3>Quản lý vận hành</h3>
+          <div class="operations-status">
+            <div class="status-item">
+              <span class="status-label">Trạng thái hệ thống:</span>
+              <span class="status-value" id="systemStatus">Đang hoạt động</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Yêu cầu chờ xử lý:</span>
+              <span class="status-value" id="pendingRequests">0</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Cảnh báo quá hạn:</span>
+              <span class="status-value" id="overdueAlerts">0</span>
+            </div>
+          </div>
+          <div class="operations-actions">
+            <button class="ops-btn" id="shiftScheduleBtn">Lịch trực</button>
+            <button class="ops-btn" id="serverStatusBtn">Trạng thái máy chủ</button>
+            <button class="ops-btn" id="backupBtn">Sao lưu</button>
+            <button class="ops-btn" id="loadTestBtn">Kiểm thử sức chịu tải</button>
+          </div>
+        </div>
+
         <!-- Early Warning Panel -->
         <div class="early-warning-panel" id="earlyWarningPanel">
           <h3>Cảnh báo sớm</h3>
@@ -8672,5 +8697,287 @@ div class="summary-label">Sự cố tháng này</div>
       <line x1="13" y1="2" x2="9" y2="6"></line>
     </svg>
   </button>
+
+  <!-- Shift Schedule Modal -->
+  <div class="modal" id="shiftScheduleModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Lịch trực 24/7</h3>
+        <button class="modal-close" id="closeShiftScheduleModal">×</button>
+      </div>
+      <div class="modal-body">
+        <table class="shift-schedule-table">
+          <thead>
+            <tr>
+              <th>Ca trực</th>
+              <th>Thời gian</th>
+              <th>Nhân viên</th>
+              <th>Trạng thái</th>
+              <th>Kênh liên lạc</th>
+            </tr>
+          </thead>
+          <tbody id="shiftScheduleBody">
+            <tr>
+              <td>Ca sáng (6:00 - 14:00)</td>
+              <td>Nguyễn Văn A, Trần Thị B</td>
+              <td><span class="shift-status active">Đang trực</span></td>
+              <td>0901234567</td>
+            </tr>
+            <tr>
+              <td>Ca chiều (14:00 - 22:00)</td>
+              <td>Lê Văn C, Phạm Thị D</td>
+              <td><span class="shift-status upcoming">Sắp tới</span></td>
+              <td>0902345678</td>
+            </tr>
+            <tr>
+              <td>Ca đêm (22:00 - 6:00)</td>
+              <td>Hoàng Văn E, Nguyễn Thị F</td>
+              <td><span class="shift-status completed">Đã kết thúc</span></td>
+              <td>0903456789</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="addShift()">Thêm ca trực</button>
+          <button class="btn btn-secondary" onclick="editShift()">Sửa lịch</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Server Status Modal -->
+  <div class="modal" id="serverStatusModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Trạng thái máy chủ & API</h3>
+        <button class="modal-close" id="closeServerStatusModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="server-status-grid">
+          <div class="server-status-item">
+            <div class="server-status-label"><span class="server-status-indicator online"></span>CPU Usage</div>
+            <div class="server-status-value">45%</div>
+          </div>
+          <div class="server-status-item">
+            <div class="server-status-label"><span class="server-status-indicator online"></span>Memory Usage</div>
+            <div class="server-status-value">65%</div>
+          </div>
+          <div class="server-status-item warning">
+            <div class="server-status-label"><span class="server-status-indicator warning"></span>Disk Usage</div>
+            <div class="server-status-value">78%</div>
+          </div>
+          <div class="server-status-item">
+            <div class="server-status-label"><span class="server-status-indicator online"></span>Network I/O</div>
+            <div class="server-status-value">12 MB/s</div>
+          </div>
+          <div class="server-status-item">
+            <div class="server-status-label"><span class="server-status-indicator online"></span>API Response Time</div>
+            <div class="server-status-value">45ms</div>
+          </div>
+          <div class="server-status-item">
+            <div class="server-status-label"><span class="server-status-indicator online"></span>Active Connections</div>
+            <div class="server-status-value">234</div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-secondary" onclick="refreshServerStatus()">Làm mới</button>
+          <button class="btn btn-secondary" onclick="viewServerLogs()">Xem logs</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backup Modal -->
+  <div class="modal" id="backupModal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>Sao lưu & Khôi phục dữ liệu</h3>
+        <button class="modal-close" id="closeBackupModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="backup-status">
+          <p><strong>Sao lưu gần nhất:</strong> <span id="lastBackupTime">Chưa có</span></p>
+          <p><strong>Kích thước bản sao:</strong> <span id="backupSize">--</span></p>
+          <p><strong>Tự động sao lưu:</strong> Mỗi 24 giờ</p>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="createBackup()">Sao lưu ngay</button>
+          <button class="btn btn-secondary" onclick="restoreBackup()">Khôi phục từ bản sao</button>
+          <button class="btn btn-secondary" onclick="configureBackup()">Cấu hình lịch</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Test Modal -->
+  <div class="modal" id="loadTestModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Kiểm thử sức chịu tải</h3>
+        <button class="modal-close" id="closeLoadTestModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="load-test-form">
+          <label>Số lượng request giả lập:</label>
+          <input type="number" id="loadTestRequests" value="1000" min="100" max="10000">
+          <label>Số lượng user đồng thời:</label>
+          <input type="number" id="loadTestUsers" value="50" min="10" max="500">
+          <button class="btn btn-primary" onclick="runLoadTest()">Chạy kiểm thử</button>
+        </div>
+        <div class="load-test-results" id="loadTestResults" style="display: none;">
+          <div class="load-test-metric">
+            <span class="load-test-label">Requests/second:</span>
+            <span class="load-test-value" id="rpsValue">0</span>
+          </div>
+          <div class="load-test-progress">
+            <div class="load-test-progress-bar" id="rpsProgress" style="width: 0%"></div>
+          </div>
+          <div class="load-test-metric">
+            <span class="load-test-label">Avg Response Time:</span>
+            <span class="load-test-value" id="avgResponseValue">0ms</span>
+          </div>
+          <div class="load-test-metric">
+            <span class="load-test-label">Error Rate:</span>
+            <span class="load-test-value" id="errorRateValue">0%</span>
+          </div>
+          <div class="load-test-metric">
+            <span class="load-test-label">Memory Usage:</span>
+            <span class="load-test-value" id="memoryUsageValue">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version Management Modal -->
+  <div class="modal" id="versionModal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>Quản lý phiên bản nội dung</h3>
+        <button class="modal-close" id="closeVersionModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="version-info">
+          <p><strong>Phiên bản hiện tại:</strong> v1.0.0</p>
+          <p><strong>Ngày phát hành:</strong> 01/10/2026</p>
+          <p><strong>Số lượng chỉnh sửa:</strong> 15</p>
+        </div>
+        <div class="version-list" style="margin-top: 20px;">
+          <h4>Lịch sử phiên bản</h4>
+          <ul id="versionHistoryList">
+            <li>v1.0.0 - 01/10/2026 - Bản phát hành đầu tiên</li>
+          </ul>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="createNewVersion()">Tạo phiên bản mới</button>
+          <button class="btn btn-secondary" onclick="rollbackVersion()">Rollback</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Training Modal -->
+  <div class="modal" id="trainingModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Đào tạo & Cấp quyền nhân viên</h3>
+        <button class="modal-close" id="closeTrainingModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="training-list">
+          <h4>Chương trình đào tạo</h4>
+          <ul>
+            <li>Quy trình tiếp nhận sự cố - Hoàn thành</li>
+            <li>Hệ thống cảnh báo sớm - Đang học</li>
+            <li>Quản lý cứu hộ cứu nạn - Chưa bắt đầu</li>
+          </ul>
+        </div>
+        <div class="employee-list" style="margin-top: 20px;">
+          <h4>Danh sách nhân viên</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Tên</th>
+                <th>Vai trò</th>
+                <th>Trạng thái đào tạo</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Nguyễn Văn A</td>
+                <td>Quản trị viên</td>
+                <td>Đã hoàn thành</td>
+                <td><button class="btn btn-sm">Chi tiết</button></td>
+              </tr>
+              <tr>
+                <td>Trần Thị B</td>
+                <td>Nhân viên</td>
+                <td>Đang học</td>
+                <td><button class="btn btn-sm">Chi tiết</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="assignTraining()">Phân công đào tạo</button>
+          <button class="btn btn-secondary" onclick="viewTrainingProgress()">Xem tiến độ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents Modal -->
+  <div class="modal" id="documentsModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Tài liệu quy trình & Danh sách liên lạc</h3>
+        <button class="modal-close" id="closeDocumentsModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="documents-section">
+          <h4>Tài liệu quy trình</h4>
+          <ul>
+            <li><a href="#">Quy trình tiếp nhận sự cố.pdf</a></li>
+            <li><a href="#">Hướng dẫn sử dụng hệ thống.pdf</a></li>
+            <li><a href="#">Quy trình sơ cứu khẩn cấp.pdf</a></li>
+          </ul>
+        </div>
+        <div class="contacts-section" style="margin-top: 20px;">
+          <h4>Danh sách liên lạc khẩn cấp</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Cơ quan</th>
+                <th>Số điện thoại</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Cảnh sát (113)</td>
+                <td>113</td>
+                <td>canhsat@gov.vn</td>
+              </tr>
+              <tr>
+                <td>Cứu hỏa (114)</td>
+                <td>114</td>
+              <td>cuuhoa@gov.vn</td>
+              </tr>
+              <tr>
+                <td>Cấp cứu (115)</td>
+                <td>115</td>
+                <td>capcuu@gov.vn</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="uploadDocument()">Tải tài liệu lên</button>
+          <button class="btn btn-secondary" onclick="addContact()">Thêm liên lạc</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
