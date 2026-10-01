@@ -12736,3 +12736,209 @@ body.high-contrast textarea {
   background: #c82333;
 }
 
+
+
+/* Offline Panel */
+.offline-panel {
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.offline-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.offline-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.offline-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Offline Data Section */
+.offline-data-section {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.offline-data-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.offline-item {
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+
+.offline-item p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.offline-item strong {
+  color: #666;
+}
+
+/* Offline Queue */
+.offline-queue table th,
+.offline-queue table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.offline-queue table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.offline-queue table td {
+  font-size: 13px;
+}
+
+.priority-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.priority-badge.high {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.priority-badge.critical {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.sync-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.sync-badge.pending {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.sync-badge.synced {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* Contact List */
+.contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.contact-item {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.contact-item p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.contact-item strong {
+  color: #666;
+}
+
+/* Guide Section */
+.guide-section {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.guide-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.guide-content p {
+  margin: 10px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.guide-content strong {
+  color: #666;
+}
+
+.guide-content ul {
+  margin: 5px 0;
+  padding-left: 20px;
+}
+
+.guide-content li {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+/* Sync Status Section */
+.sync-status-section {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.sync-status-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.server-status p {
+  margin: 8px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.server-status strong {
+  color: #666;
+}
+
+.sync-history ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.sync-history li {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+

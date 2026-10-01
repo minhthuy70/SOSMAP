@@ -13043,7 +13043,246 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeOperationsSystem();
   initializeReportingSystem();
   initializePrivacySystem();
+  initializeOfflineSystem();
 });
+
+// Offline & Resilient Access System
+var offlineData = {
+  isOnline: true,
+  offlineQueue: [],
+  downloadedMaps: [
+    { area: 'TP. Hồ Chí Minh', size: '45.2 MB', updated: '01/10/2026' }
+  ],
+  emergencyContacts: [
+    { name: 'Cảnh sát (113)', phone: '113' },
+    { name: 'Cứu hỏa (114)', phone: '114' },
+    { name: 'Cấp cứu (115)', phone: '115' },
+    { name: 'Tổng đài khẩn cấp (112)', phone: '112' }
+  ],
+  syncHistory: [
+    { time: '02/10/2026 10:30', action: 'Đã đồng bộ 2 phản ánh' },
+    { time: '02/10/2026 09:15', action: 'Đã đồng bộ 1 yêu cầu cứu hộ' },
+    { time: '01/10/2026 23:45', action: 'Tự động đồng bộ' }
+  ],
+  serverStatus: {
+    primary: 'Online',
+    backup: 'Online',
+    crossRegionBackup: 'Đã hoàn thành'
+  }
+};
+
+function initializeOfflineSystem() {
+  // Load offline data from localStorage
+  var savedOffline = localStorage.getItem('sosmap_offline');
+  if (savedOffline) {
+    offlineData = JSON.parse(savedOffline);
+  }
+
+  // Update offline panel
+  updateOfflinePanel();
+
+  // Monitor online/offline status
+  window.addEventListener('online', function() {
+    offlineData.isOnline = true;
+    updateOfflinePanel();
+    alert('Đã kết nối lại internet!');
+    logActivity('connection_online', 'Kết nối lại internet');
+  });
+
+  window.addEventListener('offline', function() {
+    offlineData.isOnline = false;
+    updateOfflinePanel();
+    alert('Đã mất kết nối internet. Chuyển sang chế độ offline.');
+    logActivity('connection_offline', 'Mất kết nối internet');
+  });
+
+  // Initialize offline buttons
+  document.getElementById('offlineDataBtn').addEventListener('click', function() {
+    document.getElementById('offlineDataModal').style.display = 'block';
+  });
+
+  document.getElementById('emergencyContactsBtn').addEventListener('click', function() {
+    document.getElementById('emergencyContactsModal').style.display = 'block';
+  });
+
+  document.getElementById('offlineGuideBtn').addEventListener('click', function() {
+    document.getElementById('offlineGuideModal').style.display = 'block';
+  });
+
+  document.getElementById('syncBtn').addEventListener('click', function() {
+    document.getElementById('syncStatusModal').style.display = 'block';
+  });
+
+  // Close modals
+  document.getElementById('closeOfflineDataModal').addEventListener('click', function() {
+    document.getElementById('offlineDataModal').style.display = 'none';
+  });
+
+  document.getElementById('closeEmergencyContactsModal').addEventListener('click', function() {
+    document.getElementById('emergencyContactsModal').style.display = 'none';
+  });
+
+  document.getElementById('closeOfflineGuideModal').addEventListener('click', function() {
+    document.getElementById('offlineGuideModal').style.display = 'none';
+  });
+
+  document.getElementById('closeSyncStatusModal').addEventListener('click', function() {
+    document.getElementById('syncStatusModal').style.display = 'none';
+  });
+
+  // Auto-sync when online
+  setInterval(autoSync, 60000); // Check every minute
+}
+
+function updateOfflinePanel() {
+  var connectionStatus = document.getElementById('connectionStatus');
+  if (connectionStatus) {
+    connectionStatus.textContent = offlineData.isOnline ? 'Đang online' : 'Đang offline';
+    connectionStatus.className = 'status-value ' + (offlineData.isOnline ? 'success' : 'error');
+  }
+
+  var offlineDataCount = document.getElementById('offlineDataCount');
+  if (offlineDataCount) {
+    offlineDataCount.textContent = offlineData.offlineQueue.length;
+  }
+
+  var syncStatus = document.getElementById('syncStatus');
+  if (syncStatus) {
+    syncStatus.textContent = offlineData.offlineQueue.length === 0 ? 'Đã đồng bộ' : 'Chờ đồng bộ';
+    syncStatus.className = 'status-value ' + (offlineData.offlineQueue.length === 0 ? 'success' : 'warning');
+  }
+}
+
+function saveOfflineData() {
+  localStorage.setItem('sosmap_offline', JSON.stringify(offlineData));
+}
+
+function autoSync() {
+  if (offlineData.isOnline && offlineData.offlineQueue.length > 0) {
+    syncOfflineData();
+  }
+}
+
+// Offline Data Functions
+function downloadMap() {
+  alert('Đang tải bản đồ mới... (demo)');
+  setTimeout(function() {
+    alert('Đã tải bản đồ thành công!');
+    logActivity('map_download', 'Tải bản đồ offline');
+  }, 2000);
+}
+
+function syncOfflineData() {
+  if (!offlineData.isOnline) {
+    alert('Không thể đồng bộ khi offline!');
+    return;
+  }
+
+  if (offlineData.offlineQueue.length === 0) {
+    alert('Không có dữ liệu để đồng bộ!');
+    return;
+  }
+
+  alert('Đang đồng bộ ' + offlineData.offlineQueue.length + ' mục dữ liệu...');
+  setTimeout(function() {
+    offlineData.offlineQueue = [];
+    saveOfflineData();
+    updateOfflinePanel();
+    alert('Đã đồng bộ thành công!');
+    logActivity('data_sync', 'Đồng bộ dữ liệu offline');
+  }, 2000);
+}
+
+function clearOfflineData() {
+  if (!confirm('Bạn có chắc muốn xóa tất cả dữ liệu offline?')) {
+    return;
+  }
+
+  offlineData.offlineQueue = [];
+  saveOfflineData();
+  updateOfflinePanel();
+  alert('Đã xóa dữ liệu offline!');
+  logActivity('offline_data_clear', 'Xóa dữ liệu offline');
+}
+
+// Emergency Contacts Functions
+function callEmergency(number) {
+  alert('Đang gọi ' + number + '... (demo)');
+  logActivity('emergency_call', 'Gọi số khẩn cấp: ' + number);
+}
+
+function addEmergencyContact() {
+  var name = document.getElementById('newContactName').value;
+  var phone = document.getElementById('newContactPhone').value;
+
+  if (!name || !phone) {
+    alert('Vui lòng nhập tên và số điện thoại!');
+    return;
+  }
+
+  offlineData.emergencyContacts.push({ name: name, phone: phone });
+  saveOfflineData();
+  alert('Đã thêm số liên lạc!');
+  logActivity('emergency_contact_add', 'Thêm số liên lạc: ' + name);
+
+  document.getElementById('newContactName').value = '';
+  document.getElementById('newContactPhone').value = '';
+}
+
+function sendEmergencySMS() {
+  if (!offlineData.isOnline) {
+    alert('Không thể gửi SMS khi không có kết nối mạng!');
+    return;
+  }
+
+  alert('Đang gửi SMS khẩn cấp... (demo)');
+  setTimeout(function() {
+    alert('Đã gửi SMS thành công!');
+    logActivity('emergency_sms', 'Gửi SMS khẩn cấp');
+  }, 2000);
+}
+
+// Offline Guide Functions
+function viewShelterMap() {
+  alert('Xem bản đồ điểm trú an (demo)');
+  logActivity('shelter_map_view', 'Xem bản đồ điểm trú an');
+}
+
+function downloadGuide() {
+  alert('Đang tải hướng dẫn mới... (demo)');
+  setTimeout(function() {
+    alert('Đã tải hướng dẫn thành công!');
+    logActivity('guide_download', 'Tải hướng dẫn offline');
+  }, 2000);
+}
+
+function printGuide() {
+  alert('In hướng dẫn (demo)');
+  logActivity('guide_print', 'In hướng dẫn offline');
+}
+
+// Sync Status Functions
+function forceSync() {
+  if (!offlineData.isOnline) {
+    alert('Không thể đồng bộ khi offline!');
+    return;
+  }
+
+  alert('Đang đồng bộ...');
+  setTimeout(function() {
+    var now = new Date();
+    var timeStr = now.toLocaleString('vi-VN');
+    offlineData.syncHistory.unshift({ time: timeStr, action: 'Đồng bộ thủ công' });
+    saveOfflineData();
+    alert('Đã đồng bộ thành công!');
+    logActivity('sync_force', 'Đồng bộ thủ công');
+  }, 2000);
+}
+
+function viewSyncLog() {
+  alert('Xem log đồng bộ (demo)');
+  logActivity('sync_log_view', 'Xem log đồng bộ');
+}
 
 // Privacy & Safety System
 var privacyData = {

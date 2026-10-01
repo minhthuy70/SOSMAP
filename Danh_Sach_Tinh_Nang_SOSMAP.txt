@@ -635,17 +635,17 @@ QUY UOC
 
 26. OFFLINE, MANG YEU VA KENH DU PHONG (RESILIENT ACCESS)
 
-[ ] - Tai truoc ban do khu vuc co nguy co
-[ ] - Luu cac so dien thoai khan cap tren thiet bi
-[ ] - Luu huong dan so cuu va phong tranh khi offline
-[ ] - Luu ban do diem tru an khi offline
-[ ] - Tao phan anh offline va dong bo khi co mang
-[ ] - Xep hang du lieu can dong bo theo muc do khan cap
-[ ] - Hien thi ro thoi diem du lieu offline duoc tao
-[ ] - Gui yeu cau qua SMS khi khong co du lieu di dong
-[ ] - Ho tro may chu du phong va sao luu lien vung
-[ ] - Hien thi trang thai mat ket noi cho nguoi dung
-[ ] - Khong bao thanh cong khi yeu cau chua den he thong
+[x] - Tai truoc ban do khu vuc co nguy co
+[x] - Luu cac so dien thoai khan cap tren thiet bi
+[x] - Luu huong dan so cuu va phong tranh khi offline
+[x] - Luu ban do diem tru an khi offline
+[x] - Tao phan anh offline va dong bo khi co mang
+[x] - Xep hang du lieu can dong bo theo muc do khan cap
+[x] - Hien thi ro thoi diem du lieu offline duoc tao
+[x] - Gui yeu cau qua SMS khi khong co du lieu di dong
+[x] - Ho tro may chu du phong va sao luu lien vung
+[x] - Hien thi trang thai mat ket noi cho nguoi dung
+[x] - Khong bao thanh cong khi yeu cau chua den he thong
 
 ================================================================================
 

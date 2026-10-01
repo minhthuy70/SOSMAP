@@ -724,6 +724,56 @@
           </div>
         </div>
 
+        <!-- Offline Panel -->
+        <div class="offline-panel" id="offlinePanel">
+          <h3>Offline & Kênh dự phòng</h3>
+          <div class="offline-status">
+            <div class="status-item">
+              <span class="status-label">Trạng thái kết nối:</span>
+              <span class="status-value success" id="connectionStatus">Đang online</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Dữ liệu offline:</span>
+              <span class="status-value" id="offlineDataCount">0</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Đồng bộ:</span>
+              <span class="status-value" id="syncStatus">Đã đồng bộ</span>
+            </div>
+          </div>
+          <div class="offline-actions">
+            <button class="ops-btn" id="offlineDataBtn">Dữ liệu offline</button>
+            <button class="ops-btn" id="emergencyContactsBtn">Liên lạc khẩn cấp</button>
+            <button class="ops-btn" id="offlineGuideBtn">Hướng dẫn offline</button>
+            <button class="ops-btn" id="syncBtn">Đồng bộ ngay</button>
+          </div>
+        </div>
+
+        <!-- Planning Panel -->
+        <div class="planning-panel" id="planningPanel">
+          <h3>Quản lý phương án & Diễn tập</h3>
+          <div class="planning-status">
+            <div class="status-item">
+              <span class="status-label">Kịch bản hoạt động:</span>
+              <span class="status-value" id="activeScenario">Không</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Điểm sẵn sàng:</span>
+              <span class="status-value success" id="readinessScore">85%</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Chế độ:</span>
+              <span class="status-value" id="drillMode">Thực tế</span>
+            </div>
+          </div>
+          <div class="planning-actions">
+            <button class="ops-btn" id="scenarioBtn">Tạo kịch bản</button>
+            <button class="ops-btn" id="simulationBtn">Mô phỏng</button>
+            <button class="ops-btn" id="reportBtn">Báo cáo rút kinh nghiệm</button>
+            <button class="ops-btn" id="versionBtn">Phiên bản</button>
+          </div>
+        </div>
+
         <!-- Early Warning Panel -->
         <div class="early-warning-panel" id="earlyWarningPanel">
           <h3>Cảnh báo sớm</h3>
@@ -9423,6 +9473,200 @@ div class="summary-label">Sự cố tháng này</div>
         <div class="modal-actions" style="margin-top: 20px;">
           <button class="btn btn-primary" onclick="exportSecurityLog()">Xuất log bảo mật</button>
           <button class="btn btn-secondary" onclick="reportSecurityIssue()">Báo cáo lỗ hổng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  <!-- Offline Data Modal -->
+  <div class="modal" id="offlineDataModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Dữ liệu offline</h3>
+        <button class="modal-close" id="closeOfflineDataModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="offline-data-section">
+          <h4>Bản đồ đã tải trước</h4>
+          <div class="offline-item">
+            <p><strong>Khu vực:</strong> TP. Hồ Chí Minh</p>
+            <p><strong>Kích thước:</strong> 45.2 MB</p>
+            <p><strong>Cập nhật:</strong> 01/10/2026</p>
+            <button class="btn btn-primary" onclick="downloadMap()">Tải bản đồ mới</button>
+          </div>
+        </div>
+        <div class="offline-data-section" style="margin-top: 20px;">
+          <h4>Dữ liệu offline đang chờ đồng bộ</h4>
+          <div class="offline-queue">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th>Loại</th>
+                  <th>Thời gian tạo</th>
+                  <th>Mức độ khẩn cấp</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody id="offlineQueueBody">
+                <tr>
+                  <td>Phản ánh sự cố</td>
+                  <td>02/10/2026 10:30</td>
+                  <td><span class="priority-badge high">Cao</span></td>
+                  <td><span class="sync-badge pending">Chờ đồng bộ</span></td>
+                </tr>
+                <tr>
+                  <td>Yêu cầu cứu hộ</td>
+                  <td>02/10/2026 10:25</td>
+                  <td><span class="priority-badge critical">Khẩn cấp</span></td>
+                  <td><span class="sync-badge pending">Chờ đồng bộ</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="syncOfflineData()">Đồng bộ tất cả</button>
+          <button class="btn btn-secondary" onclick="clearOfflineData()">Xóa dữ liệu offline</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emergency Contacts Modal -->
+  <div class="modal" id="emergencyContactsModal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>Liên lạc khẩn cấp (Offline)</h3>
+        <button class="modal-close" id="closeEmergencyContactsModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="contacts-section">
+          <h4>Số điện thoại khẩn cấp đã lưu</h4>
+          <div class="contact-list">
+            <div class="contact-item">
+              <p><strong>Cảnh sát (113)</strong></p>
+              <p>113</p>
+              <button class="btn btn-sm" onclick="callEmergency('113')">Gọi ngay</button>
+            </div>
+            <div class="contact-item">
+              <p><strong>Cứu hỏa (114)</strong></p>
+              <p>114</p>
+              <button class="btn btn-sm" onclick="callEmergency('114')">Gọi ngay</button>
+            </div>
+            <div class="contact-item">
+              <p><strong>Cấp cứu (115)</strong></p>
+              <p>115</p>
+              <button class="btn btn-sm" onclick="callEmergency('115')">Gọi ngay</button>
+            </div>
+            <div class="contact-item">
+              <p><strong>Tổng đài khẩn cấp (112)</strong></p>
+              <p>112</p>
+              <button class="btn btn-sm" onclick="callEmergency('112')">Gọi ngay</button>
+            </div>
+          </div>
+        </div>
+        <div class="contacts-section" style="margin-top: 20px;">
+          <h4>Thêm số liên lạc</h4>
+          <input type="text" id="newContactName" placeholder="Tên" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+          <input type="tel" id="newContactPhone" placeholder="Số điện thoại" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+          <button class="btn btn-primary" onclick="addEmergencyContact()">Thêm</button>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-secondary" onclick="sendEmergencySMS()">Gửi SMS khẩn cấp</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offline Guide Modal -->
+  <div class="modal" id="offlineGuideModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Hướng dẫn offline</h3>
+        <button class="modal-close" id="closeOfflineGuideModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="guide-section">
+          <h4>Hướng dẫn sơ cứu khẩn cấp</h4>
+          <div class="guide-content">
+            <p><strong>Ngạt thở:</strong></p>
+            <ul>
+              <li>Nằm ngửa, nâng cằm lên</li>
+              <li>Thổi hơi vào miệng/mũi</li>
+              <li>Ấn tim nếu cần thiết</li>
+            </ul>
+            <p><strong>Chảy máu:</strong></p>
+            <ul>
+              <li>Ép vết thương bằng gạc sạch</li>
+              <li>Nâng vùng bị thương lên cao</li>
+              <li>Gọi cấp cứu ngay</li>
+            </ul>
+          </div>
+        </div>
+        <div class="guide-section" style="margin-top: 20px;">
+          <h4>Hướng dẫn phòng tránh thiên tai</h4>
+          <div class="guide-content">
+            <p><strong>Bão:</strong></p>
+            <ul>
+              <li>Đóng kín cửa sổ</li>
+              <li>Tránh xa cửa kính</li>
+              <li>Không ra ngoài khi bão đi qua</li>
+            </ul>
+            <p><strong>Ngập lũ:</strong></p>
+            <ul>
+              <li>Di chuyển đến nơi cao</li>
+              <li>Tắt điện nước</li>
+              <li>Mang theo vật dụng cần thiết</li>
+            </ul>
+          </div>
+        </div>
+        <div class="guide-section" style="margin-top: 20px;">
+          <h4>Bản đồ điểm trú an</h4>
+          <div class="guide-content">
+            <p><strong>Điểm trú an gần nhất:</strong> Trường THCS Nguyễn Du</p>
+            <p><strong>Địa chỉ:</strong> 123 Đường 3/2, Q.10</p>
+            <p><strong>Khoảng cách:</strong> 0.5 km</p>
+            <button class="btn btn-primary" onclick="viewShelterMap()">Xem bản đồ</button>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="downloadGuide()">Tải hướng dẫn mới</button>
+          <button class="btn btn-secondary" onclick="printGuide()">In hướng dẫn</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sync Status Modal -->
+  <div class="modal" id="syncStatusModal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>Trạng thái đồng bộ</h3>
+        <button class="modal-close" id="closeSyncStatusModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="sync-status-section">
+          <h4>Trạng thái máy chủ</h4>
+          <div class="server-status">
+            <p><strong>Máy chủ chính:</strong> <span class="status-value success">Online</span></p>
+            <p><strong>Máy chủ dự phòng:</strong> <span class="status-value success">Online</span></p>
+            <p><strong>Sao lưu liên vùng:</strong> <span class="status-value success">Đã hoàn thành</span></p>
+          </div>
+        </div>
+        <div class="sync-status-section" style="margin-top: 20px;">
+          <h4>Lịch sử đồng bộ</h4>
+          <div class="sync-history">
+            <ul>
+              <li>02/10/2026 10:30 - Đã đồng bộ 2 phản ánh</li>
+              <li>02/10/2026 09:15 - Đã đồng bộ 1 yêu cầu cứu hộ</li>
+              <li>01/10/2026 23:45 - Tự động đồng bộ</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="forceSync()">Đồng bộ ngay</button>
+          <button class="btn btn-secondary" onclick="viewSyncLog()">Xem log đồng bộ</button>
         </div>
       </div>
     </div>
