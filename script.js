@@ -767,6 +767,81 @@ function updateTrafficLevels() {
   }
 }
 
+// Update traffic by area
+function updateTrafficByArea() {
+  var areas = [
+    { name: 'Quận 1', status: 'normal', speed: 45, time: 15 },
+    { name: 'Quận 3', status: 'congested', speed: 30, time: 25 },
+    { name: 'Quận 7', status: 'jammed', speed: 15, time: 40 },
+    { name: 'Quận 12', status: 'dangerous', speed: 5, time: 60 }
+  ];
+
+  var areaList = document.getElementById('areaList');
+  if (!areaList) return;
+
+  var statusLabels = {
+    normal: 'Bình thường',
+    congested: 'Đông',
+    jammed: 'Ùn tắc',
+    dangerous: 'Nguy hiểm'
+  };
+
+  areaList.innerHTML = areas.map(function(area) {
+    return `
+      <div class="area-item">
+        <div class="area-header">
+          <span class="area-name">${area.name}</span>
+          <span class="area-status ${area.status}">${statusLabels[area.status]}</span>
+        </div>
+        <div class="area-details">
+          <span class="area-speed">${area.speed} km/h</span>
+          <span class="area-time">${area.time} phút</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Update data source status
+function updateDataSourceStatus() {
+  var isOnline = Math.random() > 0.1; // 90% chance online
+  var statusElement = document.getElementById('dataSourceStatus');
+  
+  if (statusElement) {
+    if (isOnline) {
+      statusElement.textContent = 'Đang kết nối';
+      statusElement.style.color = '#28a745';
+    } else {
+      statusElement.textContent = 'Mất kết nối';
+      statusElement.style.color = '#dc3545';
+    }
+  }
+
+  // Show error notification if offline
+  if (!isOnline) {
+    showErrorNotification('Không thể kết nối đến nguồn dữ liệu giao thông');
+  }
+}
+
+// Show error notification
+function showErrorNotification(message) {
+  var errorNotification = document.getElementById('errorNotification');
+  var errorMessage = document.getElementById('errorMessage');
+  
+  if (errorNotification && errorMessage) {
+    errorMessage.textContent = message;
+    errorNotification.style.display = 'block';
+  }
+}
+
+// Hide error notification
+function hideErrorNotification() {
+  var errorNotification = document.getElementById('errorNotification');
+  if (errorNotification) {
+    errorNotification.style.display = 'none';
+  }
+}
+
 // Update traffic statistics
 function updateTrafficStatistics() {
   // Simulate statistics
@@ -880,6 +955,8 @@ function simulateConnectionStatus() {
   setTimeout(function() {
     updateConnectionStatus('connected');
     updateLastUpdateTime();
+    updateTrafficByArea();
+    updateDataSourceStatus();
   }, 2000);
 
   // Simulate occasional disconnection
@@ -892,10 +969,16 @@ function simulateConnectionStatus() {
       setTimeout(function() {
         updateConnectionStatus('connected');
         updateLastUpdateTime();
+        updateDataSourceStatus();
       }, 3000);
     }
   }, 30000); // Check every 30 seconds
 }
+
+// Close error notification
+document.getElementById('errorCloseBtn').addEventListener('click', function() {
+  hideErrorNotification();
+});
 
 // Update all traffic status information
 function updateAllTrafficStatus() {

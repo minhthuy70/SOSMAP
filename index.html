@@ -250,6 +250,18 @@
           <div class="last-update">
             <small>Cập nhật cuối: <span id="lastUpdateTime">--:--:--</span></small>
           </div>
+          <div class="data-source-status">
+            <small>Nguồn dữ liệu: <span id="dataSourceStatus">Đang kết nối</span></small>
+          </div>
+        </div>
+
+        <!-- Error Notification -->
+        <div class="error-notification" id="errorNotification" style="display: none;">
+          <div class="error-content">
+            <span class="error-icon">❌</span>
+            <span class="error-message" id="errorMessage">Không thể tải dữ liệu giao thông</span>
+            <button class="error-close" id="errorCloseBtn">×</button>
+          </div>
         </div>
 
         <!-- Live Time -->
@@ -302,6 +314,53 @@
             </div>
             <div class="level-bar dangerous">
               <div class="level-fill" id="dangerousFill" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Traffic by Area -->
+        <div class="traffic-by-area">
+          <h3>Giao thông theo khu vực</h3>
+          <div class="area-list" id="areaList">
+            <div class="area-item">
+              <div class="area-header">
+                <span class="area-name">Quận 1</span>
+                <span class="area-status normal">Bình thường</span>
+              </div>
+              <div class="area-details">
+                <span class="area-speed">45 km/h</span>
+                <span class="area-time">15 phút</span>
+              </div>
+            </div>
+            <div class="area-item">
+              <div class="area-header">
+                <span class="area-name">Quận 3</span>
+                <span class="area-status congested">Đông</span>
+              </div>
+              <div class="area-details">
+                <span class="area-speed">30 km/h</span>
+                <span class="area-time">25 phút</span>
+              </div>
+            </div>
+            <div class="area-item">
+              <div class="area-header">
+                <span class="area-name">Quận 7</span>
+                <span class="area-status jammed">Ùn tắc</span>
+              </div>
+              <div class="area-details">
+                <span class="area-speed">15 km/h</span>
+                <span class="area-time">40 phút</span>
+              </div>
+            </div>
+            <div class="area-item">
+              <div class="area-header">
+                <span class="area-name">Quận 12</span>
+                <span class="area-status dangerous">Nguy hiểm</span>
+              </div>
+              <div class="area-details">
+                <span class="area-speed">5 km/h</span>
+                <span class="area-time">60 phút</span>
+              </div>
             </div>
           </div>
         </div>

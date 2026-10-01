@@ -703,6 +703,150 @@ body, html {
   color: #999;
 }
 
+.data-source-status {
+  font-size: 11px;
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Error Notification */
+.error-notification {
+  padding: 12px;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.error-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.error-icon {
+  font-size: 18px;
+}
+
+.error-message {
+  flex: 1;
+  font-size: 13px;
+  color: #721c24;
+}
+
+.error-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #721c24;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Traffic by Area */
+.traffic-by-area {
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.traffic-by-area h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.area-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.area-item {
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #e9ecef;
+}
+
+.area-item.normal {
+  border-left-color: #28a745;
+}
+
+.area-item.congested {
+  border-left-color: #ffc107;
+}
+
+.area-item.jammed {
+  border-left-color: #fd7e14;
+}
+
+.area-item.dangerous {
+  border-left-color: #dc3545;
+}
+
+.area-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.area-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #333;
+}
+
+.area-status {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.area-status.normal {
+  background: #d4edda;
+  color: #155724;
+}
+
+.area-status.congested {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.area-status.jammed {
+  background: #ffeeba;
+  color: #856404;
+}
+
+.area-status.dangerous {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.area-details {
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  color: #666;
+}
+
+.area-speed {
+  font-weight: 600;
+}
+
+.area-time {
+  font-weight: 600;
+}
+
 /* Live Time */
 .live-time {
   background: white;
