@@ -13040,6 +13040,340 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeIncidentReporting();
 });
 
+// Interactive Map Controls
+var mapControls = {
+  currentLayer: 'street',
+  markerFilters: {
+    accident: true,
+    congestion: true,
+    flood: true,
+    obstacle: true,
+    fire: true,
+    health: true
+  },
+  isMeasuring: false,
+  measurePoints: []
+};
+
+// Layer switching
+document.querySelectorAll('.layer-option').forEach(function(option) {
+  option.addEventListener('click', function() {
+    var layer = this.getAttribute('data-layer');
+    switchMapLayer(layer);
+  });
+});
+
+function switchMapLayer(layer) {
+  if (!map) return;
+
+  // Remove existing layers
+  map.eachLayer(function(layerObj) {
+    if (layerObj instanceof L.TileLayer) {
+      map.removeLayer(layerObj);
+    }
+  });
+
+  // Add new layer based on selection
+  var tileLayer;
+  switch(layer) {
+    case 'street':
+      tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      });
+      break;
+    case 'satellite':
+      tileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri'
+      });
+      break;
+    case 'terrain':
+      tileLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenTopoMap'
+      });
+      break;
+    case 'dark':
+      tileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© CartoDB'
+      });
+      break;
+    default:
+      tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      });
+  }
+
+  tileLayer.addTo(map);
+  mapControls.currentLayer = layer;
+
+  // Update active state
+  document.querySelectorAll('.layer-option').forEach(function(opt) {
+    opt.classList.remove('active');
+    if (opt.getAttribute('data-layer') === layer) {
+      opt.classList.add('active');
+    }
+  });
+
+  logActivity('map_layer_changed', 'Chuyển đổi lớp bản đồ: ' + layer);
+}
+
+// Map search
+document.getElementById('mapSearchBtn').addEventListener('click', function() {
+  var searchTerm = document.getElementById('mapSearchInput').value;
+  if (searchTerm) {
+    searchLocation(searchTerm);
+  }
+});
+
+document.getElementById('mapSearchInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    var searchTerm = this.value;
+    if (searchTerm) {
+      searchLocation(searchTerm);
+    }
+  }
+});
+
+document.getElementById('mapSearchInput').addEventListener('focus', function() {
+  document.getElementById('searchResults').style.display = 'block';
+});
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.map-search')) {
+    document.getElementById('searchResults').style.display = 'none';
+  }
+});
+
+document.querySelectorAll('.search-result-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    var lat = parseFloat(this.getAttribute('data-lat'));
+    var lng = parseFloat(this.getAttribute('data-lng'));
+    map.setView([lat, lng], 14);
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('mapSearchInput').value = this.querySelector('.result-name').textContent;
+  });
+});
+
+function searchLocation(term) {
+  // Simulate search - in production, use geocoding API
+  alert('Tìm kiếm: ' + term + ' (tính năng demo)');
+  logActivity('map_search', 'Tìm kiếm địa điểm: ' + term);
+}
+
+// Map controls
+document.getElementById('zoomInBtn').addEventListener('click', function() {
+  if (map) map.zoomIn();
+});
+
+document.getElementById('zoomOutBtn').addEventListener('click', function() {
+  if (map) map.zoomOut();
+});
+
+document.getElementById('locateBtn').addEventListener('click', function() {
+  if (navigator.geolocation && map) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      var lat = position.coords.latitude;
+      var lng = position.coords.longitude;
+      map.setView([lat, lng], 15);
+      
+      // Add user location marker
+      L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: 'user-location-marker',
+          html: '<div style="background: #005BAC; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        })
+      }).addTo(map);
+    }, function(error) {
+      alert('Không thể lấy vị trí: ' + error.message);
+    });
+  }
+});
+
+document.getElementById('fitBoundsBtn').addEventListener('click', function() {
+  if (map && incidentData.length > 0) {
+    var bounds = L.latLngBounds();
+    incidentData.forEach(function(incident) {
+      bounds.extend([incident.lat, incident.lng]);
+    });
+    map.fitBounds(bounds);
+  }
+});
+
+document.getElementById('measureBtn').addEventListener('click', function() {
+  document.getElementById('measurementPanel').style.display = 'block';
+});
+
+document.getElementById('filterBtn').addEventListener('click', function() {
+  document.getElementById('markerFilterPanel').style.display = 'block';
+});
+
+document.getElementById('legendBtn').addEventListener('click', function() {
+  document.getElementById('mapLegend').style.display = 'block';
+});
+
+// Close panels
+document.getElementById('filterClose').addEventListener('click', function() {
+  document.getElementById('markerFilterPanel').style.display = 'none';
+});
+
+document.getElementById('legendClose').addEventListener('click', function() {
+  document.getElementById('mapLegend').style.display = 'none';
+});
+
+document.getElementById('measurementClose').addEventListener('click', function() {
+  document.getElementById('measurementPanel').style.display = 'none';
+  mapControls.isMeasuring = false;
+  mapControls.measurePoints = [];
+});
+
+// Apply marker filter
+document.getElementById('applyFilterBtn').addEventListener('click', function() {
+  mapControls.markerFilters.accident = document.getElementById('filterAccident').checked;
+  mapControls.markerFilters.congestion = document.getElementById('filterCongestion').checked;
+  mapControls.markerFilters.flood = document.getElementById('filterFlood').checked;
+  mapControls.markerFilters.obstacle = document.getElementById('filterObstacle').checked;
+  mapControls.markerFilters.fire = document.getElementById('filterFire').checked;
+  mapControls.markerFilters.health = document.getElementById('filterHealth').checked;
+
+  applyMarkerFilters();
+  document.getElementById('markerFilterPanel').style.display = 'none';
+
+  logActivity('marker_filter_applied', 'Áp dụng bộ lọc marker');
+});
+
+function applyMarkerFilters() {
+  if (!map) return;
+
+  // Remove all markers
+  map.eachLayer(function(layer) {
+    if (layer instanceof L.Marker) {
+      map.removeLayer(layer);
+    }
+  });
+
+  // Re-add markers based on filters
+  incidentData.forEach(function(incident) {
+    var shouldShow = false;
+    
+    if (incident.type === 'accident' && mapControls.markerFilters.accident) shouldShow = true;
+    if (incident.type === 'congestion' && mapControls.markerFilters.congestion) shouldShow = true;
+    if (incident.type === 'flood' && mapControls.markerFilters.flood) shouldShow = true;
+    if (incident.type === 'obstacle' && mapControls.markerFilters.obstacle) shouldShow = true;
+    if (incident.type === 'fire' && mapControls.markerFilters.fire) shouldShow = true;
+    if (incident.type === 'health' && mapControls.markerFilters.health) shouldShow = true;
+
+    if (shouldShow) {
+      addMarker(incident);
+    }
+  });
+}
+
+// Distance measurement
+document.getElementById('startMeasureBtn').addEventListener('click', function() {
+  mapControls.isMeasuring = true;
+  mapControls.measurePoints = [];
+  alert('Click trên bản đồ để chọn điểm bắt đầu đo');
+  logActivity('measurement_started', 'Bắt đầu đo khoảng cách');
+});
+
+document.getElementById('clearMeasureBtn').addEventListener('click', function() {
+  mapControls.isMeasuring = false;
+  mapControls.measurePoints = [];
+  document.getElementById('distanceValue').textContent = '0';
+  
+  // Remove measurement lines
+  map.eachLayer(function(layer) {
+    if (layer instanceof L.Polyline) {
+      map.removeLayer(layer);
+    }
+  });
+  
+  logActivity('measurement_cleared', 'Xóa đo khoảng cách');
+});
+
+// Map click handler for measurement
+if (map) {
+  map.on('click', function(e) {
+    if (mapControls.isMeasuring) {
+      mapControls.measurePoints.push(e.latlng);
+      
+      if (mapControls.measurePoints.length > 1) {
+        // Draw line between points
+        var polyline = L.polyline(mapControls.measurePoints, {
+          color: '#005BAC',
+          weight: 3,
+          opacity: 0.7
+        }).addTo(map);
+        
+        // Calculate distance
+        var totalDistance = 0;
+        for (var i = 1; i < mapControls.measurePoints.length; i++) {
+          totalDistance += mapControls.measurePoints[i-1].distanceTo(mapControls.measurePoints[i]);
+        }
+        
+        document.getElementById('distanceValue').textContent = (totalDistance / 1000).toFixed(2);
+      }
+      
+      // Add marker for the point
+      L.circleMarker(e.latlng, {
+        radius: 5,
+        color: '#005BAC',
+        fillColor: '#005BAC',
+        fillOpacity: 1
+      }).addTo(map);
+    }
+  });
+}
+
+// Marker colors by type
+function getMarkerColor(type) {
+  var colors = {
+    accident: '#e74c3c',
+    congestion: '#f39c12',
+    flood: '#3498db',
+    obstacle: '#2ecc71',
+    fire: '#9b59b6',
+    health: '#e67e22'
+  };
+  return colors[type] || '#333';
+}
+
+// Add marker with color
+function addMarker(incident) {
+  if (!map) return;
+
+  var markerColor = getMarkerColor(incident.type);
+  
+  var marker = L.circleMarker([incident.lat, incident.lng], {
+    radius: 8,
+    color: markerColor,
+    fillColor: markerColor,
+    fillOpacity: 0.7,
+    weight: 2
+  }).addTo(map);
+
+  var popupContent = `
+    <div style="min-width: 200px;">
+      <h4 style="margin: 0 0 10px 0; color: #333;">${incident.title}</h4>
+      <p style="margin: 0 0 5px 0; color: #666; font-size: 13px;">${incident.description}</p>
+      <p style="margin: 0; color: #999; font-size: 11px;">${incident.time}</p>
+    </div>
+  `;
+
+  marker.bindPopup(popupContent);
+}
+
+// Initialize map controls on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Add initial markers
+  if (map && incidentData) {
+    incidentData.forEach(function(incident) {
+      addMarker(incident);
+    });
+  }
+});
+
 // Initialize incident admin on page load
 document.addEventListener('DOMContentLoaded', function() {
   initializeIncidentAdmin();

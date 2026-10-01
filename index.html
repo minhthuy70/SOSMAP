@@ -227,6 +227,134 @@
           <button class="layer-option active" data-layer="street">Bản đồ đường phố</button>
           <button class="layer-option" data-layer="satellite">Ảnh vệ tinh</button>
           <button class="layer-option" data-layer="terrain">Địa hình</button>
+          <button class="layer-option" data-layer="dark">Dark mode</button>
+        </div>
+      </div>
+
+      <!-- Map Search -->
+      <div class="map-search" id="mapSearch">
+        <div class="search-input-group">
+          <input type="text" class="search-input" id="mapSearchInput" placeholder="Tìm địa điểm, địa chỉ...">
+          <button class="search-btn" id="mapSearchBtn">🔍</button>
+        </div>
+        <div class="search-results" id="searchResults" style="display: none;">
+          <div class="search-result-item" data-lat="10.7769" data-lng="106.7009">
+            <span class="result-name">Quận 1, TP.HCM</span>
+            <span class="result-coords">10.7769, 106.7009</span>
+          </div>
+          <div class="search-result-item" data-lat="10.7869" data-lng="106.6909">
+            <span class="result-name">Quận 3, TP.HCM</span>
+            <span class="result-coords">10.7869, 106.6909</span>
+          </div>
+          <div class="search-result-item" data-lat="10.7569" data-lng="106.6809">
+            <span class="result-name">Quận 7, TP.HCM</span>
+            <span class="result-coords">10.7569, 106.6809</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map Controls -->
+      <div class="map-controls">
+        <button class="map-control-btn" id="zoomInBtn" title="Phóng to">+</button>
+        <button class="map-control-btn" id="zoomOutBtn" title="Thu nhỏ">-</button>
+        <button class="map-control-btn" id="locateBtn" title="Vị trí của tôi">📍</button>
+        <button class="map-control-btn" id="fitBoundsBtn" title="Fit bounds">⛶</button>
+        <button class="map-control-btn" id="measureBtn" title="Đo khoảng cách">📏</button>
+        <button class="map-control-btn" id="filterBtn" title="Lọc marker">🔍</button>
+        <button class="map-control-btn" id="legendBtn" title="Chú thích">📋</button>
+      </div>
+
+      <!-- Marker Filter Panel -->
+      <div class="marker-filter-panel" id="markerFilterPanel" style="display: none;">
+        <div class="filter-panel-header">
+          <h4>Lọc marker</h4>
+          <button class="filter-close" id="filterClose">×</button>
+        </div>
+        <div class="filter-panel-content">
+          <div class="filter-item">
+            <label class="checkbox-label">
+              <input type="checkbox" id="filterAccident" checked>
+              <span>Tai nạn</span>
+            </label>
+          </div>
+          <div class="filter-item">
+            <label class="checkbox-label">
+              <input type="checkbox" id="filterCongestion" checked>
+              <span>Kẹt xe</span>
+            </label>
+          </div>
+          <div class="filter-item">
+            <label class="checkbox-label">
+              <input type="checkbox" id="filterFlood" checked>
+              <span>Ngập nước</span>
+            </label>
+          </div>
+          <div class="filter-item">
+            <label class="checkbox-label">
+              <input type="checkbox" id="filterObstacle" checked>
+              <span>Vật cản</span>
+            </label>
+          </div>
+          <div class="filter-item">
+            <label class="checkbox-label">
+              <input type="checkbox" id="filterFire" checked>
+              <span>Cháy nổ</span>
+            </label>
+          </div>
+          <div class="filter-item">
+            <label class="checkbox-label">
+              <input type="checkbox" id="filterHealth" checked>
+              <span>Sức khỏe</span>
+            </label>
+          </div>
+          <button class="btn btn-primary" id="applyFilterBtn">Áp dụng</button>
+        </div>
+      </div>
+
+      <!-- Map Legend -->
+      <div class="map-legend" id="mapLegend" style="display: none;">
+        <div class="legend-header">
+          <h4>Chú thích</h4>
+          <button class="legend-close" id="legendClose">×</button>
+        </div>
+        <div class="legend-content">
+          <div class="legend-item">
+            <span class="legend-marker" style="background: #e74c3c;"></span>
+            <span>Tai nạn</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-marker" style="background: #f39c12;"></span>
+            <span>Kẹt xe</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-marker" style="background: #3498db;"></span>
+            <span>Ngập nước</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-marker" style="background: #2ecc71;"></span>
+            <span>Vật cản</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-marker" style="background: #9b59b6;"></span>
+            <span>Cháy nổ</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-marker" style="background: #e67e22;"></span>
+            <span>Sức khỏe</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Distance Measurement -->
+      <div class="measurement-panel" id="measurementPanel" style="display: none;">
+        <div class="measurement-header">
+          <h4>Đo khoảng cách</h4>
+          <button class="measurement-close" id="measurementClose">×</button>
+        </div>
+        <div class="measurement-content">
+          <p>Khoảng cách: <span id="distanceValue">0</span> km</p>
+          <button class="btn btn-secondary" id="startMeasureBtn">Bắt đầu đo</button>
+          <button class="btn btn-secondary" id="clearMeasureBtn">Xóa</button>
         </div>
       </div>
 
