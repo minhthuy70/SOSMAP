@@ -13044,7 +13044,235 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeReportingSystem();
   initializePrivacySystem();
   initializeOfflineSystem();
+  initializePlanningSystem();
 });
+
+// Planning & Drills System
+var planningData = {
+  activeScenario: null,
+  readinessScore: 85,
+  drillMode: 'Thực tế',
+  scenarios: [
+    { id: 1, type: 'typhoon', name: 'Bão lũ miền Nam', area: 'TP. Hồ Chí Minh', time: '2026-10-15T08:00', forces: 'Cảnh sát, Cứu hỏa, Cấp cứu' }
+  ],
+  tasks: [],
+  responseTimes: {
+    police: null,
+    fire: null,
+    medical: null
+  },
+  scores: {
+    response: 90,
+    evacuation: 85,
+    coordination: 80
+  },
+  versions: [
+    { version: 'v2.1.0', date: '01/10/2026', author: 'Nguyễn Văn A', changes: 'Cập nhật kịch bản bão lũ' },
+    { version: 'v2.0.0', date: '15/09/2026', author: 'Trần Thị B', changes: 'Thêm kịch bản dịch bệnh' },
+    { version: 'v1.0.0', date: '01/08/2026', author: 'Lê Văn C', changes: 'Bản phát hành đầu tiên' }
+  ]
+};
+
+function initializePlanningSystem() {
+  // Load planning data from localStorage
+  var savedPlanning = localStorage.getItem('sosmap_planning');
+  if (savedPlanning) {
+    planningData = JSON.parse(savedPlanning);
+  }
+
+  // Update planning panel
+  updatePlanningPanel();
+
+  // Initialize planning buttons
+  document.getElementById('scenarioBtn').addEventListener('click', function() {
+    document.getElementById('scenarioModal').style.display = 'block';
+  });
+
+  document.getElementById('simulationBtn').addEventListener('click', function() {
+    document.getElementById('simulationModal').style.display = 'block';
+  });
+
+  document.getElementById('reportBtn').addEventListener('click', function() {
+    document.getElementById('reportModal').style.display = 'block';
+  });
+
+  document.getElementById('versionBtn').addEventListener('click', function() {
+    document.getElementById('versionModal').style.display = 'block';
+  });
+
+  // Close modals
+  document.getElementById('closeScenarioModal').addEventListener('click', function() {
+    document.getElementById('scenarioModal').style.display = 'none';
+  });
+
+  document.getElementById('closeSimulationModal').addEventListener('click', function() {
+    document.getElementById('simulationModal').style.display = 'none';
+  });
+
+  document.getElementById('closeReportModal').addEventListener('click', function() {
+    document.getElementById('reportModal').style.display = 'none';
+  });
+
+  document.getElementById('closeVersionModal').addEventListener('click', function() {
+    document.getElementById('versionModal').style.display = 'none';
+  });
+}
+
+function updatePlanningPanel() {
+  document.getElementById('activeScenario').textContent = planningData.activeScenario ? planningData.activeScenario : 'Không';
+  document.getElementById('readinessScore').textContent = planningData.readinessScore + '%';
+  document.getElementById('drillMode').textContent = planningData.drillMode;
+}
+
+function savePlanningData() {
+  localStorage.setItem('sosmap_planning', JSON.stringify(planningData));
+}
+
+// Scenario Functions
+function addTask() {
+  var taskList = document.getElementById('taskList');
+  var taskCount = taskList.children.length + 1;
+  var taskItem = document.createElement('div');
+  taskItem.className = 'task-item';
+  taskItem.innerHTML = '<input type="text" placeholder="Nhiệm vụ ' + taskCount + '" style="width: 70%; padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 4px;"><button class="btn btn-sm" onclick="addTask()">Thêm</button>';
+  taskList.appendChild(taskItem);
+}
+
+function saveScenario() {
+  var type = document.getElementById('scenarioType').value;
+  var name = document.getElementById('scenarioName').value;
+  var area = document.getElementById('scenarioArea').value;
+  var time = document.getElementById('scenarioTime').value;
+  var forces = document.getElementById('scenarioForces').value;
+
+  if (!name || !area || !time) {
+    alert('Vui lòng nhập đầy đủ thông tin!');
+    return;
+  }
+
+  var scenario = {
+    id: planningData.scenarios.length + 1,
+    type: type,
+    name: name,
+    area: area,
+    time: time,
+    forces: forces
+  };
+
+  planningData.scenarios.push(scenario);
+  savePlanningData();
+  alert('Đã lưu kịch bản!');
+  logActivity('scenario_save', 'Lưu kịch bản: ' + name);
+}
+
+function loadScenario() {
+  alert('Tải kịch bản (demo)');
+  logActivity('scenario_load', 'Tải kịch bản');
+}
+
+// Simulation Functions
+function simulateWarning() {
+  var level = document.getElementById('warningLevel').value;
+  var content = document.getElementById('warningContent').value;
+
+  alert('Đang phát cảnh báo cấp ' + level + '... (demo)');
+  logActivity('warning_simulate', 'Mô phỏng cảnh báo cấp ' + level);
+}
+
+function simulateEvacuation() {
+  var count = document.getElementById('evacuationCount').value;
+  var point = document.getElementById('evacuationPoint').value;
+
+  alert('Đang bắt đầu sơ tán ' + count + ' người đến ' + point + '... (demo)');
+  logActivity('evacuation_simulate', 'Mô phỏng sơ tán: ' + count + ' người');
+}
+
+function startSimulation() {
+  planningData.drillMode = 'Diễn tập';
+  planningData.activeScenario = 'Đang diễn tập';
+  savePlanningData();
+  updatePlanningPanel();
+
+  // Simulate response times
+  setTimeout(function() {
+    planningData.responseTimes.police = '5 phút';
+    updateResponseTime('Cảnh sát', '5 phút', 'completed');
+  }, 2000);
+
+  setTimeout(function() {
+    planningData.responseTimes.fire = '7 phút';
+    updateResponseTime('Cứu hỏa', '7 phút', 'completed');
+  }, 3000);
+
+  setTimeout(function() {
+    planningData.responseTimes.medical = '4 phút';
+    updateResponseTime('Cấp cứu', '4 phút', 'completed');
+  }, 4000);
+
+  alert('Đã bắt đầu diễn tập!');
+  logActivity('simulation_start', 'Bắt đầu diễn tập');
+}
+
+function stopSimulation() {
+  planningData.drillMode = 'Thực tế';
+  planningData.activeScenario = null;
+  planningData.responseTimes = { police: null, fire: null, medical: null };
+  savePlanningData();
+  updatePlanningPanel();
+
+  alert('Đã dừng diễn tập!');
+  logActivity('simulation_stop', 'Dừng diễn tập');
+}
+
+function updateResponseTime(unit, time, status) {
+  var rows = document.getElementById('responseTimesBody').rows;
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i].cells[0].textContent === unit) {
+      rows[i].cells[1].textContent = time;
+      rows[i].cells[2].innerHTML = '<span class="status-badge ' + status + '">' + (status === 'completed' ? 'Đã phản hồi' : 'Chờ') + '</span>';
+      break;
+    }
+  }
+}
+
+// Report Functions
+function saveReport() {
+  var lessons = document.getElementById('lessonsLearned').value;
+  var recommendations = document.getElementById('recommendations').value;
+
+  alert('Đã lưu báo cáo rút kinh nghiệm!');
+  logActivity('report_save', 'Lưu báo cáo rút kinh nghiệm');
+}
+
+function exportReport() {
+  alert('Xuất báo cáo (demo)');
+  logActivity('report_export', 'Xuất báo cáo rút kinh nghiệm');
+}
+
+// Version Functions
+function createNewVersion() {
+  var newVersion = prompt('Nhập phiên bản mới:', 'v2.2.0');
+  if (newVersion) {
+    planningData.versions.unshift({
+      version: newVersion,
+      date: new Date().toLocaleDateString('vi-VN'),
+      author: 'Người dùng hiện tại',
+      changes: 'Cập nhật mới'
+    });
+    savePlanningData();
+    alert('Đã tạo phiên bản mới!');
+    logActivity('version_create', 'Tạo phiên bản: ' + newVersion);
+  }
+}
+
+function rollbackVersion() {
+  if (!confirm('Bạn có chắc muốn rollback đến phiên bản trước?')) {
+    return;
+  }
+
+  alert('Đã rollback thành công!');
+  logActivity('version_rollback', 'Rollback phiên bản');
+}
 
 // Offline & Resilient Access System
 var offlineData = {

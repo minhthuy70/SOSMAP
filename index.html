@@ -9673,3 +9673,189 @@ div class="summary-label">Sự cố tháng này</div>
   </div>
 </body>
 </html>
+  <!-- Scenario Modal -->
+  <div class="modal" id="scenarioModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Tạo kịch bản diễn tập</h3>
+        <button class="modal-close" id="closeScenarioModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="scenario-form">
+          <label>Loại kịch bản:</label>
+          <select id="scenarioType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="typhoon">Bão lũ</option>
+            <option value="disease">Dịch bệnh</option>
+            <option value="fire">Cháy nổ</option>
+            <option value="earthquake">Động đất</option>
+          </select>
+          <label>Tên kịch bản:</label>
+          <input type="text" id="scenarioName" placeholder="Nhập tên kịch bản" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Địa bàn:</label>
+          <input type="text" id="scenarioArea" placeholder="Nhập địa bàn" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Thời gian:</label>
+          <input type="datetime-local" id="scenarioTime" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Lực lượng tham gia:</label>
+          <textarea id="scenarioForces" placeholder="Nhập lực lượng tham gia" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+        </div>
+        <div class="scenario-tasks" style="margin-top: 20px;">
+          <h4>Danh sách nhiệm vụ</h4>
+          <div id="taskList">
+            <div class="task-item">
+              <input type="text" placeholder="Nhiệm vụ 1" style="width: 70%; padding: 8px; margin-right: 10px; border: 1px solid #ddd; border-radius: 4px;">
+              <button class="btn btn-sm" onclick="addTask()">Thêm</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="saveScenario()">Lưu kịch bản</button>
+          <button class="btn btn-secondary" onclick="loadScenario()">Tải kịch bản</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simulation Modal -->
+  <div class="modal" id="simulationModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Mô phỏng diễn tập</h3>
+        <button class="modal-close" id="closeSimulationModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="simulation-warning" style="padding: 15px; background: #fff3cd; border-radius: 6px; margin-bottom: 20px;">
+          <p><strong>Cảnh báo:</strong> Đây là chế độ diễn tập. Dữ liệu sẽ được đánh dấu rõ ràng để tránh nhầm lẫn với dữ liệu thực tế.</p>
+        </div>
+        <div class="simulation-section">
+          <h4>Mô phỏng bản tin cảnh báo</h4>
+          <div class="warning-simulation">
+            <label>Cấp độ cảnh báo:</label>
+            <select id="warningLevel" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+              <option value="1">Cấp 1 - Thấp</option>
+              <option value="2">Cấp 2 - Trung bình</option>
+              <option value="3">Cấp 3 - Cao</option>
+              <option value="4">Cấp 4 - Rất cao</option>
+              <option value="5">Cấp 5 - Khẩn cấp</option>
+            </select>
+            <label>Nội dung cảnh báo:</label>
+            <textarea id="warningContent" placeholder="Nhập nội dung cảnh báo" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+            <button class="btn btn-primary" onclick="simulateWarning()">Phát cảnh báo</button>
+          </div>
+        </div>
+        <div class="simulation-section" style="margin-top: 20px;">
+          <h4>Mô phỏng sơ tán và tiếp nhận cứu hộ</h4>
+          <div class="evacuation-simulation">
+            <label>Số người cần sơ tán:</label>
+            <input type="number" id="evacuationCount" value="100" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <label>Điểm tập kết:</label>
+            <input type="text" id="evacuationPoint" placeholder="Nhập điểm tập kết" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <button class="btn btn-primary" onclick="simulateEvacuation()">Bắt đầu sơ tán</button>
+          </div>
+        </div>
+        <div class="simulation-section" style="margin-top: 20px;">
+          <h4>Thời gian phản hồi</h4>
+          <div class="response-times">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th>Đơn vị</th>
+                  <th>Thời gian phản hồi</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody id="responseTimesBody">
+                <tr>
+                  <td>Cảnh sát</td>
+                  <td>--</td>
+                  <td><span class="status-badge pending">Chờ</span></td>
+                </tr>
+                <tr>
+                  <td>Cứu hỏa</td>
+                  <td>--</td>
+                  <td><span class="status-badge pending">Chờ</span></td>
+                </tr>
+                <tr>
+                  <td>Cấp cứu</td>
+                  <td>--</td>
+                  <td><span class="status-badge pending">Chờ</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="startSimulation()">Bắt đầu diễn tập</button>
+          <button class="btn btn-secondary" onclick="stopSimulation()">Dừng diễn tập</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div class="modal" id="reportModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Báo cáo rút kinh nghiệm</h3>
+        <button class="modal-close" id="closeReportModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="report-section">
+          <h4>Điểm sẵn sàng</h4>
+          <div class="readiness-score">
+            <p><strong>Tổng điểm:</strong> <span id="totalScore">85</span>/100</p>
+            <div class="score-breakdown">
+              <p>Thời gian phản hồi: <span id="responseScore">90</span>/100</p>
+              <p>Hiệu quả sơ tán: <span id="evacuationScore">85</span>/100</p>
+              <p>Phối hợp đơn vị: <span id="coordinationScore">80</span>/100</p>
+            </div>
+          </div>
+        </div>
+        <div class="report-section" style="margin-top: 20px;">
+          <h4>Rút kinh nghiệm</h4>
+          <textarea id="lessonsLearned" placeholder="Nhập rút kinh nghiệm" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 120px;"></textarea>
+        </div>
+        <div class="report-section" style="margin-top: 20px;">
+          <h4>Khuyến nghị cải tiến</h4>
+          <textarea id="recommendations" placeholder="Nhập khuyến nghị cải tiến" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="saveReport()">Lưu báo cáo</button>
+          <button class="btn btn-secondary" onclick="exportReport()">Xuất báo cáo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Version Modal -->
+  <div class="modal" id="versionModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Quản lý phiên bản phương án</h3>
+        <button class="modal-close" id="closeVersionModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="version-section">
+          <h4>Phiên bản hiện tại</h4>
+          <p><strong>Phiên bản:</strong> v2.1.0</p>
+          <p><strong>Ngày tạo:</strong> 01/10/2026</p>
+          <p><strong>Tác giả:</strong> Nguyễn Văn A</p>
+        </div>
+        <div class="version-section" style="margin-top: 20px;">
+          <h4>Lịch sử phiên bản</h4>
+          <div class="version-history">
+            <ul>
+              <li>v2.1.0 - 01/10/2026 - Cập nhật kịch bản bão lũ</li>
+              <li>v2.0.0 - 15/09/2026 - Thêm kịch bản dịch bệnh</li>
+              <li>v1.0.0 - 01/08/2026 - Bản phát hành đầu tiên</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="createNewVersion()">Tạo phiên bản mới</button>
+          <button class="btn btn-secondary" onclick="rollbackVersion()">Rollback</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

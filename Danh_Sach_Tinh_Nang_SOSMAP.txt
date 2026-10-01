@@ -620,16 +620,16 @@ QUY UOC
 
 25. QUAN LY PHUONG AN VA DIEN TAP (PLANNING & DRILLS)
 
-[ ] - Tao kich ban bao lu, dich benh, chay no va dong dat
-[ ] - Tao danh sach nhiem vu theo kich ban
-[ ] - Dat thoi gian, dia ban va luc luong tham gia
-[ ] - Mo phong ban tin canh bao
-[ ] - Mo phong so tan va tiep nhan cuu ho
-[ ] - Ghi nhan thoi gian phan hoi cua tung don vi
-[ ] - Cham diem muc do san sang
-[ ] - Tao bao cao rut kinh nghiem
-[ ] - Luu phien ban phuong an
-[ ] - Khong hien thi nham du lieu dien tap ra moi truong that
+[x] - Tao kich ban bao lu, dich benh, chay no va dong dat
+[x] - Tao danh sach nhiem vu theo kich ban
+[x] - Dat thoi gian, dia ban va luc luong tham gia
+[x] - Mo phong ban tin canh bao
+[x] - Mo phong so tan va tiep nhan cuu ho
+[x] - Ghi nhan thoi gian phan hoi cua tung don vi
+[x] - Cham diem muc do san sang
+[x] - Tao bao cao rut kinh nghiem
+[x] - Luu phien ban phuong an
+[x] - Khong hien thi nham du lieu dien tap ra moi truong that
 
 ================================================================================
 
