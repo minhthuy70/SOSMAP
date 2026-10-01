@@ -13045,7 +13045,200 @@ document.addEventListener('DOMContentLoaded', function() {
   initializePrivacySystem();
   initializeOfflineSystem();
   initializePlanningSystem();
+  initializeGovernanceSystem();
 });
+
+// Governance System
+var governanceData = {
+  currentArea: 'TP. Hồ Chí Minh',
+  transferredIncidents: 0,
+  interAgencyTasks: 3,
+  administrativeAreas: [
+    { level: 'tinh', name: 'TP. Hồ Chí Minh', children: [
+      { level: 'huyen', name: 'Quận 1', children: [
+        { level: 'xa', name: 'Phường Bến Nghé' },
+        { level: 'xa', name: 'Phường Bến Thành' }
+      ]},
+      { level: 'huyen', name: 'Quận 3', children: [
+        { level: 'xa', name: 'Phường 1' },
+        { level: 'xa', name: 'Phường 2' }
+      ]}
+    ]}
+  ],
+  agencyAssignments: [
+    { incidentType: 'traffic', leadAgency: 'police', shift: 'morning', contact: '0901234567' },
+    { incidentType: 'fire', leadAgency: 'fire', shift: 'morning', contact: '0902345678' }
+  ],
+  interAgencyTasks: [
+    { id: 1, name: 'Phối hợp cứu hộ Q1', agencies: 'Cảnh sát, Cứu hỏa', status: 'pending' },
+    { id: 2, name: 'Điều phối y tế khu vực', agencies: 'Y tế', status: 'completed' }
+  ],
+  drillMode: false
+};
+
+function initializeGovernanceSystem() {
+  // Load governance data from localStorage
+  var savedGovernance = localStorage.getItem('sosmap_governance');
+  if (savedGovernance) {
+    governanceData = JSON.parse(savedGovernance);
+  }
+
+  // Update governance panel
+  updateGovernancePanel();
+
+  // Initialize governance buttons
+  document.getElementById('areaManagementBtn').addEventListener('click', function() {
+    document.getElementById('areaManagementModal').style.display = 'block';
+  });
+
+  document.getElementById('agencyAssignmentBtn').addEventListener('click', function() {
+    document.getElementById('agencyAssignmentModal').style.display = 'block';
+  });
+
+  document.getElementById('taskManagementBtn').addEventListener('click', function() {
+    document.getElementById('taskManagementModal').style.display = 'block';
+  });
+
+  document.getElementById('dashboardBtn').addEventListener('click', function() {
+    document.getElementById('governanceDashboardModal').style.display = 'block';
+  });
+
+  // Close modals
+  document.getElementById('closeAreaManagementModal').addEventListener('click', function() {
+    document.getElementById('areaManagementModal').style.display = 'none';
+  });
+
+  document.getElementById('closeAgencyAssignmentModal').addEventListener('click', function() {
+    document.getElementById('agencyAssignmentModal').style.display = 'none';
+  });
+
+  document.getElementById('closeTaskManagementModal').addEventListener('click', function() {
+    document.getElementById('taskManagementModal').style.display = 'none';
+  });
+
+  document.getElementById('closeGovernanceDashboardModal').addEventListener('click', function() {
+    document.getElementById('governanceDashboardModal').style.display = 'none';
+  });
+}
+
+function updateGovernancePanel() {
+  document.getElementById('currentArea').textContent = governanceData.currentArea;
+  document.getElementById('transferredIncidents').textContent = governanceData.transferredIncidents;
+  document.getElementById('interAgencyTasks').textContent = governanceData.interAgencyTasks.length;
+}
+
+function saveGovernanceData() {
+  localStorage.setItem('sosmap_governance', JSON.stringify(governanceData));
+}
+
+// Area Management Functions
+function addArea() {
+  alert('Thêm địa bàn (demo)');
+  logActivity('area_add', 'Thêm địa bàn mới');
+}
+
+function editAreaBounds() {
+  alert('Sửa ranh giới (demo)');
+  logActivity('area_bounds_edit', 'Sửa ranh giới hành chính');
+}
+
+function viewAreaMap() {
+  alert('Xem bản đồ ranh giới (demo)');
+  logActivity('area_map_view', 'Xem bản đồ ranh giới');
+}
+
+// Agency Assignment Functions
+function saveAssignment() {
+  var incidentType = document.getElementById('incidentType').value;
+  var leadAgency = document.getElementById('leadAgency').value;
+  var shift = document.getElementById('shift').value;
+  var contact = document.getElementById('emergencyContact').value;
+
+  governanceData.agencyAssignments.push({
+    incidentType: incidentType,
+    leadAgency: leadAgency,
+    shift: shift,
+    contact: contact
+  });
+
+  saveGovernanceData();
+  alert('Đã lưu gán cơ quan!');
+  logActivity('agency_assignment_save', 'Gán cơ quan: ' + leadAgency + ' cho ' + incidentType);
+}
+
+function viewAssignments() {
+  alert('Xem danh sách gán (demo)');
+  logActivity('agency_assignments_view', 'Xem danh sách gán cơ quan');
+}
+
+// Task Management Functions
+function createTask() {
+  var name = document.getElementById('taskName').value;
+  var agencies = document.getElementById('taskAgencies').value;
+
+  if (!name || !agencies) {
+    alert('Vui lòng nhập đầy đủ thông tin!');
+    return;
+  }
+
+  governanceData.interAgencyTasks.push({
+    id: governanceData.interAgencyTasks.length + 1,
+    name: name,
+    agencies: agencies,
+    status: 'pending'
+  });
+
+  saveGovernanceData();
+  updateGovernancePanel();
+  alert('Đã tạo nhiệm vụ!');
+  logActivity('task_create', 'Tạo nhiệm vụ liên cơ quan: ' + name);
+
+  document.getElementById('taskName').value = '';
+  document.getElementById('taskAgencies').value = '';
+}
+
+// Transfer Functions
+function transferIncident() {
+  var incidentId = document.getElementById('incidentId').value;
+  var currentLevel = document.getElementById('currentLevel').value;
+  var targetLevel = document.getElementById('targetLevel').value;
+  var reason = document.getElementById('transferReason').value;
+
+  if (!incidentId || !currentLevel || !reason) {
+    alert('Vui lòng nhập đầy đủ thông tin!');
+    return;
+  }
+
+  governanceData.transferredIncidents++;
+  saveGovernanceData();
+  updateGovernancePanel();
+  alert('Đã chuyển giao sự cố!');
+  logActivity('incident_transfer', 'Chuyển giao sự cố ' + incidentId + ' từ ' + currentLevel + ' đến ' + targetLevel);
+}
+
+// Dashboard Functions
+function switchTab(tab) {
+  var tabs = document.querySelectorAll('.tab-btn');
+  tabs.forEach(function(t) {
+    t.classList.remove('active');
+  });
+  event.target.classList.add('active');
+
+  alert('Chuyển tab: ' + tab + ' (demo)');
+  logActivity('dashboard_tab_switch', 'Chuyển tab dashboard: ' + tab);
+}
+
+function exportDashboard() {
+  alert('Xuất báo cáo dashboard (demo)');
+  logActivity('dashboard_export', 'Xuất báo cáo dashboard địa phương');
+}
+
+function toggleDrillMode() {
+  governanceData.drillMode = !governanceData.drillMode;
+  saveGovernanceData();
+  alert('Đã chuyển sang chế độ ' + (governanceData.drillMode ? 'diễn tập' : 'thực tế') + '!');
+  logActivity('drill_mode_toggle', 'Chuyển chế độ: ' + (governanceData.drillMode ? 'diễn tập' : 'thực tế'));
+}
 
 // Planning & Drills System
 var planningData = {

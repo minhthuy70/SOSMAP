@@ -603,18 +603,18 @@ QUY UOC
 
 24. QUAN TRI DIA PHUONG VA LIEN CO QUAN (GOVERNANCE)
 
-[ ] - Quan ly danh sach tinh, huyen, xa va thon
-[ ] - Quan ly ranh gioi hanh chinh va vung phu trach
-[ ] - Gan co quan dau moi cho tung loai su co
-[ ] - Gan ca truc va kenh lien lac khan cap
-[ ] - Quan ly mau van ban va quy trinh xu ly
-[ ] - Tao nhiem vu lien co quan
-[ ] - Chuyen giao su co giua cac cap
-[ ] - Theo doi cam ket thoi gian phan hoi
-[ ] - Bao cao su co vuot qua cap co so
-[ ] - Hien thi dashboard cho tinh, huyen va xa
-[ ] - Phan quyen truy cap theo dia ban
-[ ] - Ho tro che do dien tap va du lieu gia lap
+[x] - Quan ly danh sach tinh, huyen, xa va thon
+[x] - Quan ly ranh gioi hanh chinh va vung phu trach
+[x] - Gan co quan dau moi cho tung loai su co
+[x] - Gan ca truc va kenh lien lac khan cap
+[x] - Quan ly mau van ban va quy trinh xu ly
+[x] - Tao nhiem vu lien co quan
+[x] - Chuyen giao su co giua cac cap
+[x] - Theo doi cam ket thoi gian phan hoi
+[x] - Bao cao su co vuot qua cap co so
+[x] - Hien thi dashboard cho tinh, huyen va xa
+[x] - Phan quyen truy cap theo dia ban
+[x] - Ho tro che do dien tap va du lieu gia lap
 
 ================================================================================
 

@@ -13126,3 +13126,162 @@ body.high-contrast textarea {
   color: #333;
 }
 
+
+
+/* Governance Panel */
+.governance-panel {
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.governance-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.governance-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.governance-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Area Tree */
+.area-tree h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.tree-level {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.tree-level ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.tree-level li {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.tree-level strong {
+  color: #666;
+}
+
+/* Area Bounds */
+.area-bounds h4 {
+  margin: 20px 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.bounds-info {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.bounds-info p {
+  margin: 8px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.bounds-info strong {
+  color: #666;
+}
+
+/* Assignment Form */
+.assignment-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Task List */
+.task-list h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.task-list table th,
+.task-list table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.task-list table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.task-list table td {
+  font-size: 13px;
+}
+
+.task-form h4 {
+  margin: 20px 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Transfer Form */
+.transfer-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Dashboard Tabs */
+.dashboard-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.tab-btn.active {
+  background: #005BAC;
+  color: white;
+  border-color: #005BAC;
+}
+
+.tab-btn:hover:not(.active) {
+  background: #e9ecef;
+}
+
+.dashboard-content {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+

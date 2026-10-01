@@ -774,6 +774,31 @@
           </div>
         </div>
 
+        <!-- Governance Panel -->
+        <div class="governance-panel" id="governancePanel">
+          <h3>Quản trị địa phương & Liên cơ quan</h3>
+          <div class="governance-status">
+            <div class="status-item">
+              <span class="status-label">Địa bàn:</span>
+              <span class="status-value" id="currentArea">TP. Hồ Chí Minh</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Sự cố chuyển giao:</span>
+              <span class="status-value" id="transferredIncidents">0</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Nhiệm vụ liên cơ quan:</span>
+              <span class="status-value" id="interAgencyTasks">3</span>
+            </div>
+          </div>
+          <div class="governance-actions">
+            <button class="ops-btn" id="areaManagementBtn">Quản lý địa bàn</button>
+            <button class="ops-btn" id="agencyAssignmentBtn">Gán cơ quan</button>
+            <button class="ops-btn" id="taskManagementBtn">Quản lý nhiệm vụ</button>
+            <button class="ops-btn" id="dashboardBtn">Dashboard</button>
+          </div>
+        </div>
+
         <!-- Early Warning Panel -->
         <div class="early-warning-panel" id="earlyWarningPanel">
           <h3>Cảnh báo sớm</h3>
@@ -9853,6 +9878,210 @@ div class="summary-label">Sự cố tháng này</div>
         <div class="modal-actions" style="margin-top: 20px;">
           <button class="btn btn-primary" onclick="createNewVersion()">Tạo phiên bản mới</button>
           <button class="btn btn-secondary" onclick="rollbackVersion()">Rollback</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  <!-- Area Management Modal -->
+  <div class="modal" id="areaManagementModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Quản lý địa bàn hành chính</h3>
+        <button class="modal-close" id="closeAreaManagementModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="area-tree">
+          <h4>Cấu trúc địa bàn</h4>
+          <div class="tree-level">
+            <strong>Tỉnh/Thành phố:</strong>
+            <ul>
+              <li>TP. Hồ Chí Minh
+                <ul>
+                  <li>Quận 1
+                    <ul>
+                      <li>Phường Bến Nghé</li>
+                      <li>Phường Bến Thành</li>
+                    </ul>
+                  </li>
+                  <li>Quận 3
+                    <ul>
+                      <li>Phường 1</li>
+                      <li>Phường 2</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="area-bounds" style="margin-top: 20px;">
+          <h4>Ranh giới hành chính & Vùng phụ trách</h4>
+          <div class="bounds-info">
+            <p><strong>Ranh giới:</strong> Đã xác định</p>
+            <p><strong>Vùng phụ trách:</strong> Miền Nam</p>
+            <button class="btn btn-primary" onclick="viewAreaMap()">Xem bản đồ ranh giới</button>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="addArea()">Thêm địa bàn</button>
+          <button class="btn btn-secondary" onclick="editAreaBounds()">Sửa ranh giới</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agency Assignment Modal -->
+  <div class="modal" id="agencyAssignmentModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Gán cơ quan đầu mối</h3>
+        <button class="modal-close" id="closeAgencyAssignmentModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="assignment-form">
+          <label>Loại sự cố:</label>
+          <select id="incidentType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="traffic">Giao thông</option>
+            <option value="fire">Cháy nổ</option>
+            <option value="health">Sức khỏe</option>
+            <option value="natural">Thiên tai</option>
+          </select>
+          <label>Cơ quan đầu mối:</label>
+          <select id="leadAgency" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="police">Cảnh sát</option>
+            <option value="fire">Cứu hỏa</option>
+            <option value="medical">Y tế</option>
+            <option value="disaster">Phòng chống thiên tai</option>
+          </select>
+          <label>Ca trực:</label>
+          <select id="shift" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="morning">Ca sáng (6:00-14:00)</option>
+            <option value="afternoon">Ca chiều (14:00-22:00)</option>
+            <option value="night">Ca đêm (22:00-6:00)</option>
+          </select>
+          <label>Kênh liên lạc khẩn cấp:</label>
+          <input type="tel" id="emergencyContact" placeholder="Số điện thoại" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="saveAssignment()">Lưu gán</button>
+          <button class="btn btn-secondary" onclick="viewAssignments()">Xem danh sách</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Management Modal -->
+  <div class="modal" id="taskManagementModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Quản lý nhiệm vụ liên cơ quan</h3>
+        <button class="modal-close" id="closeTaskManagementModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="task-list">
+          <h4>Danh sách nhiệm vụ</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Tên nhiệm vụ</th>
+                <th>Cơ quan</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Phối hợp cứu hộ Q1</td>
+                <td>Cảnh sát, Cứu hỏa</td>
+                <td><span class="status-badge pending">Đang thực hiện</span></td>
+                <td><button class="btn btn-sm">Chi tiết</button></td>
+              </tr>
+              <tr>
+                <td>Điều phối y tế khu vực</td>
+                <td>Y tế</td>
+                <td><span class="status-badge completed">Đã hoàn thành</span></td>
+                <td><button class="btn btn-sm">Chi tiết</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="task-form" style="margin-top: 20px;">
+          <h4>Tạo nhiệm vụ mới</h4>
+          <input type="text" id="taskName" placeholder="Tên nhiệm vụ" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+          <input type="text" id="taskAgencies" placeholder="Cơ quan tham gia" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+          <button class="btn btn-primary" onclick="createTask()">Tạo nhiệm vụ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transfer Modal -->
+  <div class="modal" id="transferModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Chuyển giao sự cố</h3>
+        <button class="modal-close" id="closeTransferModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="transfer-form">
+          <label>Mã sự cố:</label>
+          <input type="text" id="incidentId" placeholder="Nhập mã sự cố" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Cấp hiện tại:</label>
+          <input type="text" id="currentLevel" placeholder="Cấp hiện tại" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Chuyển đến:</label>
+          <select id="targetLevel" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="province">Cấp tỉnh</option>
+            <option value="district">Cấp huyện</option>
+            <option value="central">Cấp trung ương</option>
+          </select>
+          <label>Lý do:</label>
+          <textarea id="transferReason" placeholder="Lý do chuyển giao" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="transferIncident()">Chuyển giao</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Modal -->
+  <div class="modal" id="governanceDashboardModal" style="display: none;">
+    <div class="modal-content" style="max-width: 1200px;">
+      <div class="modal-header">
+        <h3>Dashboard địa phương</h3>
+        <button class="modal-close" id="closeGovernanceDashboardModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="dashboard-tabs">
+          <button class="tab-btn active" onclick="switchTab('province')">Cấp tỉnh</button>
+          <button class="tab-btn" onclick="switchTab('district')">Cấp huyện</button>
+          <button class="tab-btn" onclick="switchTab('commune')">Cấp xã</button>
+        </div>
+        <div class="dashboard-content" id="provinceTab">
+          <div class="dashboard-grid">
+            <div class="dashboard-card">
+              <h4>Tổng sự cố</h4>
+              <div class="dashboard-value">156</div>
+            </div>
+            <div class="dashboard-card">
+              <h4>Đã giải quyết</h4>
+              <div class="dashboard-value">142</div>
+            </div>
+            <div class="dashboard-card">
+              <h4>Chuyển giao</h4>
+              <div class="dashboard-value">12</div>
+            </div>
+            <div class="dashboard-card">
+              <h4>Vượt cấp</h4>
+              <div class="dashboard-value">2</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="exportDashboard()">Xuất báo cáo</button>
+          <button class="btn btn-secondary" onclick="toggleDrillMode()">Chế độ diễn tập</button>
         </div>
       </div>
     </div>
