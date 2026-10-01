@@ -674,6 +674,31 @@
           </div>
         </div>
 
+        <!-- Reporting Panel -->
+        <div class="reporting-panel" id="reportingPanel">
+          <h3>Báo cáo & Thống kê</h3>
+          <div class="reporting-summary">
+            <div class="summary-item">
+              <span class="summary-label">Tổng sự cố:</span>
+              <span class="summary-value" id="totalIncidents">156</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Người cứu hộ:</span>
+              <span class="summary-value" id="totalRescued">2,345</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Cứu trợ đáp ứng:</span>
+              <span class="summary-value" id="totalRelief">89%</span>
+            </div>
+          </div>
+          <div class="reporting-actions">
+            <button class="ops-btn" id="incidentsReportBtn">Báo cáo sự cố</button>
+            <button class="ops-btn" id="rescueReportBtn">Báo cáo cứu hộ</button>
+            <button class="ops-btn" id="healthReportBtn">Báo cáo sức khỏe</button>
+            <button class="ops-btn" id="dashboardBtn">Dashboard</button>
+          </div>
+        </div>
+
         <!-- Early Warning Panel -->
         <div class="early-warning-panel" id="earlyWarningPanel">
           <h3>Cảnh báo sớm</h3>
@@ -8975,6 +9000,196 @@ div class="summary-label">Sự cố tháng này</div>
         <div class="modal-actions" style="margin-top: 20px;">
           <button class="btn btn-primary" onclick="uploadDocument()">Tải tài liệu lên</button>
           <button class="btn btn-secondary" onclick="addContact()">Thêm liên lạc</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  <!-- Incidents Report Modal -->
+  <div class="modal" id="incidentsReportModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Báo cáo sự cố</h3>
+        <button class="modal-close" id="closeIncidentsReportModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="report-filters">
+          <label>Loại sự cố:</label>
+          <select id="incidentTypeFilter">
+            <option value="all">Tất cả</option>
+            <option value="traffic">Giao thông</option>
+            <option value="flood">Ngập lũ</option>
+            <option value="fire">Cháy nổ</option>
+            <option value="health">Sức khỏe</option>
+          </select>
+          <label>Khu vực:</label>
+          <select id="areaFilter">
+            <option value="all">Tất cả</option>
+            <option value="q1">Quận 1</option>
+            <option value="q3">Quận 3</option>
+            <option value="q7">Quận 7</option>
+            <option value="q12">Quận 12</option>
+          </select>
+          <label>Thời gian:</label>
+          <input type="date" id="reportDateFrom">
+          <input type="date" id="reportDateTo">
+          <button class="btn btn-primary" onclick="generateIncidentReport()">Tạo báo cáo</button>
+        </div>
+        <div class="report-results" id="incidentReportResults" style="display: none;">
+          <h4>Kết quả báo cáo</h4>
+          <div class="report-stats">
+            <p><strong>Tổng sự cố:</strong> <span id="reportTotalIncidents">0</span></p>
+            <p><strong>Đã giải quyết:</strong> <span id="reportResolvedIncidents">0</span></p>
+            <p><strong>Đang xử lý:</strong> <span id="reportPendingIncidents">0</span></p>
+          </div>
+          <div class="report-actions" style="margin-top: 20px;">
+            <button class="btn btn-primary" onclick="exportIncidentCSV()">Xuất CSV</button>
+            <button class="btn btn-secondary" onclick="exportIncidentExcel()">Xuất Excel</button>
+            <button class="btn btn-secondary" onclick="exportIncidentPDF()">Xuất PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rescue Report Modal -->
+  <div class="modal" id="rescueReportModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Báo cáo cứu hộ</h3>
+        <button class="modal-close" id="closeRescueReportModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="report-filters">
+          <label>Loại cứu hộ:</label>
+          <select id="rescueTypeFilter">
+            <option value="all">Tất cả</option>
+            <option value="medical">Y tế</option>
+            <option value="water">Dưới nước</option>
+            <option value="mountain">Leo núi</option>
+            <option value="fire">PCCC</option>
+          </select>
+          <label>Thời gian:</label>
+          <input type="date" id="rescueDateFrom">
+          <input type="date" id="rescueDateTo">
+          <button class="btn btn-primary" onclick="generateRescueReport()">Tạo báo cáo</button>
+        </div>
+        <div class="report-results" id="rescueReportResults" style="display: none;">
+          <h4>Kết quả báo cáo</h4>
+          <div class="report-stats">
+            <p><strong>Tổng yêu cầu:</strong> <span id="reportTotalRescues">0</span></p>
+            <p><strong>Đã hoàn thành:</strong> <span id="reportCompletedRescues">0</span></p>
+            <p><strong>Đang xử lý:</strong> <span id="reportPendingRescues">0</span></p>
+            <p><strong>Người được cứu:</strong> <span id="reportTotalRescued">0</span></p>
+          </div>
+          <div class="report-actions" style="margin-top: 20px;">
+            <button class="btn btn-primary" onclick="exportRescueCSV()">Xuất CSV</button>
+            <button class="btn btn-secondary" onclick="exportRescueExcel()">Xuất Excel</button>
+            <button class="btn btn-secondary" onclick="exportRescuePDF()">Xuất PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Health Report Modal -->
+  <div class="modal" id="healthReportModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Báo cáo sức khỏe</h3>
+        <button class="modal-close" id="closeHealthReportModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="report-filters">
+          <label>Loại báo cáo:</label>
+          <select id="healthTypeFilter">
+            <option value="all">Tất cả</option>
+            <option value="cases">Ca bệnh</option>
+            <option value="quarantine">Cách ly</option>
+            <option value="treatment">Điều trị</option>
+          </select>
+          <label>Thời gian:</label>
+          <input type="date" id="healthDateFrom">
+          <input type="date" id="healthDateTo">
+          <button class="btn btn-primary" onclick="generateHealthReport()">Tạo báo cáo</button>
+        </div>
+        <div class="report-results" id="healthReportResults" style="display: none;">
+          <h4>Kết quả báo cáo</h4>
+          <div class="report-stats">
+            <p><strong>Tổng ca bệnh:</strong> <span id="reportTotalCases">0</span></p>
+            <p><strong>Người cách ly:</strong> <span id="reportTotalQuarantine">0</span></p>
+            <p><strong>Đã khỏi bệnh:</strong> <span id="reportRecovered">0</span></p>
+            <p><strong>Đang điều trị:</strong> <span id="reportTreating">0</span></p>
+          </div>
+          <div class="report-actions" style="margin-top: 20px;">
+            <button class="btn btn-primary" onclick="exportHealthCSV()">Xuất CSV</button>
+            <button class="btn btn-secondary" onclick="exportHealthExcel()">Xuất Excel</button>
+            <button class="btn btn-secondary" onclick="exportHealthPDF()">Xuất PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Modal -->
+  <div class="modal" id="dashboardModal" style="display: none;">
+    <div class="modal-content" style="max-width: 1200px;">
+      <div class="modal-header">
+        <h3>Bảng điều khiển tổng hợp</h3>
+        <button class="modal-close" id="closeDashboardModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="dashboard-grid">
+          <div class="dashboard-card">
+            <h4>Sự cố</h4>
+            <div class="dashboard-value" id="dashIncidents">156</div>
+            <div class="dashboard-change">+12%</div>
+          </div>
+          <div class="dashboard-card">
+            <h4>Cứu hộ</h4>
+            <div class="dashboard-value" id="dashRescues">2,345</div>
+            <div class="dashboard-change">+8%</div>
+          </div>
+          <div class="dashboard-card">
+            <h4>Cứu trợ</h4>
+            <div class="dashboard-value" id="dashRelief">89%</div>
+            <div class="dashboard-change">+5%</div>
+          </div>
+          <div class="dashboard-card">
+            <h4>Sức khỏe</h4>
+            <div class="dashboard-value" id="dashHealth">45</div>
+            <div class="dashboard-change">-3%</div>
+          </div>
+        </div>
+        <div class="dashboard-charts">
+          <div class="chart-section">
+            <h4>Xu hướng theo thời gian</h4>
+            <div class="chart-container" id="trendChart">
+              <div class="chart-placeholder">
+                <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                  <polyline points="22 12 18 12 15 12 9 12 5 12 2 12"></polyline>
+                </svg>
+                <p>Biểu đồ xu hướng</p>
+              </div>
+            </div>
+          </div>
+          <div class="chart-section">
+            <h4>Phân bố theo khu vực</h4>
+            <div class="chart-container" id="areaChart">
+              <div class="chart-placeholder">
+                <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                  <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path>
+                </svg>
+                <p>Biểu đồ khu vực</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="refreshDashboard()">Làm mới</button>
+          <button class="btn btn-secondary" onclick="exportDashboard()">Xuất báo cáo</button>
         </div>
       </div>
     </div>

@@ -13041,7 +13041,223 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeMobileMenu();
   initializeNavigationActiveState();
   initializeOperationsSystem();
+  initializeReportingSystem();
 });
+
+// Reporting System
+var reportingData = {
+  totalIncidents: 156,
+  totalRescued: 2345,
+  totalRelief: 89,
+  incidentsByType: {
+    traffic: 45,
+    flood: 38,
+    fire: 22,
+    health: 51
+  },
+  incidentsByArea: {
+    q1: 35,
+    q3: 28,
+    q7: 42,
+    q12: 51
+  },
+  rescueStats: {
+    total: 2345,
+    completed: 2100,
+    pending: 245,
+    byType: {
+      medical: 890,
+      water: 567,
+      mountain: 234,
+      fire: 654
+    }
+  },
+  healthStats: {
+    totalCases: 45,
+    quarantine: 12,
+    recovered: 30,
+    treating: 15
+  }
+};
+
+function initializeReportingSystem() {
+  // Load reporting data from localStorage
+  var savedReport = localStorage.getItem('sosmap_reporting');
+  if (savedReport) {
+    reportingData = JSON.parse(savedReport);
+  }
+
+  // Update reporting panel
+  updateReportingPanel();
+
+  // Initialize reporting buttons
+  document.getElementById('incidentsReportBtn').addEventListener('click', function() {
+    document.getElementById('incidentsReportModal').style.display = 'block';
+  });
+
+  document.getElementById('rescueReportBtn').addEventListener('click', function() {
+    document.getElementById('rescueReportModal').style.display = 'block';
+  });
+
+  document.getElementById('healthReportBtn').addEventListener('click', function() {
+    document.getElementById('healthReportModal').style.display = 'block';
+  });
+
+  document.getElementById('dashboardBtn').addEventListener('click', function() {
+    document.getElementById('dashboardModal').style.display = 'block';
+  });
+
+  // Close modals
+  document.getElementById('closeIncidentsReportModal').addEventListener('click', function() {
+    document.getElementById('incidentsReportModal').style.display = 'none';
+  });
+
+  document.getElementById('closeRescueReportModal').addEventListener('click', function() {
+    document.getElementById('rescueReportModal').style.display = 'none';
+  });
+
+  document.getElementById('closeHealthReportModal').addEventListener('click', function() {
+    document.getElementById('healthReportModal').style.display = 'none';
+  });
+
+  document.getElementById('closeDashboardModal').addEventListener('click', function() {
+    document.getElementById('dashboardModal').style.display = 'none';
+  });
+}
+
+function updateReportingPanel() {
+  document.getElementById('totalIncidents').textContent = reportingData.totalIncidents;
+  document.getElementById('totalRescued').textContent = reportingData.totalRescued.toLocaleString();
+  document.getElementById('totalRelief').textContent = reportingData.totalRelief + '%';
+}
+
+function saveReportingData() {
+  localStorage.setItem('sosmap_reporting', JSON.stringify(reportingData));
+}
+
+// Incident Report Functions
+function generateIncidentReport() {
+  var type = document.getElementById('incidentTypeFilter').value;
+  var area = document.getElementById('areaFilter').value;
+
+  // Simulate generating report
+  var total = reportingData.totalIncidents;
+  var resolved = Math.floor(total * 0.7);
+  var pending = total - resolved;
+
+  document.getElementById('reportTotalIncidents').textContent = total;
+  document.getElementById('reportResolvedIncidents').textContent = resolved;
+  document.getElementById('reportPendingIncidents').textContent = pending;
+
+  document.getElementById('incidentReportResults').style.display = 'block';
+
+  alert('Đã tạo báo cáo sự cố!');
+  logActivity('incident_report', 'Tạo báo cáo sự cố: ' + type + ', ' + area);
+}
+
+function exportIncidentCSV() {
+  alert('Xuất báo cáo sự cố CSV (demo)');
+  logActivity('incident_export_csv', 'Xuất báo cáo sự cố CSV');
+}
+
+function exportIncidentExcel() {
+  alert('Xuất báo cáo sự cố Excel (demo)');
+  logActivity('incident_export_excel', 'Xuất báo cáo sự cố Excel');
+}
+
+function exportIncidentPDF() {
+  alert('Xuất báo cáo sự cố PDF (demo)');
+  logActivity('incident_export_pdf', 'Xuất báo cáo sự cố PDF');
+}
+
+// Rescue Report Functions
+function generateRescueReport() {
+  var type = document.getElementById('rescueTypeFilter').value;
+
+  // Simulate generating report
+  var total = reportingData.rescueStats.total;
+  var completed = reportingData.rescueStats.completed;
+  var pending = reportingData.rescueStats.pending;
+  var rescued = reportingData.totalRescued;
+
+  document.getElementById('reportTotalRescues').textContent = total;
+  document.getElementById('reportCompletedRescues').textContent = completed;
+  document.getElementById('reportPendingRescues').textContent = pending;
+  document.getElementById('reportTotalRescued').textContent = rescued.toLocaleString();
+
+  document.getElementById('rescueReportResults').style.display = 'block';
+
+  alert('Đã tạo báo cáo cứu hộ!');
+  logActivity('rescue_report', 'Tạo báo cáo cứu hộ: ' + type);
+}
+
+function exportRescueCSV() {
+  alert('Xuất báo cáo cứu hộ CSV (demo)');
+  logActivity('rescue_export_csv', 'Xuất báo cáo cứu hộ CSV');
+}
+
+function exportRescueExcel() {
+  alert('Xuất báo cáo cứu hộ Excel (demo)');
+  logActivity('rescue_export_excel', 'Xuất báo cáo cứu hộ Excel');
+}
+
+function exportRescuePDF() {
+  alert('Xuất báo cáo cứu hộ PDF (demo)');
+  logActivity('rescue_export_pdf', 'Xuất báo cáo cứu hộ PDF');
+}
+
+// Health Report Functions
+function generateHealthReport() {
+  var type = document.getElementById('healthTypeFilter').value;
+
+  // Simulate generating report
+  var totalCases = reportingData.healthStats.totalCases;
+  var quarantine = reportingData.healthStats.quarantine;
+  var recovered = reportingData.healthStats.recovered;
+  var treating = reportingData.healthStats.treating;
+
+  document.getElementById('reportTotalCases').textContent = totalCases;
+  document.getElementById('reportTotalQuarantine').textContent = quarantine;
+  document.getElementById('reportRecovered').textContent = recovered;
+  document.getElementById('reportTreating').textContent = treating;
+
+  document.getElementById('healthReportResults').style.display = 'block';
+
+  alert('Đã tạo báo cáo sức khỏe!');
+  logActivity('health_report', 'Tạo báo cáo sức khỏe: ' + type);
+}
+
+function exportHealthCSV() {
+  alert('Xuất báo cáo sức khỏe CSV (demo)');
+  logActivity('health_export_csv', 'Xuất báo cáo sức khỏe CSV');
+}
+
+function exportHealthExcel() {
+  alert('Xuất báo cáo sức khỏe Excel (demo)');
+  logActivity('health_export_excel', 'Xuất báo cáo sức khỏe Excel');
+}
+
+function exportHealthPDF() {
+  alert('Xuất báo cáo sức khỏe PDF (demo)');
+  logActivity('health_export_pdf', 'Xuất báo cáo sức khỏe PDF');
+}
+
+// Dashboard Functions
+function refreshDashboard() {
+  // Simulate refreshing dashboard
+  document.getElementById('dashIncidents').textContent = reportingData.totalIncidents;
+  document.getElementById('dashRescues').textContent = reportingData.totalRescued.toLocaleString();
+  document.getElementById('dashRelief').textContent = reportingData.totalRelief + '%';
+  document.getElementById('dashHealth').textContent = reportingData.healthStats.totalCases;
+
+  alert('Đã làm mới dashboard!');
+  logActivity('dashboard_refresh', 'Làm mới dashboard');
+}
+
+function exportDashboard() {
+  alert('Xuất báo cáo dashboard (demo)');
+  logActivity('dashboard_export', 'Xuất báo cáo dashboard');
+}
 
 // Operations System
 var operationsData = {

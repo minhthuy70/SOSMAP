@@ -670,19 +670,19 @@ QUY UOC
 
 28. BAO CAO, DO LUONG VA MINH BACH (REPORTING)
 
-[ ] - Bao cao so luong su co theo loai va dia ban
-[ ] - Bao cao thoi gian phat hien, phan hoi va khac phuc
-[ ] - Bao cao so nguoi duoc cuu ho
-[ ] - Bao cao nhu cau cuu tro da tiep nhan va da dap ung
-[ ] - Bao cao ton kho theo diem cuu tro
-[ ] - Bao cao luong nguoi den va roi diem tru an
-[ ] - Bao cao ca benh, nhu cau cach ly va luong xu ly
-[ ] - Bao cao tuyen so tan bi chan va da mo lai
-[ ] - Bao cao phan anh trung lap, sai hoac chua xac minh
-[ ] - Bieu do theo ngay, tuan, thang va mua thien tai
-[ ] - Tai bao cao CSV, Excel, PDF va ban do
-[ ] - Cong khai chi so tong hop ma khong lo du lieu ca nhan
-[ ] - Tao bang dieu khien cho lanh dao va don vi hien truong
+[x] - Bao cao so luong su co theo loai va dia ban
+[x] - Bao cao thoi gian phat hien, phan hoi va khac phuc
+[x] - Bao cao so nguoi duoc cuu ho
+[x] - Bao cao nhu cau cuu tro da tiep nhan va da dap ung
+[x] - Bao cao ton kho theo diem cuu tro
+[x] - Bao cao luong nguoi den va roi diem tru an
+[x] - Bao cao ca benh, nhu cau cach ly va luong xu ly
+[x] - Bao cao tuyen so tan bi chan va da mo lai
+[x] - Bao cao phan anh trung lap, sai hoac chua xac minh
+[x] - Bieu do theo ngay, tuan, thang va mua thien tai
+[x] - Tai bao cao CSV, Excel, PDF va ban do
+[x] - Cong khai chi so tong hop ma khong lo du lieu ca nhan
+[x] - Tao bang dieu khien cho lanh dao va don vi hien truong
 
 ================================================================================
 
