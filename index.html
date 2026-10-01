@@ -359,14 +359,42 @@
       </div>
 
       <div class="resize-handle" id="resizeHandle"></div>
+      
+      <!-- Mobile Menu Toggle -->
+      <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Mobile Menu -->
+      <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-menu-close" id="mobileMenuClose">×</button>
+        <nav class="mobile-nav">
+          <a class="mobile-nav-link" data-section="map-section">🗺️ Bản đồ</a>
+          <a class="mobile-nav-link" data-section="report-section">📝 Phản ánh</a>
+          <a class="mobile-nav-link" data-section="admin-section">⚙️ Quản trị</a>
+          <a class="mobile-nav-link" data-section="about-section">ℹ️ Giới thiệu</a>
+        </nav>
+      </div>
+
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
           <h2>Tình trạng giao thông</h2>
-          <button class="fullscreen-btn" id="fullscreenBtn" title="Chế độ toàn màn hình">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
-            </svg>
-          </button>
+          <div class="sidebar-header-buttons">
+            <button class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Thu gọn sidebar">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button class="fullscreen-btn" id="fullscreenBtn" title="Chế độ toàn màn hình">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Connection Status -->
