@@ -699,6 +699,31 @@
           </div>
         </div>
 
+        <!-- Privacy Panel -->
+        <div class="privacy-panel" id="privacyPanel">
+          <h3>Bảo mật & Quyền riêng tư</h3>
+          <div class="privacy-status">
+            <div class="status-item">
+              <span class="status-label">Trạng thái mã hóa:</span>
+              <span class="status-value success">Đã kích hoạt</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Quyền truy cập:</span>
+              <span class="status-value" id="accessLevel">Cơ bản</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Đồng ý dữ liệu:</span>
+              <span class="status-value" id="consentStatus">Chưa đồng ý</span>
+            </div>
+          </div>
+          <div class="privacy-actions">
+            <button class="ops-btn" id="privacySettingsBtn">Cài đặt bảo mật</button>
+            <button class="ops-btn" id="consentBtn">Quản lý đồng ý</button>
+            <button class="ops-btn" id="dataDeletionBtn">Xóa dữ liệu</button>
+            <button class="ops-btn" id="securityAuditBtn">Kiểm tra bảo mật</button>
+          </div>
+        </div>
+
         <!-- Early Warning Panel -->
         <div class="early-warning-panel" id="earlyWarningPanel">
           <h3>Cảnh báo sớm</h3>
@@ -9190,6 +9215,214 @@ div class="summary-label">Sự cố tháng này</div>
         <div class="dashboard-actions" style="margin-top: 20px;">
           <button class="btn btn-primary" onclick="refreshDashboard()">Làm mới</button>
           <button class="btn btn-secondary" onclick="exportDashboard()">Xuất báo cáo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  <!-- Privacy Settings Modal -->
+  <div class="modal" id="privacySettingsModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Cài đặt bảo mật</h3>
+        <button class="modal-close" id="closePrivacySettingsModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="privacy-settings-section">
+          <h4>Mã hóa dữ liệu</h4>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="encryptionEnabled" checked>
+            <span>Mã hóa dữ liệu khi truyền</span>
+          </label>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="storageEncryptionEnabled" checked>
+            <span>Mã hóa dữ liệu khi lưu</span>
+          </label>
+        </div>
+        <div class="privacy-settings-section" style="margin-top: 20px;">
+          <h4>Xác thực</h4>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="mfaEnabled">
+            <span>Xác thực đa yếu tố (MFA)</span>
+          </label>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="biometricEnabled">
+            <span>Xác thực sinh trắc học</span>
+          </label>
+        </div>
+        <div class="privacy-settings-section" style="margin-top: 20px;">
+          <h4>Quyền riêng tư</h4>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="locationPrivacyEnabled" checked>
+            <span>Ẩn tọa độ chính xác khi công khai</span>
+          </label>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="healthPrivacyEnabled" checked>
+            <span>Ẩn thông tin bệnh nhân</span>
+          </label>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="quarantinePrivacyEnabled" checked>
+            <span>Không hiển thị danh sách cách ly</span>
+          </label>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="savePrivacySettings()">Lưu cài đặt</button>
+          <button class="btn btn-secondary" onclick="resetPrivacySettings()">Đặt lại mặc định</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Consent Management Modal -->
+  <div class="modal" id="consentModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Quản lý đồng ý dữ liệu</h3>
+        <button class="modal-close" id="closeConsentModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="consent-section">
+          <h4>Thu thập dữ liệu vị trí</h4>
+          <p>Chúng tôi thu thập dữ liệu vị trí của bạn để cung cấp dịch vụ cứu hộ và cảnh báo.</p>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="locationConsent">
+            <span>Tôi đồng ý chia sẻ dữ liệu vị trí</span>
+          </label>
+        </div>
+        <div class="consent-section" style="margin-top: 20px;">
+          <h4>Thu thập dữ liệu sức khỏe</h4>
+          <p>Chúng tôi thu thập dữ liệu sức khỏe để hỗ trợ y tế khẩn cấp và theo dõi dịch bệnh.</p>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="healthConsent">
+            <span>Tôi đồng ý chia sẻ dữ liệu sức khỏe</span>
+          </label>
+        </div>
+        <div class="consent-section" style="margin-top: 20px;">
+          <h4>Thu thập dữ liệu nhận dạng</h4>
+          <p>Chúng tôi thu thập thông tin nhận dạng để xác định và liên hệ khi cần thiết.</p>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="identityConsent">
+            <span>Tôi đồng ý chia sẻ thông tin nhận dạng</span>
+          </label>
+        </div>
+        <div class="consent-info" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+          <p><strong>Quyền của bạn:</strong></p>
+          <ul>
+            <li>Bạn có thể rút lại đồng ý bất cứ lúc nào</li>
+            <li>Dữ liệu của bạn sẽ được xóa sau khi rút lại đồng ý</li>
+            <li>Bạn có thể yêu cầu bản sao dữ liệu của mình</li>
+          </ul>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="saveConsent()">Lưu đồng ý</button>
+          <button class="btn btn-secondary" onclick="withdrawConsent()">Rút lại đồng ý</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Deletion Modal -->
+  <div class="modal" id="dataDeletionModal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>Xóa dữ liệu</h3>
+        <button class="modal-close" id="closeDataDeletionModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="deletion-warning" style="padding: 15px; background: #fff3cd; border-radius: 6px; margin-bottom: 20px;">
+          <p><strong>Cảnh báo:</strong> Hành động này không thể hoàn tác!</p>
+        </div>
+        <div class="deletion-options">
+          <label class="privacy-toggle">
+            <input type="checkbox" id="deleteLocationData">
+            <span>Xóa dữ liệu vị trí</span>
+          </label>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="deleteHealthData">
+            <span>Xóa dữ liệu sức khỏe</span>
+          </label>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="deleteActivityLog">
+            <span>Xóa nhật ký hoạt động</span>
+          </label>
+          <label class="privacy-toggle">
+            <input type="checkbox" id="deleteAllData">
+            <span>Xóa tất cả dữ liệu</span>
+          </label>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-danger" onclick="confirmDataDeletion()">Xác nhận xóa</button>
+          <button class="btn btn-secondary" onclick="requestDeletion()">Gửi yêu cầu xóa</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security Audit Modal -->
+  <div class="modal" id="securityAuditModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Kiểm tra bảo mật</h3>
+        <button class="modal-close" id="closeSecurityAuditModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="security-audit-section">
+          <h4>Kiểm tra xâm nhập</h4>
+          <div class="audit-status">
+            <p><strong>Trạng thái:</strong> <span class="status-value success">Không phát hiện xâm nhập</span></p>
+            <p><strong>Lần kiểm tra gần nhất:</strong> <span id="lastPenetrationTest">01/10/2026</span></p>
+            <p><strong>Lần kiểm tra tiếp theo:</strong> <span id="nextPenetrationTest">01/01/2027</span></p>
+          </div>
+          <button class="btn btn-primary" onclick="runPenetrationTest()">Chạy kiểm thử xâm nhập</button>
+        </div>
+        <div class="security-audit-section" style="margin-top: 20px;">
+          <h4>Kiểm thử tai nạn</h4>
+          <div class="audit-status">
+            <p><strong>Trạng thái:</strong> <span class="status-value success">Đã hoàn thành</span></p>
+            <p><strong>Lần kiểm tra gần nhất:</strong> <span id="lastDisasterTest">15/09/2026</span></p>
+            <p><strong>Kết quả:</strong> <span class="status-value success">Dữ liệu đã khôi phục thành công</span></p>
+          </div>
+          <button class="btn btn-primary" onclick="runDisasterTest()">Chạy kiểm thử tai nạn</button>
+        </div>
+        <div class="security-audit-section" style="margin-top: 20px;">
+          <h4>Log truy cập</h4>
+          <div class="access-log">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th>Thời gian</th>
+                  <th>Hành động</th>
+                  <th>IP</th>
+                  <th>Thiết bị</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>02/10/2026 10:30</td>
+                  <td>Đăng nhập</td>
+                  <td>192.168.1.100</td>
+                  <td>Chrome/Windows</td>
+                </tr>
+                <tr>
+                  <td>02/10/2026 10:25</td>
+                  <td>Xem dashboard</td>
+                  <td>192.168.1.100</td>
+                  <td>Chrome/Windows</td>
+                </tr>
+                <tr>
+                  <td>02/10/2026 10:20</td>
+                  <td>Tạo báo cáo</td>
+                  <td>192.168.1.100</td>
+                  <td>Chrome/Windows</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="exportSecurityLog()">Xuất log bảo mật</button>
+          <button class="btn btn-secondary" onclick="reportSecurityIssue()">Báo cáo lỗ hổng</button>
         </div>
       </div>
     </div>

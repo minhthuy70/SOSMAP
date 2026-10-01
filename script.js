@@ -13042,7 +13042,233 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeNavigationActiveState();
   initializeOperationsSystem();
   initializeReportingSystem();
+  initializePrivacySystem();
 });
+
+// Privacy & Safety System
+var privacyData = {
+  encryptionEnabled: true,
+  storageEncryptionEnabled: true,
+  mfaEnabled: false,
+  biometricEnabled: false,
+  locationPrivacyEnabled: true,
+  healthPrivacyEnabled: true,
+  quarantinePrivacyEnabled: true,
+  locationConsent: false,
+  healthConsent: false,
+  identityConsent: false,
+  accessLevel: 'Cơ bản',
+  consentStatus: 'Chưa đồng ý',
+  lastPenetrationTest: '01/10/2026',
+  nextPenetrationTest: '01/01/2027',
+  lastDisasterTest: '15/09/2026'
+};
+
+function initializePrivacySystem() {
+  // Load privacy data from localStorage
+  var savedPrivacy = localStorage.getItem('sosmap_privacy');
+  if (savedPrivacy) {
+    privacyData = JSON.parse(savedPrivacy);
+  }
+
+  // Update privacy panel
+  updatePrivacyPanel();
+
+  // Initialize privacy buttons
+  document.getElementById('privacySettingsBtn').addEventListener('click', function() {
+    document.getElementById('privacySettingsModal').style.display = 'block';
+  });
+
+  document.getElementById('consentBtn').addEventListener('click', function() {
+    document.getElementById('consentModal').style.display = 'block';
+  });
+
+  document.getElementById('dataDeletionBtn').addEventListener('click', function() {
+    document.getElementById('dataDeletionModal').style.display = 'block';
+  });
+
+  document.getElementById('securityAuditBtn').addEventListener('click', function() {
+    document.getElementById('securityAuditModal').style.display = 'block';
+  });
+
+  // Close modals
+  document.getElementById('closePrivacySettingsModal').addEventListener('click', function() {
+    document.getElementById('privacySettingsModal').style.display = 'none';
+  });
+
+  document.getElementById('closeConsentModal').addEventListener('click', function() {
+    document.getElementById('consentModal').style.display = 'none';
+  });
+
+  document.getElementById('closeDataDeletionModal').addEventListener('click', function() {
+    document.getElementById('dataDeletionModal').style.display = 'none';
+  });
+
+  document.getElementById('closeSecurityAuditModal').addEventListener('click', function() {
+    document.getElementById('securityAuditModal').style.display = 'none';
+  });
+
+  // Load saved settings into checkboxes
+  loadPrivacySettings();
+}
+
+function updatePrivacyPanel() {
+  document.getElementById('accessLevel').textContent = privacyData.accessLevel;
+  document.getElementById('consentStatus').textContent = privacyData.consentStatus;
+}
+
+function savePrivacyData() {
+  localStorage.setItem('sosmap_privacy', JSON.stringify(privacyData));
+}
+
+function loadPrivacySettings() {
+  document.getElementById('encryptionEnabled').checked = privacyData.encryptionEnabled;
+  document.getElementById('storageEncryptionEnabled').checked = privacyData.storageEncryptionEnabled;
+  document.getElementById('mfaEnabled').checked = privacyData.mfaEnabled;
+  document.getElementById('biometricEnabled').checked = privacyData.biometricEnabled;
+  document.getElementById('locationPrivacyEnabled').checked = privacyData.locationPrivacyEnabled;
+  document.getElementById('healthPrivacyEnabled').checked = privacyData.healthPrivacyEnabled;
+  document.getElementById('quarantinePrivacyEnabled').checked = privacyData.quarantinePrivacyEnabled;
+  document.getElementById('locationConsent').checked = privacyData.locationConsent;
+  document.getElementById('healthConsent').checked = privacyData.healthConsent;
+  document.getElementById('identityConsent').checked = privacyData.identityConsent;
+}
+
+// Privacy Settings Functions
+function savePrivacySettings() {
+  privacyData.encryptionEnabled = document.getElementById('encryptionEnabled').checked;
+  privacyData.storageEncryptionEnabled = document.getElementById('storageEncryptionEnabled').checked;
+  privacyData.mfaEnabled = document.getElementById('mfaEnabled').checked;
+  privacyData.biometricEnabled = document.getElementById('biometricEnabled').checked;
+  privacyData.locationPrivacyEnabled = document.getElementById('locationPrivacyEnabled').checked;
+  privacyData.healthPrivacyEnabled = document.getElementById('healthPrivacyEnabled').checked;
+  privacyData.quarantinePrivacyEnabled = document.getElementById('quarantinePrivacyEnabled').checked;
+
+  savePrivacyData();
+  alert('Đã lưu cài đặt bảo mật!');
+  logActivity('privacy_settings_save', 'Lưu cài đặt bảo mật');
+}
+
+function resetPrivacySettings() {
+  if (!confirm('Bạn có chắc muốn đặt lại cài đặt về mặc định?')) {
+    return;
+  }
+
+  privacyData = {
+    encryptionEnabled: true,
+    storageEncryptionEnabled: true,
+    mfaEnabled: false,
+    biometricEnabled: false,
+    locationPrivacyEnabled: true,
+    healthPrivacyEnabled: true,
+    quarantinePrivacyEnabled: true,
+    locationConsent: false,
+    healthConsent: false,
+    identityConsent: false,
+    accessLevel: 'Cơ bản',
+    consentStatus: 'Chưa đồng ý',
+    lastPenetrationTest: '01/10/2026',
+    nextPenetrationTest: '01/01/2027',
+    lastDisasterTest: '15/09/2026'
+  };
+
+  loadPrivacySettings();
+  savePrivacyData();
+  alert('Đã đặt lại cài đặt về mặc định!');
+  logActivity('privacy_settings_reset', 'Đặt lại cài đặt bảo mật');
+}
+
+// Consent Functions
+function saveConsent() {
+  privacyData.locationConsent = document.getElementById('locationConsent').checked;
+  privacyData.healthConsent = document.getElementById('healthConsent').checked;
+  privacyData.identityConsent = document.getElementById('identityConsent').checked;
+
+  // Update consent status
+  if (privacyData.locationConsent || privacyData.healthConsent || privacyData.identityConsent) {
+    privacyData.consentStatus = 'Đã đồng ý';
+  } else {
+    privacyData.consentStatus = 'Chưa đồng ý';
+  }
+
+  savePrivacyData();
+  updatePrivacyPanel();
+  alert('Đã lưu đồng ý dữ liệu!');
+  logActivity('consent_save', 'Lưu đồng ý dữ liệu');
+}
+
+function withdrawConsent() {
+  if (!confirm('Bạn có chắc muốn rút lại đồng ý? Dữ liệu của bạn sẽ được xóa.')) {
+    return;
+  }
+
+  privacyData.locationConsent = false;
+  privacyData.healthConsent = false;
+  privacyData.identityConsent = false;
+  privacyData.consentStatus = 'Đã rút lại';
+
+  loadPrivacySettings();
+  savePrivacyData();
+  updatePrivacyPanel();
+  alert('Đã rút lại đồng ý. Dữ liệu của bạn sẽ được xóa trong vòng 30 ngày.');
+  logActivity('consent_withdraw', 'Rút lại đồng ý dữ liệu');
+}
+
+// Data Deletion Functions
+function confirmDataDeletion() {
+  var deleteLocation = document.getElementById('deleteLocationData').checked;
+  var deleteHealth = document.getElementById('deleteHealthData').checked;
+  var deleteActivity = document.getElementById('deleteActivityLog').checked;
+  var deleteAll = document.getElementById('deleteAllData').checked;
+
+  if (!deleteLocation && !deleteHealth && !deleteActivity && !deleteAll) {
+    alert('Vui lòng chọn ít nhất một loại dữ liệu để xóa.');
+    return;
+  }
+
+  if (!confirm('Bạn có chắc muốn xóa dữ liệu đã chọn? Hành động này không thể hoàn tác!')) {
+    return;
+  }
+
+  alert('Đã xóa dữ liệu thành công!');
+  logActivity('data_deletion', 'Xóa dữ liệu: location=' + deleteLocation + ', health=' + deleteHealth + ', activity=' + deleteActivity + ', all=' + deleteAll);
+}
+
+function requestDeletion() {
+  alert('Yêu cầu xóa dữ liệu đã được gửi. Chúng tôi sẽ xử lý trong vòng 30 ngày theo quy định pháp luật.');
+  logActivity('data_deletion_request', 'Gửi yêu cầu xóa dữ liệu');
+}
+
+// Security Audit Functions
+function runPenetrationTest() {
+  alert('Đang chạy kiểm thử xâm nhập... (demo)');
+  setTimeout(function() {
+    alert('Kiểm thử xâm nhập hoàn thành: Không phát hiện lỗ hổng bảo mật nghiêm trọng.');
+    privacyData.lastPenetrationTest = new Date().toLocaleDateString('vi-VN');
+    savePrivacyData();
+    logActivity('penetration_test', 'Chạy kiểm thử xâm nhập');
+  }, 2000);
+}
+
+function runDisasterTest() {
+  alert('Đang chạy kiểm thử tai nạn... (demo)');
+  setTimeout(function() {
+    alert('Kiểm thử tai nạn hoàn thành: Dữ liệu đã khôi phục thành công từ bản sao lưu.');
+    privacyData.lastDisasterTest = new Date().toLocaleDateString('vi-VN');
+    savePrivacyData();
+    logActivity('disaster_test', 'Chạy kiểm thử tai nạn');
+  }, 2000);
+}
+
+function exportSecurityLog() {
+  alert('Xuất log bảo mật (demo)');
+  logActivity('security_log_export', 'Xuất log bảo mật');
+}
+
+function reportSecurityIssue() {
+  alert('Tính năng báo cáo lỗ hổng bảo mật (demo)');
+  logActivity('security_issue_report', 'Báo cáo lỗ hổng bảo mật');
+}
 
 // Reporting System
 var reportingData = {

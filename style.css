@@ -12560,3 +12560,179 @@ body.high-contrast textarea {
   height: 60px;
 }
 
+
+
+/* Privacy Panel */
+.privacy-panel {
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.privacy-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.privacy-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.privacy-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Privacy Settings Section */
+.privacy-settings-section {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.privacy-settings-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.privacy-toggle {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.privacy-toggle input {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.privacy-toggle span {
+  font-size: 13px;
+  color: #333;
+}
+
+/* Consent Section */
+.consent-section {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.consent-section h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.consent-section p {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.consent-info {
+  font-size: 13px;
+  color: #333;
+}
+
+.consent-info p {
+  margin: 0 0 10px 0;
+}
+
+.consent-info ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.consent-info li {
+  margin: 5px 0;
+}
+
+/* Deletion Warning */
+.deletion-warning {
+  color: #856404;
+}
+
+.deletion-warning p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.deletion-options {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+/* Security Audit Section */
+.security-audit-section {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.security-audit-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.audit-status {
+  margin-bottom: 15px;
+}
+
+.audit-status p {
+  margin: 8px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.audit-status strong {
+  color: #666;
+}
+
+/* Access Log */
+.access-log table th,
+.access-log table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.access-log table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.access-log table td {
+  font-size: 13px;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}
+

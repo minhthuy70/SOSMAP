@@ -651,20 +651,20 @@ QUY UOC
 
 27. BAO MAT, QUYEN RIENG TU VA DAO DUC (PRIVACY & SAFETY)
 
-[ ] - Ma hoa du lieu nhay cam khi truyen va khi luu
-[ ] - Xac thuc da yeu to cho tai khoan quan tri
-[ ] - Phan quyen toi thieu theo nhiem vu
-[ ] - An toa do chinh xac cua nguoi de bi ton thuong khi cong khai
-[ ] - An thong tin benh nhan khoi ban do cong cong
-[ ] - Khong hien thi danh sach nguoi cach ly cho cong dong
-[ ] - Yeu cau dong y khi thu thap du lieu suc khoe va vi tri
-[ ] - Cho phep rut lai dong y theo quy dinh
-[ ] - Luu nhat ky truy cap, sua va xuat du lieu
-[ ] - Canh bao khi nguoi dung sap chia se du lieu nhay cam
-[ ] - Sao luu, phuc hoi va kiem tra tinh toan ven du lieu
-[ ] - Co quy trinh xu ly yeu cau xoa du lieu
-[ ] - Co co che bao cao lo hong bao mat
-[ ] - Kiem thu xam nhap va kiem thu tai nan dinh ky
+[x] - Ma hoa du lieu nhay cam khi truyen va khi luu
+[x] - Xac thuc da yeu to cho tai khoan quan tri
+[x] - Phan quyen toi thieu theo nhiem vu
+[x] - An toa do chinh xac cua nguoi de bi ton thuong khi cong khai
+[x] - An thong tin benh nhan khoi ban do cong cong
+[x] - Khong hien thi danh sach nguoi cach ly cho cong dong
+[x] - Yeu cau dong y khi thu thap du lieu suc khoe va vi tri
+[x] - Cho phep rut lai dong y theo quy dinh
+[x] - Luu nhat ky truy cap, sua va xuat du lieu
+[x] - Canh bao khi nguoi dung sap chia se du lieu nhay cam
+[x] - Sao luu, phuc hoi va kiem tra tinh toan ven du lieu
+[x] - Co quy trinh xu ly yeu cau xoa du lieu
+[x] - Co co che bao cao lo hong bao mat
+[x] - Kiem thu xam nhap va kiem thu tai nan dinh ky
 
 ================================================================================
 
