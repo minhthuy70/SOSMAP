@@ -463,38 +463,38 @@ QUY UOC
 18. DICH BENH VA KIEM SOAT LAY NHIEM (PUBLIC HEALTH)
 
 18.1. Thong tin dich te
-[ ] - Hien thi ban do ca nghi ngo, ca xac nhan va diem dich
-[ ] - Hien thi muc do canh bao theo khu vuc
-[ ] - Hien thi thoi diem cap nhat va nguon du lieu y te
-[ ] - Hien thi khuyen cao phong benh chinh thuc
-[ ] - Hien thi khu vuc co bien phap han che tam thoi
-[ ] - Hien thi diem tiem chung va co so y te
-[ ] - Hien thi diem xet nghiem va diem phat thuoc
-[ ] - Hien thi thong tin ve muoi, con trung hoac vat chu trung gian
-[ ] - Phan biet du lieu da xac minh va tin chua kiem chung
+[x] - Hien thi ban do ca nghi ngo, ca xac nhan va diem dich
+[x] - Hien thi muc do canh bao theo khu vuc
+[x] - Hien thi thoi diem cap nhat va nguon du lieu y te
+[x] - Hien thi khuyen cao phong benh chinh thuc
+[x] - Hien thi khu vuc co bien phap han che tam thoi
+[x] - Hien thi diem tiem chung va co so y te
+[x] - Hien thi diem xet nghiem va diem phat thuoc
+[x] - Hien thi thong tin ve muoi, con trung hoac vat chu trung gian
+[x] - Phan biet du lieu da xac minh va tin chua kiem chung
 
 18.2. Yeu cau y te va cach ly
-[ ] - Dang ky tu danh gia trieu chung theo huong dan y te
-[ ] - Gui yeu cau tu van y te tu xa
-[ ] - Gui yeu cau xe cap cuu hoac chuyen vien
-[ ] - Dang ky diem cach ly tap trung
-[ ] - Dang ky cach ly tai nha theo quy dinh dia phuong
-[ ] - Khai bao so nguoi trong cung ho va nguoi tiep xuc gan
-[ ] - Theo doi thoi gian cach ly theo huong dan cua co quan y te
-[ ] - Nhac do than nhiet va cap nhat trieu chung
-[ ] - Dat lich lay mau, xet nghiem va tai kham
-[ ] - Yeu cau giao thuoc va luong thuc cho nguoi cach ly
-[ ] - Bao cao tinh trang khan cap trong thoi gian cach ly
-[ ] - Chuyen thong tin y te toi co quan co tham quyen theo phap luat
+[x] - Dang ky tu danh gia trieu chung theo huong dan y te
+[x] - Gui yeu cau tu van y te tu xa
+[x] - Gui yeu cau xe cap cuu hoac chuyen vien
+[x] - Dang ky diem cach ly tap trung
+[x] - Dang ky cach ly tai nha theo quy dinh dia phuong
+[x] - Khai bao so nguoi trong cung ho va nguoi tiep xuc gan
+[x] - Theo doi thoi gian cach ly theo huong dan cua co quan y te
+[x] - Nhac do than nhiet va cap nhat trieu chung
+[x] - Dat lich lay mau, xet nghiem va tai kham
+[x] - Yeu cau giao thuoc va luong thuc cho nguoi cach ly
+[x] - Bao cao tinh trang khan cap trong thoi gian cach ly
+[x] - Chuyen thong tin y te toi co quan co tham quyen theo phap luat
 
 18.3. Bao ve du lieu suc khoe
-[ ] - Thu thap toi thieu thong tin can thiet
-[ ] - Tach thong tin dinh danh khoi du lieu thong ke
-[ ] - Chi hien thi du lieu suc khoe cho vai tro duoc cap quyen
-[ ] - Ghi log moi lan truy cap ho so y te
-[ ] - Cho phep nguoi dung xem lich su su dung du lieu
-[ ] - Cho phep rut lai dong y khi phap luat cho phep
-[ ] - Tu dong xoa hoac an danh du lieu het thoi han luu tru
+[x] - Thu thap toi thieu thong tin can thiet
+[x] - Tach thong tin dinh danh khoi du lieu thong ke
+[x] - Chi hien thi du lieu suc khoe cho vai tro duoc cap quyen
+[x] - Ghi log moi lan truy cap ho so y te
+[x] - Cho phep nguoi dung xem lich su su dung du lieu
+[x] - Cho phep rut lai dong y khi phap luat cho phep
+[x] - Tu dong xoa hoac an danh du lieu het thoi han luu tru
 
 ================================================================================
 

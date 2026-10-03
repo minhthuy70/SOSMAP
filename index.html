@@ -924,6 +924,31 @@
           </div>
         </div>
 
+        <!-- Public Health Panel -->
+        <div class="public-health-panel" id="publicHealthPanel">
+          <h3>Dịch bệnh & Kiểm soát lây nhiễm</h3>
+          <div class="health-status">
+            <div class="status-item">
+              <span class="status-label">Ca nhiễm:</span>
+              <span class="status-value warning" id="infectedCases">45</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Đang cách ly:</span>
+              <span class="status-value" id="quarantineCount">12</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Mức độ cảnh báo:</span>
+              <span class="status-value success" id="alertLevel">Trung bình</span>
+            </div>
+          </div>
+          <div class="health-actions">
+            <button class="ops-btn" id="healthInfoBtn">Thông tin dịch tễ</button>
+            <button class="ops-btn" id="medicalRequestBtn">Yêu cầu y tế</button>
+            <button class="ops-btn" id="quarantineBtn">Cách ly</button>
+            <button class="ops-btn" id="healthDataBtn">Bảo vệ dữ liệu</button>
+          </div>
+        </div>
+
         <!-- Early Warning Panel -->
         <div class="early-warning-panel" id="earlyWarningPanel">
           <h3>Cảnh báo sớm</h3>
@@ -11194,6 +11219,178 @@ div class="summary-label">Sự cố tháng này</div>
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  <!-- Health Info Modal -->
+  <div class="modal" id="healthInfoModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Thông tin dịch tễ</h3>
+        <button class="modal-close" id="closeHealthInfoModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="health-map-info">
+          <h4>Bản đồ dịch bệnh</h4>
+          <div class="epidemic-stats">
+            <p><strong>Ca nghi ngờ:</strong> 12</p>
+            <p><strong>Ca xác nhận:</strong> 45</p>
+            <p><strong>Điểm dịch:</strong> 3</p>
+            <p><strong>Mức độ cảnh báo:</strong> <span class="status-value warning">Trung bình</span></p>
+          </div>
+        </div>
+        <div class="health-update" style="margin-top: 20px;">
+          <h4>Cập nhật & Nguồn dữ liệu</h4>
+          <p><strong>Cập nhật gần nhất:</strong> 02/10/2026 10:30</p>
+          <p><strong>Nguồn:</strong> Bộ Y tế</p>
+        </div>
+        <div class="health-advisory" style="margin-top: 20px;">
+          <h4>Khuyến cáo chính thức</h4>
+          <ul>
+            <li>Đeo khẩu trang khi ra ngoài</li>
+            <li>Rửa tay thường xuyên</li>
+            <li>Giữ khoảng cách xã hội</li>
+          </ul>
+        </div>
+        <div class="health-points" style="margin-top: 20px;">
+          <h4>Điểm y tế & Tiêm chủng</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Loại</th>
+                <th>Địa điểm</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tiem chung</td>
+                <td>Trung tâm y tế Q1</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+              </tr>
+              <tr>
+                <td>Xet nghiem</td>
+                <td>Bệnh viện Chợ Rẫy</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Medical Request Modal -->
+  <div class="modal" id="medicalRequestModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Yêu cầu y tế & Cách ly</h3>
+        <button class="modal-close" id="closeMedicalRequestModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="medical-request-form">
+          <label>Loại yêu cầu:</label>
+          <select id="medicalRequestType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="self_assessment">Tự đánh giá triệu chứng</option>
+            <option value="consultation">Tư vấn y tế từ xa</option>
+            <option value="ambulance">Xe cấp cứu</option>
+            <option value="transfer">Chuyển viện</option>
+            <option value="quarantine_center">Điểm cách ly tập trung</option>
+            <option value="home_quarantine">Cách ly tại nhà</option>
+          </select>
+          <label>Họ tên:</label>
+          <input type="text" id="medicalRequestName" placeholder="Nhập họ tên" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Triệu chứng:</label>
+          <textarea id="medicalRequestSymptoms" placeholder="Mô tả triệu chứng" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+          <label>Số người trong hộ:</label>
+          <input type="number" id="householdSize" placeholder="Nhập số lượng" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Người tiếp xúc gần:</label>
+          <input type="number" id="closeContacts" placeholder="Nhập số lượng" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="submitMedicalRequest()">Gửi yêu cầu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quarantine Modal -->
+  <div class="modal" id="quarantineModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Quản lý cách ly</h3>
+        <button class="modal-close" id="closeQuarantineModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="quarantine-tracker">
+          <h4>Theo dõi thời gian cách ly</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Họ tên</th>
+                <th>Loại cách ly</th>
+                <th>Ngày bắt đầu</th>
+                <th>Ngày kết thúc</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Nguyễn Văn A</td>
+                <td>Tại nhà</td>
+                <td>25/09/2026</td>
+                <td>08/10/2026</td>
+                <td><span class="status-badge warning">Đang cách ly</span></td>
+              </tr>
+              <tr>
+                <td>Trần Thị B</td>
+                <td>Tập trung</td>
+                <td>26/09/2026</td>
+                <td>09/10/2026</td>
+                <td><span class="status-badge warning">Đang cách ly</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="quarantine-actions" style="margin-top: 20px;">
+          <h4>Hành động</h4>
+          <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="updateBodyTemperature()">Cập nhật thân nhiệt</button>
+            <button class="btn btn-secondary" onclick="requestMedicationDelivery()">Yêu cầu giao thuốc</button>
+            <button class="btn btn-secondary" onclick="requestFoodDelivery()">Yêu cầu giao lương thực</button>
+            <button class="btn btn-danger" onclick="reportEmergency()">Báo cáo khẩn cấp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Health Data Modal -->
+  <div class="modal" id="healthDataModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Bảo vệ dữ liệu sức khỏe</h3>
+        <button class="modal-close" id="closeHealthDataModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="health-data-info">
+          <h4>Chính sách bảo mật</h4>
+          <ul>
+            <li>Chỉ thu thập thông tin tối thiểu cần thiết</li>
+            <li>Tách thông tin định danh khỏi dữ liệu thống kê</li>
+            <li>Chỉ hiển thị dữ liệu cho vai trò được cấp quyền</li>
+            <li>Ghi log mọi lần truy cập hồ sơ y tế</li>
+          </ul>
+        </div>
+        <div class="health-data-actions" style="margin-top: 20px;">
+          <h4>Quyền của người dùng</h4>
+          <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="viewDataHistory()">Xem lịch sử sử dụng dữ liệu</button>
+            <button class="btn btn-danger" onclick="withdrawHealthConsent()">Rút lại đồng ý</button>
+          </div>
         </div>
       </div>
     </div>

@@ -13051,7 +13051,123 @@ document.addEventListener('DOMContentLoaded', function() {
   initializePublicSafetySystem();
   initializeFireInfrastructureSystem();
   initializeEmergencyCareSystem();
+  initializePublicHealthSystem();
 });
+
+// Public Health System
+var publicHealthData = {
+  infectedCases: 45,
+  quarantineCount: 12,
+  alertLevel: 'Trung bình',
+  quarantineList: [
+    { name: 'Nguyễn Văn A', type: 'home', startDate: '25/09/2026', endDate: '08/10/2026', status: 'quarantining' },
+    { name: 'Trần Thị B', type: 'center', startDate: '26/09/2026', endDate: '09/10/2026', status: 'quarantining' }
+  ]
+};
+
+function initializePublicHealthSystem() {
+  var savedPublicHealth = localStorage.getItem('sosmap_public_health');
+  if (savedPublicHealth) {
+    publicHealthData = JSON.parse(savedPublicHealth);
+  }
+
+  updatePublicHealthPanel();
+
+  document.getElementById('healthInfoBtn').addEventListener('click', function() {
+    document.getElementById('healthInfoModal').style.display = 'block';
+  });
+
+  document.getElementById('medicalRequestBtn').addEventListener('click', function() {
+    document.getElementById('medicalRequestModal').style.display = 'block';
+  });
+
+  document.getElementById('quarantineBtn').addEventListener('click', function() {
+    document.getElementById('quarantineModal').style.display = 'block';
+  });
+
+  document.getElementById('healthDataBtn').addEventListener('click', function() {
+    document.getElementById('healthDataModal').style.display = 'block';
+  });
+
+  document.getElementById('closeHealthInfoModal').addEventListener('click', function() {
+    document.getElementById('healthInfoModal').style.display = 'none';
+  });
+
+  document.getElementById('closeMedicalRequestModal').addEventListener('click', function() {
+    document.getElementById('medicalRequestModal').style.display = 'none';
+  });
+
+  document.getElementById('closeQuarantineModal').addEventListener('click', function() {
+    document.getElementById('quarantineModal').style.display = 'none';
+  });
+
+  document.getElementById('closeHealthDataModal').addEventListener('click', function() {
+    document.getElementById('healthDataModal').style.display = 'none';
+  });
+}
+
+function updatePublicHealthPanel() {
+  document.getElementById('infectedCases').textContent = publicHealthData.infectedCases;
+  document.getElementById('quarantineCount').textContent = publicHealthData.quarantineCount;
+  document.getElementById('alertLevel').textContent = publicHealthData.alertLevel;
+}
+
+function savePublicHealthData() {
+  localStorage.setItem('sosmap_public_health', JSON.stringify(publicHealthData));
+}
+
+function submitMedicalRequest() {
+  var type = document.getElementById('medicalRequestType').value;
+  var name = document.getElementById('medicalRequestName').value;
+  var symptoms = document.getElementById('medicalRequestSymptoms').value;
+  var householdSize = document.getElementById('householdSize').value;
+  var closeContacts = document.getElementById('closeContacts').value;
+
+  if (!name || !symptoms) {
+    alert('Vui lòng nhập họ tên và triệu chứng!');
+    return;
+  }
+
+  alert('Đã gửi yêu cầu y tế!');
+  logActivity('medical_request_submit', 'Yêu cầu y tế: ' + type + ' cho ' + name);
+
+  document.getElementById('medicalRequestName').value = '';
+  document.getElementById('medicalRequestSymptoms').value = '';
+  document.getElementById('householdSize').value = '';
+  document.getElementById('closeContacts').value = '';
+}
+
+function updateBodyTemperature() {
+  alert('Cập nhật thân nhiệt (demo)');
+  logActivity('body_temp_update', 'Cập nhật thân nhiệt');
+}
+
+function requestMedicationDelivery() {
+  alert('Yêu cầu giao thuốc (demo)');
+  logActivity('medication_delivery', 'Yêu cầu giao thuốc');
+}
+
+function requestFoodDelivery() {
+  alert('Yêu cầu giao lương thực (demo)');
+  logActivity('food_delivery', 'Yêu cầu giao lương thực');
+}
+
+function reportEmergency() {
+  alert('Báo cáo khẩn cấp (demo)');
+  logActivity('quarantine_emergency', 'Báo cáo khẩn cấp trong cách ly');
+}
+
+function viewDataHistory() {
+  alert('Xem lịch sử sử dụng dữ liệu (demo)');
+  logActivity('data_history_view', 'Xem lịch sử dữ liệu sức khỏe');
+}
+
+function withdrawHealthConsent() {
+  if (confirm('Bạn có chắc muốn rút lại đồng ý sử dụng dữ liệu sức khỏe?')) {
+    alert('Đã rút lại đồng ý!');
+    logActivity('health_consent_withdraw', 'Rút lại đồng ý dữ liệu sức khỏe');
+  }
+}
 
 // Emergency Care System
 var emergencyCareData = {
