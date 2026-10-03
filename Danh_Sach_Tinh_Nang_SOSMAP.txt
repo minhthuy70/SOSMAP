@@ -566,15 +566,15 @@ QUY UOC
 
 22. NGUOI MAT TICH VA KET NOI GIA DINH (MISSING PERSONS)
 
-[ ] - Tao thong bao tim nguoi mat tich
-[ ] - Nhap dac diem nhan dang va anh theo quy dinh
-[ ] - Gan vi tri nhin thay cuoi cung
-[ ] - Chon muc do khan cap va nguy co suc khoe
-[ ] - Tiep nhan thong tin nhin thay tu cong dong
-[ ] - Xac minh thong tin truoc khi phat hanh cong khai
-[ ] - An thong tin nhay cam cua tre em va nguoi de bi ton thuong
-[ ] - Danh dau da tim thay va thong bao cho nguoi lien quan
-[ ] - Luu lich su cap nhat va nguon tin
+[x] - Tao thong bao tim nguoi mat tich
+[x] - Nhap dac diem nhan dang va anh theo quy dinh
+[x] - Gan vi tri nhin thay cuoi cung
+[x] - Chon muc do khan cap va nguy co suc khoe
+[x] - Tiep nhan thong tin nhin thay tu cong dong
+[x] - Xac minh thong tin truoc khi phat hanh cong khai
+[x] - An thong tin nhay cam cua tre em va nguoi de bi ton thuong
+[x] - Danh dau da tim thay va thong bao cho nguoi lien quan
+[x] - Luu lich su cap nhat va nguon tin
 
 ================================================================================
 

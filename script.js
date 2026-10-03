@@ -13047,7 +13047,188 @@ document.addEventListener('DOMContentLoaded', function() {
   initializePlanningSystem();
   initializeGovernanceSystem();
   initializeCommunitySystem();
+  initializeMissingPersonsSystem();
 });
+
+// Missing Persons System
+var missingPersonsData = {
+  missingCount: 3,
+  foundCount: 15,
+  pendingVerification: 2,
+  missingPersons: [
+    { id: 'MISS-001', name: 'Nguyễn Văn A', age: 25, description: 'Cao 1m75, mặc áo trắng', lastSeen: 'Quận 1', lastSeenTime: '2026-10-02T10:00', priority: 'high', healthRisk: 'medium', status: 'missing', isVulnerable: false, contact: '0901234567' },
+    { id: 'MISS-002', name: 'Trần Thị B', age: 12, description: 'Cao 1m50, mặc đồ hồng', lastSeen: 'Quận 3', lastSeenTime: '2026-10-01T15:00', priority: 'critical', healthRisk: 'high', status: 'found', isVulnerable: true, contact: '0902345678' }
+  ],
+  sightings: [],
+  updateHistory: []
+};
+
+function initializeMissingPersonsSystem() {
+  // Load missing persons data from localStorage
+  var savedMissing = localStorage.getItem('sosmap_missing');
+  if (savedMissing) {
+    missingPersonsData = JSON.parse(savedMissing);
+  }
+
+  // Update missing persons panel
+  updateMissingPersonsPanel();
+
+  // Initialize missing persons buttons
+  document.getElementById('createMissingBtn').addEventListener('click', function() {
+    document.getElementById('createMissingModal').style.display = 'block';
+  });
+
+  document.getElementById('missingListBtn').addEventListener('click', function() {
+    document.getElementById('missingListModal').style.display = 'block';
+  });
+
+  document.getElementById('sightingBtn').addEventListener('click', function() {
+    document.getElementById('sightingModal').style.display = 'block';
+  });
+
+  document.getElementById('familyConnectBtn').addEventListener('click', function() {
+    document.getElementById('familyConnectModal').style.display = 'block';
+  });
+
+  // Close modals
+  document.getElementById('closeCreateMissingModal').addEventListener('click', function() {
+    document.getElementById('createMissingModal').style.display = 'none';
+  });
+
+  document.getElementById('closeMissingListModal').addEventListener('click', function() {
+    document.getElementById('missingListModal').style.display = 'none';
+  });
+
+  document.getElementById('closeSightingModal').addEventListener('click', function() {
+    document.getElementById('sightingModal').style.display = 'none';
+  });
+
+  document.getElementById('closeFamilyConnectModal').addEventListener('click', function() {
+    document.getElementById('familyConnectModal').style.display = 'none';
+  });
+}
+
+function updateMissingPersonsPanel() {
+  document.getElementById('missingCount').textContent = missingPersonsData.missingCount;
+  document.getElementById('foundCount').textContent = missingPersonsData.foundCount;
+  document.getElementById('pendingVerification').textContent = missingPersonsData.pendingVerification;
+}
+
+function saveMissingPersonsData() {
+  localStorage.setItem('sosmap_missing', JSON.stringify(missingPersonsData));
+}
+
+// Create Missing Alert Functions
+function createMissingAlert() {
+  var name = document.getElementById('missingName').value;
+  var age = document.getElementById('missingAge').value;
+  var description = document.getElementById('missingDescription').value;
+  var lastSeenLocation = document.getElementById('lastSeenLocation').value;
+  var lastSeenTime = document.getElementById('lastSeenTime').value;
+  var priority = document.getElementById('missingPriority').value;
+  var healthRisk = document.getElementById('healthRisk').value;
+  var contactPerson = document.getElementById('contactPerson').value;
+  var contactPhone = document.getElementById('contactPhone').value;
+  var isVulnerable = document.getElementById('isVulnerable').checked;
+
+  if (!name || !lastSeenLocation) {
+    alert('Vui lòng nhập họ tên và vị trí!');
+    return;
+  }
+
+  var missingPerson = {
+    id: 'MISS-' + (missingPersonsData.missingPersons.length + 1).toString().padStart(3, '0'),
+    name: name,
+    age: age,
+    description: description,
+    lastSeen: lastSeenLocation,
+    lastSeenTime: lastSeenTime,
+    priority: priority,
+    healthRisk: healthRisk,
+    status: 'missing',
+    isVulnerable: isVulnerable,
+    contact: contactPhone,
+    contactPerson: contactPerson,
+    createdAt: new Date().toLocaleString('vi-VN')
+  };
+
+  missingPersonsData.missingPersons.push(missingPerson);
+  missingPersonsData.missingCount++;
+  missingPersonsData.pendingVerification++;
+  saveMissingPersonsData();
+  updateMissingPersonsPanel();
+
+  alert('Đã tạo thông báo tìm người mất tích!');
+  logActivity('missing_alert_create', 'Tạo thông báo tìm người: ' + name);
+
+  // Clear form
+  document.getElementById('missingName').value = '';
+  document.getElementById('missingAge').value = '';
+  document.getElementById('missingDescription').value = '';
+  document.getElementById('lastSeenLocation').value = '';
+  document.getElementById('lastSeenTime').value = '';
+  document.getElementById('contactPerson').value = '';
+  document.getElementById('contactPhone').value = '';
+  document.getElementById('isVulnerable').checked = false;
+}
+
+// Missing List Functions
+function viewMissingDetail(id) {
+  var person = missingPersonsData.missingPersons.find(function(p) { return p.id === id; });
+  if (person) {
+    alert('Chi tiết người mất tích: ' + person.name + '\n' + 
+          'Vị trí cuối: ' + person.lastSeen + '\n' +
+          'Trạng thái: ' + (person.status === 'missing' ? 'Đang tìm' : 'Đã tìm'));
+    logActivity('missing_detail_view', 'Xem chi tiết: ' + id);
+  }
+}
+
+// Sighting Functions
+function submitSighting() {
+  var sightingId = document.getElementById('sightingId').value;
+  var location = document.getElementById('sightingLocation').value;
+  var time = document.getElementById('sightingTime').value;
+  var description = document.getElementById('sightingDescription').value;
+  var anonymous = document.getElementById('anonymousSighting').checked;
+
+  if (!sightingId || !location) {
+    alert('Vui lòng nhập mã và vị trí!');
+    return;
+  }
+
+  var sighting = {
+    missingId: sightingId,
+    location: location,
+    time: time,
+    description: description,
+    anonymous: anonymous,
+    timestamp: new Date().toLocaleString('vi-VN')
+  };
+
+  missingPersonsData.sightings.push(sighting);
+  saveMissingPersonsData();
+
+  alert('Đã gửi báo cáo nhìn thấy!');
+  logActivity('sighting_submit', 'Báo cáo nhìn thấy: ' + sightingId);
+
+  document.getElementById('sightingId').value = '';
+  document.getElementById('sightingLocation').value = '';
+  document.getElementById('sightingTime').value = '';
+  document.getElementById('sightingDescription').value = '';
+  document.getElementById('anonymousSighting').checked = false;
+}
+
+// Family Connect Functions
+function searchFamily() {
+  var search = document.getElementById('familySearch').value;
+  alert('Tìm kiếm người thân: ' + search + ' (demo)');
+  logActivity('family_search', 'Tìm kiếm người thân: ' + search);
+}
+
+function connectFamily(id) {
+  alert('Đã kết nối gia đình cho ' + id + '!');
+  logActivity('family_connect', 'Kết nối gia đình: ' + id);
+}
 
 // Community System
 var communityData = {

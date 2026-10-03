@@ -13418,3 +13418,105 @@ body.high-contrast textarea {
   color: #333;
 }
 
+
+
+/* Missing Persons Panel */
+.missing-persons-panel {
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.missing-persons-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.missing-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.missing-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Missing Form */
+.missing-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Missing Table */
+.missing-filters label {
+  display: inline-block;
+  margin-right: 10px;
+  font-size: 13px;
+  color: #666;
+}
+
+.missing-table table th,
+.missing-table table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.missing-table table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.missing-table table td {
+  font-size: 13px;
+}
+
+/* Sighting Form */
+.sighting-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Connect Form */
+.connect-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+.connect-results h4 {
+  margin: 20px 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.result-item {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.result-item p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.result-item strong {
+  color: #666;
+}
+

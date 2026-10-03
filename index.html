@@ -824,6 +824,31 @@
           </div>
         </div>
 
+        <!-- Missing Persons Panel -->
+        <div class="missing-persons-panel" id="missingPersonsPanel">
+          <h3>Người mất tích & Kết nối gia đình</h3>
+          <div class="missing-status">
+            <div class="status-item">
+              <span class="status-label">Đang tìm kiếm:</span>
+              <span class="status-value warning" id="missingCount">3</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Đã tìm thấy:</span>
+              <span class="status-value success" id="foundCount">15</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Chờ xác minh:</span>
+              <span class="status-value" id="pendingVerification">2</span>
+            </div>
+          </div>
+          <div class="missing-actions">
+            <button class="ops-btn" id="createMissingBtn">Tạo thông báo</button>
+            <button class="ops-btn" id="missingListBtn">Danh sách</button>
+            <button class="ops-btn" id="sightingBtn">Báo cáo nhìn thấy</button>
+            <button class="ops-btn" id="familyConnectBtn">Kết nối gia đình</button>
+          </div>
+        </div>
+
         <!-- Early Warning Panel -->
         <div class="early-warning-panel" id="earlyWarningPanel">
           <h3>Cảnh báo sớm</h3>
@@ -10265,6 +10290,167 @@ div class="summary-label">Sự cố tháng này</div>
         </div>
         <div class="modal-actions" style="margin-top: 20px;">
           <button class="btn btn-primary" onclick="addChannel()">Thêm kênh</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  <!-- Create Missing Modal -->
+  <div class="modal" id="createMissingModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Tạo thông báo tìm người mất tích</h3>
+        <button class="modal-close" id="closeCreateMissingModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="missing-form">
+          <label>Họ tên:</label>
+          <input type="text" id="missingName" placeholder="Nhập họ tên" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Tuổi:</label>
+          <input type="number" id="missingAge" placeholder="Nhập tuổi" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Đặc điểm nhận dạng:</label>
+          <textarea id="missingDescription" placeholder="Mô tả đặc điểm nhận dạng" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+          <label>Ảnh:</label>
+          <input type="file" id="missingPhoto" accept="image/*" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Vị trí nhìn thấy cuối cùng:</label>
+          <input type="text" id="lastSeenLocation" placeholder="Nhập vị trí" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Thời gian nhìn thấy:</label>
+          <input type="datetime-local" id="lastSeenTime" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Mức độ khẩn cấp:</label>
+          <select id="missingPriority" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="low">Thấp</option>
+            <option value="medium">Trung bình</option>
+            <option value="high">Cao</option>
+            <option value="critical">Khẩn cấp</option>
+          </select>
+          <label>Nguy cơ sức khỏe:</label>
+          <select id="healthRisk" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="none">Không</option>
+            <option value="low">Thấp</option>
+            <option value="medium">Trung bình</option>
+            <option value="high">Cao</option>
+          </select>
+          <label>Người liên hệ:</label>
+          <input type="text" id="contactPerson" placeholder="Tên người liên hệ" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+          <input type="tel" id="contactPhone" placeholder="Số điện thoại" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label class="privacy-toggle">
+            <input type="checkbox" id="isVulnerable">
+            <span>Người dễ bị tổn thương (trẻ em/người già/người khuyết tật)</span>
+          </label>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="createMissingAlert()">Tạo thông báo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Missing List Modal -->
+  <div class="modal" id="missingListModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Danh sách người mất tích</h3>
+        <button class="modal-close" id="closeMissingListModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="missing-filters">
+          <label>Trạng thái:</label>
+          <select id="missingStatusFilter" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="all">Tất cả</option>
+            <option value="missing">Đang tìm kiếm</option>
+            <option value="found">Đã tìm thấy</option>
+          </select>
+        </div>
+        <div class="missing-table" style="margin-top: 15px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Mã</th>
+                <th>Họ tên</th>
+                <th>Vị trí cuối</th>
+                <th>Khẩn cấp</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>MISS-001</td>
+                <td>Nguyễn Văn A</td>
+                <td>Quận 1</td>
+                <td><span class="priority-badge high">Cao</span></td>
+                <td><span class="status-badge warning">Đang tìm</span></td>
+                <td><button class="btn btn-sm" onclick="viewMissingDetail('MISS-001')">Chi tiết</button></td>
+              </tr>
+              <tr>
+                <td>MISS-002</td>
+                <td>Trần Thị B</td>
+                <td>Quận 3</td>
+                <td><span class="priority-badge critical">Khẩn cấp</span></td>
+                <td><span class="status-badge completed">Đã tìm</span></td>
+                <td><button class="btn btn-sm" onclick="viewMissingDetail('MISS-002')">Chi tiết</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sighting Modal -->
+  <div class="modal" id="sightingModal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>Báo cáo nhìn thấy người mất tích</h3>
+        <button class="modal-close" id="closeSightingModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="sighting-form">
+          <label>Mã người mất tích:</label>
+          <input type="text" id="sightingId" placeholder="Nhập mã người mất tích" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Vị trí nhìn thấy:</label>
+          <input type="text" id="sightingLocation" placeholder="Nhập vị trí" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Thời gian:</label>
+          <input type="datetime-local" id="sightingTime" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Mô tả:</label>
+          <textarea id="sightingDescription" placeholder="Mô tả chi tiết" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+          <label>Ảnh (nếu có):</label>
+          <input type="file" id="sightingPhoto" accept="image/*" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label class="privacy-toggle">
+            <input type="checkbox" id="anonymousSighting">
+            <span>Báo cáo ẩn danh</span>
+          </label>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="submitSighting()">Gửi báo cáo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Family Connect Modal -->
+  <div class="modal" id="familyConnectModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Kết nối gia đình</h3>
+        <button class="modal-close" id="closeFamilyConnectModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="connect-form">
+          <label>Tìm kiếm người thân:</label>
+          <input type="text" id="familySearch" placeholder="Nhập tên hoặc mã" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <button class="btn btn-primary" onclick="searchFamily()">Tìm kiếm</button>
+        </div>
+        <div class="connect-results" style="margin-top: 20px;">
+          <h4>Kết quả tìm kiếm</h4>
+          <div class="result-item">
+            <p><strong>Mã:</strong> MISS-003</p>
+            <p><strong>Họ tên:</strong> Lê Văn C</p>
+            <p><strong>Trạng thái:</strong> <span class="status-badge completed">Đã tìm thấy</span></p>
+            <p><strong>Người liên hệ:</strong> 0901234567</p>
+            <button class="btn btn-primary" onclick="connectFamily('MISS-003')">Kết nối</button>
+          </div>
         </div>
       </div>
     </div>
