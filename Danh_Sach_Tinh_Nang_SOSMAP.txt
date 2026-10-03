@@ -501,23 +501,23 @@ QUY UOC
 19. Y TE KHAN CAP VA HO TRO NGUOI YEU THE (EMERGENCY CARE)
 
 19.1. Dinh vi dich vu y te
-[ ] - Hien thi benh vien, tram y te va phong kham gan nhat
-[ ] - Hien thi co so co cap cuu 24/7
-[ ] - Hien thi co so co kha nang tiep nhan tre em
-[ ] - Hien thi co so co khoa san, ngoai, nhi va truyen nhiem
-[ ] - Hien thi diem cap phat thuoc va oxy
-[ ] - Hien thi suc chua va kha nang tiep nhan cap nhat
-[ ] - Chi duong toi co so y te bang tuyen phu hop
+[x] - Hien thi benh vien, tram y te va phong kham gan nhat
+[x] - Hien thi co so co cap cuu 24/7
+[x] - Hien thi co so co kha nang tiep nhan tre em
+[x] - Hien thi co so co khoa san, ngoai, nhi va truyen nhiem
+[x] - Hien thi diem cap phat thuoc va oxy
+[x] - Hien thi suc chua va kha nang tiep nhan cap nhat
+[x] - Chi duong toi co so y te bang tuyen phu hop
 
 19.2. Nhu cau dac thu
-[ ] - Danh dau nguoi cao tuoi song mot minh
-[ ] - Danh dau nguoi khuyet tat can ho tro tiep can
-[ ] - Danh dau phu nu mang thai va tre so sinh
-[ ] - Danh dau nguoi benh man tinh can thuoc dinh ky
-[ ] - Danh dau nguoi can may tho, loc than hoac oxy
-[ ] - Tao danh sach uu tien ho tro khi so tan
-[ ] - Yeu cau nguoi ho tro ngon ngu ky hieu
-[ ] - Ho tro thong dich vien va tai lieu de hieu
+[x] - Danh dau nguoi cao tuoi song mot minh
+[x] - Danh dau nguoi khuyet tat can ho tro tiep can
+[x] - Danh dau phu nu mang thai va tre so sinh
+[x] - Danh dau nguoi benh man tinh can thuoc dinh ky
+[x] - Danh dau nguoi can may tho, loc than hoac oxy
+[x] - Tao danh sach uu tien ho tro khi so tan
+[x] - Yeu cau nguoi ho tro ngon ngu ky hieu
+[x] - Ho tro thong dich vien va tai lieu de hieu
 
 ================================================================================
 

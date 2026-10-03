@@ -13778,3 +13778,133 @@ body.high-contrast textarea {
   color: #666;
 }
 
+
+
+/* Emergency Care Panel */
+.emergency-care-panel {
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.emergency-care-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.care-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.care-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Medical Facilities */
+.medical-filters label {
+  display: inline-block;
+  margin-right: 10px;
+  font-size: 13px;
+  color: #666;
+}
+
+.medical-list table th,
+.medical-list table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.medical-list table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.medical-list table td {
+  font-size: 13px;
+}
+
+.medication-points h4 {
+  margin: 20px 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.medication-points p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+/* Special Needs */
+.special-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+.special-list h4 {
+  margin: 20px 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.special-list table th,
+.special-list table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.special-list table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.special-list table td {
+  font-size: 13px;
+}
+
+/* Medication */
+.medication-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Priority List */
+.priority-list h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.priority-list table th,
+.priority-list table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.priority-list table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.priority-list table td {
+  font-size: 13px;
+}
+

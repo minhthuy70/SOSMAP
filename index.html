@@ -899,6 +899,31 @@
           </div>
         </div>
 
+        <!-- Emergency Care Panel -->
+        <div class="emergency-care-panel" id="emergencyCarePanel">
+          <h3>Y tế khẩn cấp & Hỗ trợ người yếu thế</h3>
+          <div class="care-status">
+            <div class="status-item">
+              <span class="status-label">Cơ sở y tế:</span>
+              <span class="status-value success" id="medicalFacilities">8</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Người cần hỗ trợ:</span>
+              <span class="status-value warning" id="vulnerablePeople">12</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Điểm cấp phát thuốc:</span>
+              <span class="status-value" id="medicationPoints">5</span>
+            </div>
+          </div>
+          <div class="care-actions">
+            <button class="ops-btn" id="medicalFacilitiesBtn">Cơ sở y tế</button>
+            <button class="ops-btn" id="specialNeedsBtn">Nhu cầu đặc thù</button>
+            <button class="ops-btn" id="medicationBtn">Cấp phát thuốc</button>
+            <button class="ops-btn" id="priorityListBtn">Danh sách ưu tiên</button>
+          </div>
+        </div>
+
         <!-- Early Warning Panel -->
         <div class="early-warning-panel" id="earlyWarningPanel">
           <h3>Cảnh báo sớm</h3>
@@ -10949,6 +10974,226 @@ div class="summary-label">Sự cố tháng này</div>
         </div>
         <div class="modal-actions" style="margin-top: 20px;">
           <button class="btn btn-primary" onclick="assignAgency()">Phân công</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  <!-- Medical Facilities Modal -->
+  <div class="modal" id="medicalFacilitiesModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Cơ sở y tế gần nhất</h3>
+        <button class="modal-close" id="closeMedicalFacilitiesModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="medical-filters">
+          <label>Loại cơ sở:</label>
+          <select id="facilityType" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="all">Tất cả</option>
+            <option value="hospital">Bệnh viện</option>
+            <option value="clinic">Trạm y tế</option>
+            <option value="pharmacy">Nhà thuốc</option>
+          </select>
+          <label style="margin-left: 15px;">Dịch vụ:</label>
+          <select id="facilityService" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="all">Tất cả</option>
+            <option value="emergency">Cấp cứu 24/7</option>
+            <option value="pediatric">Tiếp nhận trẻ em</option>
+            <option value="maternity">Khoa sản</option>
+          </select>
+        </div>
+        <div class="medical-list" style="margin-top: 15px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Tên</th>
+                <th>Loại</th>
+                <th>Dịch vụ</th>
+                <th>Sức chứa</th>
+                <th>Khoảng cách</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Bệnh viện Chợ Rẫy</td>
+                <td>Bệnh viện</td>
+                <td>Cấp cứu 24/7, Nhi, Sản</td>
+                <td>85%</td>
+                <td>1.2 km</td>
+                <td><button class="btn btn-sm">Chỉ đường</button></td>
+              </tr>
+              <tr>
+                <td>Bệnh viện Nhân dân 115</td>
+                <td>Bệnh viện</td>
+                <td>Cấp cứu 24/7, Nội, Ngoại</td>
+                <td>72%</td>
+                <td>2.5 km</td>
+                <td><button class="btn btn-sm">Chỉ đường</button></td>
+              </tr>
+              <tr>
+                <td>Trạm y tế Quận 1</td>
+                <td>Trạm y tế</td>
+                <td>Cơ bản</td>
+                <td>45%</td>
+                <td>0.5 km</td>
+                <td><button class="btn btn-sm">Chỉ đường</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="medication-points" style="margin-top: 20px;">
+          <h4>Điểm cấp phát thuốc & Oxy</h4>
+          <div class="point-item">
+            <p><strong>Điểm 1:</strong> Nhà thuốc Tân Phước - 0.3 km</p>
+            <p><strong>Điểm 2:</strong> Nhà thuốc Long Châu - 0.8 km</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Special Needs Modal -->
+  <div class="modal" id="specialNeedsModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Nhu cầu đặc thù</h3>
+        <button class="modal-close" id="closeSpecialNeedsModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="special-form">
+          <label>Loại nhu cầu:</label>
+          <select id="specialNeedType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="elderly">Người cao tuổi sống một mình</option>
+            <option value="disability">Người khuyết tật cần hỗ trợ tiếp cận</option>
+            <option value="pregnant">Phụ nữ mang thai và trẻ sơ sinh</option>
+            <option value="chronic">Người bệnh mãn tính cần thuốc định kỳ</option>
+            <option value="medical">Người cần máy thở, lọc thận hoặc oxy</option>
+          </select>
+          <label>Họ tên:</label>
+          <input type="text" id="specialName" placeholder="Nhập họ tên" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Vị trí:</label>
+          <input type="text" id="specialLocation" placeholder="Nhập địa chỉ" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Mô tả chi tiết:</label>
+          <textarea id="specialDescription" placeholder="Mô tả nhu cầu" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+          <label>Người liên hệ:</label>
+          <input type="text" id="specialContact" placeholder="Số điện thoại" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label class="privacy-toggle">
+            <input type="checkbox" id="needsInterpreter">
+            <span>Cần thông dịch viên hoặc hỗ trợ ngôn ngữ ký hiệu</span>
+          </label>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="submitSpecialNeed()">Đăng ký</button>
+        </div>
+        <div class="special-list" style="margin-top: 20px;">
+          <h4>Danh sách người cần hỗ trợ</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Họ tên</th>
+                <th>Loại nhu cầu</th>
+                <th>Vị trí</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Nguyễn Văn A</td>
+                <td>Bệnh mãn tính</td>
+                <td>Quận 1</td>
+                <td><span class="status-badge warning">Đang hỗ trợ</span></td>
+              </tr>
+              <tr>
+                <td>Trần Thị B</td>
+                <td>Mang thai</td>
+                <td>Quận 3</td>
+                <td><span class="status-badge completed">Đã hỗ trợ</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Medication Modal -->
+  <div class="modal" id="medicationModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Cấp phát thuốc</h3>
+        <button class="modal-close" id="closeMedicationModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="medication-form">
+          <label>Loại thuốc:</label>
+          <select id="medicationType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="emergency">Thuốc khẩn cấp</option>
+            <option value="chronic">Thuốc mãn tính</option>
+            <option value="prevention">Thuốc dự phòng</option>
+          </select>
+          <label>Số lượng:</label>
+          <input type="number" id="medicationQuantity" placeholder="Nhập số lượng" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Điểm cấp phát:</label>
+          <select id="medicationPoint" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="point1">Nhà thuốc Tân Phước</option>
+            <option value="point2">Nhà thuốc Long Châu</option>
+            <option value="point3">Nhà thuốc Pharmacity</option>
+          </select>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="requestMedication()">Yêu cầu cấp phát</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Priority List Modal -->
+  <div class="modal" id="priorityListModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Danh sách ưu tiên sơ tán</h3>
+        <button class="modal-close" id="closePriorityListModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="priority-list">
+          <h4>Người ưu tiên khi sơ tán</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Họ tên</th>
+                <th>Loại ưu tiên</th>
+                <th>Vị trí</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Lê Văn C</td>
+                <td>Cần máy thở</td>
+                <td>Quận 1</td>
+                <td><span class="status-badge critical">Khẩn cấp</span></td>
+                <td><button class="btn btn-sm">Sơ tán</button></td>
+              </tr>
+              <tr>
+                <td>Phạm Thị D</td>
+                <td>Người cao tuổi</td>
+                <td>Quận 3</td>
+                <td><span class="status-badge warning">Chờ</span></td>
+                <td><button class="btn btn-sm">Sơ tán</button></td>
+              </tr>
+              <tr>
+                <td>Hoàng Văn E</td>
+                <td>Khuyết tật</td>
+                <td>Quận 5</td>
+                <td><span class="status-badge warning">Chờ</span></td>
+                <td><button class="btn btn-sm">Sơ tán</button></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

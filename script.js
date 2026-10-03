@@ -13050,7 +13050,129 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeMissingPersonsSystem();
   initializePublicSafetySystem();
   initializeFireInfrastructureSystem();
+  initializeEmergencyCareSystem();
 });
+
+// Emergency Care System
+var emergencyCareData = {
+  medicalFacilities: 8,
+  vulnerablePeople: 12,
+  medicationPoints: 5,
+  specialNeeds: [
+    { name: 'Nguyễn Văn A', type: 'chronic', location: 'Quận 1', status: 'supporting' },
+    { name: 'Trần Thị B', type: 'pregnant', location: 'Quận 3', status: 'completed' }
+  ],
+  priorityList: [
+    { name: 'Lê Văn C', type: 'medical_equipment', location: 'Quận 1', status: 'critical' },
+    { name: 'Phạm Thị D', type: 'elderly', location: 'Quận 3', status: 'waiting' },
+    { name: 'Hoàng Văn E', type: 'disability', location: 'Quận 5', status: 'waiting' }
+  ]
+};
+
+function initializeEmergencyCareSystem() {
+  var savedEmergencyCare = localStorage.getItem('sosmap_emergency_care');
+  if (savedEmergencyCare) {
+    emergencyCareData = JSON.parse(savedEmergencyCare);
+  }
+
+  updateEmergencyCarePanel();
+
+  document.getElementById('medicalFacilitiesBtn').addEventListener('click', function() {
+    document.getElementById('medicalFacilitiesModal').style.display = 'block';
+  });
+
+  document.getElementById('specialNeedsBtn').addEventListener('click', function() {
+    document.getElementById('specialNeedsModal').style.display = 'block';
+  });
+
+  document.getElementById('medicationBtn').addEventListener('click', function() {
+    document.getElementById('medicationModal').style.display = 'block';
+  });
+
+  document.getElementById('priorityListBtn').addEventListener('click', function() {
+    document.getElementById('priorityListModal').style.display = 'block';
+  });
+
+  document.getElementById('closeMedicalFacilitiesModal').addEventListener('click', function() {
+    document.getElementById('medicalFacilitiesModal').style.display = 'none';
+  });
+
+  document.getElementById('closeSpecialNeedsModal').addEventListener('click', function() {
+    document.getElementById('specialNeedsModal').style.display = 'none';
+  });
+
+  document.getElementById('closeMedicationModal').addEventListener('click', function() {
+    document.getElementById('medicationModal').style.display = 'none';
+  });
+
+  document.getElementById('closePriorityListModal').addEventListener('click', function() {
+    document.getElementById('priorityListModal').style.display = 'none';
+  });
+}
+
+function updateEmergencyCarePanel() {
+  document.getElementById('medicalFacilities').textContent = emergencyCareData.medicalFacilities;
+  document.getElementById('vulnerablePeople').textContent = emergencyCareData.vulnerablePeople;
+  document.getElementById('medicationPoints').textContent = emergencyCareData.medicationPoints;
+}
+
+function saveEmergencyCareData() {
+  localStorage.setItem('sosmap_emergency_care', JSON.stringify(emergencyCareData));
+}
+
+function submitSpecialNeed() {
+  var type = document.getElementById('specialNeedType').value;
+  var name = document.getElementById('specialName').value;
+  var location = document.getElementById('specialLocation').value;
+  var description = document.getElementById('specialDescription').value;
+  var contact = document.getElementById('specialContact').value;
+  var needsInterpreter = document.getElementById('needsInterpreter').checked;
+
+  if (!name || !location) {
+    alert('Vui lòng nhập họ tên và vị trí!');
+    return;
+  }
+
+  emergencyCareData.specialNeeds.push({
+    name: name,
+    type: type,
+    location: location,
+    description: description,
+    contact: contact,
+    needsInterpreter: needsInterpreter,
+    status: 'pending',
+    timestamp: new Date().toLocaleString('vi-VN')
+  });
+
+  emergencyCareData.vulnerablePeople++;
+  saveEmergencyCareData();
+  updateEmergencyCarePanel();
+
+  alert('Đã đăng ký nhu cầu đặc thù!');
+  logActivity('special_need_register', 'Đăng ký nhu cầu: ' + type + ' cho ' + name);
+
+  document.getElementById('specialName').value = '';
+  document.getElementById('specialLocation').value = '';
+  document.getElementById('specialDescription').value = '';
+  document.getElementById('specialContact').value = '';
+  document.getElementById('needsInterpreter').checked = false;
+}
+
+function requestMedication() {
+  var type = document.getElementById('medicationType').value;
+  var quantity = document.getElementById('medicationQuantity').value;
+  var point = document.getElementById('medicationPoint').value;
+
+  if (!quantity) {
+    alert('Vui lòng nhập số lượng!');
+    return;
+  }
+
+  alert('Đã yêu cầu cấp phát thuốc tại điểm ' + point + '!');
+  logActivity('medication_request', 'Yêu cầu thuốc: ' + type + ' - ' + quantity);
+
+  document.getElementById('medicationQuantity').value = '';
+}
 
 // Fire & Infrastructure System
 var fireInfraData = {
