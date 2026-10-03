@@ -849,6 +849,31 @@
           </div>
         </div>
 
+        <!-- Public Safety Panel -->
+        <div class="public-safety-panel" id="publicSafetyPanel">
+          <h3>Giao thông, Hạn chế & Môi trường</h3>
+          <div class="safety-status">
+            <div class="status-item">
+              <span class="status-label">Đường bị chặn:</span>
+              <span class="status-value warning" id="blockedRoads">5</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Chất lượng không khí:</span>
+              <span class="status-value success" id="airQuality">Tốt</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Cảnh báo môi trường:</span>
+              <span class="status-value" id="envAlerts">2</span>
+            </div>
+          </div>
+          <div class="safety-actions">
+            <button class="ops-btn" id="trafficBtn">Giao thông khẩn cấp</button>
+            <button class="ops-btn" id="environmentBtn">Môi trường</button>
+            <button class="ops-btn" id="infrastructureBtn">Hạ tầng</button>
+            <button class="ops-btn" id="safetyGuideBtn">Hướng dẫn an toàn</button>
+          </div>
+        </div>
+
         <!-- Early Warning Panel -->
         <div class="early-warning-panel" id="earlyWarningPanel">
           <h3>Cảnh báo sớm</h3>
@@ -10450,6 +10475,249 @@ div class="summary-label">Sự cố tháng này</div>
             <p><strong>Trạng thái:</strong> <span class="status-badge completed">Đã tìm thấy</span></p>
             <p><strong>Người liên hệ:</strong> 0901234567</p>
             <button class="btn btn-primary" onclick="connectFamily('MISS-003')">Kết nối</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  <!-- Traffic Organization Modal -->
+  <div class="modal" id="trafficModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Tổ chức giao thông khẩn cấp</h3>
+        <button class="modal-close" id="closeTrafficModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="traffic-section">
+          <h4>Đường bị chặn / Đường một chiều tạm thời</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Đường</th>
+                <th>Loại</th>
+                <th>Lý do</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Đường Nguyễn Văn Linh</td>
+                <td>Đường một chiều</td>
+                <td>Sơ tán</td>
+                <td><span class="status-badge warning">Đang áp dụng</span></td>
+                <td><button class="btn btn-sm">Chi tiết</button></td>
+              </tr>
+              <tr>
+                <td>Đường 3/2</td>
+                <td>Điểm chặn</td>
+                <td>Tai nạn</td>
+                <td><span class="status-badge warning">Đang áp dụng</span></td>
+                <td><button class="btn btn-sm">Chi tiết</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="traffic-section" style="margin-top: 20px;">
+          <h4>Tuyến ưu tiên (Xe cứu thương, Cứu hỏa)</h4>
+          <div class="priority-routes">
+            <p><strong>Tuyến 1:</strong> Quận 1 → Bệnh viện Chợ Rẫy</p>
+            <p><strong>Tuyến 2:</strong> Quận 3 → Bệnh viện Nhân dân 115</p>
+            <button class="btn btn-primary" onclick="addPriorityRoute()">Thêm tuyến</button>
+          </div>
+        </div>
+        <div class="traffic-section" style="margin-top: 20px;">
+          <h4>Điểm kết xe sơ tán</h4>
+          <div class="evacuation-points">
+            <p><strong>Điểm 1:</strong> Công viên Lê Văn Tám</p>
+            <p><strong>Điểm 2:</strong> Sân vận động Thống Nhất</p>
+            <button class="btn btn-primary" onclick="addEvacuationPoint()">Thêm điểm</button>
+          </div>
+        </div>
+        <div class="traffic-section" style="margin-top: 20px;">
+          <h4>Trạm xăng, Trạm sạc, Điểm sửa xe</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Loại</th>
+                <th>Địa điểm</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Trạm xăng</td>
+                <td>Ngã tư 7 Tháng 2</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+              </tr>
+              <tr>
+                <td>Trạm sạc</td>
+                <td>Vincom Q3</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Environment Modal -->
+  <div class="modal" id="environmentModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Môi trường & An toàn cộng đồng</h3>
+        <button class="modal-close" id="closeEnvironmentModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="env-section">
+          <h4>Chất lượng không khí & Bụi mịn</h4>
+          <div class="air-quality">
+            <p><strong>AQI:</strong> <span class="status-value success">45 - Tốt</span></p>
+            <p><strong>PM2.5:</strong> 25 µg/m³</p>
+            <p><strong>PM10:</strong> 40 µg/m³</p>
+          </div>
+        </div>
+        <div class="env-section" style="margin-top: 20px;">
+          <h4>Ô nhiễm nguồn nước</h4>
+          <div class="water-quality">
+            <p><strong>Trạng thái:</strong> <span class="status-value success">An toàn</span></p>
+            <p><strong>Điểm đo:</strong> Sông Sài Gòn - Chỉ số tốt</p>
+          </div>
+        </div>
+        <div class="env-section" style="margin-top: 20px;">
+          <h4>Báo cáo sự cố môi trường</h4>
+          <div class="env-report-form">
+            <label>Loại sự cố:</label>
+            <select id="envIncidentType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+              <option value="oil">Tràn dầu</option>
+              <option value="chemical">Hóa chất</option>
+              <option value="waste">Chất thải nguy hại</option>
+            </select>
+            <label>Vị trí:</label>
+            <input type="text" id="envLocation" placeholder="Nhập vị trí" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <label>Mô tả:</label>
+            <textarea id="envDescription" placeholder="Mô tả chi tiết" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+            <button class="btn btn-primary" onclick="submitEnvReport()">Báo cáo</button>
+          </div>
+        </div>
+        <div class="env-section" style="margin-top: 20px;">
+          <h4>Điểm nước sạch & Vệ sinh công cộng</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Loại</th>
+                <th>Địa điểm</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Nước sạch</td>
+                <td>Công viên Tao Đàn</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+              </tr>
+              <tr>
+                <td>Vệ sinh</td>
+                <td>Chợt Bến Thành</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Infrastructure Modal -->
+  <div class="modal" id="infrastructureModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Sự cố hạ tầng</h3>
+        <button class="modal-close" id="closeInfrastructureModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="infra-form">
+          <label>Loại sự cố:</label>
+          <select id="infraType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="power">Đứt cáp điện</option>
+            <option value="water">Vỡ đường ống nước</option>
+            <option value="bridge">Hỏng cầu/đường</option>
+            <option value="pole">Cột điện đổ</option>
+            <option value="tower">Trạm phát sóng</option>
+          </select>
+          <label>Vị trí:</label>
+          <input type="text" id="infraLocation" placeholder="Nhập vị trí" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Mô tả:</label>
+          <textarea id="infraDescription" placeholder="Mô tả chi tiết" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+          <label>Đơn vị quản lý:</label>
+          <input type="text" id="infraAgency" placeholder="Nhập đơn vị" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <button class="btn btn-primary" onclick="submitInfraReport()">Báo cáo</button>
+        </div>
+        <div class="infra-list" style="margin-top: 20px;">
+          <h4>Sự cố đang xử lý</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Loại</th>
+                <th>Vị trí</th>
+                <th>Đơn vị</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Đứt cáp điện</td>
+                <td>Quận 1</td>
+                <td>EVN</td>
+                <td><span class="status-badge warning">Đang xử lý</span></td>
+              </tr>
+              <tr>
+                <td>Vỡ đường ống nước</td>
+                <td>Quận 3</td>
+                <td>Tân Hòa</td>
+                <td><span class="status-badge warning">Đang xử lý</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Safety Guide Modal -->
+  <div class="modal" id="safetyGuideModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Hướng dẫn an toàn</h3>
+        <button class="modal-close" id="closeSafetyGuideModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="guide-section">
+          <h4>Tránh vào vùng nguy hiểm</h4>
+          <div class="guide-content">
+            <p><strong>Cháy nổ:</strong></p>
+            <ul>
+              <li>Tránh xa nguồn lửa</li>
+              <li>Không đi vào khu vực có khói độc</li>
+              <li>Sử dụng lối thoát an toàn</li>
+            </ul>
+            <p><strong>Ngập lũ:</strong></p>
+            <ul>
+              <li>Không đi qua vùng nước chảy xiết</li>
+              <li>Tránh xa cầu, hầm bị ngập</li>
+              <li>Di chuyển đến nơi cao</li>
+            </ul>
+          </div>
+        </div>
+        <div class="guide-section" style="margin-top: 20px;">
+          <h4>Điểm an toàn gần nhất</h4>
+          <div class="safe-points">
+            <p><strong>Điểm 1:</strong> Trường THCS Nguyễn Du - 0.5 km</p>
+            <p><strong>Điểm 2:</strong> Trung tâm thương mại Takashimaya - 1.0 km</p>
+            <button class="btn btn-primary" onclick="viewSafePoints()">Xem bản đồ</button>
           </div>
         </div>
       </div>

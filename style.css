@@ -13520,3 +13520,150 @@ body.high-contrast textarea {
   color: #666;
 }
 
+
+
+/* Public Safety Panel */
+.public-safety-panel {
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.public-safety-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.safety-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.safety-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Traffic Section */
+.traffic-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.traffic-section table th,
+.traffic-section table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.traffic-section table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.traffic-section table td {
+  font-size: 13px;
+}
+
+.priority-routes p,
+.evacuation-points p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+/* Environment Section */
+.env-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.air-quality p,
+.water-quality p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.env-report-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Infrastructure Section */
+.infra-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+.infra-list h4 {
+  margin: 20px 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.infra-list table th,
+.infra-list table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.infra-list table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.infra-list table td {
+  font-size: 13px;
+}
+
+/* Safety Guide Section */
+.guide-section h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.guide-content p {
+  margin: 10px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.guide-content strong {
+  color: #666;
+}
+
+.guide-content ul {
+  margin: 5px 0;
+  padding-left: 20px;
+}
+
+.guide-content li {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.safe-points p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+

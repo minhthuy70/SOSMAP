@@ -13048,7 +13048,137 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeGovernanceSystem();
   initializeCommunitySystem();
   initializeMissingPersonsSystem();
+  initializePublicSafetySystem();
 });
+
+// Public Safety System
+var publicSafetyData = {
+  blockedRoads: 5,
+  airQuality: 'Tốt',
+  envAlerts: 2,
+  trafficRestrictions: [
+    { road: 'Đường Nguyễn Văn Linh', type: 'Đường một chiều', reason: 'Sơ tán', status: 'active' },
+    { road: 'Đường 3/2', type: 'Điểm chặn', reason: 'Tai nạn', status: 'active' }
+  ],
+  priorityRoutes: [
+    { id: 1, route: 'Quận 1 → Bệnh viện Chợ Rẫy', type: 'xe_cuu_thuong' },
+    { id: 2, route: 'Quận 3 → Bệnh viện Nhân dân 115', type: 'xe_cuu_hoa' }
+  ],
+  envIncidents: []
+};
+
+function initializePublicSafetySystem() {
+  var savedSafety = localStorage.getItem('sosmap_safety');
+  if (savedSafety) {
+    publicSafetyData = JSON.parse(savedSafety);
+  }
+
+  updatePublicSafetyPanel();
+
+  document.getElementById('trafficBtn').addEventListener('click', function() {
+    document.getElementById('trafficModal').style.display = 'block';
+  });
+
+  document.getElementById('environmentBtn').addEventListener('click', function() {
+    document.getElementById('environmentModal').style.display = 'block';
+  });
+
+  document.getElementById('infrastructureBtn').addEventListener('click', function() {
+    document.getElementById('infrastructureModal').style.display = 'block';
+  });
+
+  document.getElementById('safetyGuideBtn').addEventListener('click', function() {
+    document.getElementById('safetyGuideModal').style.display = 'block';
+  });
+
+  document.getElementById('closeTrafficModal').addEventListener('click', function() {
+    document.getElementById('trafficModal').style.display = 'none';
+  });
+
+  document.getElementById('closeEnvironmentModal').addEventListener('click', function() {
+    document.getElementById('environmentModal').style.display = 'none';
+  });
+
+  document.getElementById('closeInfrastructureModal').addEventListener('click', function() {
+    document.getElementById('infrastructureModal').style.display = 'none';
+  });
+
+  document.getElementById('closeSafetyGuideModal').addEventListener('click', function() {
+    document.getElementById('safetyGuideModal').style.display = 'none';
+  });
+}
+
+function updatePublicSafetyPanel() {
+  document.getElementById('blockedRoads').textContent = publicSafetyData.blockedRoads;
+  document.getElementById('airQuality').textContent = publicSafetyData.airQuality;
+  document.getElementById('envAlerts').textContent = publicSafetyData.envAlerts;
+}
+
+function savePublicSafetyData() {
+  localStorage.setItem('sosmap_safety', JSON.stringify(publicSafetyData));
+}
+
+function addPriorityRoute() {
+  alert('Thêm tuyến ưu tiên (demo)');
+  logActivity('priority_route_add', 'Thêm tuyến ưu tiên');
+}
+
+function addEvacuationPoint() {
+  alert('Thêm điểm kết xe (demo)');
+  logActivity('evacuation_point_add', 'Thêm điểm kết xe');
+}
+
+function submitEnvReport() {
+  var type = document.getElementById('envIncidentType').value;
+  var location = document.getElementById('envLocation').value;
+  var description = document.getElementById('envDescription').value;
+
+  if (!location || !description) {
+    alert('Vui lòng nhập đầy đủ thông tin!');
+    return;
+  }
+
+  publicSafetyData.envIncidents.push({
+    type: type,
+    location: location,
+    description: description,
+    timestamp: new Date().toLocaleString('vi-VN')
+  });
+
+  publicSafetyData.envAlerts++;
+  savePublicSafetyData();
+  updatePublicSafetyPanel();
+
+  alert('Đã báo cáo sự cố môi trường!');
+  logActivity('env_report_submit', 'Báo cáo sự cố môi trường: ' + type);
+
+  document.getElementById('envLocation').value = '';
+  document.getElementById('envDescription').value = '';
+}
+
+function submitInfraReport() {
+  var type = document.getElementById('infraType').value;
+  var location = document.getElementById('infraLocation').value;
+  var description = document.getElementById('infraDescription').value;
+  var agency = document.getElementById('infraAgency').value;
+
+  if (!location || !description) {
+    alert('Vui lòng nhập đầy đủ thông tin!');
+    return;
+  }
+
+  alert('Đã báo cáo sự cố hạ tầng!');
+  logActivity('infra_report_submit', 'Báo cáo sự cố hạ tầng: ' + type);
+
+  document.getElementById('infraLocation').value = '';
+  document.getElementById('infraDescription').value = '';
+  document.getElementById('infraAgency').value = '';
+}
+
+function viewSafePoints() {
+  alert('Xem bản đồ điểm an toàn (demo)');
+  logActivity('safe_points_view', 'Xem bản đồ điểm an toàn');
+}
 
 // Missing Persons System
 var missingPersonsData = {

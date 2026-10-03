@@ -546,21 +546,21 @@ QUY UOC
 21. GIAO THONG, HAN CHE DI CHUYEN VA MOI TRUONG (PUBLIC SAFETY)
 
 21.1. To chuc giao thong khan cap
-[ ] - Hien thi duong cam, duong mot chieu tam thoi va diem chan
-[ ] - Hien thi tuyen uu tien cho xe cuu thuong va cuu hoa
-[ ] - Hien thi diem ket xe do so tan
-[ ] - Hien thi tram xang, tram sac va diem sua xe con hoat dong
-[ ] - Hien thi diem tau, pha, cau phao va ben xe thay the
-[ ] - Phat hanh huong dan tranh di vao vung nguy hiem
+[x] - Hien thi duong cam, duong mot chieu tam thoi va diem chan
+[x] - Hien thi tuyen uu tien cho xe cuu thuong va cuu hoa
+[x] - Hien thi diem ket xe do so tan
+[x] - Hien thi tram xang, tram sac va diem sua xe con hoat dong
+[x] - Hien thi diem tau, pha, cau phao va ben xe thay the
+[x] - Phat hanh huong dan tranh di vao vung nguy hiem
 
 21.2. Moi truong va an toan cong dong
-[ ] - Canh bao chat luong khong khi va bui min
-[ ] - Canh bao o nhiem nguon nuoc
-[ ] - Bao cao tran dau, hoa chat va chat thai nguy hai
-[ ] - Hien thi khu vuc khong khi khong an toan
-[ ] - Hien thi diem cap nuoc sach va nha ve sinh cong cong
-[ ] - Bao cao dong vat nguy hiem hoac dong vat bi anh huong
-[ ] - Theo doi nhiet do va chi so nguy co nang nong
+[x] - Canh bao chat luong khong khi va bui min
+[x] - Canh bao o nhiem nguon nuoc
+[x] - Bao cao tran dau, hoa chat va chat thai nguy hai
+[x] - Hien thi khu vuc khong khi khong an toan
+[x] - Hien thi diem cap nuoc sach va nha ve sinh cong cong
+[x] - Bao cao dong vat nguy hiem hoac dong vat bi anh huong
+[x] - Theo doi nhiet do va chi so nguy co nang nong
 
 ================================================================================
 
