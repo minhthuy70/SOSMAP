@@ -581,23 +581,23 @@ QUY UOC
 23. CONG DONG, THONG TIN VA PHAN ANH (COMMUNITY)
 
 23.1. Kenh tiep nhan cong dong
-[ ] - Gui phan anh khong can tao tai khoan trong truong hop khan cap
-[ ] - Gui tin nhan van ban, am thanh va hinh anh
-[ ] - Tiep nhan phan anh qua SMS, Zalo OA hoac tong dai
-[ ] - Ho tro tieng Viet co dau va tieng dan toc khi co nguon luc
-[ ] - Hien thi muc do uu tien de nguoi dan chon dung
-[ ] - Cho phep phan anh an danh trong truong hop nhay cam
-[ ] - Bao ve nguoi bao tin va han che lo vi tri nhay cam
+[x] - Gui phan anh khong can tao tai khoan trong truong hop khan cap
+[x] - Gui tin nhan van ban, am thanh va hinh anh
+[x] - Tiep nhan phan anh qua SMS, Zalo OA hoac tong dai
+[x] - Ho tro tieng Viet co dau va tieng dan toc khi co nguon luc
+[x] - Hien thi muc do uu tien de nguoi dan chon dung
+[x] - Cho phep phan anh an danh trong truong hop nhay cam
+[x] - Bao ve nguoi bao tin va han che lo vi tri nhay cam
 
 23.2. Xac minh va chong tin sai
-[ ] - Danh dau tin chua xac minh
-[ ] - Yeu cau nhieu nguon doc lap xac nhan
-[ ] - Phat hien phan anh trung lap va spam
-[ ] - Phat hien hinh anh hoac video da cu neu co the
-[ ] - Hien thi dinh chinh khi thong tin sai
-[ ] - Luu bang chung va lich su chinh sua
-[ ] - Phan quyen nguoi duoc phep phat hanh thong tin chinh thuc
-[ ] - Khong tu dong ket luan nguyen nhan khi chua co xac minh
+[x] - Danh dau tin chua xac minh
+[x] - Yeu cau nhieu nguon doc lap xac nhan
+[x] - Phat hien phan anh trung lap va spam
+[x] - Phat hien hinh anh hoac video da cu neu co the
+[x] - Hien thi dinh chinh khi thong tin sai
+[x] - Luu bang chung va lich su chinh sua
+[x] - Phan quyen nguoi duoc phep phat hanh thong tin chinh thuc
+[x] - Khong tu dong ket luan nguyen nhan khi chua co xac minh
 
 ================================================================================
 

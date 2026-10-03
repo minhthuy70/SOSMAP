@@ -799,6 +799,31 @@
           </div>
         </div>
 
+        <!-- Community Panel -->
+        <div class="community-panel" id="communityPanel">
+          <h3>Cộng đồng & Phản ánh</h3>
+          <div class="community-status">
+            <div class="status-item">
+              <span class="status-label">Phản ánh mới:</span>
+              <span class="status-value" id="newReports">5</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Chưa xác minh:</span>
+              <span class="status-value warning" id="unverifiedReports">12</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Đính chính:</span>
+              <span class="status-value" id="corrections">2</span>
+            </div>
+          </div>
+          <div class="community-actions">
+            <button class="ops-btn" id="quickReportBtn">Phản ánh nhanh</button>
+            <button class="ops-btn" id="verificationBtn">Xác minh</button>
+            <button class="ops-btn" id="correctionBtn">Đính chính</button>
+            <button class="ops-btn" id="channelBtn">Kênh tiếp nhận</button>
+          </div>
+        </div>
+
         <!-- Early Warning Panel -->
         <div class="early-warning-panel" id="earlyWarningPanel">
           <h3>Cảnh báo sớm</h3>
@@ -10082,6 +10107,164 @@ div class="summary-label">Sự cố tháng này</div>
         <div class="modal-actions" style="margin-top: 20px;">
           <button class="btn btn-primary" onclick="exportDashboard()">Xuất báo cáo</button>
           <button class="btn btn-secondary" onclick="toggleDrillMode()">Chế độ diễn tập</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  <!-- Quick Report Modal -->
+  <div class="modal" id="quickReportModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Phản ánh nhanh (Không cần đăng nhập)</h3>
+        <button class="modal-close" id="closeQuickReportModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="report-form">
+          <label>Loại phản ánh:</label>
+          <select id="reportType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="emergency">Khẩn cấp</option>
+            <option value="traffic">Giao thông</option>
+            <option value="infrastructure">Hạ tầng</option>
+            <option value="other">Khác</option>
+          </select>
+          <label>Mức độ ưu tiên:</label>
+          <select id="reportPriority" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="low">Thấp</option>
+            <option value="medium">Trung bình</option>
+            <option value="high">Cao</option>
+            <option value="critical">Khẩn cấp</option>
+          </select>
+          <label>Nội dung:</label>
+          <textarea id="reportContent" placeholder="Mô tả chi tiết" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 100px;"></textarea>
+          <label>Đính kèm (ảnh/video/âm thanh):</label>
+          <input type="file" id="reportAttachment" multiple style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label class="privacy-toggle">
+            <input type="checkbox" id="anonymousReport">
+            <span>Phản ánh ẩn danh</span>
+          </label>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="submitQuickReport()">Gửi phản ánh</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verification Modal -->
+  <div class="modal" id="verificationModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Xác minh phản ánh</h3>
+        <button class="modal-close" id="closeVerificationModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="verification-list">
+          <h4>Danh sách phản ánh chưa xác minh</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Mã</th>
+                <th>Nội dung</th>
+                <th>Người gửi</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>RPT-001</td>
+                <td>Ngập lụt đường Nguyễn Văn Linh</td>
+                <td>Ẩn danh</td>
+                <td><span class="status-badge warning">Chưa xác minh</span></td>
+                <td><button class="btn btn-sm" onclick="verifyReport('RPT-001')">Xác minh</button></td>
+              </tr>
+              <tr>
+                <td>RPT-002</td>
+                <td>Cây đổ trên đường 3/2</td>
+                <td>Nguyễn Văn A</td>
+                <td><span class="status-badge warning">Chưa xác minh</span></td>
+                <td><button class="btn btn-sm" onclick="verifyReport('RPT-002')">Xác minh</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="verification-tools" style="margin-top: 20px;">
+          <h4>Công cụ xác minh</h4>
+          <div class="tool-buttons">
+            <button class="btn btn-secondary" onclick="checkDuplicate()">Kiểm tra trùng lặp</button>
+            <button class="btn btn-secondary" onclick="checkOldMedia()">Kiểm tra ảnh/video cũ</button>
+            <button class="btn btn-secondary" onclick="requestMultipleSources()">Yêu cầu nhiều nguồn</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Correction Modal -->
+  <div class="modal" id="correctionModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Đính chính thông tin</h3>
+        <button class="modal-close" id="closeCorrectionModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="correction-form">
+          <label>Mã phản ánh cần đính chính:</label>
+          <input type="text" id="correctionReportId" placeholder="Nhập mã phản ánh" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Nội dung đính chính:</label>
+          <textarea id="correctionContent" placeholder="Nhập nội dung đính chính" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 100px;"></textarea>
+          <label>Bằng chứng:</label>
+          <input type="file" id="correctionEvidence" multiple style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div class="correction-history" style="margin-top: 20px;">
+          <h4>Lịch sử đính chính</h4>
+          <ul>
+            <li>RPT-001 - 01/10/2026 - Đã xác minh: Không ngập lụt</li>
+            <li>RPT-003 - 30/09/2026 - Đã xác minh: Cây đã được dọn</li>
+          </ul>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="submitCorrection()">Gửi đính chính</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Channel Modal -->
+  <div class="modal" id="channelModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Kênh tiếp nhận cộng đồng</h3>
+        <button class="modal-close" id="closeChannelModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="channel-list">
+          <h4>Kênh đang hoạt động</h4>
+          <div class="channel-item">
+            <p><strong>Web/App:</strong> <span class="status-value success">Đang hoạt động</span></p>
+            <p>Hỗ trợ tiếng Việt có dấu</p>
+          </div>
+          <div class="channel-item">
+            <p><strong>SMS:</strong> <span class="status-value success">Đang hoạt động</span></p>
+            <p>Số: 1900 xxxx</p>
+          </div>
+          <div class="channel-item">
+            <p><strong>Zalo OA:</strong> <span class="status-value success">Đang hoạt động</span></p>
+            <p>OA: SOSMAP Official</p>
+          </div>
+          <div class="channel-item">
+            <p><strong>Tổng đài:</strong> <span class="status-value success">Đang hoạt động</span></p>
+            <p>Số: 1900 xxxx</p>
+          </div>
+        </div>
+        <div class="language-support" style="margin-top: 20px;">
+          <h4>Hỗ trợ ngôn ngữ</h4>
+          <p>Tiếng Việt có dấu, Tiếng Anh, Tiếng dân tộc (khi có nguồn lực)</p>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="addChannel()">Thêm kênh</button>
         </div>
       </div>
     </div>

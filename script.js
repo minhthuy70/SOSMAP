@@ -13046,7 +13046,182 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeOfflineSystem();
   initializePlanningSystem();
   initializeGovernanceSystem();
+  initializeCommunitySystem();
 });
+
+// Community System
+var communityData = {
+  newReports: 5,
+  unverifiedReports: 12,
+  corrections: 2,
+  reports: [
+    { id: 'RPT-001', content: 'Ngập lụt đường Nguyễn Văn Linh', sender: 'Ẩn danh', status: 'unverified', priority: 'high' },
+    { id: 'RPT-002', content: 'Cây đổ trên đường 3/2', sender: 'Nguyễn Văn A', status: 'unverified', priority: 'medium' }
+  ],
+  channels: [
+    { type: 'web', name: 'Web/App', status: 'active', language: 'Tiếng Việt có dấu' },
+    { type: 'sms', name: 'SMS', status: 'active', number: '1900 xxxx' },
+    { type: 'zalo', name: 'Zalo OA', status: 'active', oa: 'SOSMAP Official' },
+    { type: 'hotline', name: 'Tổng đài', status: 'active', number: '1900 xxxx' }
+  ],
+  correctionHistory: [
+    { reportId: 'RPT-001', date: '01/10/2026', content: 'Đã xác minh: Không ngập lụt' },
+    { reportId: 'RPT-003', date: '30/09/2026', content: 'Đã xác minh: Cây đã được dọn' }
+  ]
+};
+
+function initializeCommunitySystem() {
+  // Load community data from localStorage
+  var savedCommunity = localStorage.getItem('sosmap_community');
+  if (savedCommunity) {
+    communityData = JSON.parse(savedCommunity);
+  }
+
+  // Update community panel
+  updateCommunityPanel();
+
+  // Initialize community buttons
+  document.getElementById('quickReportBtn').addEventListener('click', function() {
+    document.getElementById('quickReportModal').style.display = 'block';
+  });
+
+  document.getElementById('verificationBtn').addEventListener('click', function() {
+    document.getElementById('verificationModal').style.display = 'block';
+  });
+
+  document.getElementById('correctionBtn').addEventListener('click', function() {
+    document.getElementById('correctionModal').style.display = 'block';
+  });
+
+  document.getElementById('channelBtn').addEventListener('click', function() {
+    document.getElementById('channelModal').style.display = 'block';
+  });
+
+  // Close modals
+  document.getElementById('closeQuickReportModal').addEventListener('click', function() {
+    document.getElementById('quickReportModal').style.display = 'none';
+  });
+
+  document.getElementById('closeVerificationModal').addEventListener('click', function() {
+    document.getElementById('verificationModal').style.display = 'none';
+  });
+
+  document.getElementById('closeCorrectionModal').addEventListener('click', function() {
+    document.getElementById('correctionModal').style.display = 'none';
+  });
+
+  document.getElementById('closeChannelModal').addEventListener('click', function() {
+    document.getElementById('channelModal').style.display = 'none';
+  });
+}
+
+function updateCommunityPanel() {
+  document.getElementById('newReports').textContent = communityData.newReports;
+  document.getElementById('unverifiedReports').textContent = communityData.unverifiedReports;
+  document.getElementById('corrections').textContent = communityData.corrections;
+}
+
+function saveCommunityData() {
+  localStorage.setItem('sosmap_community', JSON.stringify(communityData));
+}
+
+// Quick Report Functions
+function submitQuickReport() {
+  var type = document.getElementById('reportType').value;
+  var priority = document.getElementById('reportPriority').value;
+  var content = document.getElementById('reportContent').value;
+  var anonymous = document.getElementById('anonymousReport').checked;
+
+  if (!content) {
+    alert('Vui lòng nhập nội dung phản ánh!');
+    return;
+  }
+
+  var report = {
+    id: 'RPT-' + (communityData.reports.length + 1).toString().padStart(3, '0'),
+    type: type,
+    priority: priority,
+    content: content,
+    sender: anonymous ? 'Ẩn danh' : 'Người dùng',
+    status: 'unverified',
+    timestamp: new Date().toLocaleString('vi-VN')
+  };
+
+  communityData.reports.push(report);
+  communityData.newReports++;
+  communityData.unverifiedReports++;
+  saveCommunityData();
+  updateCommunityPanel();
+
+  alert('Đã gửi phản ánh thành công!');
+  logActivity('quick_report_submit', 'Gửi phản ánh nhanh: ' + type);
+
+  document.getElementById('reportContent').value = '';
+  document.getElementById('reportAttachment').value = '';
+  document.getElementById('anonymousReport').checked = false;
+}
+
+// Verification Functions
+function verifyReport(reportId) {
+  var report = communityData.reports.find(function(r) { return r.id === reportId; });
+  if (report) {
+    report.status = 'verified';
+    communityData.unverifiedReports--;
+    saveCommunityData();
+    updateCommunityPanel();
+    alert('Đã xác minh phản ánh ' + reportId);
+    logActivity('report_verify', 'Xác minh phản ánh: ' + reportId);
+  }
+}
+
+function checkDuplicate() {
+  alert('Kiểm tra trùng lặp (demo)');
+  logActivity('duplicate_check', 'Kiểm tra phản ánh trùng lặp');
+}
+
+function checkOldMedia() {
+  alert('Kiểm tra ảnh/video cũ (demo)');
+  logActivity('old_media_check', 'Kiểm tra ảnh/video cũ');
+}
+
+function requestMultipleSources() {
+  alert('Yêu cầu nhiều nguồn xác nhận (demo)');
+  logActivity('multiple_sources_request', 'Yêu cầu nhiều nguồn xác nhận');
+}
+
+// Correction Functions
+function submitCorrection() {
+  var reportId = document.getElementById('correctionReportId').value;
+  var content = document.getElementById('correctionContent').value;
+
+  if (!reportId || !content) {
+    alert('Vui lòng nhập đầy đủ thông tin!');
+    return;
+  }
+
+  communityData.correctionHistory.push({
+    reportId: reportId,
+    date: new Date().toLocaleDateString('vi-VN'),
+    content: content
+  });
+
+  communityData.corrections++;
+  saveCommunityData();
+  updateCommunityPanel();
+
+  alert('Đã gửi đính chính!');
+  logActivity('correction_submit', 'Gửi đính chính: ' + reportId);
+
+  document.getElementById('correctionReportId').value = '';
+  document.getElementById('correctionContent').value = '';
+  document.getElementById('correctionEvidence').value = '';
+}
+
+// Channel Functions
+function addChannel() {
+  alert('Thêm kênh (demo)');
+  logActivity('channel_add', 'Thêm kênh tiếp nhận');
+}
 
 // Governance System
 var governanceData = {
