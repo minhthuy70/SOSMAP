@@ -425,38 +425,38 @@ QUY UOC
 17. CUNG CAP CUU TRO VA HAU CAN (RELIEF & LOGISTICS)
 
 17.1. Tiep nhan nhu cau
-[ ] - Tao yeu cau luong thuc, nuoc uong va sua cho tre em
-[ ] - Tao yeu cau thuoc, vat tu y te va do bao ho
-[ ] - Tao yeu cau quan ao, chan man va do dung ca nhan
-[ ] - Tao yeu cau xu ly nuoc, may phat dien va nhien lieu
-[ ] - Tao yeu cau thuyen, xe tai va phuong tien cuu ho
-[ ] - Nhap so luong, don vi tinh va thoi han can
-[ ] - Gan nhu cau voi ho gia dinh, diem tru an hoac dia phuong
-[ ] - Xac nhan nhu cau boi can bo hoac to chuc uy tin
-[ ] - Theo doi nhu cau da dap ung va con thieu
+[x] - Tao yeu cau luong thuc, nuoc uong va sua cho tre em
+[x] - Tao yeu cau thuoc, vat tu y te va do bao ho
+[x] - Tao yeu cau quan ao, chan man va do dung ca nhan
+[x] - Tao yeu cau xu ly nuoc, may phat dien va nhien lieu
+[x] - Tao yeu cau thuyen, xe tai va phuong tien cuu ho
+[x] - Nhap so luong, don vi tinh va thoi han can
+[x] - Gan nhu cau voi ho gia dinh, diem tru an hoac dia phuong
+[x] - Xac nhan nhu cau boi can bo hoac to chuc uy tin
+[x] - Theo doi nhu cau da dap ung va con thieu
 
 17.2. Kho va phan phoi
-[ ] - Tao danh sach kho hang va diem tiep nhan
-[ ] - Theo doi ton kho theo loai hang va han su dung
-[ ] - Tiep nhan phieu nhap va phieu xuat
-[ ] - Gan lo hang voi nha tai tro va nguon kinh phi
-[ ] - Tao ke hoach phan phoi theo muc do uu tien
-[ ] - Theo doi xe van chuyen va trang thai giao hang
-[ ] - Xac nhan ban giao tai diem nhan
-[ ] - Ghi nhan mat mat, hong hong hoac het han
-[ ] - Canh bao ton kho thap
-[ ] - Bao cao luong hang da cap phat
+[x] - Tao danh sach kho hang va diem tiep nhan
+[x] - Theo doi ton kho theo loai hang va han su dung
+[x] - Tiep nhan phieu nhap va phieu xuat
+[x] - Gan lo hang voi nha tai tro va nguon kinh phi
+[x] - Tao ke hoach phan phoi theo muc do uu tien
+[x] - Theo doi xe van chuyen va trang thai giao hang
+[x] - Xac nhan ban giao tai diem nhan
+[x] - Ghi nhan mat mat, hong hong hoac het han
+[x] - Canh bao ton kho thap
+[x] - Bao cao luong hang da cap phat
 
 17.3. Quyen gop minh bach
-[ ] - Tao chien dich quyen gop theo su co va dia ban
-[ ] - Hien thi muc tieu va so tien da tiep nhan
-[ ] - Ho tro chuyen khoan, QR va cong thanh toan hop le
-[ ] - Tao ma giao dich va bien nhan
-[ ] - Cong khai danh sach khoan thu theo chinh sach bao mat
-[ ] - Cong khai khoan chi theo hang muc
-[ ] - Cho phep tai bao cao kiem ke
-[ ] - Phat hien giao dich bat thuong va yeu cau doi soat
-[ ] - Cam ket khong tu y keu goi tien neu chua duoc phe duyet
+[x] - Tao chien dich quyen gop theo su co va dia ban
+[x] - Hien thi muc tieu va so tien da tiep nhan
+[x] - Ho tro chuyen khoan, QR va cong thanh toan hop le
+[x] - Tao ma giao dich va bien nhan
+[x] - Cong khai danh sach khoan thu theo chinh sach bao mat
+[x] - Cong khai khoan chi theo hang muc
+[x] - Cho phep tai bao cao kiem ke
+[x] - Phat hien giao dich bat thuong va yeu cau doi soat
+[x] - Cam ket khong tu y keu goi tien neu chua duoc phe duyet
 
 ================================================================================
 

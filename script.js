@@ -13052,7 +13052,134 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeFireInfrastructureSystem();
   initializeEmergencyCareSystem();
   initializePublicHealthSystem();
+  initializeReliefLogisticsSystem();
 });
+
+// Relief & Logistics System
+var reliefData = {
+  pendingNeeds: 8,
+  inventoryLevel: 72,
+  donationAmount: '5.2 tỷ',
+  needs: [
+    { type: 'food', quantity: 100, unit: 'kg', assignTo: 'Điểm trú A', status: 'pending' },
+    { type: 'water', quantity: 50, unit: 'chai', assignTo: 'Hộ B', status: 'completed' }
+  ],
+  warehouses: [
+    { name: 'Kho A', itemType: 'Lương thực', stock: 85, expiry: 'OK', status: 'active' },
+    { name: 'Kho B', itemType: 'Thuốc', stock: 25, expiry: '1 tháng', status: 'warning' }
+  ]
+};
+
+function initializeReliefLogisticsSystem() {
+  var savedRelief = localStorage.getItem('sosmap_relief');
+  if (savedRelief) {
+    reliefData = JSON.parse(savedRelief);
+  }
+
+  updateReliefPanel();
+
+  document.getElementById('needsRequestBtn').addEventListener('click', function() {
+    document.getElementById('needsRequestModal').style.display = 'block';
+  });
+
+  document.getElementById('warehouseBtn').addEventListener('click', function() {
+    document.getElementById('warehouseModal').style.display = 'block';
+  });
+
+  document.getElementById('donationBtn').addEventListener('click', function() {
+    document.getElementById('donationModal').style.display = 'block';
+  });
+
+  document.getElementById('distributionBtn').addEventListener('click', function() {
+    document.getElementById('distributionModal').style.display = 'block';
+  });
+
+  document.getElementById('closeNeedsRequestModal').addEventListener('click', function() {
+    document.getElementById('needsRequestModal').style.display = 'none';
+  });
+
+  document.getElementById('closeWarehouseModal').addEventListener('click', function() {
+    document.getElementById('warehouseModal').style.display = 'none';
+  });
+
+  document.getElementById('closeDonationModal').addEventListener('click', function() {
+    document.getElementById('donationModal').style.display = 'none';
+  });
+
+  document.getElementById('closeDistributionModal').addEventListener('click', function() {
+    document.getElementById('distributionModal').style.display = 'none';
+  });
+}
+
+function updateReliefPanel() {
+  document.getElementById('pendingNeeds').textContent = reliefData.pendingNeeds;
+  document.getElementById('inventoryLevel').textContent = reliefData.inventoryLevel + '%';
+  document.getElementById('donationAmount').textContent = reliefData.donationAmount;
+}
+
+function saveReliefData() {
+  localStorage.setItem('sosmap_relief', JSON.stringify(reliefData));
+}
+
+function submitNeedRequest() {
+  var type = document.getElementById('needType').value;
+  var quantity = document.getElementById('needQuantity').value;
+  var unit = document.getElementById('needUnit').value;
+  var deadline = document.getElementById('needDeadline').value;
+  var assignTo = document.getElementById('needAssignTo').value;
+  var assignName = document.getElementById('needAssignName').value;
+  var description = document.getElementById('needDescription').value;
+
+  if (!quantity || !assignName) {
+    alert('Vui lòng nhập số lượng và tên!');
+    return;
+  }
+
+  reliefData.needs.push({
+    type: type,
+    quantity: quantity,
+    unit: unit,
+    deadline: deadline,
+    assignTo: assignTo,
+    assignName: assignName,
+    description: description,
+    status: 'pending',
+    timestamp: new Date().toLocaleString('vi-VN')
+  });
+
+  reliefData.pendingNeeds++;
+  saveReliefData();
+  updateReliefPanel();
+
+  alert('Đã gửi nhu cầu cứu trợ!');
+  logActivity('need_request_submit', 'Gửi nhu cầu: ' + type + ' cho ' + assignName);
+
+  document.getElementById('needQuantity').value = '';
+  document.getElementById('needUnit').value = '';
+  document.getElementById('needDeadline').value = '';
+  document.getElementById('needAssignName').value = '';
+  document.getElementById('needDescription').value = '';
+}
+
+function addReceipt() {
+  alert('Thêm phiếu nhập (demo)');
+  logActivity('receipt_add', 'Thêm phiếu nhập kho');
+}
+
+function addIssue() {
+  alert('Thêm phiếu xuất (demo)');
+  logActivity('issue_add', 'Thêm phiếu xuất kho');
+}
+
+function reportLoss() {
+  alert('Ghi nhận mất mát/hỏng (demo)');
+  logActivity('loss_report', 'Ghi nhận mất mát/hỏng');
+}
+
+function lowStockAlert() {
+  alert('Cảnh báo tồn kho thấp (demo)');
+  logActivity('low_stock_alert', 'Cảnh báo tồn kho thấp');
+}
 
 // Public Health System
 var publicHealthData = {

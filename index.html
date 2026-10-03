@@ -949,6 +949,31 @@
           </div>
         </div>
 
+        <!-- Relief & Logistics Panel -->
+        <div class="relief-panel" id="reliefPanel">
+          <h3>Cung cấp cứu trợ & Hậu cần</h3>
+          <div class="relief-status">
+            <div class="status-item">
+              <span class="status-label">Nhu cầu đang chờ:</span>
+              <span class="status-value warning" id="pendingNeeds">8</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Tồn kho:</span>
+              <span class="status-value success" id="inventoryLevel">72%</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Đã quyên góp:</span>
+              <span class="status-value" id="donationAmount">5.2 tỷ</span>
+            </div>
+          </div>
+          <div class="relief-actions">
+            <button class="ops-btn" id="needsRequestBtn">Tiếp nhận nhu cầu</button>
+            <button class="ops-btn" id="warehouseBtn">Kho & Phân phối</button>
+            <button class="ops-btn" id="donationBtn">Quyên góp</button>
+            <button class="ops-btn" id="distributionBtn">Phân phối</button>
+          </div>
+        </div>
+
         <!-- Early Warning Panel -->
         <div class="early-warning-panel" id="earlyWarningPanel">
           <h3>Cảnh báo sớm</h3>
@@ -11391,6 +11416,228 @@ div class="summary-label">Sự cố tháng này</div>
             <button class="btn btn-secondary" onclick="viewDataHistory()">Xem lịch sử sử dụng dữ liệu</button>
             <button class="btn btn-danger" onclick="withdrawHealthConsent()">Rút lại đồng ý</button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  <!-- Needs Request Modal -->
+  <div class="modal" id="needsRequestModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Tiếp nhận nhu cầu cứu trợ</h3>
+        <button class="modal-close" id="closeNeedsRequestModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="needs-form">
+          <label>Loại nhu cầu:</label>
+          <select id="needType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="food">Lương thực, nước uống, sữa trẻ em</option>
+            <option value="medical">Thuốc, vật tư y tế, đồ bảo hộ</option>
+            <option value="clothing">Quần áo, chăn măn, đồ dùng cá nhân</option>
+            <option value="utilities">Xử lý nước, máy phát điện, nhiên liệu</option>
+            <option value="transport">Thuyền, xe tải, phương tiện cứu hộ</option>
+          </select>
+          <label>Số lượng:</label>
+          <input type="number" id="needQuantity" placeholder="Nhập số lượng" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Đơn vị tính:</label>
+          <input type="text" id="needUnit" placeholder="VD: kg, chai, bộ" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Thời hạn cần:</label>
+          <input type="date" id="needDeadline" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Gán với:</label>
+          <select id="needAssignTo" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="household">Hộ gia đình</option>
+            <option value="shelter">Điểm trú an</option>
+            <option value="area">Địa bàn</option>
+          </select>
+          <label>Tên hộ/điểm/địa bàn:</label>
+          <input type="text" id="needAssignName" placeholder="Nhập tên" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Mô tả chi tiết:</label>
+          <textarea id="needDescription" placeholder="Mô tả chi tiết nhu cầu" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="submitNeedRequest()">Gửi nhu cầu</button>
+        </div>
+        <div class="needs-list" style="margin-top: 20px;">
+          <h4>Nhu cầu đang chờ xử lý</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Loại</th>
+                <th>Số lượng</th>
+                <th>Gán với</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Lương thực</td>
+                <td>100 kg</td>
+                <td>Điểm trú A</td>
+                <td><span class="status-badge warning">Chờ xử lý</span></td>
+              </tr>
+              <tr>
+                <td>Nước uống</td>
+                <td>50 chai</td>
+                <td>Hộ B</td>
+                <td><span class="status-badge completed">Đã đáp ứng</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warehouse Modal -->
+  <div class="modal" id="warehouseModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Kho & Phân phối</h3>
+        <button class="modal-close" id="closeWarehouseModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="warehouse-list">
+          <h4>Danh sách kho & Điểm tiếp nhận</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Kho/Điểm</th>
+                <th>Loại hàng</th>
+                <th>Tồn kho</th>
+                <th>Hạn sử dụng</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Kho A</td>
+                <td>Lương thực</td>
+                <td>85%</td>
+                <td>OK</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+              </tr>
+              <tr>
+                <td>Kho B</td>
+                <td>Thuốc</td>
+                <td><span class="status-value warning">25%</span></td>
+                <td>1 tháng</td>
+                <td><span class="status-value warning">Cảnh báo</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="warehouse-actions" style="margin-top: 20px;">
+          <h4>Hành động</h4>
+          <div class="action-buttons">
+            <button class="btn btn-secondary" onclick="addReceipt()">Phiếu nhập</button>
+            <button class="btn btn-secondary" onclick="addIssue()">Phiếu xuất</button>
+            <button class="btn btn-secondary" onclick="reportLoss()">Ghi nhận mất mát/hỏng</button>
+            <button class="btn btn-danger" onclick="lowStockAlert()">Cảnh báo tồn kho thấp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Donation Modal -->
+  <div class="modal" id="donationModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Quyên góp minh bạch</h3>
+        <button class="modal-close" id="closeDonationModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="donation-campaign">
+          <h4>Chiến dịch quyên góp</h4>
+          <p><strong>Mục tiêu:</strong> 10 tỷ đồng</p>
+          <p><strong>Đã tiếp nhận:</strong> 5.2 tỷ đồng (52%)</p>
+          <p><strong>Sự cố:</strong> Ngập lụt TP.HCM</p>
+        </div>
+        <div class="donation-methods" style="margin-top: 20px;">
+          <h4>Phương thức quyên góp</h4>
+          <div class="method-item">
+            <p><strong>Chuyển khoản:</strong> 1234567890 - Ngân hàng ABC</p>
+            <p><strong>QR Code:</strong> [QR placeholder]</p>
+            <p><strong>Thanh toán hợp pháp:</strong> Đã đăng ký</p>
+          </div>
+        </div>
+        <div class="donation-transparency" style="margin-top: 20px;">
+          <h4>Minh bạch</h4>
+          <p><strong>Mã giao dịch:</strong> Tự động tạo</p>
+          <p><strong>Biên nhận:</strong> Được cấp sau khi quyên góp</p>
+          <p><strong>Danh sách người quyên góp:</strong> Công khai (theo chính sách bảo mật)</p>
+          <p><strong>Khoản chi:</strong> Công khai theo hạng mục</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Distribution Modal -->
+  <div class="modal" id="distributionModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Phân phối cứu trợ</h3>
+        <button class="modal-close" id="closeDistributionModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="distribution-plan">
+          <h4>Kế hoạch phân phối theo mức độ ưu tiên</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Ưu tiên</th>
+                <th>Điểm phân phối</th>
+                <th>Loại hàng</th>
+                <th>Số lượng</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="priority-badge critical">Khẩn cấp</span></td>
+                <td>Điểm trú A</td>
+                <td>Lương thực</td>
+                <td>200 kg</td>
+                <td><span class="status-badge warning">Đang giao</span></td>
+              </tr>
+              <tr>
+                <td><span class="priority-badge high">Cao</span></td>
+                <td>Điểm trú B</td>
+                <td>Nước uống</td>
+                <td>100 chai</td>
+                <td><span class="status-badge completed">Đã giao</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="transport-tracking" style="margin-top: 20px;">
+          <h4>Theo dõi xe vận chuyển</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Biển số</th>
+                <th>Điểm đi</th>
+                <th>Điểm đến</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>51A-12345</td>
+                <td>Kho A</td>
+                <td>Điểm trú A</td>
+                <td><span class="status-badge warning">Đang vận chuyển</span></td>
+              </tr>
+              <tr>
+                <td>51A-67890</td>
+                <td>Kho B</td>
+                <td>Điểm trú B</td>
+                <td><span class="status-badge completed">Đã giao</span></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
