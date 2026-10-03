@@ -524,22 +524,22 @@ QUY UOC
 20. CHAY NO, CỨU HOA VA SU CO CONG TRINH (FIRE & INFRASTRUCTURE)
 
 20.1. Phan anh chay no
-[ ] - Bao chay, no, khoi doc hoac ro ri khi gas
-[ ] - Chon loai cong trinh va muc do nguy hiem
-[ ] - Hien thi vi tri truc tiep cho luc luong PCCC
-[ ] - Nhap so nguoi mac ket va huong tiep can
-[ ] - Gui hinh anh dam chay neu an toan
-[ ] - Hien thi huong gio va khu vuc co nguy co lan
-[ ] - Canh bao nguoi dan trong vung ban kinh
+[x] - Bao chay, no, khoi doc hoac ro ri khi gas
+[x] - Chon loai cong trinh va muc do nguy hiem
+[x] - Hien thi vi tri truc tiep cho luc luong PCCC
+[x] - Nhap so nguoi mac ket va huong tiep can
+[x] - Gui hinh anh dam chay neu an toan
+[x] - Hien thi huong gio va khu vuc co nguy co lan
+[x] - Canh bao nguoi dan trong vung ban kinh
 
 20.2. Su co ha tang
-[ ] - Bao dut cap dien, ro ri dien va cot dien do
-[ ] - Bao vo duong ong nuoc va thieu nuoc sinh hoat
-[ ] - Bao hong cau, duong, de, cong va tram bom
-[ ] - Bao cay do, bien bao do va vat can nguy hiem
-[ ] - Bao su co tram phat song va mat lien lac
-[ ] - Phan cong don vi quan ly ha tang
-[ ] - Theo doi thoi gian khac phuc
+[x] - Bao dut cap dien, ro ri dien va cot dien do
+[x] - Bao vo duong ong nuoc va thieu nuoc sinh hoat
+[x] - Bao hong cau, duong, de, cong va tram bom
+[x] - Bao cay do, bien bao do va vat can nguy hiem
+[x] - Bao su co tram phat song va mat lien lac
+[x] - Phan cong don vi quan ly ha tang
+[x] - Theo doi thoi gian khac phuc
 
 ================================================================================
 

@@ -13667,3 +13667,114 @@ body.high-contrast textarea {
   color: #333;
 }
 
+
+
+/* Fire Panel */
+.fire-panel {
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+
+.fire-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.fire-status {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.fire-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Fire Form */
+.fire-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+
+/* Fire Map Info */
+.fire-map-info h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.wind-direction p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+.wind-direction strong {
+  color: #666;
+}
+
+/* Fire Incidents List */
+.fire-incidents-list h4 {
+  margin: 20px 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.fire-incidents-list table th,
+.fire-incidents-list table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.fire-incidents-list table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.fire-incidents-list table td {
+  font-size: 13px;
+}
+
+/* Infra Status */
+.infra-list h4 {
+  margin: 0 0 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.infra-list table th,
+.infra-list table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.infra-list table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.infra-list table td {
+  font-size: 13px;
+}
+
+/* Agency Assignment */
+.agency-assignment label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #666;
+}
+

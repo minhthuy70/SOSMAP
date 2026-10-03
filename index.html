@@ -874,6 +874,31 @@
           </div>
         </div>
 
+        <!-- Fire & Infrastructure Panel -->
+        <div class="fire-panel" id="firePanel">
+          <h3>Cháy nổ, Cứu hỏa & Sự cố hạ tầng</h3>
+          <div class="fire-status">
+            <div class="status-item">
+              <span class="status-label">Sự cố cháy nổ:</span>
+              <span class="status-value warning" id="fireIncidents">2</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Sự cố hạ tầng:</span>
+              <span class="status-value warning" id="infraIncidents">3</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Đang xử lý:</span>
+              <span class="status-value" id="activeFireInfra">5</span>
+            </div>
+          </div>
+          <div class="fire-actions">
+            <button class="ops-btn" id="fireReportBtn">Báo cáo cháy nổ</button>
+            <button class="ops-btn" id="infraReportBtn">Báo cáo hạ tầng</button>
+            <button class="ops-btn" id="fireStatusBtn">Trạng thái xử lý</button>
+            <button class="ops-btn" id="fireAgencyBtn">Phân công đơn vị</button>
+          </div>
+        </div>
+
         <!-- Early Warning Panel -->
         <div class="early-warning-panel" id="earlyWarningPanel">
           <h3>Cảnh báo sớm</h3>
@@ -10719,6 +10744,211 @@ div class="summary-label">Sự cố tháng này</div>
             <p><strong>Điểm 2:</strong> Trung tâm thương mại Takashimaya - 1.0 km</p>
             <button class="btn btn-primary" onclick="viewSafePoints()">Xem bản đồ</button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+  <!-- Fire Report Modal -->
+  <div class="modal" id="fireReportModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Báo cáo cháy nổ</h3>
+        <button class="modal-close" id="closeFireReportModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="fire-form">
+          <label>Loại sự cố:</label>
+          <select id="fireType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="fire">Cháy</option>
+            <option value="explosion">Nổ</option>
+            <option value="smoke">Khói độc</option>
+            <option value="gas">Rò rỉ khí gas</option>
+          </select>
+          <label>Loại công trình:</label>
+          <select id="buildingType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="residential">Nhà ở</option>
+            <option value="commercial">Công nghiệp</option>
+            <option value="industrial">Công nghiệp</option>
+            <option value="public">Công cộng</option>
+          </select>
+          <label>Mức độ nguy hiểm:</label>
+          <select id="dangerLevel" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="low">Thấp</option>
+            <option value="medium">Trung bình</option>
+            <option value="high">Cao</option>
+            <option value="critical">Khẩn cấp</option>
+          </select>
+          <label>Vị trí:</label>
+          <input type="text" id="fireLocation" placeholder="Nhập địa chỉ" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Số người mắc kẹt:</label>
+          <input type="number" id="trappedPeople" placeholder="Nhập số lượng" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Hướng tiếp cận:</label>
+          <textarea id="accessRoute" placeholder="Mô tả hướng tiếp cận" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+          <label>Ảnh đám cháy (nếu an toàn):</label>
+          <input type="file" id="firePhoto" accept="image/*" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-danger" onclick="submitFireReport()">Báo cáo khẩn cấp</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fire Status Modal -->
+  <div class="modal" id="fireStatusModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Trạng thái xử lý cháy nổ</h3>
+        <button class="modal-close" id="closeFireStatusModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="fire-map-info">
+          <h4>Hướng gió & Khu vực nguy cơ lan</h4>
+          <div class="wind-direction">
+            <p><strong>Hướng gió:</strong> Đông Bắc</p>
+            <p><strong>Tốc độ gió:</strong> 15 km/h</p>
+            <p><strong>Khu vực nguy cơ lan:</strong> Bán kính 500m</p>
+          </div>
+        </div>
+        <div class="fire-incidents-list" style="margin-top: 20px;">
+          <h4>Sự cố đang xử lý</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Mã</th>
+                <th>Loại</th>
+                <th>Vị trí</th>
+                <th>Người mắc kẹt</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>FIRE-001</td>
+                <td>Cháy</td>
+                <td>Quận 1</td>
+                <td>0</td>
+                <td><span class="status-badge warning">Đang dập</span></td>
+              </tr>
+              <tr>
+                <td>FIRE-002</td>
+                <td>Khói độc</td>
+                <td>Quận 3</td>
+                <td>2</td>
+                <td><span class="status-badge critical">Cứu hộ</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Infra Report Modal -->
+  <div class="modal" id="infraReportModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Báo cáo sự cố hạ tầng</h3>
+        <button class="modal-close" id="closeInfraReportModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="infra-form">
+          <label>Loại sự cố:</label>
+          <select id="infraType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="power">Đứt cáp điện</option>
+            <option value="water">Vỡ đường ống nước</option>
+            <option value="bridge">Hỏng cầu/đường</option>
+            <option value="pole">Cột điện đổ</option>
+            <option value="tower">Trạm phát sóng</option>
+          </select>
+          <label>Vị trí:</label>
+          <input type="text" id="infraLocation" placeholder="Nhập vị trí" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Mô tả:</label>
+          <textarea id="infraDescription" placeholder="Mô tả chi tiết" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; height: 80px;"></textarea>
+          <label>Đơn vị quản lý:</label>
+          <input type="text" id="infraAgency" placeholder="Nhập đơn vị" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="submitInfraReport()">Báo cáo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Infra Status Modal -->
+  <div class="modal" id="infraStatusModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Trạng thái xử lý hạ tầng</h3>
+        <button class="modal-close" id="closeInfraStatusModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="infra-list">
+          <h4>Sự cố đang xử lý</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Loại</th>
+                <th>Vị trí</th>
+                <th>Đơn vị</th>
+                <th>Thời gian khắc phục</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Đứt cáp điện</td>
+                <td>Quận 1</td>
+                <td>EVN</td>
+                <td>30 phút</td>
+                <td><span class="status-badge warning">Đang xử lý</span></td>
+              </tr>
+              <tr>
+                <td>Vỡ đường ống nước</td>
+                <td>Quận 3</td>
+                <td>Tân Hòa</td>
+                <td>45 phút</td>
+                <td><span class="status-badge warning">Đang xử lý</span></td>
+              </tr>
+              <tr>
+                <td>Cột điện đổ</td>
+                <td>Quận 5</td>
+                <td>EVN</td>
+                <td>60 phút</td>
+                <td><span class="status-badge completed">Đã khắc phục</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fire Agency Modal -->
+  <div class="modal" id="fireAgencyModal" style="display: none;">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Phân công đơn vị quản lý hạ tầng</h3>
+        <button class="modal-close" id="closeFireAgencyModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="agency-assignment">
+          <label>Loại sự cố:</label>
+          <select id="infraTypeAssign" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="power">Đứt cáp điện</option>
+            <option value="water">Hệ thống nước</option>
+            <option value="telecom">Viễn thông</option>
+            <option value="transport">Giao thông</option>
+          </select>
+          <label>Đơn vị quản lý:</label>
+          <input type="text" id="agencyName" placeholder="Nhập tên đơn vị" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Kênh liên lạc:</label>
+          <input type="tel" id="agencyContact" placeholder="Số điện thoại" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="assignAgency()">Phân công</button>
         </div>
       </div>
     </div>

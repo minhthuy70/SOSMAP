@@ -13049,7 +13049,173 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeCommunitySystem();
   initializeMissingPersonsSystem();
   initializePublicSafetySystem();
+  initializeFireInfrastructureSystem();
 });
+
+// Fire & Infrastructure System
+var fireInfraData = {
+  fireIncidents: 2,
+  infraIncidents: 3,
+  activeFireInfra: 5,
+  fireReports: [
+    { id: 'FIRE-001', type: 'fire', location: 'Quận 1', trapped: 0, status: 'dousing' },
+    { id: 'FIRE-002', type: 'smoke', location: 'Quận 3', trapped: 2, status: 'rescue' }
+  ],
+  infraReports: [
+    { type: 'power', location: 'Quận 1', agency: 'EVN', status: 'processing', eta: '30 phút' },
+    { type: 'water', location: 'Quận 3', agency: 'Tân Hòa', status: 'processing', eta: '45 phút' },
+    { type: 'pole', location: 'Quận 5', agency: 'EVN', status: 'completed', eta: '60 phút' }
+  ],
+  agencyAssignments: []
+};
+
+function initializeFireInfrastructureSystem() {
+  var savedFireInfra = localStorage.getItem('sosmap_fire_infra');
+  if (savedFireInfra) {
+    fireInfraData = JSON.parse(savedFireInfra);
+  }
+
+  updateFirePanel();
+
+  document.getElementById('fireReportBtn').addEventListener('click', function() {
+    document.getElementById('fireReportModal').style.display = 'block';
+  });
+
+  document.getElementById('infraReportBtn').addEventListener('click', function() {
+    document.getElementById('infraReportModal').style.display = 'block';
+  });
+
+  document.getElementById('fireStatusBtn').addEventListener('click', function() {
+    document.getElementById('fireStatusModal').style.display = 'block';
+  });
+
+  document.getElementById('fireAgencyBtn').addEventListener('click', function() {
+    document.getElementById('fireAgencyModal').style.display = 'block';
+  });
+
+  document.getElementById('closeFireReportModal').addEventListener('click', function() {
+    document.getElementById('fireReportModal').style.display = 'none';
+  });
+
+  document.getElementById('closeInfraReportModal').addEventListener('click', function() {
+    document.getElementById('infraReportModal').style.display = 'none';
+  });
+
+  document.getElementById('closeFireStatusModal').addEventListener('click', function() {
+    document.getElementById('fireStatusModal').style.display = 'none';
+  });
+
+  document.getElementById('closeFireAgencyModal').addEventListener('click', function() {
+    document.getElementById('fireAgencyModal').style.display = 'none';
+  });
+}
+
+function updateFirePanel() {
+  document.getElementById('fireIncidents').textContent = fireInfraData.fireIncidents;
+  document.getElementById('infraIncidents').textContent = fireInfraData.infraIncidents;
+  document.getElementById('activeFireInfra').textContent = fireInfraData.activeFireInfra;
+}
+
+function saveFireInfraData() {
+  localStorage.setItem('sosmap_fire_infra', JSON.stringify(fireInfraData));
+}
+
+function submitFireReport() {
+  var type = document.getElementById('fireType').value;
+  var buildingType = document.getElementById('buildingType').value;
+  var dangerLevel = document.getElementById('dangerLevel').value;
+  var location = document.getElementById('fireLocation').value;
+  var trappedPeople = document.getElementById('trappedPeople').value;
+  var accessRoute = document.getElementById('accessRoute').value;
+
+  if (!location) {
+    alert('Vui lòng nhập vị trí!');
+    return;
+  }
+
+  fireInfraData.fireReports.push({
+    id: 'FIRE-' + (fireInfraData.fireReports.length + 1).toString().padStart(3, '0'),
+    type: type,
+    buildingType: buildingType,
+    dangerLevel: dangerLevel,
+    location: location,
+    trappedPeople: trappedPeople,
+    accessRoute: accessRoute,
+    status: 'pending',
+    timestamp: new Date().toLocaleString('vi-VN')
+  });
+
+  fireInfraData.fireIncidents++;
+  fireInfraData.activeFireInfra++;
+  saveFireInfraData();
+  updateFirePanel();
+
+  alert('Đã báo cáo cháy nổ khẩn cấp! Vị trí đã gửi trực tiếp cho lực lượng PCCC.');
+  logActivity('fire_report_submit', 'Báo cáo cháy nổ: ' + type + ' tại ' + location);
+
+  document.getElementById('fireLocation').value = '';
+  document.getElementById('trappedPeople').value = '';
+  document.getElementById('accessRoute').value = '';
+  document.getElementById('firePhoto').value = '';
+}
+
+function submitInfraReport() {
+  var type = document.getElementById('infraType').value;
+  var location = document.getElementById('infraLocation').value;
+  var description = document.getElementById('infraDescription').value;
+  var agency = document.getElementById('infraAgency').value;
+
+  if (!location || !description) {
+    alert('Vui lòng nhập đầy đủ thông tin!');
+    return;
+  }
+
+  fireInfraData.infraReports.push({
+    type: type,
+    location: location,
+    description: description,
+    agency: agency,
+    status: 'pending',
+    timestamp: new Date().toLocaleString('vi-VN')
+  });
+
+  fireInfraData.infraIncidents++;
+  fireInfraData.activeFireInfra++;
+  saveFireInfraData();
+  updateFirePanel();
+
+  alert('Đã báo cáo sự cố hạ tầng!');
+  logActivity('infra_report_submit', 'Báo cáo sự cố hạ tầng: ' + type + ' tại ' + location);
+
+  document.getElementById('infraLocation').value = '';
+  document.getElementById('infraDescription').value = '';
+  document.getElementById('infraAgency').value = '';
+}
+
+function assignAgency() {
+  var type = document.getElementById('infraTypeAssign').value;
+  var agencyName = document.getElementById('agencyName').value;
+  var contact = document.getElementById('agencyContact').value;
+
+  if (!agencyName || !contact) {
+    alert('Vui lòng nhập đầy đủ thông tin!');
+    return;
+  }
+
+  fireInfraData.agencyAssignments.push({
+    type: type,
+    agency: agencyName,
+    contact: contact,
+    timestamp: new Date().toLocaleString('vi-VN')
+  });
+
+  saveFireInfraData();
+  alert('Đã phân công đơn vị quản lý!');
+  logActivity('agency_assign', 'Phân công đơn vị: ' + agencyName + ' cho ' + type);
+
+  document.getElementById('agencyName').value = '';
+  document.getElementById('agencyContact').value = '';
+}
 
 // Public Safety System
 var publicSafetyData = {
