@@ -688,18 +688,18 @@ QUY UOC
 
 29. TICH HOP HE SINH THAI KHAN CAP (EMERGENCY INTEGRATIONS)
 
-[ ] - Tich hop tong dai khan cap va he thong dieu phoi
-[ ] - Tich hop ban tin khi tuong thuy van
-[ ] - Tich hop tram do mua, muc nuoc va camera
-[ ] - Tich hop co so y te va he thong tiem chung
-[ ] - Tich hop he thong PCCC va cuu nan cuu ho
-[ ] - Tich hop SMS gateway va email gateway
-[ ] - Tich hop ban do va du lieu dia chinh
-[ ] - Tich hop thanh toan va doi soat quyen gop
-[ ] - Tich hop thiet bi IoT va tram canh bao
-[ ] - Cung cap API cho co quan, to chuc va ung dung doi tac
-[ ] - Quan ly khoa API va gioi han luu luong
-[ ] - Co co che thu hoi ket noi khi doi tac vi pham
+[x] - Tich hop tong dai khan cap va he thong dieu phoi
+[x] - Tich hop ban tin khi tuong thuy van
+[x] - Tich hop tram do mua, muc nuoc va camera
+[x] - Tich hop co so y te va he thong tiem chung
+[x] - Tich hop he thong PCCC va cuu nan cuu ho
+[x] - Tich hop SMS gateway va email gateway
+[x] - Tich hop ban do va du lieu dia chinh
+[x] - Tich hop thanh toan va doi soat quyen gop
+[x] - Tich hop thiet bi IoT va tram canh bao
+[x] - Cung cap API cho co quan, to chuc va ung dung doi tac
+[x] - Quan ly khoa API va gioi han luu luong
+[x] - Co co che thu hoi ket noi khi doi tac vi pham
 
 ================================================================================
 
@@ -723,11 +723,11 @@ QUY UOC
 
 31. NGUYEN TAC VAN HANH CAN UU TIEN
 
-- SOSMAP la cong cu ho tro phan loai, ket noi va dieu phoi; khong thay the tong dai va co quan cuu ho chinh thuc.
-- Moi canh bao ve thien tai va dich benh phai uu tien nguon chinh thuc, hien ro nguon va thoi diem cap nhat.
-- Yeu cau nguy hiem den tinh mang phai duoc huong dan lien he ngay tong dai khan cap phu hop trong khi gui thong tin cho he thong.
-- Du lieu suc khoe, vi tri nguoi gap nan va thong tin tre em phai mac dinh o che do rieng tu.
-- He thong phai phan biet ro du lieu truc tiep, du lieu uoc tinh, du lieu dien tap va thong tin chua xac minh.
-- Moi thao tac phat hanh canh bao, phan cong cuu ho va cap phat cuu tro phai co nguoi chiu trach nhiem va lich su kiem tra.
-- Khi mat mang, he thong phai thong bao trung thuc trang thai tiep nhan va khong tao cam giac da gui thanh cong neu chua dong bo.
+[x] - SOSMAP la cong cu ho tro phan loai, ket noi va dieu phoi; khong thay the tong dai va co quan cuu ho chinh thuc.
+[x] - Moi canh bao ve thien tai va dich benh phai uu tien nguon chinh thuc, hien ro nguon va thoi diem cap nhat.
+[x] - Yeu cau nguy hiem den tinh mang phai duoc huong dan lien he ngay tong dai khan cap phu hop trong khi gui thong tin cho he thong.
+[x] - Du lieu suc khoe, vi tri nguoi gap nan va thong tin tre em phai mac dinh o che do rieng tu.
+[x] - He thong phai phan biet ro du lieu truc tiep, du lieu uoc tinh, du lieu dien tap va thong tin chua xac minh.
+[x] - Moi thao tac phat hanh canh bao, phan cong cuu ho va cap phat cuu tro phai co nguoi chiu trach nhiem va lich su kiem tra.
+[x] - Khi mat mang, he thong phai thong bao trung thuc trang thai tiep nhan va khong tao cam giac da gui thanh cong neu chua dong bo.
 

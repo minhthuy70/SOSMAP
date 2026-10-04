@@ -5865,6 +5865,125 @@ body, html {
   color: #333;
   display: flex;
   align-items: center;
+}
+
+.integrations-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.integrations-btn {
+  flex: 1;
+  padding: 10px 15px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.integrations-btn:hover {
+  background: #1976D2;
+}
+
+.integrations-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.integration-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  gap: 10px;
+}
+
+.integration-item.active {
+  border-left: 3px solid #4CAF50;
+}
+
+.integration-item.inactive {
+  border-left: 3px solid #9E9E9E;
+  opacity: 0.7;
+}
+
+.integration-icon {
+  font-size: 20px;
+}
+
+.integration-name {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+.integration-status {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Integrations Modals */
+.integrations-list h4,
+.api-keys-list h4,
+.api-usage h4 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.integrations-list table,
+.api-keys-list table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+}
+
+.integrations-list th,
+.api-keys-list th {
+  background: #f5f5f5;
+  padding: 10px;
+  text-align: left;
+  font-size: 12px;
+  color: #666;
+  border-bottom: 2px solid #ddd;
+}
+
+.integrations-list td,
+.api-keys-list td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+
+.api-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #333;
+}
+
+.usage-stats {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.usage-stats p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
   gap: 8px;
 }
 

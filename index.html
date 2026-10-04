@@ -11644,3 +11644,185 @@ div class="summary-label">Sự cố tháng này</div>
   </div>
 </body>
 </html>
+  <!-- Manage Integrations Modal -->
+  <div class="modal" id="manageIntegrationsModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Quản lý tích hợp hệ sinh thái</h3>
+        <button class="modal-close" id="closeManageIntegrationsModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="integrations-list">
+          <h4>Danh sách tích hợp</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Tên</th>
+                <th>Loại</th>
+                <th>Endpoint</th>
+                <th>Trạng thái</th>
+                <th>Cập nhật gần nhất</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tổng đài khẩn cấp</td>
+                <td>Phone</td>
+                <td>113/114/115</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+                <td>2026-10-03 10:30</td>
+                <td>
+                  <button class="btn btn-sm" onclick="testIntegration('hotline')">Kiểm tra</button>
+                  <button class="btn btn-sm" onclick="toggleIntegrationStatus('hotline')">Bật/Tắt</button>
+                </td>
+              </tr>
+              <tr>
+                <td>Khí tượng thủy văn</td>
+                <td>API</td>
+                <td>https://weather-api.gov.vn</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+                <td>2026-10-03 10:25</td>
+                <td>
+                  <button class="btn btn-sm" onclick="testIntegration('weather')">Kiểm tra</button>
+                  <button class="btn btn-sm" onclick="toggleIntegrationStatus('weather')">Bật/Tắt</button>
+                </td>
+              </tr>
+              <tr>
+                <td>Cơ sở y tế</td>
+                <td>API</td>
+                <td>https://health-api.gov.vn</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+                <td>2026-10-03 10:20</td>
+                <td>
+                  <button class="btn btn-sm" onclick="testIntegration('health')">Kiểm tra</button>
+                  <button class="btn btn-sm" onclick="toggleIntegrationStatus('health')">Bật/Tắt</button>
+                </td>
+              </tr>
+              <tr>
+                <td>PCCC</td>
+                <td>API</td>
+                <td>https://fire-api.gov.vn</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+                <td>Cập nhật realtime</td>
+                <td>
+                  <button class="btn btn-sm" onclick="testIntegration('fire')">Kiểm tra</button>
+                  <button class="btn btn-sm" onclick="toggleIntegrationStatus('fire')">Bật/Tắt</button>
+                </td>
+              </tr>
+              <tr>
+                <td>SMS Gateway</td>
+                <td>Gateway</td>
+                <td>sms://gateway.vn</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+                <td>Cập nhật realtime</td>
+                <td>
+                  <button class="btn btn-sm" onclick="testIntegration('sms')">Kiểm tra</button>
+                  <button class="btn btn-sm" onclick="toggleIntegrationStatus('sms')">Bật/Tắt</button>
+                </td>
+              </tr>
+              <tr>
+                <td>Email Gateway</td>
+                <td>Gateway</td>
+                <td>smtp://email.vn</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+                <td>Cập nhật realtime</td>
+                <td>
+                  <button class="btn btn-sm" onclick="testIntegration('email')">Kiểm tra</button>
+                  <button class="btn btn-sm" onclick="toggleIntegrationStatus('email')">Bật/Tắt</button>
+                </td>
+              </tr>
+              <tr>
+                <td>Bản đồ địa chính</td>
+                <td>API</td>
+                <td>https://map-api.gov.vn</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+                <td>Cập nhật realtime</td>
+                <td>
+                  <button class="btn btn-sm" onclick="testIntegration('map')">Kiểm tra</button>
+                  <button class="btn btn-sm" onclick="toggleIntegrationStatus('map')">Bật/Tắt</button>
+                </td>
+              </tr>
+              <tr>
+                <td>Thanh toán</td>
+                <td>Gateway</td>
+                <td>https://payment.vn</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+                <td>Cập nhật realtime</td>
+                <td>
+                  <button class="btn btn-sm" onclick="testIntegration('payment')">Kiểm tra</button>
+                  <button class="btn btn-sm" onclick="toggleIntegrationStatus('payment')">Bật/Tắt</button>
+                </td>
+              </tr>
+              <tr>
+                <td>IoT Sensors</td>
+                <td>IoT</td>
+                <td>mqtt://iot.vn</td>
+                <td><span class="status-value success">Đang hoạt động</span></td>
+                <td>Cập nhật realtime</td>
+                <td>
+                  <button class="btn btn-sm" onclick="testIntegration('iot')">Kiểm tra</button>
+                  <button class="btn btn-sm" onclick="toggleIntegrationStatus('iot')">Bật/Tắt</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Management Modal -->
+  <div class="modal" id="apiManagementModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Quản lý API</h3>
+        <button class="modal-close" id="closeApiManagementModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="api-form">
+          <label>Tên API:</label>
+          <input type="text" id="apiKeyName" placeholder="Nhập tên API" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>API Key:</label>
+          <input type="password" id="apiKeyValue" placeholder="Nhập API key" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Endpoint:</label>
+          <input type="text" id="apiKeyEndpoint" placeholder="Nhập endpoint URL" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button class="btn btn-primary" onclick="addApiKey()">Thêm API Key</button>
+        </div>
+        <div class="api-keys-list" style="margin-top: 20px;">
+          <h4>API Keys đã lưu</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Tên</th>
+                <th>Endpoint</th>
+                <th>Ngày tạo</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Weather API</td>
+                <td>https://weather-api.gov.vn</td>
+                <td>01/10/2026</td>
+                <td><button class="btn btn-sm btn-danger" onclick="revokeApiKey('key_1')">Thu hồi</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="api-usage" style="margin-top: 20px;">
+          <h4>Thống kê sử dụng API</h4>
+          <div class="usage-stats">
+            <p><strong>Tổng requests:</strong> 1,234</p>
+            <p><strong>Lỗi:</strong> 12</p>
+            <p><strong>Giới hạn:</strong> 10,000 requests/ngày</p>
+          </div>
+          <button class="btn btn-secondary" onclick="viewApiUsage()">Xem chi tiết</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

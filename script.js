@@ -13053,7 +13053,140 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeEmergencyCareSystem();
   initializePublicHealthSystem();
   initializeReliefLogisticsSystem();
+  initializeEmergencyIntegrationsSystem();
 });
+
+// Emergency Integrations System
+var integrationsData = {
+  integrations: [
+    { id: 'hotline', name: 'Tổng đài khẩn cấp', type: 'phone', status: 'active', contact: '113/114/115', lastUpdate: '2026-10-03 10:30' },
+    { id: 'weather', name: 'Khí tượng thủy văn', type: 'api', status: 'active', endpoint: 'https://weather-api.gov.vn', lastUpdate: '2026-10-03 10:25' },
+    { id: 'health', name: 'Cơ sở y tế', type: 'api', status: 'active', endpoint: 'https://health-api.gov.vn', lastUpdate: '2026-10-03 10:20' },
+    { id: 'fire', name: 'PCCC', type: 'api', status: 'active', endpoint: 'https://fire-api.gov.vn', lastUpdate: 'temp' },
+    { id: 'sms', name: 'SMS Gateway', type: 'gateway', status: 'active', endpoint: 'sms://gateway.vn', lastUpdate: 'temp' },
+    { id: 'email', name: 'Email Gateway', type: 'gateway', status: 'active', endpoint: 'smtp://email.vn', lastUpdate: 'temp' },
+    { id: 'map', name: 'Bản đồ địa chính', type: 'api', status: 'active', endpoint: 'https://map-api.gov.vn', lastUpdate: 'temp' },
+    { id: 'payment', name: 'Thanh toán', type: 'gateway', status: 'active', endpoint: 'https://payment.vn', lastUpdate: 'temp' },
+    { id: 'iot', name: 'IoT Sensors', type: 'iot', status: 'active', endpoint: 'mqtt://iot.vn', lastUpdate: 'temp' }
+  ],
+  apiKeys: [],
+  apiUsage: []
+};
+
+function initializeEmergencyIntegrationsSystem() {
+  var savedIntegrations = localStorage.getItem('sosmap_integrations');
+  if (savedIntegrations) {
+    integrationsData = JSON.parse(savedIntegrations);
+  }
+
+  updateIntegrationsPanel();
+
+  document.getElementById('manageIntegrationsBtn').addEventListener('click', function() {
+    document.getElementById('manageIntegrationsModal').style.display = 'block';
+  });
+
+  document.getElementById('apiManagementBtn').addEventListener('click', function() {
+    document.getElementById('apiManagementModal').style.display = 'block';
+  });
+
+  document.getElementById('closeManageIntegrationsModal').addEventListener('click', function() {
+    document.getElementById('manageIntegrationsModal').style.display = 'none';
+  });
+
+  document.getElementById('closeApiManagementModal').addEventListener('click', function() {
+    document.getElementById('apiManagementModal').style.display = 'none';
+  });
+}
+
+function updateIntegrationsPanel() {
+  var statusDiv = document.getElementById('integrationsStatus');
+  if (statusDiv) {
+    statusDiv.innerHTML = '';
+    integrationsData.integrations.forEach(function(integration) {
+      var icon = getIntegrationIcon(integration.type);
+      var statusClass = integration.status === 'active' ? 'active' : 'inactive';
+      statusDiv.innerHTML += `
+        <div class="integration-item ${statusClass}">
+          <span class="integration-icon">${icon}</span>
+          <span class="integration-name">${integration.name}</span>
+          <span class="integration-status">${integration.status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span>
+        </div>
+      `;
+    });
+  }
+}
+
+function getIntegrationIcon(type) {
+  var icons = {
+    phone: '📞',
+    api: '🔌',
+    gateway: '📡',
+    iot: '📡'
+  };
+  return icons[type] || '🔗';
+}
+
+function saveIntegrationsData() {
+  localStorage.setItem('sosmap_integrations', JSON.stringify(integrationsData));
+}
+
+function testIntegration(id) {
+  var integration = integrationsData.integrations.find(function(i) { return i.id === id; });
+  if (integration) {
+    alert('Kiểm tra kết nối: ' + integration.name + ' (' + integration.endpoint + ')');
+    logActivity('integration_test', 'Kiểm tra tích hợp: ' + integration.name);
+  }
+}
+
+function toggleIntegrationStatus(id) {
+  var integration = integrationsData.integrations.find(function(i) { return i.id === id; });
+  if (integration) {
+    integration.status = integration.status === 'active' ? 'inactive' : 'active';
+    saveIntegrationsData();
+    updateIntegrationsPanel();
+    alert('Đã thay đổi trạng thái: ' + integration.name);
+    logActivity('integration_toggle', 'Thay đổi trạng thái: ' + integration.name);
+  }
+}
+
+function addApiKey() {
+  var name = document.getElementById('apiKeyName').value;
+  var key = document.getElementById('apiKeyValue').value;
+  var endpoint = document.getElementById('apiKeyEndpoint').value;
+
+  if (!name || !key) {
+    alert('Vui lòng nhập tên và key!');
+    return;
+  }
+
+  integrationsData.apiKeys.push({
+    id: 'key_' + Date.now(),
+    name: name,
+    key: key,
+    endpoint: endpoint,
+    createdAt: new Date().toLocaleString('vi-VN')
+  });
+
+  saveIntegrationsData();
+  alert('Đã thêm API key!');
+  logActivity('api_key_add', 'Thêm API key: ' + name);
+
+  document.getElementById('apiKeyName').value = '';
+  document.getElementById('apiKeyValue').value = '';
+  document.getElementById('apiKeyEndpoint').value = '';
+}
+
+function viewApiUsage() {
+  alert('Xem thống kê sử dụng API (demo)');
+  logActivity('api_usage_view', 'Xem thống kê sử dụng API');
+}
+
+function revokeApiKey(id) {
+  integrationsData.apiKeys = integrationsData.apiKeys.filter(function(k) { return k.id !== id; });
+  saveIntegrationsData();
+  alert('Đã thu hồi API key!');
+  logActivity('api_key_revoke', 'Thu hồi API key');
+}
 
 // Relief & Logistics System
 var reliefData = {
