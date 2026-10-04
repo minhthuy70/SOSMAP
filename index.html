@@ -12105,3 +12105,226 @@ div class="summary-label">Sự cố tháng này</div>
   </div>
 </body>
 </html>
+  <!-- Create Incident Modal -->
+  <div class="modal" id="createIncidentModal" style="display: none;">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h3>Tạo sự cố đa rủi ro</h3>
+        <button class="modal-close" id="closeCreateIncidentModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="incident-form">
+          <label>Loại sự cố:</label>
+          <select id="incidentType" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="">-- Chọn loại sự cố --</option>
+            <option value="storm">Bão, áp thấp nhiệt độ và gió mạnh</option>
+            <option value="flood">Lũ lụt, lũ quét và nước dâng</option>
+            <option value="landslide">Sạt lở đất, sạt lở bờ sông và bờ biển</option>
+            <option value="earthquake">Động đất, sóng thần và rung chấn</option>
+            <option value="drought">Hạn hán, xâm nhập mặn và thiếu nước</option>
+            <option value="fire">Cháy rừng, cháy nhà và nổ</option>
+            <option value="accident">Tai nạn giao thông và sự cố công trình</option>
+            <option value="disease">Dịch bệnh, ổ dịch và nguy cơ lây nhiễm</option>
+            <option value="pollution">Ô nhiễm không khí, nguồn nước và hóa chất độc hại</option>
+            <option value="extreme_weather">Nắng nóng cực đoan, rét đậm rét hại và lốc xoáy</option>
+            <option value="infrastructure">Mất điện, mất nước, mất sóng và sự cố hạ tầng</option>
+            <option value="maritime">Sự cố tàu thuyền, hàng hải và khu vực biển đảo</option>
+            <option value="security">Sự cố an ninh, mất tích và trẻ em gặp nguy hiểm</option>
+            <option value="other">Sự cố khác do người dùng hoặc cơ quan khai báo</option>
+          </select>
+          <label>Cấp độ nghiêm trọng (1-5):</label>
+          <select id="incidentSeverity" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="1">Cấp 1 - Thấp</option>
+            <option value="2">Cấp 2 - Trung bình</option>
+            <option value="3">Cấp 3 - Cao</option>
+            <option value="4">Cấp 4 - Rất cao</option>
+            <option value="5">Cấp 5 - Nghiêm trọng</option>
+          </select>
+          <label>Tiêu đề:</label>
+          <input type="text" id="incidentTitle" placeholder="Nhập tiêu đề sự cố" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Mô tả chi tiết:</label>
+          <textarea id="incidentDescription" placeholder="Mô tả chi tiết sự cố" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; min-height: 100px;"></textarea>
+          <label>Vị trí (tọa độ):</label>
+          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <input type="text" id="incidentLat" placeholder="Vĩ độ" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <input type="text" id="incidentLng" placeholder="Kinh độ" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <button class="btn btn-secondary" onclick="getIncidentLocation()">Lấy GPS</button>
+          </div>
+          <label>Khu vực ảnh hưởng:</label>
+          <input type="text" id="incidentArea" placeholder="Tỉnh/Huyện/Xa" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Nguồn tin:</label>
+          <input type="text" id="incidentSource" placeholder="Nguồn tin (ví dụ: Người dân, Cơ quan chức năng...)" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Mức độ tin cậy:</label>
+          <select id="incidentReliability" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="verified">Đã xác minh</option>
+            <option value="high">Cao</option>
+            <option value="medium">Trung bình</option>
+            <option value="low">Thấp</option>
+            <option value="unverified">Chưa xác minh</option>
+          </select>
+          <label>Liên kết phản ánh:</label>
+          <input type="text" id="incidentReports" placeholder="Mã phản ánh liên quan (ngăn cách bằng dấu phẩy)" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;">
+          <label>Đính kèm:</label>
+          <div style="margin-bottom: 15px;">
+            <input type="file" id="incidentImage" accept="image/*" style="margin-bottom: 5px;">
+            <input type="file" id="incidentVideo" accept="video/*" style="margin-bottom: 5px;">
+            <input type="file" id="incidentAudio" accept="audio/*">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" onclick="submitIncident()">Tạo sự cố</button>
+          <button class="btn btn-secondary" id="cancelIncidentBtn">Hủy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Incidents Modal -->
+  <div class="modal" id="viewIncidentsModal" style="display: none;">
+    <div class="modal-content" style="max-width: 1000px;">
+      <div class="modal-header">
+        <h3>Danh sách sự cố đa rủi ro</h3>
+        <button class="modal-close" id="closeViewIncidentsModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="incident-filters">
+          <label>Loại:</label>
+          <select id="incidentTypeFilter" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="all">Tất cả</option>
+            <option value="storm">Bão</option>
+            <option value="flood">Lũ lụt</option>
+            <option value="landslide">Sạt lở</option>
+            <option value="earthquake">Động đất</option>
+            <option value="drought">Hạn hán</option>
+            <option value="fire">Cháy nổ</option>
+            <option value="accident">Tai nạn</option>
+            <option value="disease">Dịch bệnh</option>
+            <option value="pollution">Ô nhiễm</option>
+            <option value="extreme_weather">Thời tiết cực đoan</option>
+            <option value="infrastructure">Hạ tầng</option>
+            <option value="maritime">Biển đảo</option>
+            <option value="security">An ninh</option>
+            <option value="other">Khác</option>
+          </select>
+          <label>Cấp độ:</label>
+          <select id="incidentSeverityFilter" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="all">Tất cả</option>
+            <option value="5">Cấp 5</option>
+            <option value="4">Cấp 4</option>
+            <option value="3">Cấp 3</option>
+            <option value="2">Cấp 2</option>
+            <option value="1">Cấp 1</option>
+          </select>
+          <label>Trạng thái:</label>
+          <select id="incidentStatusFilter" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            <option value="all">Tất cả</option>
+            <option value="new">Mới</option>
+            <option value="in_progress">Đang xử lý</option>
+            <option value="controlled">Đã kiểm soát</option>
+            <option value="resolved">Đã giải quyết</option>
+          </select>
+        </div>
+        <div class="incidents-list" id="incidentsList">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Mã</th>
+                <th>Loại</th>
+                <th>Tiêu đề</th>
+                <th>Cấp độ</th>
+                <th>Trạng thái</th>
+                <th>Thời gian</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>INC-001</td>
+                <td>Lũ lụt</td>
+                <td>Ngập lụt Quận 1</td>
+                <td><span class="severity-badge severity-4">Cấp 4</span></td>
+                <td><span class="status-badge in_progress">Đang xử lý</span></td>
+                <td>02/10/2026 10:30</td>
+                <td><button class="btn btn-sm" onclick="viewIncidentDetail('INC-001')">Xem</button></td>
+              </tr>
+              <tr>
+                <td>INC-002</td>
+                <td>Cháy nổ</td>
+                <td>Cháy nhà phố</td>
+                <td><span class="severity-badge severity-5">Cấp 5</span></td>
+                <td><span class="status-badge new">Mới</span></td>
+                <td>02/10/2026 11:15</td>
+                <td><button class="btn btn-sm" onclick="viewIncidentDetail('INC-002')">Xem</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Heat Map Modal -->
+  <div class="modal" id="heatMapModal" style="display: none;">
+    <div class="modal-content" style="max-width: 1200px;">
+      <div class="modal-header">
+        <h3>Bản đồ nhiệt rủi ro</h3>
+        <button class="modal-close" id="closeHeatMapModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="heat-map-legend">
+          <h4>Chú thích</h4>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #e74c3c;"></span>
+            <span>Cấp 5 - Nghiêm trọng</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #e67e22;"></span>
+            <span>Cấp 4 - Rất cao</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #f39c12;"></span>
+            <span>Cấp 3 - Cao</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #3498db;"></span>
+            <span>Cấp 2 - Trung bình</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #2ecc71;"></span>
+            <span>Cấp 1 - Thấp</span>
+          </div>
+        </div>
+        <div class="heat-map-container">
+          <div id="incidentHeatMap" style="height: 500px; width: 100%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incident Detail Modal -->
+  <div class="modal" id="incidentDetailModal" style="display: none;">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>Chi tiết sự cố</h3>
+        <button class="modal-close" id="closeIncidentDetailModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="incident-detail-content" id="incidentDetailContent">
+          <!-- Content will be populated dynamically -->
+        </div>
+        <div class="incident-timeline">
+          <h4>Lịch sử diễn biến</h4>
+          <div id="incidentTimeline">
+            <!-- Timeline will be populated dynamically -->
+          </div>
+        </div>
+        <div class="incident-actions">
+          <button class="btn btn-primary" onclick="confirmIncident()">Xác nhận chính thức</button>
+          <button class="btn btn-secondary" onclick="updateIncidentStatus()">Cập nhật trạng thái</button>
+          <button class="btn btn-secondary" onclick="addTimelineEntry()">Thêm diễn biến</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

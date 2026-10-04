@@ -280,75 +280,75 @@ QUY UOC
 13. QUAN LY SU CO DA RUI RO (MULTI-HAZARD INCIDENTS)
 
 13.1. Phan loai su co
-[ ] - Bao, ap thap nhiet doi va gio manh
-[ ] - Lu lut, lu quet va nuoc dang
-[ ] - Sat lo dat, sat lo bo song va bo bien
-[ ] - Dong dat, song than va rung chan
-[ ] - Han han, xam nhap man va thieu nuoc
-[ ] - Chay rung, chay nha va no
-[ ] - Tai nan giao thong va su co cong trinh
-[ ] - Dich benh, o dich va nguy co lay nhiem
-[ ] - O nhiem khong khi, nguon nuoc va hoa chat doc hai
-[ ] - Nang nong cuc doan, ret dam ret hai va loc xoay
-[ ] - Mat dien, mat nuoc, mat song va su co ha tang
-[ ] - Su co tau thuyen, hang hai va khu vuc bien dao
-[ ] - Su co an ninh, mat tich va tre em gap nguy hiem
-[ ] - Su co khac do nguoi dung hoac co quan khai bao
+[x] - Bao, ap thap nhiet doi va gio manh
+[x] - Lu lut, lu quet va nuoc dang
+[x] - Sat lo dat, sat lo bo song va bo bien
+[x] - Dong dat, song than va rung chan
+[x] - Han han, xam nhap man va thieu nuoc
+[x] - Chay rung, chay nha va no
+[x] - Tai nan giao thong va su co cong trinh
+[x] - Dich benh, o dich va nguy co lay nhiem
+[x] - O nhiem khong khi, nguon nuoc va hoa chat doc hai
+[x] - Nang nong cuc doan, ret dam ret hai va loc xoay
+[x] - Mat dien, mat nuoc, mat song va su co ha tang
+[x] - Su co tau thuyen, hang hai va khu vuc bien dao
+[x] - Su co an ninh, mat tich va tre em gap nguy hiem
+[x] - Su co khac do nguoi dung hoac co quan khai bao
 
 13.2. Ho so su co
-[ ] - Tao ma su co duy nhat
-[ ] - Gan su co voi mot hoac nhieu toa do
-[ ] - Ve vung anh huong tren ban do
-[ ] - Ghi nhan thoi diem bat dau va cap nhat
-[ ] - Gan cap do nghiem trong tu cap 1 den cap 5
-[ ] - Gan trang thai moi, dang xu ly, tam kiem soat va ket thuc
-[ ] - Ghi nhan nguon tin va muc do tin cay
-[ ] - Lien ket cac phan anh trung tam su co
-[ ] - Luu anh, video, am thanh va tep dinh kem
-[ ] - Luu lich su dien bien cua su co
-[ ] - Hien thi ban do nhiet cac diem co nguy co cao
-[ ] - Cho phep co quan co tham quyen xac nhan thong tin chinh thuc
+[x] - Tao ma su co duy nhat
+[x] - Gan su co voi mot hoac nhieu toa do
+[x] - Ve vung anh huong tren ban do
+[x] - Ghi nhan thoi diem bat dau va cap nhat
+[x] - Gan cap do nghiem trong tu cap 1 den cap 5
+[x] - Gan trang thai moi, dang xu ly, tam kiem soat va ket thuc
+[x] - Ghi nhan nguon tin va muc do tin cay
+[x] - Lien ket cac phan anh trung tam su co
+[x] - Luu anh, video, am thanh va tep dinh kem
+[x] - Luu lich su dien bien cua su co
+[x] - Hien thi ban do nhiet cac diem co nguy co cao
+[x] - Cho phep co quan co tham quyen xac nhan thong tin chinh thuc
 
 ================================================================================
 
 14. CANH BAO SOM VA DU BAO (EARLY WARNING)
 
 14.1. Nguon du lieu canh bao
-[ ] - Tiep nhan ban tin khi tuong va thien tai chinh thuc
-[ ] - Tiep nhan du lieu muc nuoc song, ho dap va tram mua
-[ ] - Tiep nhan du lieu canh bao sat lo
-[ ] - Tiep nhan du lieu dong dat va rung chan
-[ ] - Tiep nhan du lieu chat luong khong khi
-[ ] - Tiep nhan du lieu nhiet do, han han va xam nhap man
-[ ] - Tiep nhan du lieu ve dich benh tu co quan y te
-[ ] - Hien thi thoi diem cap nhat va do tre cua tung nguon
-[ ] - Kiem tra cheo nhieu nguon du lieu
-[ ] - Danh dau thong tin chua duoc xac minh
+[x] - Tiep nhan ban tin khi tuong va thien tai chinh thuc
+[x] - Tiep nhan du lieu muc nuoc song, ho dap va tram mua
+[x] - Tiep nhan du lieu canh bao sat lo
+[x] - Tiep nhan du lieu dong dat va rung chan
+[x] - Tiep nhan du lieu chat luong khong khi
+[x] - Tiep nhan du lieu nhiet do, han han va xam nhap man
+[x] - Tiep nhan du lieu ve dich benh tu co quan y te
+[x] - Hien thi thoi diem cap nhat va do tre cua tung nguon
+[x] - Kiem tra cheo nhieu nguon du lieu
+[x] - Danh dau thong tin chua duoc xac minh
 
 14.2. Phat hanh canh bao
-[ ] - Tao ban tin canh bao theo khu vuc
-[ ] - Chon muc do va mau sac canh bao
-[ ] - Chon doi tuong can nhan canh bao
-[ ] - Dat thoi gian bat dau va het han canh bao
-[ ] - Gui canh bao theo dia gioi tinh, huyen, xa
-[ ] - Gui canh bao theo vung ban kinh hoac polygon
-[ ] - Canh bao song ngu Viet-Anh
-[ ] - Ho tro noi dung ngan cho SMS va noi dung day du tren web
-[ ] - Yeu cau nguoi dung xac nhan da nhan canh bao
-[ ] - Gui lai canh bao neu nguoi dung chua xac nhan
-[ ] - Luu lich su phat hanh, sua va thu hoi canh bao
-[ ] - Hien thi ban tin da het han de tra cuu
+[x] - Tao ban tin canh bao theo khu vuc
+[x] - Chon muc do va mau sac canh bao
+[x] - Chon doi tuong can nhan canh bao
+[x] - Dat thoi gian bat dau va het han canh bao
+[x] - Gui canh bao theo dia gioi tinh, huyen, xa
+[x] - Gui canh bao theo vung ban kinh hoac polygon
+[x] - Canh bao song ngu Viet-Anh
+[x] - Ho tro noi dung ngan cho SMS va noi dung day du tren web
+[x] - Yeu cau nguoi dung xac nhan da nhan canh bao
+[x] - Gui lai canh bao neu nguoi dung chua xac nhan
+[x] - Luu lich su phat hanh, sua va thu hoi canh bao
+[x] - Hien thi ban tin da het han de tra cuu
 
 14.3. Huong dan hanh dong
-[ ] - Huong dan so tan truoc bao lu va sat lo
-[ ] - Huong dan phong tranh dien giat khi ngap lu
-[ ] - Huong dan khong di qua cau, ham va vung nuoc chay xiết
-[ ] - Huong dan phong chay chua chay va thoat nan
-[ ] - Huong dan xu ly khi dong dat hoac rung chan
-[ ] - Huong dan phong tranh nang nong va mat nuoc
-[ ] - Huong dan phong lay nhiem trong vung dich
-[ ] - Hien thi danh sach so dien thoai khan cap theo tinh thanh
-[ ] - Hien thi noi dung co the truy cap nhanh khi mang yeu
+[x] - Huong dan so tan truoc bao lu va sat lo
+[x] - Huong dan phong tranh dien giat khi ngap lu
+[x] - Huong dan khong di qua cau, ham va vung nuoc chay xiết
+[x] - Huong dan phong chay chua chay va thoat nan
+[x] - Huong dan xu ly khi dong dat hoac rung chan
+[x] - Huong dan phong tranh nang nong va mat nuoc
+[x] - Huong dan phong lay nhiem trong vung dich
+[x] - Hien thi danh sach so dien thoai khan cap theo tinh thanh
+[x] - Hien thi noi dung co the truy cap nhanh khi mang yeu
 
 ================================================================================
 

@@ -6903,6 +6903,216 @@ body, html {
   color: #333;
   display: flex;
   align-items: center;
+}
+
+.multihazard-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.multihazard-btn {
+  flex: 1;
+  padding: 10px 15px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.multihazard-btn:hover {
+  background: #1976D2;
+}
+
+.multihazard-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.multihazard-status .status-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.multihazard-status .status-label {
+  font-size: 13px;
+  color: #666;
+}
+
+.multihazard-status .status-value {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.multihazard-status .status-value.warning {
+  color: #f39c12;
+}
+
+.multihazard-status .status-value.critical {
+  color: #e74c3c;
+}
+
+.multihazard-status .status-value.success {
+  color: #2ecc71;
+}
+
+/* Multi-Hazard Modals */
+.incident-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #333;
+}
+
+.incident-form input,
+.incident-form select,
+.incident-form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.incident-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.incident-filters label {
+  font-size: 13px;
+  color: #333;
+}
+
+.incident-filters select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.incidents-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.incidents-list th {
+  background: #f5f5f5;
+  padding: 10px;
+  text-align: left;
+  font-size: 12px;
+  color: #666;
+  border-bottom: 2px solid #ddd;
+}
+
+.incidents-list td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+
+.severity-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+}
+
+.severity-1 { background: #2ecc71; }
+.severity-2 { background: #3498db; }
+.severity-3 { background: #f39c12; }
+.severity-4 { background: #e67e22; }
+.severity-5 { background: #e74c3c; }
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-badge.new { background: #3498db; color: white; }
+.status-badge.in_progress { background: #f39c12; color: white; }
+.status-badge.controlled { background: #2ecc71; color: white; }
+.status-badge.resolved { background: #95a5a6; color: white; }
+
+.heat-map-legend h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.heat-map-legend {
+  margin-bottom: 15px;
+}
+
+.heat-map-container {
+  margin-bottom: 20px;
+}
+
+.incident-detail-content .detail-row {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+
+.incident-detail-content .detail-row strong {
+  display: inline-block;
+  width: 150px;
+  color: #666;
+}
+
+.incident-timeline h4 {
+  margin: 20px 0 15px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.timeline-entry {
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.timeline-time {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.timeline-action {
+  font-weight: 600;
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 3px;
+}
+
+.timeline-note {
+  font-size: 13px;
+  color: #666;
+}
+
+.incident-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
   gap: 8px;
 }
 

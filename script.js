@@ -5291,9 +5291,7 @@ document.getElementById('closeActionGuideBtn').addEventListener('click', functio
 });
 
 // Initialize early warning system on page load
-document.addEventListener('DOMContentLoaded', function() {
-  initializeEarlyWarningSystem();
-});
+// earlyWarningSystem initialization is now called from main DOMContentLoaded
 
 // Search & Rescue System
 var rescueRequests = [];
@@ -13054,7 +13052,336 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeEmergencyIntegrationsSystem();
   initializeRescueSystem();
   initializeFloodEvacuationSystem();
+  initializeEarlyWarningSystem();
+  initializeMultiHazardSystem();
 });
+
+// Multi-Hazard Incidents System
+var multiHazardIncidents = [];
+var incidentHeatMap = null;
+
+var incidentTypes = {
+  storm: 'Bão, áp thấp nhiệt độ và gió mạnh',
+  flood: 'Lũ lụt, lũ quét và nước dâng',
+  landslide: 'Sạt lở đất, sạt lở bờ sông và bờ biển',
+  earthquake: 'Động đất, sóng thần và rung chấn',
+  drought: 'Hạn hán, xâm nhập mặn và thiếu nước',
+  fire: 'Cháy rừng, cháy nhà và nổ',
+  accident: 'Tai nạn giao thông và sự cố công trình',
+  disease: 'Dịch bệnh, ổ dịch và nguy cơ lây nhiễm',
+  pollution: 'Ô nhiễm không khí, nguồn nước và hóa chất độc hại',
+  extreme_weather: 'Nắng nóng cực đoan, rét đậm rét hại và lốc xoáy',
+  infrastructure: 'Mất điện, mất nước, mất sóng và sự cố hạ tầng',
+  maritime: 'Sự cố tàu thuyền, hàng hải và khu vực biển đảo',
+  security: 'Sự cố an ninh, mất tích và trẻ em gặp nguy hiểm',
+  other: 'Sự cố khác'
+};
+
+var incidentSeverities = {
+  1: { label: 'Cấp 1 - Thấp', class: 'severity-1', color: '#2ecc71' },
+  2: { label: 'Cấp 2 - Trung bình', class: 'severity-2', color: '#3498db' },
+  3: { label: 'Cấp 3 - Cao', class: 'severity-3', color: '#f39c12' },
+  4: { label: 'Cấp 4 - Rất cao', class: 'severity-4', color: '#e67e22' },
+  5: { label: 'Cấp 5 - Nghiêm trọng', class: 'severity-5', color: '#e74c3c' }
+};
+
+var incidentStatuses = {
+  new: 'Mới',
+  in_progress: 'Đang xử lý',
+  controlled: 'Đã kiểm soát',
+  resolved: 'Đã giải quyết'
+};
+
+function initializeMultiHazardSystem() {
+  var savedIncidents = localStorage.getItem('sosmap_multihazard_incidents');
+  if (savedIncidents) {
+    multiHazardIncidents = JSON.parse(savedIncidents);
+  }
+
+  updateMultiHazardPanel();
+
+  document.getElementById('createIncidentBtn').addEventListener('click', function() {
+    document.getElementById('createIncidentModal').style.display = 'block';
+  });
+
+  document.getElementById('viewIncidentsBtn').addEventListener('click', function() {
+    renderIncidentsList();
+    document.getElementById('viewIncidentsModal').style.display = 'block';
+  });
+
+  document.getElementById('heatMapBtn').addEventListener('click', function() {
+    document.getElementById('heatMapModal').style.display = 'block';
+    initializeIncidentHeatMap();
+  });
+
+  document.getElementById('closeCreateIncidentModal').addEventListener('click', function() {
+    document.getElementById('createIncidentModal').style.display = 'none';
+  });
+
+  document.getElementById('closeViewIncidentsModal').addEventListener('click', function() {
+    document.getElementById('viewIncidentsModal').style.display = 'none';
+  });
+
+  document.getElementById('closeHeatMapModal').addEventListener('click', function() {
+    document.getElementById('heatMapModal').style.display = 'none';
+  });
+
+  document.getElementById('closeIncidentDetailModal').addEventListener('click', function() {
+    document.getElementById('incidentDetailModal').style.display = 'none';
+  });
+
+  document.getElementById('cancelIncidentBtn').addEventListener('click', function() {
+    document.getElementById('createIncidentModal').style.display = 'none';
+  });
+
+  document.getElementById('incidentTypeFilter').addEventListener('change', renderIncidentsList);
+  document.getElementById('incidentSeverityFilter').addEventListener('change', renderIncidentsList);
+  document.getElementById('incidentStatusFilter').addEventListener('change', renderIncidentsList);
+}
+
+function updateMultiHazardPanel() {
+  var statusDiv = document.getElementById('multihazardStatus');
+  if (statusDiv) {
+    var openIncidents = multiHazardIncidents.filter(function(i) { return i.status !== 'resolved'; }).length;
+    var highSeverity = multiHazardIncidents.filter(function(i) { return i.severity >= 4 && i.status !== 'resolved'; }).length;
+    var criticalSeverity = multiHazardIncidents.filter(function(i) { return i.severity === 5 && i.status !== 'resolved'; }).length;
+
+    statusDiv.innerHTML = `
+      <div class="status-item">
+        <span class="status-label">Sự cố mở:</span>
+        <span class="status-value">${openIncidents}</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Cấp độ cao:</span>
+        <span class="status-value ${highSeverity > 0 ? 'warning' : 'success'}">${highSeverity}</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Cấp 5 (Nghiêm trọng):</span>
+        <span class="status-value ${criticalSeverity > 0 ? 'critical' : 'success'}">${criticalSeverity}</span>
+      </div>
+    `;
+  }
+}
+
+function getIncidentLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        document.getElementById('incidentLat').value = position.coords.latitude.toFixed(6);
+        document.getElementById('incidentLng').value = position.coords.longitude.toFixed(6);
+      },
+      function(error) {
+        alert('Không thể lấy vị trí: ' + error.message);
+      },
+      { enableHighAccuracy: true }
+    );
+  } else {
+    alert('Trình duyệt không hỗ trợ GPS');
+  }
+}
+
+function submitIncident() {
+  var type = document.getElementById('incidentType').value;
+  var severity = parseInt(document.getElementById('incidentSeverity').value);
+  var title = document.getElementById('incidentTitle').value;
+  var description = document.getElementById('incidentDescription').value;
+  var lat = document.getElementById('incidentLat').value;
+  var lng = document.getElementById('incidentLng').value;
+  var area = document.getElementById('incidentArea').value;
+  var source = document.getElementById('incidentSource').value;
+  var reliability = document.getElementById('incidentReliability').value;
+  var reports = document.getElementById('incidentReports').value;
+
+  if (!type || !severity || !title || !description) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  var incident = {
+    id: 'INC-' + Date.now(),
+    type: type,
+    severity: severity,
+    title: title,
+    description: description,
+    location: lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : null,
+    area: area,
+    source: source,
+    reliability: reliability,
+    reports: reports ? reports.split(',').map(function(r) { return r.trim(); }) : [],
+    hasImage: document.getElementById('incidentImage').files.length > 0,
+    hasVideo: document.getElementById('incidentVideo').files.length > 0,
+    hasAudio: document.getElementById('incidentAudio').files.length > 0,
+    status: 'new',
+    isOfficial: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    timeline: []
+  };
+
+  incident.timeline.push({
+    action: 'created',
+    timestamp: new Date().toISOString(),
+    note: 'Sự cố được tạo'
+  });
+
+  multiHazardIncidents.push(incident);
+  saveMultiHazardIncidents();
+  updateMultiHazardPanel();
+
+  document.getElementById('createIncidentModal').style.display = 'none';
+  document.getElementById('incidentForm').reset();
+  alert('Đã tạo sự cố! Mã: ' + incident.id);
+  logActivity('incident_create', 'Tạo sự cố đa rủi ro: ' + incident.id);
+}
+
+function renderIncidentsList() {
+  var list = document.getElementById('incidentsList');
+  if (!list) return;
+
+  var typeFilter = document.getElementById('incidentTypeFilter').value;
+  var severityFilter = document.getElementById('incidentSeverityFilter').value;
+  var statusFilter = document.getElementById('incidentStatusFilter').value;
+
+  var filtered = multiHazardIncidents.filter(function(i) {
+    var typeMatch = typeFilter === 'all' || i.type === typeFilter;
+    var severityMatch = severityFilter === 'all' || i.severity === parseInt(severityFilter);
+    var statusMatch = statusFilter === 'all' || i.status === statusFilter;
+    return typeMatch && severityMatch && statusMatch;
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-state"><p>Không có sự cố nào</p></div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(function(incident) {
+    var typeLabel = incidentTypes[incident.type] || incident.type;
+    var severity = incidentSeverities[incident.severity];
+    var status = incidentStatuses[incident.status];
+    var time = new Date(incident.createdAt).toLocaleString('vi-VN');
+
+    return `
+      <tr>
+        <td>${incident.id}</td>
+        <td>${typeLabel}</td>
+        <td>${incident.title}</td>
+        <td><span class="severity-badge ${severity.class}">${severity.label}</span></td>
+        <td><span class="status-badge ${incident.status}">${status}</span></td>
+        <td>${time}</td>
+        <td><button class="btn btn-sm" onclick="viewIncidentDetail('${incident.id}')">Xem</button></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function initializeIncidentHeatMap() {
+  if (incidentHeatMap) {
+    incidentHeatMap.remove();
+  }
+
+  incidentHeatMap = L.map('incidentHeatMap').setView([10.7769, 106.7009], 12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(incidentHeatMap);
+
+  multiHazardIncidents.forEach(function(incident) {
+    if (incident.location) {
+      var severity = incidentSeverities[incident.severity];
+      var marker = L.circleMarker([incident.location.lat, incident.location.lng], {
+        radius: incident.severity * 5000,
+        color: severity.color,
+        fillColor: severity.color,
+        fillOpacity: 0.4
+      }).addTo(incidentHeatMap).bindPopup('<b>' + incident.id + '</b><br>' + incident.title + '<br>' + severity.label);
+    }
+  });
+}
+
+function viewIncidentDetail(incidentId) {
+  var incident = multiHazardIncidents.find(function(i) { return i.id === incidentId; });
+  if (!incident) return;
+
+  var typeLabel = incidentTypes[incident.type] || incident.type;
+  var severity = incidentSeverities[incident.severity];
+  var status = incidentStatuses[incident.status];
+
+  var content = document.getElementById('incidentDetailContent');
+  content.innerHTML = `
+    <div class="detail-row">
+      <strong>Mã sự cố:</strong> ${incident.id}
+    </div>
+    <div class="detail-row">
+      <strong>Loại:</strong> ${typeLabel}
+    </div>
+    <div class="detail-row">
+      <strong>Cấp độ:</strong> <span class="severity-badge ${severity.class}">${severity.label}</span>
+    </div>
+    <div class="detail-row">
+      <strong>Trạng thái:</strong> <span class="status-badge ${incident.status}">${status}</span></div>
+    <div class="detail-row">
+      <strong>Tiêu đề:</strong> ${incident.title}
+    </div>
+    <div class="detail-row">
+      <strong>Mô tả:</strong> ${incident.description}
+    </div>
+    <div class="detail-row">
+      <strong>Vị trí:</strong> ${incident.location ? incident.location.lat + ', ' + incident.location.lng : 'Chưa có'}
+    </div>
+    <div class="detail-row">
+      <strong>Khu vực:</strong> ${incident.area || 'Chưa có'}
+    </div>
+    <div class="detail-row">
+      <strong>Nguồn tin:</strong> ${incident.source || 'Chưa có'}
+    </div>
+    <div class="detail-row">
+      <strong>Mức độ tin cậy:</strong> ${incident.reliability}
+    </div>
+    <div class="detail-row">
+      <strong>Đã xác nhận chính thức:</strong> ${incident.isOfficial ? 'Có' : 'Chưa'}
+    </div>
+    <div class="detail-row">
+      <strong>Phản ánh liên kết:</strong> ${incident.reports.length > 0 ? incident.reports.join(', ') : 'Không có'}
+    </div>
+    <div class="detail-row">
+      <strong>Đính kèm:</strong> ${incident.hasImage ? 'Ảnh' : ''} ${incident.hasVideo ? 'Video' : ''} ${incident.hasAudio ? 'Âm thanh' : ''} ${!incident.hasImage && !incident.hasVideo && !incident.hasAudio ? 'Không có' : ''}
+    </div>
+  `;
+
+  var timelineDiv = document.getElementById('incidentTimeline');
+  timelineDiv.innerHTML = incident.timeline.map(function(entry) {
+    var time = new Date(entry.timestamp).toLocaleString('vi-VN');
+    return `
+      <div class="timeline-entry">
+        <div class="timeline-time">${time}</div>
+        <div class="timeline-action">${entry.action}</div>
+        <div class="timeline-note">${entry.note}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('viewIncidentsModal').style.display = 'none';
+  document.getElementById('incidentDetailModal').style.display = 'block';
+}
+
+function confirmIncident() {
+  alert('Đã xác nhận chính thức sự cố');
+  logActivity('incident_confirm', 'Xác nhận chính thức sự cố');
+}
+
+function updateIncidentStatus() {
+  alert('Cập nhật trạng thái sự cố');
+  logActivity('incident_status_update', 'Cập nhật trạng thái sự cố');
+}
+
+function addTimelineEntry() {
+  alert('Thêm diễn biến mới');
+  logActivity('incident_timeline', 'Thêm diễn biến sự cố');
+}
+
+function saveMultiHazardIncidents() {
+  localStorage.setItem('sosmap_multihazard_incidents', JSON.stringify(multiHazardIncidents));
+}
 
 // Flood & Evacuation System
 var floodData = {
