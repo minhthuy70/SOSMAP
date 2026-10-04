@@ -355,70 +355,70 @@ QUY UOC
 15. BAO LU, SAT LO VA SO TAN (FLOOD & EVACUATION)
 
 15.1. Ban do nguy co
-[ ] - Hien thi vung ngap theo muc nuoc uoc tinh
-[ ] - Hien thi huong dong chay va diem nguy hiem
-[ ] - Hien thi vung co nguy co lu quet
-[ ] - Hien thi vung co nguy co sat lo
-[ ] - Hien thi muc nuoc tai tram quan trac
-[ ] - Hien thi ho dap, cau, ham va tuyen duong xung yeu
-[ ] - Hien thi vung an toan va vung cam vao
-[ ] - So sanh ban do hien tai voi ban do ngap lich su
-[ ] - Hien thi du bao ngap theo moc thoi gian
+[x] - Hien thi vung ngap theo muc nuoc uoc tinh
+[x] - Hien thi huong dong chay va diem nguy hiem
+[x] - Hien thi vung co nguy co lu quet
+[x] - Hien thi vung co nguy co sat lo
+[x] - Hien thi muc nuoc tai tram quan trac
+[x] - Hien thi ho dap, cau, ham va tuyen duong xung yeu
+[x] - Hien thi vung an toan va vung cam vao
+[x] - So sanh ban do hien tai voi ban do ngap lich su
+[x] - Hien thi du bao ngap theo moc thoi gian
 
 15.2. Ke hoach so tan
-[ ] - Tao phuong an so tan cho tung khu dan cu
-[ ] - Hien thi diem tap ket va noi tru an
-[ ] - Hien thi tuyen so tan an toan
-[ ] - Tinh tuyen duong tranh vung ngap va sat lo
-[ ] - Hien thi duong di cho nguoi di bo
-[ ] - Hien thi duong di cho xe cuu ho
-[ ] - Cap nhat tuyen duong bi chan theo thoi gian thuc
-[ ] - Hien thi suc chua con lai cua diem tru an
-[ ] - Danh dau diem tru an da day
-[ ] - Hien thi nha ve sinh, nuoc sach, dien va y te tai diem tru an
-[ ] - Tao danh sach nguoi can so tan theo ho gia dinh
-[ ] - Xac nhan nguoi da den diem tru an
-[ ] - Ho tro dang ky nhu cau dua don
+[x] - Tao phuong an so tan cho tung khu dan cu
+[x] - Hien thi diem tap ket va noi tru an
+[x] - Hien thi tuyen so tan an toan
+[x] - Tinh tuyen duong tranh vung ngap va sat lo
+[x] - Hien thi duong di cho nguoi di bo
+[x] - Hien thi duong di cho xe cuu ho
+[x] - Cap nhat tuyen duong bi chan theo thoi gian thuc
+[x] - Hien thi suc chua con lai cua diem tru an
+[x] - Danh dau diem tru an da day
+[x] - Hien thi nha ve sinh, nuoc sach, dien va y te tai diem tru an
+[x] - Tao danh sach nguoi can so tan theo ho gia dinh
+[x] - Xac nhan nguoi da den diem tru an
+[x] - Ho tro dang ky nhu cau dua don
 
 ================================================================================
 
 16. DIEU PHOI CUU HO CUU NAN (SEARCH & RESCUE)
 
 16.1. Yeu cau cuu ho
-[ ] - Gui yeu cau cuu ho khan cap trong mot thao tac
-[ ] - Tu dong gui toa do GPS kem sai so vi tri
-[ ] - Chon loai yeu cau: mac ket, bi thuong, mat tich, can y te
-[ ] - Nhap so nguoi dang gap nan
-[ ] - Danh dau co tre em, nguoi gia, nguoi khuyet tat hoac phu nu mang thai
-[ ] - Nhap mo ta nguy co va kha nang tiep can
-[ ] - Gui anh, video hoac tin nhan thoai khi co mang
-[ ] - Tao ma yeu cau va hien thi trang thai xu ly
-[ ] - Cho phep cap nhat vi tri theo thoi gian thuc
-[ ] - Cho phep nguoi than gui yeu cau thay
-[ ] - Huy yeu cau khi da an toan
+[x] - Gui yeu cau cuu ho khan cap trong mot thao tac
+[x] - Tu dong gui toa do GPS kem sai so vi tri
+[x] - Chon loai yeu cau: mac ket, bi thuong, mat tich, can y te
+[x] - Nhap so nguoi dang gap nan
+[x] - Danh dau co tre em, nguoi gia, nguoi khuyet tat hoac phu nu mang thai
+[x] - Nhap mo ta nguy co va kha nang tiep can
+[x] - Gui anh, video hoac tin nhan thoai khi co mang
+[x] - Tao ma yeu cau va hien thi trang thai xu ly
+[x] - Cho phep cap nhat vi tri theo thoi gian thuc
+[x] - Cho phep nguoi than gui yeu cau thay
+[x] - Huy yeu cau khi da an toan
 
 16.2. Trung tam dieu phoi
-[ ] - Tiep nhan va xep hang yeu cau theo muc do khan cap
-[ ] - Hien thi ban do toan bo yeu cau dang mo
-[ ] - Phan cong doi cuu ho gan nhat
-[ ] - Phan cong theo nang luc: y te, duoi nuoc, leo nui, PCCC
-[ ] - Theo doi trang thai doi cuu ho va phuong tien
-[ ] - Tinh tuyen duong an toan cho doi cuu ho
-[ ] - Tao kenh lien lac voi nguoi yeu cau
-[ ] - Chuyen tiep yeu cau cho 112, 113, 114, 115 hoac co quan dia phuong
-[ ] - Ghi nhan thoi diem tiep nhan, xuat phat va hoan tat
-[ ] - Canh bao yeu cau qua han chua co nguoi xu ly
-[ ] - Luu bien ban va hinh anh sau cuu ho
+[x] - Tiep nhan va xep hang yeu cau theo muc do khan cap
+[x] - Hien thi ban do toan bo yeu cau dang mo
+[x] - Phan cong doi cuu ho gan nhat
+[x] - Phan cong theo nang luc: y te, duoi nuoc, leo nui, PCCC
+[x] - Theo doi trang thai doi cuu ho va phuong tien
+[x] - Tinh tuyen duong an toan cho doi cuu ho
+[x] - Tao kenh lien lac voi nguoi yeu cau
+[x] - Chuyen tiep yeu cau cho 112, 113, 114, 115 hoac co quan dia phuong
+[x] - Ghi nhan thoi diem tiep nhan, xuat phat va hoan tat
+[x] - Canh bao yeu cau qua han chua co nguoi xu ly
+[x] - Luu bien ban va hinh anh sau cuu ho
 
 16.3. Mang luoi tinh nguyen
-[ ] - Dang ky tinh nguyen vien theo khu vuc
-[ ] - Xac minh danh tinh va ky nang tinh nguyen vien
-[ ] - Khai bao phuong tien va vat tu co the ho tro
-[ ] - Bat/tat trang thai san sang ho tro
-[ ] - Nhan nhiem vu tu trung tam dieu phoi
-[ ] - Check-in va check-out tai nhiem vu
-[ ] - Chia se vi tri cua doi tinh nguyen theo pham vi can thiet
-[ ] - Danh gia an toan sau khi ket thuc nhiem vu
+[x] - Dang ky tinh nguyen vien theo khu vuc
+[x] - Xac minh danh tinh va ky nang tinh nguyen vien
+[x] - Khai bao phuong tien va vat tu co the ho tro
+[x] - Bat/tat trang thai san sang ho tro
+[x] - Nhan nhiem vu tu trung tam dieu phoi
+[x] - Check-in va check-out tai nhiem vu
+[x] - Chia se vi tri cua doi tinh nguyen theo pham vi can thiet
+[x] - Danh gia an toan sau khi ket thuc nhiem vu
 
 ================================================================================
 

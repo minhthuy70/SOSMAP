@@ -7186,6 +7186,175 @@ body, html {
   color: #333;
   display: flex;
   align-items: center;
+}
+
+.flood-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.flood-btn {
+  flex: 1;
+  padding: 10px 15px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.flood-btn:hover {
+  background: #1976D2;
+}
+
+.flood-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.flood-status .status-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.flood-status .status-label {
+  font-size: 13px;
+  color: #666;
+}
+
+.flood-status .status-value {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Flood Map Modal */
+.flood-map-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.flood-legend h4,
+.flood-filters h4 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+}
+
+.flood-filters label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #333;
+}
+
+.flood-map-container {
+  margin-bottom: 20px;
+}
+
+.flood-stations h4,
+.flood-forecast h4 {
+  margin: 20px 0 15px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.flood-stations table,
+.evacuation-points table,
+.evacuation-routes table,
+.evacuation-family-list table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+}
+
+.flood-stations th,
+.evacuation-points th,
+.evacuation-routes th,
+.evacuation-family-list th {
+  background: #f5f5f5;
+  padding: 10px;
+  text-align: left;
+  font-size: 12px;
+  color: #666;
+  border-bottom: 2px solid #ddd;
+}
+
+.flood-stations td,
+.evacuation-points td,
+.evacuation-routes td,
+.evacuation-family-list td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
+}
+
+.forecast-chart p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #333;
+}
+
+/* Evacuation Plan Modal */
+.evacuation-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.evacuation-map {
+  margin-bottom: 20px;
+}
+
+.evacuation-points h4,
+.evacuation-routes h4,
+.evacuation-family-list h4,
+.evacuation-pickup-request h4 {
+  margin: 20px 0 15px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.pickup-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 13px;
+  color: #333;
+}
+
+.pickup-form input,
+.pickup-form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
   gap: 8px;
 }
 

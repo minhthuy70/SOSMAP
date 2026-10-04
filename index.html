@@ -11826,3 +11826,282 @@ div class="summary-label">Sự cố tháng này</div>
   </div>
 </body>
 </html>
+  <!-- Flood Risk Map Modal -->
+  <div class="modal" id="floodMapModal" style="display: none;">
+    <div class="modal-content" style="max-width: 1200px;">
+      <div class="modal-header">
+        <h3>Bản đồ nguy cơ bão lũ</h3>
+        <button class="modal-close" id="closeFloodMapModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="flood-map-controls">
+          <div class="flood-legend">
+            <h4>Chú thích</h4>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #e74c3c;"></span>
+              <span>Vùng ngập > 2m</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #f39c12;"></span>
+              <span>Vùng ngập 1-2m</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #f1c40f;"></span>
+              <span>Vùng ngập 0.5-1m</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #3498db;"></span>
+              <span>Hướng dòng chảy</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #9b59b6;"></span>
+              <span>Nguy cơ lũ quét</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #e67e22;"></span>
+              <span>Nguy cơ sạt lở</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #2ecc71;"></span>
+              <span>Vùng an toàn</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #95a5a6;"></span>
+              <span>Vùng cấm vào</span>
+            </div>
+          </div>
+          <div class="flood-filters">
+            <label>
+              <input type="checkbox" id="showFloodAreas" checked> Hiện vùng ngập
+            </label>
+            <label>
+              <input type="checkbox" id="showFlowDirection" checked> Hiện hướng dòng chảy
+            </label>
+            <label>
+              <input type="checkbox" id="showLandslideRisk" checked> Hiện nguy cơ sạt lở
+            </label>
+            <label>
+              <input type="checkbox" id="showSafeZones" checked> Hiện vùng an toàn
+            </label>
+          </div>
+        </div>
+        <div class="flood-map-container">
+          <div id="floodRiskMap" style="height: 500px; width: 100%;"></div>
+        </div>
+        <div class="flood-stations">
+          <h4>Mực nước tại trạm quan trắc</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Trạm</th>
+                <th>Vị trí</th>
+                <th>Mực nước hiện tại</th>
+                <th>Mực nước cảnh báo</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Trạm Sài Gòn</td>
+                <td>Quận 1</td>
+                <td>2.5m</td>
+                <td>2.0m</td>
+                <td><span class="status-value warning">Cảnh báo</span></td>
+              </tr>
+              <tr>
+                <td>Trạm Đồng Nai</td>
+                <td>TP Thủ Đức</td>
+                <td>1.8m</td>
+                <td>2.5m</td>
+                <td><span class="status-value success">Bình thường</span></td>
+              </tr>
+              <tr>
+                <td>Trạm Vàm Cỏ</td>
+                <td>Long An</td>
+                <td>3.2m</td>
+                <td>2.5m</td>
+                <td><span class="status-value danger">Nguy hiểm</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="flood-forecast">
+          <h4>Dự báo mực nước theo thời gian</h4>
+          <div class="forecast-chart">
+            <p><strong>+6 giờ:</strong> 2.8m (Cảnh báo)</p>
+            <p><strong>+12 giờ:</strong> 3.1m (Nguy hiểm)</p>
+            <p><strong>+24 giờ:</strong> 2.5m (Cảnh báo)</p>
+            <p><strong>+48 giờ:</strong> 1.8m (Bình thường)</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Evacuation Plan Modal -->
+  <div class="modal" id="evacuationPlanModal" style="display: none;">
+    <div class="modal-content" style="max-width: 1200px;">
+      <div class="modal-header">
+        <h3>Kế hoạch sơ tán</h3>
+        <button class="modal-close" id="closeEvacuationPlanModal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="evacuation-controls">
+          <button class="btn btn-primary" id="createEvacuationPlanBtn">Tạo phương án sơ tán</button>
+          <button class="btn btn-secondary" id="viewEvacuationListBtn">Danh sách người sơ tán</button>
+        </div>
+        <div class="evacuation-map">
+          <h4>Bản đồ sơ tán</h4>
+          <div id="evacuationMap" style="height: 400px; width: 100%;"></div>
+        </div>
+        <div class="evacuation-points">
+          <h4>Điểm tập kết và nơi trú an</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Tên điểm</th>
+                <th>Loại</th>
+                <th>Vị trí</th>
+                <th>Sức chứa</th>
+                <th>Đã có</th>
+                <th>Trạng thái</th>
+                <th>Thiết bị</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Trường THCS Nguyễn Du</td>
+                <td>Điểm trú an</td>
+                <td>Quận 1</td>
+                <td>500</td>
+                <td>320</td>
+                <td><span class="status-value success">Còn chỗ</span></td>
+                <td>Nước, điện, y tế</td>
+              </tr>
+              <tr>
+                <td>Công viên Lê Văn Tám</td>
+                <td>Điểm tập kết</td>
+                <td>Quận 1</td>
+                <td>1000</td>
+                <td>850</td>
+                <td><span class="status-value warning">Sắp đầy</span></td>
+                <td>Nước, vệ sinh</td>
+              </tr>
+              <tr>
+                <td>Sân vận động Thống Nhất</td>
+                <td>Điểm trú an</td>
+                <td>Quận 3</td>
+                <td>2000</td>
+                <td>2000</td>
+                <td><span class="status-value danger">Đã đầy</span></td>
+                <td>Nước, điện, y tế, vệ sinh</td>
+              </tr>
+              <tr>
+                <td>Trường THPT Ngô Gia Tự</td>
+                <td>Điểm trú an</td>
+                <td>Quận 5</td>
+                <td>400</td>
+                <td>150</td>
+                <td><span class="status-value success">Còn chỗ</span></td>
+                <td>Nước, điện</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="evacuation-routes">
+          <h4>Tuyến sơ tán an toàn</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Tuyến</th>
+                <th>Điểm đi</th>
+                <th>Điểm đến</th>
+                <th>Loại phương tiện</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tuyến 1</td>
+                <td>Khu dân cư A</td>
+                <td>Trường THCS Nguyễn Du</td>
+                <td>Người bộ</td>
+                <td><span class="status-value success">An toàn</span></td>
+              </tr>
+              <tr>
+                <td>Tuyến 2</td>
+                <td>Khu dân cư B</td>
+                <td>Công viên Lê Văn Tám</td>
+                <td>Xe cứu hộ</td>
+                <td><span class="status-value success">An toàn</span></td>
+              </tr>
+              <tr>
+                <td>Tuyến 3</td>
+                <td>Khu dân cư C</td>
+                <td>Trường THPT Ngô Gia Tự</td>
+                <td>Xe cứu hộ</td>
+                <td><span class="status-value warning">Có ngập cục bộ</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="evacuation-family-list">
+          <h4>Danh sách người cần sơ tán theo hộ gia đình</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Hộ gia đình</th>
+                <th>Số người</th>
+                <th>Nhóm đặc biệt</th>
+                <th>Điểm sơ tán</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Hộ Nguyễn Văn A</td>
+                <td>4</td>
+                <td>Người già, trẻ em</td>
+                <td>Trường THCS Nguyễn Du</td>
+                <td><span class="status-value warning">Chưa đến</span></td>
+                <td><button class="btn btn-sm" onclick="confirmEvacuation('h1')">Xác nhận</button></td>
+              </tr>
+              <tr>
+                <td>Hộ Trần Thị B</td>
+                <td>3</td>
+                <td>Phụ nữ mang thai</td>
+                <td>Công viên Lê Văn Tám</td>
+                <td><span class="status-value success">Đã đến</span></td>
+                <td><button class="btn btn-sm" disabled>Đã xác nhận</button></td>
+              </tr>
+              <tr>
+                <td>Hộ Lê Văn C</td>
+                <td>5</td>
+                <td>Người khuyết tật</td>
+                <td>Trường THPT Ngô Gia Tự</td>
+                <td><span class="status-value warning">Chưa đến</span></td>
+                <td><button class="btn btn-sm" onclick="confirmEvacuation('h3')">Xác nhận</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="evacuation-pickup-request">
+          <h4>Đăng ký đưa đón</h4>
+          <div class="pickup-form">
+            <label>Hộ gia đình:</label>
+            <input type="text" id="pickupFamily" placeholder="Nhập tên hộ gia đình" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <label>Số người:</label>
+            <input type="number" id="pickupPeople" placeholder="Số người cần đưa đón" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <label>Địa chỉ:</label>
+            <input type="text" id="pickupAddress" placeholder="Địa chỉ cần đến" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <label>Ghi chú:</label>
+            <textarea id="pickupNote" placeholder="Ghi chú đặc biệt (người già, khuyết tật...)" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+            <button class="btn btn-primary" onclick="submitPickupRequest()">Đăng ký đưa đón</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

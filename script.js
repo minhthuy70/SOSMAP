@@ -5924,9 +5924,7 @@ document.getElementById('submitVolunteerBtn') && document.getElementById('submit
 });
 
 // Initialize rescue system on page load
-document.addEventListener('DOMContentLoaded', function() {
-  initializeRescueSystem();
-});
+// rescueSystem initialization is now called from main DOMContentLoaded
 
 // Relief & Logistics System
 var reliefNeeds = [];
@@ -13054,7 +13052,218 @@ document.addEventListener('DOMContentLoaded', function() {
   initializePublicHealthSystem();
   initializeReliefLogisticsSystem();
   initializeEmergencyIntegrationsSystem();
+  initializeRescueSystem();
+  initializeFloodEvacuationSystem();
 });
+
+// Flood & Evacuation System
+var floodData = {
+  waterLevels: [
+    { id: 'sg', name: 'Trạm Sài Gòn', location: 'Quận 1', currentLevel: 2.5, warningLevel: 2.0, status: 'warning' },
+    { id: 'dn', name: 'Trạm Đồng Nai', location: 'TP Thủ Đức', currentLevel: 1.8, warningLevel: 2.5, status: 'normal' },
+    { id: 'vc', name: 'Trạm Vàm Cỏ', location: 'Long An', currentLevel: 3.2, warningLevel: 2.5, status: 'danger' }
+  ],
+  evacuationPoints: [
+    { id: 'ep1', name: 'Trường THCS Nguyễn Du', type: 'shelter', location: 'Quận 1', capacity: 500, current: 320, status: 'available', facilities: ['water', 'electricity', 'medical'] },
+    { id: 'ep2', name: 'Công viên Lê Văn Tám', type: 'assembly', location: 'Quận 1', capacity: 1000, current: 850, status: 'warning', facilities: ['water', 'sanitation'] },
+    { id: 'ep3', name: 'Sân vận động Thống Nhất', type: 'shelter', location: 'Quận 3', capacity: 2000, current: 2000, status: 'full', facilities: ['water', 'electricity', 'medical', 'sanitation'] },
+    { id: 'ep4', name: 'Trường THPT Ngô Gia Tự', type: 'shelter', location: 'Quận 5', capacity: 400, current: 150, status: 'available', facilities: ['water', 'electricity'] }
+  ],
+  evacuationRoutes: [
+    { id: 'r1', from: 'Khu dân cư A', to: 'Trường THCS Nguyễn Du', vehicleType: 'pedestrian', status: 'safe' },
+    { id: 'r2', from: 'Khu dân cư B', to: 'Công viên Lê Văn Tám', vehicleType: 'rescue', status: 'safe' },
+    { id: 'r3', from: 'Khu dân cư C', to: 'Trường THPT Ngô Gia Tự', vehicleType: 'rescue', status: 'warning' }
+  ],
+  families: [
+    { id: 'h1', name: 'Hộ Nguyễn Văn A', people: 4, specialGroups: ['elderly', 'children'], point: 'Trường THCS Nguyễn Du', status: 'pending' },
+    { id: 'h2', name: 'Hộ Trần Thị B', people: 3, specialGroups: ['pregnant'], point: 'Công viên Lê Văn Tám', status: 'arrived' },
+    { id: 'h3', name: 'Hộ Lê Văn C', people: 5, specialGroups: ['disabled'], point: 'Trường THPT Ngô Gia Tự', status: 'pending' }
+  ],
+  pickupRequests: []
+};
+
+var floodRiskMap = null;
+var evacuationMap = null;
+
+function initializeFloodEvacuationSystem() {
+  var savedFloodData = localStorage.getItem('sosmap_flood_data');
+  if (savedFloodData) {
+    floodData = JSON.parse(savedFloodData);
+  }
+
+  updateFloodPanel();
+
+  document.getElementById('floodMapBtn').addEventListener('click', function() {
+    document.getElementById('floodMapModal').style.display = 'block';
+    initializeFloodRiskMap();
+  });
+
+  document.getElementById('evacuationPlanBtn').addEventListener('click', function() {
+    document.getElementById('evacuationPlanModal').style.display = 'block';
+    initializeEvacuationMap();
+  });
+
+  document.getElementById('closeFloodMapModal').addEventListener('click', function() {
+    document.getElementById('floodMapModal').style.display = 'none';
+  });
+
+  document.getElementById('closeEvacuationPlanModal').addEventListener('click', function() {
+    document.getElementById('evacuationPlanModal').style.display = 'none';
+  });
+}
+
+function updateFloodPanel() {
+  var statusDiv = document.getElementById('floodStatus');
+  if (statusDiv) {
+    var avgLevel = floodData.waterLevels.reduce(function(sum, s) { return sum + s.currentLevel; }, 0) / floodData.waterLevels.length;
+    var totalEvacuated = floodData.families.filter(function(f) { return f.status === 'arrived'; }).reduce(function(sum, f) { return sum + f.people; }, 0);
+    
+    statusDiv.innerHTML = `
+      <div class="status-item">
+        <span class="status-label">Mực nước:</span>
+        <span class="status-value ${avgLevel > 2.5 ? 'danger' : avgLevel > 2.0 ? 'warning' : 'success'}">${avgLevel.toFixed(1)}m (${avgLevel > 2.5 ? 'Nguy hiểm' : avgLevel > 2.0 ? 'Cảnh báo' : 'Bình thường'})</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Điểm trú an:</span>
+        <span class="status-value">${floodData.evacuationPoints.length} điểm</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Người sơ tán:</span>
+        <span class="status-value">${totalEvacuated}</span>
+      </div>
+    `;
+  }
+}
+
+function initializeFloodRiskMap() {
+  if (floodRiskMap) {
+    floodRiskMap.remove();
+  }
+
+  floodRiskMap = L.map('floodRiskMap').setView([10.7769, 106.7009], 12);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(floodRiskMap);
+
+  // Add flood zones (demo polygons)
+  var floodZones = [
+    { coords: [[10.77, 106.69], [10.78, 106.69], [10.78, 106.71], [10.77, 106.71]], level: 'high', color: '#e74c3c' },
+    { coords: [[10.78, 106.70], [10.79, 106.70], [10.79, 106.72], [10.78, 106.72]], level: 'medium', color: '#f39c12' },
+    { coords: [[10.76, 106.68], [10.77, 106.68], [10.77, 106.70], [10.76, 106.70]], level: 'low', color: '#f1c40f' }
+  ];
+
+  floodZones.forEach(function(zone) {
+    L.polygon(zone.coords, {
+      color: zone.color,
+      fillColor: zone.color,
+      fillOpacity: 0.3
+    }).addTo(floodRiskMap).bindPopup('Vùng ngập: ' + zone.level);
+  });
+
+  // Add flow direction arrows (demo)
+  var flowDirections = [
+    { coords: [[10.775, 106.695], [10.778, 106.700]], label: 'Hướng dòng chảy' }
+  ];
+
+  flowDirections.forEach(function(flow) {
+    L.polyline(flow.coords, {
+      color: '#3498db',
+      weight: 3,
+      dashArray: '10, 10'
+    }).addTo(floodRiskMap).bindPopup(flow.label);
+  });
+
+  // Add safe zones
+  var safeZones = [
+    { coords: [[10.79, 106.71], [10.80, 106.71], [10.80, 106.73], [10.79, 106.73]], label: 'Vùng an toàn' }
+  ];
+
+  safeZones.forEach(function(zone) {
+    L.polygon(zone.coords, {
+      color: '#2ecc71',
+      fillColor: '#2ecc71',
+      fillOpacity: 0.2
+    }).addTo(floodRiskMap).bindPopup(zone.label);
+  });
+}
+
+function initializeEvacuationMap() {
+  if (evacuationMap) {
+    evacuationMap.remove();
+  }
+
+  evacuationMap = L.map('evacuationMap').setView([10.7769, 106.7009], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(evacuationMap);
+
+  // Add evacuation points
+  floodData.evacuationPoints.forEach(function(point) {
+    var marker = L.marker([10.7769 + Math.random() * 0.01, 106.7009 + Math.random() * 0.01])
+      .addTo(evacuationMap)
+      .bindPopup('<b>' + point.name + '</b><br>' + point.type + '<br>Sức chứa: ' + point.current + '/' + point.capacity);
+  });
+
+  // Add evacuation routes
+  floodData.evacuationRoutes.forEach(function(route) {
+    L.polyline([
+      [10.7769 + Math.random() * 0.01, 106.7009 + Math.random() * 0.01],
+      [10.7769 + Math.random() * 0.01, 106.7009 + Math.random() * 0.01]
+    ], {
+      color: route.status === 'safe' ? '#2ecc71' : '#f39c12',
+      weight: 4
+    }).addTo(evacuationMap).bindPopup(route.from + ' → ' + route.to);
+  });
+}
+
+function confirmEvacuation(familyId) {
+  var family = floodData.families.find(function(f) { return f.id === familyId; });
+  if (family) {
+    family.status = 'arrived';
+    saveFloodData();
+    updateFloodPanel();
+    alert('Đã xác nhận: ' + family.name + ' đã đến điểm sơ tán');
+    logActivity('evacuation_confirm', 'Xác nhận sơ tán: ' + family.name);
+  }
+}
+
+function submitPickupRequest() {
+  var family = document.getElementById('pickupFamily').value;
+  var people = parseInt(document.getElementById('pickupPeople').value);
+  var address = document.getElementById('pickupAddress').value;
+  var note = document.getElementById('pickupNote').value;
+
+  if (!family || !people || !address) {
+    alert('Vui lòng điền đầy đủ các trường bắt buộc');
+    return;
+  }
+
+  var request = {
+    id: 'PU-' + Date.now(),
+    family: family,
+    people: people,
+    address: address,
+    note: note,
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+
+  floodData.pickupRequests.push(request);
+  saveFloodData();
+  alert('Đã đăng ký yêu cầu đưa đón! Mã: ' + request.id);
+  logActivity('pickup_request', 'Đăng ký đưa đón: ' + family);
+
+  document.getElementById('pickupFamily').value = '';
+  document.getElementById('pickupPeople').value = '';
+  document.getElementById('pickupAddress').value = '';
+  document.getElementById('pickupNote').value = '';
+}
+
+function saveFloodData() {
+  localStorage.setItem('sosmap_flood_data', JSON.stringify(floodData));
+}
 
 // Emergency Integrations System
 var integrationsData = {
