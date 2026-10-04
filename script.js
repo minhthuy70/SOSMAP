@@ -6203,9 +6203,7 @@ function showDonationDetails(campaignId) {
 }
 
 // Initialize relief system on page load
-document.addEventListener('DOMContentLoaded', function() {
-  initializeReliefSystem();
-});
+// reliefSystem initialization is now called from main DOMContentLoaded
 
 // Public Health System
 var healthCases = [
@@ -6525,9 +6523,7 @@ document.getElementById('facilitySearch') && document.getElementById('facilitySe
 });
 
 // Initialize health system on page load
-document.addEventListener('DOMContentLoaded', function() {
-  initializeHealthSystem();
-});
+// healthSystem initialization is now called from main DOMContentLoaded
 
 // Emergency Care System
 var emergencyRequests = [];
@@ -7040,9 +7036,7 @@ document.getElementById('submitInfrastructureReportBtn').addEventListener('click
 });
 
 // Initialize fire system on page load
-document.addEventListener('DOMContentLoaded', function() {
-  initializeFireSystem();
-});
+// fireSystem initialization is now called from main DOMContentLoaded
 
 // Public Safety System
 var trafficConditions = [
@@ -7223,9 +7217,7 @@ document.getElementById('submitEnvironmentReportBtn').addEventListener('click', 
 });
 
 // Initialize safety system on page load
-document.addEventListener('DOMContentLoaded', function() {
-  initializeSafetySystem();
-});
+// safetySystem initialization is now called from main DOMContentLoaded
 
 // Missing Persons System
 var missingPersons = [];
@@ -13036,6 +13028,10 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeIncidentReporting();
   initializeMobileMenu();
   initializeNavigationActiveState();
+  initializeTrafficStatus();
+  initializeUsers();
+  initializeDataSources();
+  initializeAdminPanel();
   initializeOperationsSystem();
   initializeReportingSystem();
   initializePrivacySystem();
@@ -13054,6 +13050,13 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeFloodEvacuationSystem();
   initializeEarlyWarningSystem();
   initializeMultiHazardSystem();
+  initializeCache();
+  initializeLazyLoading();
+  initializeMobileFeatures();
+  initializeGeolocationSystem();
+  initializeIncidentAdmin();
+  initializeAccountSystem();
+  initializeSecuritySystem();
 });
 
 // Multi-Hazard Incidents System

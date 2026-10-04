@@ -4,7 +4,7 @@ He thong ban do tiep nhan va hien thi phan anh su co giao thong
 
 QUY UOC
 [x] - Tinh nang da co trong phien ban hien tai
-[ ] - Tinh nang de xuat hoac can tiep tuc phat trien
+[x] - Tinh nang de xuat hoac can tiep tuc phat trien
 
 1. GIAO DIEN TONG QUAN (USER INTERFACE)
 
