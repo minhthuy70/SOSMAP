@@ -4,10 +4,16 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
 const path = require('path');
+const http = require('http');
 require('dotenv').config();
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
+
+// Initialize WebSocket
+const { initializeWebSocket } = require('./services/websocket');
+const io = initializeWebSocket(server);
 
 // Middleware
 app.use(helmet());
@@ -50,9 +56,10 @@ app.use((req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`SOSMAP Backend Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`WebSocket enabled`);
 });
 
-module.exports = app;
+module.exports = { app, server, io };

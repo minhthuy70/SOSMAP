@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const { auth } = require('../middleware/auth');
 const pool = require('../config/database');
 const upload = require('../middleware/upload');
+const { broadcastIncidentUpdate, sendIncidentUpdate } = require('../services/websocket');
 
 // Get all incidents with filters
 router.get('/', auth, async (req, res) => {
@@ -87,7 +88,15 @@ router.post('/', [
       [req.user.id, type, title, description, latitude, longitude, severity, 'pending', images || []]
     );
 
-    res.status(201).json({ message: 'Incident created successfully', incident: result.rows[0] });
+    const incident = result.rows[0];
+
+    // Broadcast to all connected clients
+    broadcastIncidentUpdate({
+      action: 'created',
+      incident: incident
+    });
+
+    res.status(201).json({ message: 'Incident created successfully', incident: incident });
   } catch (error) {
     console.error('Create incident error:', error);
     res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
@@ -115,7 +124,15 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(404).json({ error: { message: 'Incident not found or unauthorized', status: 404 } });
     }
 
-    res.json({ message: 'Incident updated successfully', incident: result.rows[0] });
+    const incident = result.rows[0];
+
+    // Send update to incident-specific room
+    sendIncidentUpdate(req.params.id, {
+      action: 'updated',
+      incident: incident
+    });
+
+    res.json({ message: 'Incident updated successfully', incident: incident });
   } catch (error) {
     console.error('Update incident error:', error);
     res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
@@ -133,6 +150,12 @@ router.delete('/:id', auth, async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: { message: 'Incident not found or unauthorized', status: 404 } });
     }
+
+    // Broadcast deletion
+    sendIncidentUpdate(req.params.id, {
+      action: 'deleted',
+      incidentId: req.params.id
+    });
 
     res.json({ message: 'Incident deleted successfully' });
   } catch (error) {
