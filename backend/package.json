@@ -28,6 +28,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^2.5.0",
+    "node-geocoder": "^4.4.1",
     "pg": "^8.11.3",
     "rate-limiter-flexible": "^4.0.0"
   },
