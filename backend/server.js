@@ -43,6 +43,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/locations', require('./routes/locations'));
+app.use('/api/layers', require('./routes/layers'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

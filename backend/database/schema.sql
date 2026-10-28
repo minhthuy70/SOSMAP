@@ -2,6 +2,7 @@
 -- PostgreSQL
 
 -- Drop existing tables if they exist
+DROP TABLE IF EXISTS map_layers CASCADE;
 DROP TABLE IF EXISTS notifications CASCADE;
 DROP TABLE IF EXISTS incidents CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
@@ -81,6 +82,34 @@ CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
 
 CREATE TRIGGER update_incidents_updated_at BEFORE UPDATE ON incidents
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Map Layers table
+CREATE TABLE map_layers (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  url VARCHAR(500) NOT NULL,
+  type VARCHAR(50) NOT NULL CHECK (type IN ('tile', 'wms', 'geojson', 'vector')),
+  attribution TEXT,
+  is_active BOOLEAN DEFAULT true,
+  display_order INTEGER DEFAULT 0,
+  options JSONB DEFAULT '{}',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for map_layers
+CREATE INDEX idx_map_layers_type ON map_layers(type);
+CREATE INDEX idx_map_layers_active ON map_layers(is_active);
+
+-- Trigger for map_layers updated_at
+CREATE TRIGGER update_map_layers_updated_at BEFORE UPDATE ON map_layers
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Insert default map layers
+INSERT INTO map_layers (name, url, type, attribution, display_order, options) VALUES
+('OpenStreetMap', 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', 'tile', '&copy; OpenStreetMap contributors', 1, '{"maxZoom": 19}'),
+('Satellite', 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 'tile', 'Tiles &copy; Esri', 2, '{"maxZoom": 17}'),
+('Terrain', 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', 'tile', 'Map data: &copy; OpenStreetMap, SRTM | Map style: &copy; OpenTopoMap', 3, '{"maxZoom": 17}');
 
 -- Insert sample admin user (password: admin123)
 INSERT INTO users (email, password, name, role) VALUES
