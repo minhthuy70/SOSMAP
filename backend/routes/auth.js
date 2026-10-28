@@ -6,6 +6,96 @@ const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
 const { sendWelcomeEmail } = require('../services/email');
 
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - name
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *                 minLength: 6
+ *               name:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Login user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+
 // Register
 router.post('/register', [
   body('email').isEmail().normalizeEmail(),

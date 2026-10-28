@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const compression = require('compression');
 const path = require('path');
 const http = require('http');
+const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
 
 const app = express();
@@ -18,6 +19,10 @@ const io = initializeWebSocket(server);
 // Initialize Email Service
 const { initializeEmailService } = require('./services/email');
 initializeEmailService();
+
+// Swagger Documentation
+const swaggerSpec = require('./swagger');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Middleware
 app.use(helmet());

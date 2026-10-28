@@ -6,6 +6,55 @@ const pool = require('../config/database');
 const upload = require('../middleware/upload');
 const { broadcastIncidentUpdate, sendIncidentUpdate } = require('../services/websocket');
 
+/**
+ * @swagger
+ * /api/incidents:
+ *   get:
+ *     summary: Get all incidents with filters
+ *     tags: [Incidents]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: severity
+ *         schema:
+ *           type: string
+ *           enum: [low, medium, high, critical]
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [pending, verified, in_progress, resolved, rejected]
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *           default: 0
+ *     responses:
+ *       200:
+ *         description: List of incidents
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 incidents:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Incident'
+ *                 pagination:
+ *                   type: object
+ */
+
 // Get all incidents with filters
 router.get('/', auth, async (req, res) => {
   try {
