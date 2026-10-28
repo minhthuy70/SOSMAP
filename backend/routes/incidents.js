@@ -9,7 +9,19 @@ const { broadcastIncidentUpdate, sendIncidentUpdate } = require('../services/web
 // Get all incidents with filters
 router.get('/', auth, async (req, res) => {
   try {
-    const { type, severity, status, limit = 50, offset = 0 } = req.query;
+    const {
+      type,
+      severity,
+      status,
+      user_id,
+      start_date,
+      end_date,
+      search,
+      limit = 50,
+      offset = 0,
+      sort_by = 'created_at',
+      sort_order = 'DESC'
+    } = req.query;
 
     let query = 'SELECT * FROM incidents WHERE 1=1';
     const params = [];
@@ -33,11 +45,101 @@ router.get('/', auth, async (req, res) => {
       paramIndex++;
     }
 
-    query += ` ORDER BY created_at DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    if (user_id) {
+      query += ` AND user_id = $${paramIndex}`;
+      params.push(user_id);
+      paramIndex++;
+    }
+
+    if (start_date) {
+      query += ` AND created_at >= $${paramIndex}`;
+      params.push(start_date);
+      paramIndex++;
+    }
+
+    if (end_date) {
+      query += ` AND created_at <= $${paramIndex}`;
+      params.push(end_date);
+      paramIndex++;
+    }
+
+    if (search) {
+      query += ` AND (title ILIKE $${paramIndex} OR description ILIKE $${paramIndex})`;
+      params.push(`%${search}%`);
+      paramIndex++;
+    }
+
+    // Validate sort_by
+    const validSortFields = ['created_at', 'updated_at', 'severity', 'status', 'type'];
+    const sortField = validSortFields.includes(sort_by) ? sort_by : 'created_at';
+
+    // Validate sort_order
+    const sortOrder = sort_order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    query += ` ORDER BY ${sortField} ${sortOrder} LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
     params.push(limit, offset);
 
     const result = await pool.query(query, params);
-    res.json({ incidents: result.rows });
+
+    // Get total count for pagination
+    let countQuery = 'SELECT COUNT(*) as total FROM incidents WHERE 1=1';
+    const countParams = [];
+    let countParamIndex = 1;
+
+    if (type) {
+      countQuery += ` AND type = $${countParamIndex}`;
+      countParams.push(type);
+      countParamIndex++;
+    }
+
+    if (severity) {
+      countQuery += ` AND severity = $${countParamIndex}`;
+      countParams.push(severity);
+      countParamIndex++;
+    }
+
+    if (status) {
+      countQuery += ` AND status = $${countParamIndex}`;
+      countParams.push(status);
+      countParamIndex++;
+    }
+
+    if (user_id) {
+      countQuery += ` AND user_id = $${countParamIndex}`;
+      countParams.push(user_id);
+      countParamIndex++;
+    }
+
+    if (start_date) {
+      countQuery += ` AND created_at >= $${countParamIndex}`;
+      countParams.push(start_date);
+      countParamIndex++;
+    }
+
+    if (end_date) {
+      countQuery += ` AND created_at <= $${countParamIndex}`;
+      countParams.push(end_date);
+      countParamIndex++;
+    }
+
+    if (search) {
+      countQuery += ` AND (title ILIKE $${countParamIndex} OR description ILIKE $${countParamIndex})`;
+      countParams.push(`%${search}%`);
+      countParamIndex++;
+    }
+
+    const countResult = await pool.query(countQuery, countParams);
+    const total = parseInt(countResult.rows[0].total);
+
+    res.json({
+      incidents: result.rows,
+      pagination: {
+        total: total,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        pages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     console.error('Get incidents error:', error);
     res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
