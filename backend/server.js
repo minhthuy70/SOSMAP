@@ -29,6 +29,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/exports', express.static(path.join(__dirname, 'exports')));
 
 // Health check endpoint
 app.get('/health', (req, res) => {

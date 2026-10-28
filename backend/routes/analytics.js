@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { auth } = require('../middleware/auth');
 const pool = require('../config/database');
+const { generateIncidentReport, generateAnalyticsReport, savePdfToFile } = require('../services/pdf');
 
 // Get incident statistics
 router.get('/incidents', auth, async (req, res) => {
@@ -88,6 +89,67 @@ router.get('/trends', auth, async (req, res) => {
     res.json({ trends: result.rows });
   } catch (error) {
     console.error('Get trends error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Export analytics to PDF
+router.get('/export/pdf', auth, async (req, res) => {
+  try {
+    const { start_date, end_date } = req.query;
+
+    let dateFilter = '';
+    const params = [];
+    let paramIndex = 1;
+
+    if (start_date && end_date) {
+      dateFilter = `WHERE created_at BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+      params.push(start_date, end_date);
+      paramIndex += 2;
+    }
+
+    // Get analytics data
+    const totalResult = await pool.query(
+      `SELECT COUNT(*) as total FROM incidents ${dateFilter}`,
+      params
+    );
+
+    const typeResult = await pool.query(
+      `SELECT type, COUNT(*) as count FROM incidents ${dateFilter} GROUP BY type ORDER BY count DESC`,
+      params
+    );
+
+    const severityResult = await pool.query(
+      `SELECT severity, COUNT(*) as count FROM incidents ${dateFilter} GROUP BY severity ORDER BY count DESC`,
+      params
+    );
+
+    const statusResult = await pool.query(
+      `SELECT status, COUNT(*) as count FROM incidents ${dateFilter} GROUP BY status ORDER BY count DESC`,
+      params
+    );
+
+    const analytics = {
+      total: parseInt(totalResult.rows[0].total),
+      by_type: typeResult.rows,
+      by_severity: severityResult.rows,
+      by_status: statusResult.rows
+    };
+
+    // Generate PDF
+    const pdfBuffer = await generateAnalyticsReport(analytics);
+
+    // Save to file
+    const filename = `analytics-report-${Date.now()}.pdf`;
+    const filePath = await savePdfToFile(pdfBuffer, filename);
+
+    res.json({
+      message: 'PDF generated successfully',
+      filename: filename,
+      downloadUrl: `/exports/${filename}`
+    });
+  } catch (error) {
+    console.error('Export PDF error:', error);
     res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
   }
 });
