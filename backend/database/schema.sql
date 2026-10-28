@@ -2,6 +2,7 @@
 -- PostgreSQL
 
 -- Drop existing tables if they exist
+DROP TABLE IF EXISTS audit_logs CASCADE;
 DROP TABLE IF EXISTS map_layers CASCADE;
 DROP TABLE IF EXISTS notifications CASCADE;
 DROP TABLE IF EXISTS incidents CASCADE;
@@ -111,6 +112,26 @@ INSERT INTO map_layers (name, url, type, attribution, display_order, options) VA
 ('OpenStreetMap', 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', 'tile', '&copy; OpenStreetMap contributors', 1, '{"maxZoom": 19}'),
 ('Satellite', 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 'tile', 'Tiles &copy; Esri', 2, '{"maxZoom": 17}'),
 ('Terrain', 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', 'tile', 'Map data: &copy; OpenStreetMap, SRTM | Map style: &copy; OpenTopoMap', 3, '{"maxZoom": 17}');
+
+-- Audit Logs table
+CREATE TABLE audit_logs (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  action VARCHAR(100) NOT NULL,
+  entity_type VARCHAR(100),
+  entity_id INTEGER,
+  old_values JSONB,
+  new_values JSONB,
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for audit_logs
+CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
+CREATE INDEX idx_audit_logs_action ON audit_logs(action);
+CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
+CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at);
 
 -- Insert sample admin user (password: admin123)
 INSERT INTO users (email, password, name, role) VALUES
