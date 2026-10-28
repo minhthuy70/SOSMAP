@@ -3,6 +3,7 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { auth } = require('../middleware/auth');
 const pool = require('../config/database');
+const upload = require('../middleware/upload');
 
 // Get all incidents with filters
 router.get('/', auth, async (req, res) => {
@@ -136,6 +137,93 @@ router.delete('/:id', auth, async (req, res) => {
     res.json({ message: 'Incident deleted successfully' });
   } catch (error) {
     console.error('Delete incident error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Upload images/videos for incident
+router.post('/:id/upload', [auth, upload.array('files', 5)], async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: { message: 'No files uploaded', status: 400 } });
+    }
+
+    // Get incident
+    const incidentResult = await pool.query(
+      'SELECT * FROM incidents WHERE id = $1',
+      [req.params.id]
+    );
+
+    if (incidentResult.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Incident not found', status: 404 } });
+    }
+
+    const incident = incidentResult.rows[0];
+
+    // Check authorization
+    if (incident.user_id !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    // Get current images
+    const currentImages = incident.images || [];
+
+    // Add new file paths
+    const newFiles = req.files.map(file => `/uploads/${file.filename}`);
+    const updatedImages = [...currentImages, ...newFiles];
+
+    // Update incident
+    const updateResult = await pool.query(
+      'UPDATE incidents SET images = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+      [JSON.stringify(updatedImages), req.params.id]
+    );
+
+    res.json({
+      message: 'Files uploaded successfully',
+      incident: updateResult.rows[0],
+      uploadedFiles: newFiles
+    });
+  } catch (error) {
+    console.error('Upload files error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Delete image from incident
+router.delete('/:id/images/:filename', auth, async (req, res) => {
+  try {
+    const incidentResult = await pool.query(
+      'SELECT * FROM incidents WHERE id = $1',
+      [req.params.id]
+    );
+
+    if (incidentResult.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Incident not found', status: 404 } });
+    }
+
+    const incident = incidentResult.rows[0];
+
+    // Check authorization
+    if (incident.user_id !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const currentImages = incident.images || [];
+    const filenameToDelete = `/uploads/${req.params.filename}`;
+
+    const updatedImages = currentImages.filter(img => img !== filenameToDelete);
+
+    const updateResult = await pool.query(
+      'UPDATE incidents SET images = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+      [JSON.stringify(updatedImages), req.params.id]
+    );
+
+    res.json({
+      message: 'Image deleted successfully',
+      incident: updateResult.rows[0]
+    });
+  } catch (error) {
+    console.error('Delete image error:', error);
     res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
   }
 });
