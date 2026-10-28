@@ -1,5 +1,5 @@
-// API Configuration
-var API_BASE_URL = 'http://localhost:3000/api';
+// Load configuration
+var API_BASE_URL = (typeof API_CONFIG !== 'undefined' ? API_CONFIG.BASE_URL : 'http://localhost:3000/api');
 var API_TOKEN = localStorage.getItem('sosmap_token');
 var CURRENT_USER = JSON.parse(localStorage.getItem('sosmap_user') || 'null');
 
