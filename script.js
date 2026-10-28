@@ -1,3 +1,169 @@
+// API Configuration
+var API_BASE_URL = 'http://localhost:3000/api';
+var API_TOKEN = localStorage.getItem('sosmap_token');
+var CURRENT_USER = JSON.parse(localStorage.getItem('sosmap_user') || 'null');
+
+// API Helper Functions
+async function apiRequest(endpoint, options = {}) {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  if (API_TOKEN) {
+    headers['Authorization'] = `Bearer ${API_TOKEN}`;
+  }
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'API request failed');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
+}
+
+// Authentication Functions
+async function registerUser(userData) {
+  const result = await apiRequest('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(userData)
+  });
+
+  if (result.token) {
+    API_TOKEN = result.token;
+    CURRENT_USER = result.user;
+    localStorage.setItem('sosmap_token', result.token);
+    localStorage.setItem('sosmap_user', JSON.stringify(result.user));
+  }
+
+  return result;
+}
+
+async function loginUser(email, password) {
+  const result = await apiRequest('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password })
+  });
+
+  if (result.token) {
+    API_TOKEN = result.token;
+    CURRENT_USER = result.user;
+    localStorage.setItem('sosmap_token', result.token);
+    localStorage.setItem('sosmap_user', JSON.stringify(result.user));
+  }
+
+  return result;
+}
+
+function logoutUser() {
+  API_TOKEN = null;
+  CURRENT_USER = null;
+  localStorage.removeItem('sosmap_token');
+  localStorage.removeItem('sosmap_user');
+  updateAuthUI();
+}
+
+// Incident API Functions
+async function getIncidents(filters = {}) {
+  const queryParams = new URLSearchParams(filters).toString();
+  const result = await apiRequest(`/incidents?${queryParams}`);
+  return result.incidents;
+}
+
+async function getIncident(id) {
+  const result = await apiRequest(`/incidents/${id}`);
+  return result.incident;
+}
+
+async function createIncident(incidentData) {
+  const result = await apiRequest('/incidents', {
+    method: 'POST',
+    body: JSON.stringify(incidentData)
+  });
+  return result.incident;
+}
+
+async function updateIncident(id, incidentData) {
+  const result = await apiRequest(`/incidents/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(incidentData)
+  });
+  return result.incident;
+}
+
+async function deleteIncident(id) {
+  const result = await apiRequest(`/incidents/${id}`, {
+    method: 'DELETE'
+  });
+  return result;
+}
+
+// Notifications API Functions
+async function getNotifications(filters = {}) {
+  const queryParams = new URLSearchParams(filters).toString();
+  const result = await apiRequest(`/notifications?${queryParams}`);
+  return result.notifications;
+}
+
+async function markNotificationAsRead(id) {
+  const result = await apiRequest(`/notifications/${id}/read`, {
+    method: 'PUT'
+  });
+  return result.notification;
+}
+
+async function markAllNotificationsAsRead() {
+  const result = await apiRequest('/notifications/read-all', {
+    method: 'PUT'
+  });
+  return result;
+}
+
+// Load incidents from API and display on map
+async function loadIncidentsFromAPI() {
+  try {
+    const incidents = await getIncidents();
+    addMarkers(incidents);
+  } catch (error) {
+    console.error('Failed to load incidents:', error);
+    // Fall back to sample data if API fails
+    addMarkers(incidentData);
+  }
+}
+
+function updateAuthUI() {
+  const authSection = document.getElementById('authSection');
+  const userSection = document.getElementById('userSection');
+
+  if (CURRENT_USER) {
+    authSection.style.display = 'none';
+    userSection.style.display = 'block';
+    document.getElementById('userName').textContent = CURRENT_USER.name;
+    document.getElementById('userAvatar').textContent = CURRENT_USER.name.charAt(0).toUpperCase();
+
+    // Show admin link if admin
+    const adminLink = document.querySelector('.admin-only');
+    if (adminLink && CURRENT_USER.role === 'admin') {
+      adminLink.style.display = 'block';
+    }
+  } else {
+    authSection.style.display = 'block';
+    userSection.style.display = 'none';
+  }
+}
+
 // Khởi tạo bản đồ
 var map = L.map('map').setView([10.7769, 106.7009], 13); // HCM center
 
@@ -3130,54 +3296,20 @@ document.getElementById('closeLoginModal').addEventListener('click', function() 
   document.getElementById('loginModal').style.display = 'none';
 });
 
-document.getElementById('loginForm').addEventListener('submit', function(e) {
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
   var email = document.getElementById('loginEmail').value;
-
-  // Check rate limiting
-  var rateCheck = checkLoginAttempts(email);
-  if (!rateCheck.allowed) {
-    alert(rateCheck.message);
-    return;
-  }
-
-  if (rateCheck.attemptsRemaining <= 2) {
-    alert('Cảnh báo: Bạn còn ' + rateCheck.attemptsRemaining + ' lần thử đăng nhập.');
-  }
-
   var password = document.getElementById('loginPassword').value;
-  var rememberMe = document.getElementById('rememberMe').checked;
 
-  // Hash password for comparison
-  var hashedPassword = hashPassword(password);
-
-  // Find user
-  var user = users.find(function(u) {
-    return u.email === email && u.password === hashedPassword && u.isActive;
-  });
-
-  if (user) {
-    // Reset login attempts on success
-    loginAttempts[email] = { count: 0, lastAttempt: 0 };
-
-    currentUser = user;
-
-    // Save to localStorage if remember me is checked
-    if (rememberMe) {
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    }
-
-    // Log activity
-    logActivity('login', 'Đăng nhập thành công');
-
-    updateUserInterface();
+  try {
+    const result = await loginUser(email, password);
+    updateAuthUI();
     document.getElementById('loginModal').style.display = 'none';
     document.getElementById('loginForm').reset();
-
-    alert('Đăng nhập thành công! Xin chào ' + user.name);
-  } else {
-    alert('Email hoặc mật khẩu không đúng');
+    alert('Đăng nhập thành công! Xin chào ' + result.user.name);
+  } catch (error) {
+    alert('Đăng nhập thất bại: ' + error.message);
   }
 });
 
@@ -3190,33 +3322,15 @@ document.getElementById('closeRegisterModal').addEventListener('click', function
   document.getElementById('registerModal').style.display = 'none';
 });
 
-document.getElementById('registerForm').addEventListener('submit', function(e) {
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  var name = sanitizeInput(document.getElementById('registerName').value);
-  var email = sanitizeInput(document.getElementById('registerEmail').value);
-  var phone = sanitizeInput(document.getElementById('registerPhone').value);
+  var name = document.getElementById('registerName').value;
+  var email = document.getElementById('registerEmail').value;
+  var phone = document.getElementById('registerPhone').value;
   var password = document.getElementById('registerPassword').value;
   var confirmPassword = document.getElementById('registerConfirmPassword').value;
   var agreeTerms = document.getElementById('agreeTerms').checked;
-
-  // Validate email
-  if (!validateEmail(email)) {
-    alert('Email không hợp lệ');
-    return;
-  }
-
-  // Validate phone if provided
-  if (phone && !validatePhone(phone)) {
-    alert('Số điện thoại không hợp lệ');
-    return;
-  }
-
-  // Check rate limiting
-  if (!checkRateLimit(email)) {
-    alert('Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau 1 phút.');
-    return;
-  }
 
   // Validation
   if (password !== confirmPassword) {
@@ -3234,37 +3348,15 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
     return;
   }
 
-  // Check if email already exists
-  var existingUser = users.find(function(u) {
-    return u.email === email;
-  });
-
-  if (existingUser) {
-    alert('Email này đã được sử dụng');
-    return;
+  try {
+    const result = await registerUser({ name, email, phone, password });
+    updateAuthUI();
+    document.getElementById('registerModal').style.display = 'none';
+    document.getElementById('registerForm').reset();
+    alert('Đăng ký thành công! Xin chào ' + result.user.name);
+  } catch (error) {
+    alert('Đăng ký thất bại: ' + error.message);
   }
-
-  // Create new user
-  var newUser = {
-    id: 'user-' + Date.now(),
-    name: name,
-    email: email,
-    phone: phone,
-    password: hashPassword(password),
-    role: 'reporter',
-    createdAt: new Date().toISOString(),
-    isActive: true
-  };
-
-  users.push(newUser);
-
-  // Log activity
-  logActivity('register', 'Đăng ký tài khoản mới: ' + email);
-
-  document.getElementById('registerModal').style.display = 'none';
-  document.getElementById('registerForm').reset();
-
-  alert('Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.');
 });
 
 // Forgot password functionality
@@ -3302,12 +3394,7 @@ document.getElementById('logoutBtn').addEventListener('click', function(e) {
   e.preventDefault();
 
   if (confirm('Bạn có chắc muốn đăng xuất?')) {
-    logActivity('logout', 'Đăng xuất');
-
-    currentUser = null;
-    localStorage.removeItem('currentUser');
-    updateUserInterface();
-
+    logoutUser();
     alert('Đã đăng xuất thành công');
   }
 });
@@ -12554,14 +12641,12 @@ function updateIncidentReportingStatus() {
   `;
 }
 
-function submitReport() {
+async function submitReport() {
   var type = document.getElementById('reportType').value;
   var title = document.getElementById('reportTitle').value;
   var content = document.getElementById('reportContent').value;
   var location = document.getElementById('reportLocation').value;
-  var contactName = document.getElementById('reportContactName').value;
-  var contactPhone = document.getElementById('reportContactPhone').value;
-  var contactEmail = document.getElementById('reportContactEmail').value;
+  var coordinatesValue = document.getElementById('coordinatesValue').textContent;
   var isAnonymous = document.getElementById('reportAnonymous').checked;
 
   // Validation
@@ -12570,50 +12655,40 @@ function submitReport() {
     return;
   }
 
-  // Generate report ID
-  var reportId = 'RPT-' + String(incidentReportingData.myReports.length + 1).padStart(3, '0');
+  // Parse coordinates
+  var latitude = 10.7769;
+  var longitude = 106.7009;
+  if (coordinatesValue) {
+    var coords = coordinatesValue.split(',').map(c => parseFloat(c.trim()));
+    if (coords.length === 2) {
+      latitude = coords[0];
+      longitude = coords[1];
+    }
+  }
 
-  // Create report
-  var report = {
-    id: reportId,
-    type: type,
-    title: title,
-    content: content,
-    location: location || 'Chưa có địa chỉ',
-    coordinates: document.getElementById('coordinatesValue').textContent || '',
-    status: 'pending',
-    createdAt: new Date().toLocaleString('vi-VN'),
-    userId: accountData.currentUser.id,
-    userName: isAnonymous ? 'Ẩn danh' : accountData.currentUser.name,
-    contactInfo: isAnonymous ? null : {
-      name: contactName,
-      phone: contactPhone,
-      email: contactEmail
-    },
-    evidence: [],
-    history: [{
-      time: new Date().toLocaleString('vi-VN'),
-      action: 'Tạo phản ánh',
-      user: accountData.currentUser.name
-    }]
-  };
+  try {
+    const incident = await createIncident({
+      type: type,
+      title: title,
+      description: content,
+      latitude: latitude,
+      longitude: longitude,
+      severity: 'medium'
+    });
 
-  incidentReportingData.myReports.unshift(report);
-  saveIncidentReportingData();
-  updateIncidentReportingStatus();
+    alert('Đã gửi phản ánh thành công! Mã số: ' + incident.id);
 
-  // Add to audit log
-  addAuditLog('create', 'Tạo phản ánh: ' + reportId);
+    // Reset form
+    resetReportForm();
 
-  alert('Đã gửi phản ánh thành công! Mã số: ' + reportId);
+    // Close modal
+    document.getElementById('createReportModal').style.display = 'none';
 
-  // Reset form
-  resetReportForm();
-
-  // Close modal
-  document.getElementById('createReportModal').style.display = 'none';
-
-  logActivity('report_created', 'Tạo phản ánh: ' + reportId);
+    // Refresh incidents on map
+    loadIncidentsFromAPI();
+  } catch (error) {
+    alert('Gửi phản ánh thất bại: ' + error.message);
+  }
 }
 
 function resetReportForm() {
@@ -16961,3 +17036,14 @@ function showVerificationDialog(reportId) {
     }
   }
 }
+
+// Initialize API integration on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Check for saved token
+  if (API_TOKEN && CURRENT_USER) {
+    updateAuthUI();
+  }
+
+  // Load incidents from API
+  loadIncidentsFromAPI();
+});
