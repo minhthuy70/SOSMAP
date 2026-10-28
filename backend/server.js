@@ -15,6 +15,10 @@ const PORT = process.env.PORT || 3000;
 const { initializeWebSocket } = require('./services/websocket');
 const io = initializeWebSocket(server);
 
+// Initialize Email Service
+const { initializeEmailService } = require('./services/email');
+initializeEmailService();
+
 // Middleware
 app.use(helmet());
 app.use(cors());
