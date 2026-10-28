@@ -15,6 +15,7 @@ CREATE TABLE users (
   name VARCHAR(255) NOT NULL,
   phone VARCHAR(20),
   role VARCHAR(50) DEFAULT 'user' CHECK (role IN ('user', 'admin', 'moderator')),
+  is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
