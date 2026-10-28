@@ -143,6 +143,128 @@ async function loadIncidentsFromAPI() {
   }
 }
 
+// Analytics API Functions
+async function getIncidentAnalytics(startDate, endDate) {
+  const params = {};
+  if (startDate) params.start_date = startDate;
+  if (endDate) params.end_date = endDate;
+
+  const queryParams = new URLSearchParams(params).toString();
+  const result = await apiRequest(`/analytics/incidents?${queryParams}`);
+  return result;
+}
+
+async function getUserAnalytics() {
+  const result = await apiRequest('/analytics/users');
+  return result;
+}
+
+async function getIncidentTrends() {
+  const result = await apiRequest('/analytics/trends');
+  return result.trends;
+}
+
+// Load analytics data from API
+async function loadAnalyticsFromAPI() {
+  try {
+    const analytics = await getIncidentAnalytics();
+    updateAnalyticsDashboard(analytics);
+  } catch (error) {
+    console.error('Failed to load analytics:', error);
+  }
+}
+
+// Update analytics dashboard with API data
+function updateAnalyticsDashboard(analytics) {
+  // Update total incidents
+  var totalElement = document.getElementById('totalIncidents');
+  if (totalElement) {
+    totalElement.textContent = analytics.total || 0;
+  }
+
+  // Update by type chart
+  var typeChart = document.getElementById('incidentTypeChart');
+  if (typeChart && analytics.by_type) {
+    // Update chart data here
+    console.log('Type data:', analytics.by_type);
+  }
+
+  // Update by severity
+  var severityElement = document.getElementById('severityBreakdown');
+  if (severityElement && analytics.by_severity) {
+    // Update severity breakdown
+    console.log('Severity data:', analytics.by_severity);
+  }
+
+  // Update by status
+  var statusElement = document.getElementById('statusBreakdown');
+  if (statusElement && analytics.by_status) {
+    // Update status breakdown
+    console.log('Status data:', analytics.by_status);
+  }
+}
+
+// Load notifications from API
+async function loadNotificationsFromAPI() {
+  try {
+    const notifications = await getNotifications({ limit: 20 });
+    updateNotificationsUI(notifications);
+  } catch (error) {
+    console.error('Failed to load notifications:', error);
+  }
+}
+
+// Update notifications UI with API data
+function updateNotificationsUI(notifications) {
+  var notificationsPanel = document.getElementById('notificationsPanel');
+  if (!notificationsPanel) return;
+
+  var unreadCount = notifications.filter(n => !n.read).length;
+  var badge = document.querySelector('.notification-badge');
+  if (badge) {
+    badge.textContent = unreadCount;
+    badge.style.display = unreadCount > 0 ? 'block' : 'none';
+  }
+
+  // Update notifications list
+  var notificationsList = document.getElementById('notificationsList');
+  if (notificationsList) {
+    notificationsList.innerHTML = '';
+    notifications.forEach(function(notification) {
+      var item = document.createElement('div');
+      item.className = 'notification-item' + (notification.read ? '' : ' unread');
+      item.innerHTML = `
+        <div class="notification-content">
+          <h4>${notification.title}</h4>
+          <p>${notification.message}</p>
+          <small>${new Date(notification.created_at).toLocaleString('vi-VN')}</small>
+        </div>
+      `;
+      notificationsList.appendChild(item);
+    });
+  }
+}
+
+// Mark notification as read and sync with API
+async function markNotificationReadFromAPI(id) {
+  try {
+    await markNotificationAsRead(id);
+    loadNotificationsFromAPI();
+  } catch (error) {
+    console.error('Failed to mark notification as read:', error);
+  }
+}
+
+// Mark all notifications as read and sync with API
+async function markAllNotificationsReadFromAPI() {
+  try {
+    await markAllNotificationsAsRead();
+    loadNotificationsFromAPI();
+  } catch (error) {
+    console.error('Failed to mark all notifications as read:', error);
+  }
+}
+
 function updateAuthUI() {
   const authSection = document.getElementById('authSection');
   const userSection = document.getElementById('userSection');
@@ -17042,8 +17164,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // Check for saved token
   if (API_TOKEN && CURRENT_USER) {
     updateAuthUI();
+    // Load notifications if authenticated
+    loadNotificationsFromAPI();
   }
 
   // Load incidents from API
   loadIncidentsFromAPI();
+
+  // Load analytics data
+  loadAnalyticsFromAPI();
 });
