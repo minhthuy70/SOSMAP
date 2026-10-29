@@ -62,6 +62,82 @@ function safeExecute(fn, fallback = null) {
   }
 }
 
+// Loading State Management
+var loadingStates = {
+  incidents: false,
+  notifications: false,
+  analytics: false,
+  profile: false
+};
+
+function setLoading(key, isLoading) {
+  loadingStates[key] = isLoading;
+  updateLoadingUI(key, isLoading);
+}
+
+function updateLoadingUI(key, isLoading) {
+  const loadingElements = document.querySelectorAll(`[data-loading="${key}"]`);
+  loadingElements.forEach(function(element) {
+    if (isLoading) {
+      element.classList.add('loading');
+      element.disabled = true;
+      if (element.tagName === 'BUTTON') {
+        const originalText = element.textContent;
+        element.setAttribute('data-original-text', originalText);
+        element.innerHTML = '<span class="spinner"></span> Đang tải...';
+      }
+    } else {
+      element.classList.remove('loading');
+      element.disabled = false;
+      if (element.tagName === 'BUTTON') {
+        const originalText = element.getAttribute('data-original-text');
+        if (originalText) {
+          element.textContent = originalText;
+        }
+      }
+    }
+  });
+}
+
+function showGlobalLoading(message = 'Đang tải...') {
+  const loader = document.createElement('div');
+  loader.id = 'globalLoader';
+  loader.className = 'global-loader';
+  loader.innerHTML = `
+    <div class="loader-spinner"></div>
+    <p>${message}</p>
+  `;
+  document.body.appendChild(loader);
+  document.body.style.overflow = 'hidden';
+}
+
+function hideGlobalLoading() {
+  const loader = document.getElementById('globalLoader');
+  if (loader) {
+    loader.remove();
+    document.body.style.overflow = '';
+  }
+}
+
+function showInlineLoading(containerId) {
+  const container = document.getElementById(containerId);
+  if (container) {
+    container.innerHTML = `
+      <div class="inline-loading">
+        <div class="spinner"></div>
+        <p>Đang tải...</p>
+      </div>
+    `;
+  }
+}
+
+function hideInlineLoading(containerId, defaultContent = '') {
+  const container = document.getElementById(containerId);
+  if (container) {
+    container.innerHTML = defaultContent;
+  }
+}
+
 // Load configuration
 var API_BASE_URL = (typeof API_CONFIG !== 'undefined' ? API_CONFIG.BASE_URL : 'http://localhost:3000/api');
 var API_TOKEN = localStorage.getItem('sosmap_token');
