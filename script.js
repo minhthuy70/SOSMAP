@@ -904,6 +904,79 @@ function validateFile(file) {
   return true;
 }
 
+// User Profile Settings Functions
+async function updateProfileUI() {
+  const name = document.getElementById('profileName')?.value;
+  const phone = document.getElementById('profilePhone')?.value;
+  const email = document.getElementById('profileEmail')?.value;
+
+  try {
+    const result = await apiRequest('/users/profile', {
+      method: 'PUT',
+      body: JSON.stringify({ name, phone, email })
+    });
+
+    CURRENT_USER = result.user;
+    localStorage.setItem('sosmap_user', JSON.stringify(CURRENT_USER));
+    updateAuthUI();
+
+    showNotification('Cập nhật thành công', 'Thông tin hồ sơ đã được cập nhật');
+  } catch (error) {
+    alert('Cập nhật thất bại: ' + error.message);
+  }
+}
+
+async function changePasswordUI() {
+  const currentPassword = document.getElementById('currentPassword')?.value;
+  const newPassword = document.getElementById('newPassword')?.value;
+  const confirmPassword = document.getElementById('confirmPassword')?.value;
+
+  if (newPassword !== confirmPassword) {
+    alert('Mật khẩu xác nhận không khớp');
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    alert('Mật khẩu phải có ít nhất 6 ký tự');
+    return;
+  }
+
+  try {
+    await apiRequest('/users/password', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+
+    showNotification('Đổi mật khẩu thành công', 'Vui lòng đăng nhập lại');
+    logoutUser();
+  } catch (error) {
+    alert('Đổi mật khẩu thất bại: ' + error.message);
+  }
+}
+
+function loadUserProfile() {
+  if (CURRENT_USER) {
+    document.getElementById('profileName').value = CURRENT_USER.name || '';
+    document.getElementById('profilePhone').value = CURRENT_USER.phone || '';
+    document.getElementById('profileEmail').value = CURRENT_USER.email || '';
+  }
+}
+
+function openProfileModal() {
+  loadUserProfile();
+  const modal = document.getElementById('profileModal');
+  if (modal) {
+    modal.style.display = 'block';
+  }
+}
+
+function closeProfileModal() {
+  const modal = document.getElementById('profileModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
 function updateAuthUI() {
   const authSection = document.getElementById('authSection');
   const userSection = document.getElementById('userSection');
