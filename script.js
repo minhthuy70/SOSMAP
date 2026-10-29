@@ -556,6 +556,89 @@ function switchMapLayerByType(layerType) {
   }
 }
 
+// Advanced Search Functions
+async function searchIncidentsAdvanced(filters) {
+  try {
+    const queryParams = new URLSearchParams(filters).toString();
+    const result = await apiRequest(`/incidents?${queryParams}`);
+    return result;
+  } catch (error) {
+    console.error('Advanced search error:', error);
+    throw error;
+  }
+}
+
+function applyAdvancedSearch() {
+  const filters = {
+    type: document.getElementById('searchType')?.value || null,
+    severity: document.getElementById('searchSeverity')?.value || null,
+    status: document.getElementById('searchStatus')?.value || null,
+    user_id: document.getElementById('searchUserId')?.value || null,
+    start_date: document.getElementById('searchStartDate')?.value || null,
+    end_date: document.getElementById('searchEndDate')?.value || null,
+    search: document.getElementById('searchKeyword')?.value || null,
+    sort_by: document.getElementById('searchSortBy')?.value || 'created_at',
+    sort_order: document.getElementById('searchSortOrder')?.value || 'DESC',
+    limit: parseInt(document.getElementById('searchLimit')?.value) || 50,
+    offset: parseInt(document.getElementById('searchOffset')?.value) || 0
+  };
+
+  // Remove null values
+  Object.keys(filters).forEach(key => {
+    if (filters[key] === null || filters[key] === '') {
+      delete filters[key];
+    }
+  });
+
+  searchIncidentsAdvanced(filters)
+    .then(function(result) {
+      addMarkers(result.incidents);
+      updatePagination(result.pagination);
+      showNotification('Tìm kiếm thành công', `Tìm thấy ${result.incidents.length} sự cố`);
+    })
+    .catch(function(error) {
+      alert('Tìm kiếm thất bại: ' + error.message);
+    });
+}
+
+function updatePagination(pagination) {
+  const paginationContainer = document.getElementById('paginationContainer');
+  if (!paginationContainer) return;
+
+  paginationContainer.innerHTML = `
+    <div class="pagination-info">
+      <span>Tổng: ${pagination.total}</span>
+      <span>Trang ${Math.floor(pagination.offset / pagination.limit) + 1} / ${pagination.pages}</span>
+    </div>
+    <div class="pagination-controls">
+      <button onclick="goToPage(${pagination.offset - pagination.limit})" ${pagination.offset === 0 ? 'disabled' : ''}>Trước</button>
+      <button onclick="goToPage(${pagination.offset + pagination.limit})" ${pagination.offset + pagination.limit >= pagination.total ? 'disabled' : ''}>Sau</button>
+    </div>
+  `;
+}
+
+function goToPage(offset) {
+  if (offset < 0) return;
+  document.getElementById('searchOffset').value = offset;
+  applyAdvancedSearch();
+}
+
+function resetAdvancedSearch() {
+  document.getElementById('searchType').value = '';
+  document.getElementById('searchSeverity').value = '';
+  document.getElementById('searchStatus').value = '';
+  document.getElementById('searchUserId').value = '';
+  document.getElementById('searchStartDate').value = '';
+  document.getElementById('searchEndDate').value = '';
+  document.getElementById('searchKeyword').value = '';
+  document.getElementById('searchSortBy').value = 'created_at';
+  document.getElementById('searchSortOrder').value = 'DESC';
+  document.getElementById('searchLimit').value = '50';
+  document.getElementById('searchOffset').value = '0';
+
+  loadIncidentsFromAPI();
+}
+
 function updateAuthUI() {
   const authSection = document.getElementById('authSection');
   const userSection = document.getElementById('userSection');
