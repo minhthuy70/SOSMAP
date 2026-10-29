@@ -621,6 +621,125 @@ function showAllIncidents() {
   });
 }
 
+// Sharing Functionality
+function shareIncident(incidentId) {
+  const incidentUrl = window.location.origin + '/incident/' + incidentId;
+  
+  if (navigator.share) {
+    navigator.share({
+      title: 'SOSMAP Incident',
+      text: 'Xem sự cố này trên SOSMAP',
+      url: incidentUrl
+    }).then(function() {
+      showNotification('Chia sẻ', 'Đã chia sẻ thành công');
+    }).catch(function(error) {
+      console.error('Share error:', error);
+    });
+  } else {
+    copyToClipboard(incidentUrl);
+  }
+}
+
+function shareMapState() {
+  const center = map.getCenter();
+  const zoom = map.getZoom();
+  const mapUrl = window.location.origin + '?lat=' + center.lat + '&lng=' + center.lng + '&zoom=' + zoom;
+  
+  if (navigator.share) {
+    navigator.share({
+      title: 'SOSMAP Map',
+      text: 'Xem bản đồ SOSMAP',
+      url: mapUrl
+    }).then(function() {
+      showNotification('Chia sẻ', 'Đã chia sẻ bản đồ');
+    }).catch(function(error) {
+      console.error('Share error:', error);
+    });
+  } else {
+    copyToClipboard(mapUrl);
+  }
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      showNotification('Sao chép', 'Đã sao chép link vào clipboard');
+    }).catch(function(error) {
+      console.error('Clipboard error:', error);
+      fallbackCopyToClipboard(text);
+    });
+  } else {
+    fallbackCopyToClipboard(text);
+  }
+}
+
+function fallbackCopyToClipboard(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-999999px';
+  document.body.appendChild(textArea);
+  textArea.select();
+  
+  try {
+    document.execCommand('copy');
+    showNotification('Sao chép', 'Đã sao chép link vào clipboard');
+  } catch (error) {
+    console.error('Fallback copy error:', error);
+    showNotification('Lỗi', 'Không thể sao chép link');
+  }
+  
+  document.body.removeChild(textArea);
+}
+
+function shareOnFacebook(url) {
+  const shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+  window.open(shareUrl, '_blank', 'width=600,height=400');
+}
+
+function shareOnTwitter(url, text) {
+  const shareUrl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url);
+  window.open(shareUrl, '_blank', 'width=600,height=400');
+}
+
+function shareOnLinkedIn(url, title) {
+  const shareUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url);
+  window.open(shareUrl, '_blank', 'width=600,height=400');
+}
+
+function shareByEmail(subject, body) {
+  const mailtoLink = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  window.location.href = mailtoLink;
+}
+
+function generateQRCode(url) {
+  // Using QR code API
+  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);
+  return qrUrl;
+}
+
+function showShareDialog(type, data) {
+  const dialog = document.createElement('div');
+  dialog.className = 'share-dialog';
+  dialog.innerHTML = `
+    <div class="share-dialog-content">
+      <h3>Chia sẻ</h3>
+      <div class="share-options">
+        <button onclick="copyToClipboard('${data.url}')">📋 Copy Link</button>
+        <button onclick="shareOnFacebook('${data.url}')">📘 Facebook</button>
+        <button onclick="shareOnTwitter('${data.url}', '${data.text || ''}')">🐦 Twitter</button>
+        <button onclick="shareOnLinkedIn('${data.url}', '${data.title || ''}')">💼 LinkedIn</button>
+        <button onclick="shareByEmail('${data.subject || ''}', '${data.body || ''}')">📧 Email</button>
+      </div>
+      <div class="qr-code">
+        <img src="${generateQRCode(data.url)}" alt="QR Code">
+      </div>
+      <button class="close-btn" onclick="this.closest('.share-dialog').remove()">Đóng</button>
+    </div>
+  `;
+  document.body.appendChild(dialog);
+}
+
 function saveOfflineData(key, data) {
   try {
     localStorage.setItem('offline_' + key, JSON.stringify(data));
