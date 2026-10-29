@@ -327,6 +327,79 @@ function initializeDarkMode() {
   }
 }
 
+// Language Switching (i18n)
+var translations = {
+  vi: {
+    appName: 'SOS MAP',
+    home: 'Trang chủ',
+    map: 'Bản đồ',
+    report: 'Phản ánh',
+    about: 'Giới thiệu',
+    login: 'Đăng nhập',
+    register: 'Đăng ký',
+    logout: 'Đăng xuất',
+    incidents: 'Sự cố',
+    notifications: 'Thông báo',
+    settings: 'Cài đặt',
+    search: 'Tìm kiếm',
+    loading: 'Đang tải...',
+    error: 'Lỗi',
+    success: 'Thành công'
+  },
+  en: {
+    appName: 'SOS MAP',
+    home: 'Home',
+    map: 'Map',
+    report: 'Report',
+    about: 'About',
+    login: 'Login',
+    register: 'Register',
+    logout: 'Logout',
+    incidents: 'Incidents',
+    notifications: 'Notifications',
+    settings: 'Settings',
+    search: 'Search',
+    loading: 'Loading...',
+    error: 'Error',
+    success: 'Success'
+  }
+};
+
+function setLanguage(lang) {
+  const preferences = getUserPreferences();
+  preferences.language = lang;
+  saveUserPreferences(preferences);
+  applyLanguage(lang);
+}
+
+function applyLanguage(lang) {
+  const t = translations[lang] || translations.vi;
+  
+  // Update UI elements with data-i18n attribute
+  document.querySelectorAll('[data-i18n]').forEach(function(element) {
+    const key = element.getAttribute('data-i18n');
+    if (t[key]) {
+      element.textContent = t[key];
+    }
+  });
+  
+  // Update dynamic elements
+  const appName = document.querySelector('.navbar h1');
+  if (appName) appName.textContent = t.appName;
+  
+  showNotification('Language', lang === 'vi' ? 'Đã chuyển sang tiếng Việt' : 'Switched to English');
+}
+
+function initializeLanguage() {
+  const preferences = getUserPreferences();
+  applyLanguage(preferences.language || 'vi');
+}
+
+function getTranslation(key) {
+  const lang = getUserPreferences().language || 'vi';
+  return translations[lang]?.[key] || translations.vi[key] || key;
+}
+
 function saveOfflineData(key, data) {
   try {
     localStorage.setItem('offline_' + key, JSON.stringify(data));
