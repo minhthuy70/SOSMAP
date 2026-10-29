@@ -3,6 +3,73 @@
 
 [Read in English version](README.md)
 
+# SOS MAP - Hệ thống Bản đồ Cứu hộ SOS
+
+SOS MAP là hệ thống bản đồ tương tác cho phép người dùng báo cáo, theo dõi và quản lý các sự cố giao thông và tình huống khẩn cấp theo thời gian thực.
+
+## Tính năng chính
+
+### Frontend
+- 🗺️ Bản đồ tương tác với Leaflet.js
+- 📱 Responsive design cho mọi thiết bị
+- 🌙 Dark mode support
+- 🌍 Hỗ trợ đa ngôn ngữ (Tiếng Việt, English)
+- 🔍 Tìm kiếm và lọc sự cố
+- ⭐ Yêu thích/bookmark sự cố
+- 📤 Chia sẻ sự cố qua mạng xã hội
+- 🖨️ In báo cáo sự cố
+- ⌨️ Phím tắt nâng cao
+- 🔔 Thông báo real-time
+- 📊 Dashboard analytics
+- 📁 File upload với preview
+- 📍 Geocoding (địa chỉ ↔ tọa độ)
+- 📄 Export PDF
+- 🚀 Performance optimizations
+- 🔒 Security improvements
+- ♿ Accessibility improvements
+- 📴 Offline mode support
+- 💾 Cache management
+
+### Backend
+- 🔐 JWT Authentication
+- 📡 WebSocket real-time updates
+- 📧 Email notifications
+- 📊 Analytics API
+- 📍 Geocoding service
+- 📁 File upload handling
+- 📄 PDF generation
+- 🎯 Role-based access control
+- 📝 Audit logging
+- 🚦 Rate limiting
+- 📚 Swagger API documentation
+- 🐳 Docker support
+
+### Database
+- PostgreSQL với schema đầy đủ
+- Indexes cho performance
+- Triggers cho timestamps
+- Vietnamese administrative units data
+
+## Cài đặt
+
+Xem file [SETUP.md](SETUP.md) để hướng dẫn cài đặt chi tiết.
+
+## Tài liệu
+
+- [Backend README](backend/README.md)
+- [API Documentation](http://localhost:3000/api-docs)
+- [Feature List](Danh_Sach_Tinh_Nang_SOSMAP.txt)
+
+## Phiên bản
+
+Version: 1.0.0
+
+## Giấy phép
+
+MIT License
+
+---
+
 # Dữ liệu Tỉnh thành, Quận huyện Việt Nam
 
 Đây là tập lệnh cơ sở dữ liệu SQL của toàn bộ đơn vị hành chính Việt Nam, bao gồm **34 tỉnh thành** và các Quận huyện, phường xã liên quan.  
