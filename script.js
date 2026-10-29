@@ -299,6 +299,34 @@ function updateOnlineStatus() {
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
+// Dark Mode Functions
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  const isDarkMode = document.body.classList.contains('dark-mode');
+  
+  // Save preference
+  const preferences = getUserPreferences();
+  preferences.theme = isDarkMode ? 'dark' : 'light';
+  saveUserPreferences(preferences);
+  
+  // Update button icon
+  const toggleBtn = document.getElementById('darkModeToggle');
+  if (toggleBtn) {
+    toggleBtn.innerHTML = isDarkMode 
+      ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="23" y1="12" x2="21" y2="12"></line><line x1="3" y1="12" x2="1" y2="12"></line></svg>'
+      : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+  }
+  
+  showNotification('Chế độ', isDarkMode ? 'Đã bật chế độ tối' : 'Đã tắt chế độ tối');
+}
+
+function initializeDarkMode() {
+  const preferences = getUserPreferences();
+  if (preferences.theme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+}
+
 function saveOfflineData(key, data) {
   try {
     localStorage.setItem('offline_' + key, JSON.stringify(data));

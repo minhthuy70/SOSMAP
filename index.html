@@ -25,6 +25,7 @@
 
   <!-- ARIA live region for screen readers -->
   <div class="aria-live" aria-live="polite" aria-atomic="true" id="ariaLiveRegion"></div>
+  <div class="aria-live" aria-live="assertive" aria-atomic="true" id="ariaAlertRegion"></div>
 
   <!-- Font size controls -->
   <div class="font-size-controls" id="fontSizeControls">
@@ -40,6 +41,13 @@
       <circle cx="12" cy="12" r="10"></circle>
       <path d="M12 8v8"></path>
       <path d="M8 12h8"></path>
+    </svg>
+  </button>
+
+  <!-- Dark mode toggle button -->
+  <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode" title="Dark mode">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
     </svg>
   </button>
 
