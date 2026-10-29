@@ -400,6 +400,145 @@ function getTranslation(key) {
   return translations[lang]?.[key] || translations.vi[key] || key;
 }
 
+// Batch Operations for Incidents
+var selectedIncidents = new Set();
+
+function toggleIncidentSelection(incidentId) {
+  if (selectedIncidents.has(incidentId)) {
+    selectedIncidents.delete(incidentId);
+  } else {
+    selectedIncidents.add(incidentId);
+  }
+  updateBatchSelectionUI();
+}
+
+function updateBatchSelectionUI() {
+  const count = selectedIncidents.size;
+  const batchActionsBar = document.getElementById('batchActionsBar');
+  
+  if (batchActionsBar) {
+    if (count > 0) {
+      batchActionsBar.style.display = 'flex';
+      batchActionsBar.querySelector('.selection-count').textContent = count + ' selected';
+    } else {
+      batchActionsBar.style.display = 'none';
+    }
+  }
+  
+  // Update checkbox states
+  document.querySelectorAll('.incident-checkbox').forEach(function(checkbox) {
+    const id = checkbox.getAttribute('data-id');
+    checkbox.checked = selectedIncidents.has(id);
+  });
+}
+
+function selectAllIncidents(select) {
+  document.querySelectorAll('.incident-checkbox').forEach(function(checkbox) {
+    const id = checkbox.getAttribute('data-id');
+    if (select) {
+      selectedIncidents.add(id);
+    } else {
+      selectedIncidents.delete(id);
+    }
+  });
+  updateBatchSelectionUI();
+}
+
+async function batchUpdateStatus(status) {
+  if (selectedIncidents.size === 0) {
+    showNotification('Thông báo', 'Chưa chọn sự cố nào');
+    return;
+  }
+
+  const promises = Array.from(selectedIncidents).map(function(id) {
+    return updateIncidentStatus(id, status);
+  });
+
+  try {
+    await Promise.all(promises);
+    showNotification('Thành công', 'Đã cập nhật trạng thái ' + selectedIncidents.size + ' sự cố');
+    selectedIncidents.clear();
+    updateBatchSelectionUI();
+    refreshIncidents();
+  } catch (error) {
+    showNotification('Lỗi', 'Không thể cập nhật trạng thái: ' + error.message);
+  }
+}
+
+async function batchDeleteIncidents() {
+  if (selectedIncidents.size === 0) {
+    showNotification('Thông báo', 'Chưa chọn sự cố nào');
+    return;
+  }
+
+  if (!confirm('Bạn có chắc muốn xóa ' + selectedIncidents.size + ' sự cố này?')) {
+    return;
+  }
+
+  const promises = Array.from(selectedIncidents).map(function(id) {
+    return deleteIncident(id);
+  });
+
+  try {
+    await Promise.all(promises);
+    showNotification('Thành công', 'Đã xóa ' + selectedIncidents.size + ' sự cố');
+    selectedIncidents.clear();
+    updateBatchSelectionUI();
+    refreshIncidents();
+  } catch (error) {
+    showNotification('Lỗi', 'Không thể xóa sự cố: ' + error.message);
+  }
+}
+
+async function batchExportIncidents() {
+  if (selectedIncidents.size === 0) {
+    showNotification('Thông báo', 'Chưa chọn sự cố nào');
+    return;
+  }
+
+  try {
+    const incidents = await getIncidents();
+    const selected = incidents.filter(function(inc) {
+      return selectedIncidents.has(inc.id.toString());
+    });
+    
+    const csv = convertToCSV(selected);
+    downloadCSV(csv, 'incidents_export.csv');
+    showNotification('Thành công', 'Đã xuất ' + selected.length + ' sự cố');
+  } catch (error) {
+    showNotification('Lỗi', 'Không thể xuất dữ liệu: ' + error.message);
+  }
+}
+
+function convertToCSV(data) {
+  const headers = ['ID', 'Title', 'Type', 'Status', 'Location', 'Created At'];
+  const rows = data.map(function(item) {
+    return [
+      item.id,
+      item.title,
+      item.type,
+      item.status,
+      item.location,
+      item.created_at
+    ].join(',');
+  });
+  
+  return [headers.join(','), ...rows].join('\n');
+}
+
+function downloadCSV(csv, filename) {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 function saveOfflineData(key, data) {
   try {
     localStorage.setItem('offline_' + key, JSON.stringify(data));

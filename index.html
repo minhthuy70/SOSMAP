@@ -35,6 +35,18 @@
     <button class="font-size-btn" id="fontXLarge" aria-label="Font size extra large" title="Extra large font">A++</button>
   </div>
 
+  <!-- Batch Actions Bar -->
+  <div class="batch-actions-bar" id="batchActionsBar" style="display: none;">
+    <span class="selection-count">0 selected</span>
+    <div class="batch-actions">
+      <button class="batch-btn" onclick="batchUpdateStatus('resolved')">Mark Resolved</button>
+      <button class="batch-btn" onclick="batchUpdateStatus('closed')">Close</button>
+      <button class="batch-btn batch-btn-danger" onclick="batchDeleteIncidents()">Delete</button>
+      <button class="batch-btn" onclick="batchExportIncidents()">Export</button>
+      <button class="batch-btn" onclick="selectAllIncidents(false)">Clear</button>
+    </div>
+  </div>
+
   <!-- Accessibility toggle button -->
   <button class="accessibility-toggle" id="accessibilityToggle" aria-label="Toggle accessibility options" title="Accessibility options">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
