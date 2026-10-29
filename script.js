@@ -539,6 +539,88 @@ function downloadCSV(csv, filename) {
   document.body.removeChild(link);
 }
 
+// Favorites / Bookmarks
+var favoriteIncidents = new Set();
+
+function loadFavorites() {
+  try {
+    const saved = localStorage.getItem('sosmap_favorites');
+    if (saved) {
+      favoriteIncidents = new Set(JSON.parse(saved));
+    }
+  } catch (error) {
+    console.error('Load favorites error:', error);
+  }
+}
+
+function saveFavorites() {
+  try {
+    localStorage.setItem('sosmap_favorites', JSON.stringify(Array.from(favoriteIncidents)));
+  } catch (error) {
+    console.error('Save favorites error:', error);
+  }
+}
+
+function toggleFavorite(incidentId) {
+  if (favoriteIncidents.has(incidentId)) {
+    favoriteIncidents.delete(incidentId);
+    showNotification('Yêu thích', 'Đã xóa khỏi danh sách yêu thích');
+  } else {
+    favoriteIncidents.add(incidentId);
+    showNotification('Yêu thích', 'Đã thêm vào danh sách yêu thích');
+  }
+  saveFavorites();
+  updateFavoriteUI(incidentId);
+}
+
+function updateFavoriteUI(incidentId) {
+  const btn = document.querySelector('.favorite-btn[data-id="' + incidentId + '"]');
+  if (btn) {
+    const isFavorite = favoriteIncidents.has(incidentId);
+    btn.innerHTML = isFavorite ? '★' : '☆';
+    btn.classList.toggle('active', isFavorite);
+  }
+}
+
+function isFavorite(incidentId) {
+  return favoriteIncidents.has(incidentId);
+}
+
+function getFavoriteIncidents() {
+  return Array.from(favoriteIncidents);
+}
+
+function clearFavorites() {
+  if (confirm('Bạn có chắc muốn xóa tất cả sự cố yêu thích?')) {
+    favoriteIncidents.clear();
+    saveFavorites();
+    showNotification('Yêu thích', 'Đã xóa tất cả yêu thích');
+    
+    // Update all favorite buttons
+    document.querySelectorAll('.favorite-btn').forEach(function(btn) {
+      btn.innerHTML = '☆';
+      btn.classList.remove('active');
+    });
+  }
+}
+
+function showFavoritesOnly() {
+  document.querySelectorAll('.incident-item').forEach(function(item) {
+    const id = item.getAttribute('data-id');
+    if (favoriteIncidents.has(id)) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+function showAllIncidents() {
+  document.querySelectorAll('.incident-item').forEach(function(item) {
+    item.style.display = '';
+  });
+}
+
 function saveOfflineData(key, data) {
   try {
     localStorage.setItem('offline_' + key, JSON.stringify(data));

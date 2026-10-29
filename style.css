@@ -15420,3 +15420,76 @@ body.dark-mode .batch-btn:hover {
   margin-right: 8px;
 }
 
+/* Favorites */
+.favorite-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #ccc;
+  padding: 4px 8px;
+  transition: all 0.2s;
+}
+
+.favorite-btn:hover {
+  color: #ffd700;
+  transform: scale(1.2);
+}
+
+.favorite-btn.active {
+  color: #ffd700;
+}
+
+.favorite-btn.active::before {
+  content: '★';
+}
+
+body.dark-mode .favorite-btn {
+  color: #666;
+}
+
+body.dark-mode .favorite-btn:hover,
+body.dark-mode .favorite-btn.active {
+  color: #ffd700;
+}
+
+.favorites-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+body.dark-mode .favorites-panel {
+  background: #2a2a2a;
+  border: 1px solid #444;
+}
+
+.favorites-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.favorites-count {
+  background: #005BAC;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.show-favorites-btn {
+  background: #005BAC;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.show-favorites-btn:hover {
+  background: #004a8a;
+}
+
