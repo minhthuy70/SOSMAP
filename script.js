@@ -639,6 +639,72 @@ function resetAdvancedSearch() {
   loadIncidentsFromAPI();
 }
 
+// Notifications Panel Functions
+function openNotificationsPanel() {
+  const panel = document.getElementById('notificationsPanel');
+  if (panel) {
+    panel.style.display = 'block';
+    loadNotificationsFromAPI();
+  }
+}
+
+function closeNotificationsPanel() {
+  const panel = document.getElementById('notificationsPanel');
+  if (panel) {
+    panel.style.display = 'none';
+  }
+}
+
+function markNotificationAsReadOnUI(notificationId) {
+  markNotificationReadFromAPI(notificationId);
+}
+
+function markAllNotificationsAsReadOnUI() {
+  markAllNotificationsReadFromAPI();
+}
+
+function createNotificationElement(notification) {
+  const element = document.createElement('div');
+  element.className = 'notification-item' + (notification.read ? '' : ' unread');
+  element.setAttribute('data-id', notification.id);
+  element.innerHTML = `
+    <div class="notification-icon">${getNotificationIcon(notification.type)}</div>
+    <div class="notification-content">
+      <h4>${notification.title}</h4>
+      <p>${notification.message}</p>
+      <small>${formatDate(notification.created_at)}</small>
+    </div>
+    <div class="notification-actions">
+      ${!notification.read ? `<button onclick="markNotificationAsReadOnUI(${notification.id})" class="btn btn-sm">Đánh dấu đã đọc</button>` : ''}
+    </div>
+  `;
+  return element;
+}
+
+function getNotificationIcon(type) {
+  const icons = {
+    incident: '🚨',
+    alert: '⚠️',
+    system: 'ℹ️',
+    update: '📝',
+    success: '✅'
+  };
+  return icons[type] || '📢';
+}
+
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleString('vi-VN');
+}
+
+function updateNotificationBadge(count) {
+  const badge = document.querySelector('.notification-badge');
+  if (badge) {
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'block' : 'none';
+  }
+}
+
 function updateAuthUI() {
   const authSection = document.getElementById('authSection');
   const userSection = document.getElementById('userSection');
