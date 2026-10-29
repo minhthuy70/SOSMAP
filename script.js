@@ -1491,6 +1491,193 @@ function initializePerformanceOptimizations() {
   window.addEventListener('beforeunload', cleanup);
 }
 
+// Security Improvements
+function sanitizeHTML(str) {
+  var temp = document.createElement('div');
+  temp.textContent = str;
+  return temp.innerHTML;
+}
+
+function escapeHTML(text) {
+  var map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+function validateURL(url) {
+  try {
+    var parsed = new URL(url);
+    return ['http:', 'https:'].includes(parsed.protocol);
+  } catch (e) {
+    return false;
+  }
+}
+
+function setSecureCookie(name, value, days) {
+  var expires = '';
+  if (days) {
+    var date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    expires = '; expires=' + date.toUTCString();
+  }
+  document.cookie = name + '=' + escapeHTML(value) + expires + '; path=/; SameSite=Strict; Secure';
+}
+
+function getSecureCookie(name) {
+  var nameEQ = name + '=';
+  var ca = document.cookie.split(';');
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) {
+      var value = c.substring(nameEQ.length, c.length);
+      return sanitizeHTML(value);
+    }
+  }
+  return null;
+}
+
+function clearSecureCookie(name) {
+  document.cookie = name + '=; path=/; SameSite=Strict; Secure; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+}
+
+function addCSRFToken() {
+  var token = getSecureCookie('csrf_token');
+  var metaTag = document.querySelector('meta[name="csrf-token"]');
+  if (metaTag && token) {
+    metaTag.setAttribute('content', token);
+  }
+}
+
+function sanitizeInput(input) {
+  if (typeof input !== 'string') return input;
+  return input
+    .replace(/[<>]/g, '')
+    .trim()
+    .substring(0, 1000); // Limit length
+}
+
+function validateFileUpload(file) {
+  var allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+  var maxSize = 10 * 1024 * 1024; // 10MB
+  
+  if (!allowedTypes.includes(file.type)) {
+    showNotification('Lỗi', 'Loại file không được phép');
+    return false;
+  }
+  
+  if (file.size > maxSize) {
+    showNotification('Lỗi', 'Kích thước file quá lớn (tối đa 10MB)');
+    return false;
+  }
+  
+  return true;
+}
+
+function rateLimit(action, limit, period) {
+  var key = 'rate_limit_' + action;
+  var now = Date.now();
+  var data = JSON.parse(localStorage.getItem(key) || '{"count":0,"resetTime":0}');
+  
+  if (now > data.resetTime) {
+    data.count = 0;
+    data.resetTime = now + period;
+  }
+  
+  if (data.count >= limit) {
+    return false;
+  }
+  
+  data.count++;
+  localStorage.setItem(key, JSON.stringify(data));
+  return true;
+}
+
+function checkContentSecurityPolicy() {
+  // Check if CSP is active
+  var metaCSP = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+  if (!metaCSP) {
+    console.warn('Content Security Policy not set');
+  }
+}
+
+function preventClickjacking() {
+  if (window.top !== window.self) {
+    window.top.location = window.self.location;
+  }
+}
+
+function secureLocalStorage() {
+  // Store sensitive data with basic encoding
+  var originalSetItem = localStorage.setItem;
+  var originalGetItem = localStorage.getItem;
+  
+  localStorage.setItem = function(key, value) {
+    if (key.includes('token') || key.includes('password')) {
+      value = btoa(value); // Basic encoding
+    }
+    originalSetItem.call(localStorage, key, value);
+  };
+  
+  localStorage.getItem = function(key) {
+    var value = originalGetItem.call(localStorage, key);
+    if (key.includes('token') || key.includes('password')) {
+      try {
+        value = atob(value);
+      } catch (e) {
+        // Return as-is if decoding fails
+      }
+    }
+    return value;
+  };
+}
+
+function logSecurityEvent(event, details) {
+  var logEntry = {
+    timestamp: new Date().toISOString(),
+    event: event,
+    details: details,
+    userAgent: navigator.userAgent
+  };
+  
+  // Send to backend for audit logging
+  if (API_TOKEN) {
+    fetch(API_BASE_URL + '/audit/log', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + API_TOKEN
+      },
+      body: JSON.stringify(logEntry)
+    }).catch(function(error) {
+      console.error('Security log error:', error);
+    });
+  }
+}
+
+function initializeSecurity() {
+  preventClickjacking();
+  checkContentSecurityPolicy();
+  addCSRFToken();
+  secureLocalStorage();
+  
+  // Log page load
+  logSecurityEvent('page_load', {
+    url: window.location.href,
+    referrer: document.referrer
+  });
+}
+
+// Initialize security on load
+document.addEventListener('DOMContentLoaded', function() {
+  initializeSecurity();
+});
+
 function saveOfflineData(key, data) {
   try {
     localStorage.setItem('offline_' + key, JSON.stringify(data));
