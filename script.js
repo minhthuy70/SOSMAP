@@ -1258,6 +1258,239 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeKeyboardShortcuts();
 });
 
+// Performance Optimizations
+function debounce(func, wait) {
+  var timeout;
+  return function() {
+    var context = this;
+    var args = arguments;
+    clearTimeout(timeout);
+    timeout = setTimeout(function() {
+      func.apply(context, args);
+    }, wait);
+  };
+}
+
+function throttle(func, limit) {
+  var inThrottle;
+  return function() {
+    var context = this;
+    var args = arguments;
+    if (!inThrottle) {
+      func.apply(context, args);
+      inThrottle = true;
+      setTimeout(function() {
+        inThrottle = false;
+      }, limit);
+    }
+  };
+}
+
+function requestAnimationFrameThrottle(func) {
+  var ticking = false;
+  return function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        func.apply(this, arguments);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  };
+}
+
+// Lazy load images
+function lazyLoadImages() {
+  var images = document.querySelectorAll('img[data-src]');
+  var imageObserver = new IntersectionObserver(function(entries, observer) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var img = entry.target;
+        img.src = img.getAttribute('data-src');
+        img.removeAttribute('data-src');
+        observer.unobserve(img);
+      }
+    });
+  }, {
+    rootMargin: '50px 0px',
+    threshold: 0.01
+  });
+  
+  images.forEach(function(img) {
+    imageObserver.observe(img);
+  });
+}
+
+// Optimize map interactions
+var mapUpdateThrottled = throttle(function() {
+  if (typeof map !== 'undefined' && map) {
+    map.invalidateSize();
+  }
+}, 200);
+
+// Optimize event listeners
+var searchInputThrottled = throttle(function(value) {
+  // Perform search
+  performSearch(value);
+}, 300);
+
+// Cache DOM queries
+var domCache = {};
+
+function getCachedElement(id) {
+  if (!domCache[id]) {
+    domCache[id] = document.getElementById(id);
+  }
+  return domCache[id];
+}
+
+function clearDomCache() {
+  domCache = {};
+}
+
+// Optimize incident rendering
+function renderIncidentsBatch(incidents, batchSize = 50) {
+  var container = getCachedElement('incidentsContainer');
+  if (!container) return;
+  
+  var index = 0;
+  
+  function renderBatch() {
+    var batch = incidents.slice(index, index + batchSize);
+    batch.forEach(function(incident) {
+      renderIncident(incident);
+    });
+    
+    index += batchSize;
+    
+    if (index < incidents.length) {
+      requestAnimationFrame(renderBatch);
+    }
+  }
+  
+  renderBatch();
+}
+
+// Optimize memory
+function cleanup() {
+  // Remove event listeners when panels are closed
+  clearDomCache();
+  
+  // Clear large arrays if not needed
+  if (selectedIncidents.size === 0) {
+    selectedIncidents.clear();
+  }
+}
+
+// Virtual scrolling for large lists
+function setupVirtualScroll(container, itemHeight, renderItem) {
+  var viewportHeight = container.clientHeight;
+  var scrollTop = container.scrollTop;
+  var startIndex = Math.floor(scrollTop / itemHeight);
+  var endIndex = Math.min(
+    startIndex + Math.ceil(viewportHeight / itemHeight) + 1,
+    container.children.length
+  );
+  
+  // Only render visible items
+  Array.from(container.children).forEach(function(item, index) {
+    if (index >= startIndex && index <= endIndex) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+// Optimize WebSocket reconnection
+var wsReconnectAttempts = 0;
+var wsMaxReconnectAttempts = 5;
+var wsReconnectDelay = 1000;
+
+function exponentialBackoff(attempt) {
+  return Math.min(1000 * Math.pow(2, attempt), 30000);
+}
+
+// Optimize API calls with request queuing
+var apiQueue = [];
+var isProcessingQueue = false;
+
+function queueApiCall(apiFunction) {
+  return new Promise(function(resolve, reject) {
+    apiQueue.push({
+      fn: apiFunction,
+      resolve: resolve,
+      reject: reject
+    });
+    
+    if (!isProcessingQueue) {
+      processApiQueue();
+    }
+  });
+}
+
+function processApiQueue() {
+  if (apiQueue.length === 0) {
+    isProcessingQueue = false;
+    return;
+  }
+  
+  isProcessingQueue = true;
+  var item = apiQueue.shift();
+  
+  item.fn()
+    .then(function(result) {
+      item.resolve(result);
+    })
+    .catch(function(error) {
+      item.reject(error);
+    })
+    .finally(function() {
+      setTimeout(processApiQueue, 100); // Small delay between requests
+    });
+}
+
+// Performance monitoring
+var performanceMetrics = {
+  pageLoadTime: 0,
+  apiResponseTimes: [],
+  renderTimes: []
+};
+
+function measurePerformance(name, fn) {
+  var start = performance.now();
+  var result = fn();
+  var end = performance.now();
+  
+  var duration = end - start;
+  if (name === 'api') {
+    performanceMetrics.apiResponseTimes.push(duration);
+  } else if (name === 'render') {
+    performanceMetrics.renderTimes.push(duration);
+  }
+  
+  return result;
+}
+
+function getAverageMetric(metrics) {
+  if (metrics.length === 0) return 0;
+  var sum = metrics.reduce(function(a, b) { return a + b; }, 0);
+  return sum / metrics.length;
+}
+
+// Initialize performance optimizations
+function initializePerformanceOptimizations() {
+  lazyLoadImages();
+  
+  // Track page load time
+  window.addEventListener('load', function() {
+    performanceMetrics.pageLoadTime = performance.now();
+  });
+  
+  // Cleanup on page unload
+  window.addEventListener('beforeunload', cleanup);
+}
+
 function saveOfflineData(key, data) {
   try {
     localStorage.setItem('offline_' + key, JSON.stringify(data));
