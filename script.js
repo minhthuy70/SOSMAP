@@ -1102,6 +1102,162 @@ function confirmNavigation(message, callback) {
   });
 }
 
+// Keyboard Shortcuts
+var keyboardShortcuts = {
+  'Ctrl+F': function() { showSearchPanel(); },
+  'Ctrl+K': function() { showSearchPanel(); },
+  'Ctrl+N': function() { showNewIncidentPanel(); },
+  'Ctrl+L': function() { toggleDarkMode(); },
+  'Ctrl+H': function() { toggleFavoritesFilter(); },
+  'Escape': function() { closeAllPanels(); },
+  'Ctrl+P': function() { printPage(); },
+  'Ctrl+S': function() { saveCurrentForm(); },
+  'Ctrl+R': function() { refreshIncidents(); },
+  'F1': function() { showHelpPanel(); },
+  '?': function() { showHelpPanel(); }
+};
+
+function handleKeyboardShortcut(event) {
+  // Don't trigger shortcuts when typing in input fields
+  if (event.target.tagName === 'INPUT' || 
+      event.target.tagName === 'TEXTAREA' || 
+      event.target.isContentEditable) {
+    return;
+  }
+  
+  const key = [];
+  if (event.ctrlKey) key.push('Ctrl');
+  if (event.altKey) key.push('Alt');
+  if (event.shiftKey) key.push('Shift');
+  key.push(event.key);
+  
+  const shortcut = key.join('+');
+  
+  if (keyboardShortcuts[shortcut]) {
+    event.preventDefault();
+    keyboardShortcuts[shortcut]();
+  }
+}
+
+function showSearchPanel() {
+  const searchInput = document.getElementById('mapSearchInput');
+  if (searchInput) {
+    searchInput.focus();
+    showNotification('Tìm kiếm', 'Nhập từ khóa để tìm kiếm');
+  }
+}
+
+function showNewIncidentPanel() {
+  const reportBtn = document.querySelector('[onclick*="showReportPanel"]');
+  if (reportBtn) {
+    reportBtn.click();
+    showNotification('Sự cố mới', 'Đã mở form báo cáo sự cố');
+  }
+}
+
+function toggleFavoritesFilter() {
+  const hasFavorites = favoriteIncidents.size > 0;
+  if (hasFavorites) {
+    showFavoritesOnly();
+    showNotification('Yêu thích', 'Đang hiển thị sự cố yêu thích');
+  } else {
+    showNotification('Yêu thích', 'Chưa có sự cố yêu thích nào');
+  }
+}
+
+function closeAllPanels() {
+  document.querySelectorAll('.panel').forEach(function(panel) {
+    panel.style.display = 'none';
+  });
+  showNotification('Đóng', 'Đã đóng tất cả các panel');
+}
+
+function saveCurrentForm() {
+  const activeForm = document.querySelector('form:visible');
+  if (activeForm) {
+    activeForm.dispatchEvent(new Event('submit'));
+  } else {
+    showNotification('Lưu', 'Không có form nào đang mở');
+  }
+}
+
+function refreshIncidents() {
+  loadIncidentsWithCache();
+  showNotification('Làm mới', 'Đang tải lại sự cố');
+}
+
+function showHelpPanel() {
+  const helpPanel = document.getElementById('helpPanel');
+  if (helpPanel) {
+    helpPanel.style.display = helpPanel.style.display === 'none' ? 'block' : 'none';
+  } else {
+    showNotification('Trợ giúp', 'Mở tài liệu hướng dẫn');
+  }
+}
+
+function showKeyboardShortcutsHelp() {
+  const dialog = document.createElement('div');
+  dialog.className = 'shortcuts-dialog';
+  dialog.innerHTML = `
+    <div class="shortcuts-dialog-content">
+      <h3>Phím tắt</h3>
+      <div class="shortcuts-list">
+        <div class="shortcut-item">
+          <kbd>Ctrl</kbd> + <kbd>F</kbd>
+          <span>Tìm kiếm</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Ctrl</kbd> + <kbd>K</kbd>
+          <span>Tìm kiếm</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Ctrl</kbd> + <kbd>N</kbd>
+          <span>Sự cố mới</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Ctrl</kbd> + <kbd>L</kbd>
+          <span>Chuyển chế độ tối</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Ctrl</kbd> + <kbd>H</kbd>
+          <span>Lọc yêu thích</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Ctrl</kbd> + <kbd>P</kbd>
+          <span>In trang</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Ctrl</kbd> + <kbd>S</kbd>
+          <span>Lưu form</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Ctrl</kbd> + <kbd>R</kbd>
+          <span>Làm mới</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>Escape</kbd>
+          <span>Đóng panel</span>
+        </div>
+        <div class="shortcut-item">
+          <kbd>F1</kbd> hoặc <kbd>?</kbd>
+          <span>Trợ giúp</span>
+        </div>
+      </div>
+      <button class="close-btn" onclick="this.closest('.shortcuts-dialog').remove()">Đóng</button>
+    </div>
+  `;
+  document.body.appendChild(dialog);
+}
+
+function initializeKeyboardShortcuts() {
+  document.addEventListener('keydown', handleKeyboardShortcut);
+}
+
+// Initialize keyboard shortcuts on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+  initializeKeyboardShortcuts();
+});
+
 function saveOfflineData(key, data) {
   try {
     localStorage.setItem('offline_' + key, JSON.stringify(data));
