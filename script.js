@@ -174,6 +174,129 @@ async function loadAnalyticsFromAPI() {
   }
 }
 
+// WebSocket Client Integration
+var socket = null;
+
+function initializeWebSocket() {
+  if (!FEATURE_FLAGS.ENABLE_BACKEND_API) return;
+
+  try {
+    // Use socket.io client
+    socket = io(API_BASE_URL.replace('/api', ''));
+
+    socket.on('connect', () => {
+      console.log('WebSocket connected');
+      // Join user room if authenticated
+      if (CURRENT_USER) {
+        socket.emit('join-user-room', CURRENT_USER.id);
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('WebSocket disconnected');
+    });
+
+    // Listen for incident updates
+    socket.on('incident-update', (data) => {
+      console.log('Incident update received:', data);
+      handleIncidentUpdate(data);
+    });
+
+    // Listen for notifications
+    socket.on('notification', (data) => {
+      console.log('Notification received:', data);
+      handleNotification(data);
+    });
+
+    // Listen for alerts
+    socket.on('alert', (data) => {
+      console.log('Alert received:', data);
+      handleAlert(data);
+    });
+
+    // Listen for location updates
+    socket.on('location-update', (data) => {
+      console.log('Location update received:', data);
+      handleLocationUpdate(data);
+    });
+
+  } catch (error) {
+    console.error('WebSocket initialization error:', error);
+  }
+}
+
+function handleIncidentUpdate(data) {
+  if (data.action === 'created') {
+    // Add new marker to map
+    addMarkers([data.incident]);
+    showNotification('Sự cố mới đã được báo cáo', data.incident.title);
+  } else if (data.action === 'updated') {
+    // Update existing marker
+    updateIncidentMarker(data.incident);
+  } else if (data.action === 'deleted') {
+    // Remove marker from map
+    removeIncidentMarker(data.incidentId);
+  }
+}
+
+function handleNotification(data) {
+  // Update notifications UI
+  loadNotificationsFromAPI();
+  showNotification(data.title, data.message);
+}
+
+function handleAlert(data) {
+  // Show alert popup
+  showAlert(data.message, data.severity);
+}
+
+function handleLocationUpdate(data) {
+  // Update nearby incidents
+  loadIncidentsFromAPI();
+}
+
+function showNotification(title, message) {
+  // Create notification element
+  var notification = document.createElement('div');
+  notification.className = 'toast-notification';
+  notification.innerHTML = `
+    <div class="toast-content">
+      <h4>${title}</h4>
+      <p>${message}</p>
+    </div>
+    <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+  `;
+  document.body.appendChild(notification);
+
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    notification.remove();
+  }, 5000);
+}
+
+function showAlert(message, severity) {
+  alert(message);
+}
+
+function joinIncidentRoom(incidentId) {
+  if (socket) {
+    socket.emit('join-incident-room', incidentId);
+  }
+}
+
+function joinLocationRoom(lat, lng) {
+  if (socket) {
+    socket.emit('join-location-room', { lat, lng });
+  }
+}
+
+function disconnectWebSocket() {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+}
+
 // Update analytics dashboard with API data
 function updateAnalyticsDashboard(analytics) {
   // Update total incidents
@@ -17173,4 +17296,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Load analytics data
   loadAnalyticsFromAPI();
+
+  // Initialize WebSocket for real-time updates
+  initializeWebSocket();
 });
