@@ -1,3 +1,67 @@
+// Global Error Handler
+window.onerror = function(message, source, lineno, colno, error) {
+  console.error('Global error:', error);
+  // Log error to backend if available
+  if (API_TOKEN) {
+    apiRequest('/errors/log', {
+      method: 'POST',
+      body: JSON.stringify({
+        message,
+        source,
+        lineno,
+        colno,
+        stack: error?.stack
+      })
+    }).catch(e => console.error('Failed to log error:', e));
+  }
+  return false;
+};
+
+// Promise Rejection Handler
+window.onunhandledrejection = function(event) {
+  console.error('Unhandled promise rejection:', event.reason);
+  showNotification('Lỗi hệ thống', 'Đã xảy ra lỗi không mong muốn');
+};
+
+// API Error Handler
+function handleApiError(error) {
+  console.error('API Error:', error);
+  
+  if (error.message.includes('401')) {
+    // Unauthorized - clear token and redirect to login
+    logoutUser();
+    showNotification('Phiên hết hạn', 'Vui lòng đăng nhập lại');
+  } else if (error.message.includes('403')) {
+    showNotification('Không có quyền', 'Bạn không có quyền thực hiện hành động này');
+  } else if (error.message.includes('404')) {
+    showNotification('Không tìm thấy', 'Tài nguyên không tồn tại');
+  } else if (error.message.includes('500')) {
+    showNotification('Lỗi server', 'Lỗi hệ thống, vui lòng thử lại sau');
+  } else {
+    showNotification('Lỗi', error.message || 'Đã xảy ra lỗi');
+  }
+}
+
+// Safe API Request Wrapper
+async function safeApiRequest(endpoint, options = {}) {
+  try {
+    return await apiRequest(endpoint, options);
+  } catch (error) {
+    handleApiError(error);
+    throw error;
+  }
+}
+
+// Safe Function Executor
+function safeExecute(fn, fallback = null) {
+  try {
+    return fn();
+  } catch (error) {
+    console.error('Function execution error:', error);
+    return fallback;
+  }
+}
+
 // Load configuration
 var API_BASE_URL = (typeof API_CONFIG !== 'undefined' ? API_CONFIG.BASE_URL : 'http://localhost:3000/api');
 var API_TOKEN = localStorage.getItem('sosmap_token');
