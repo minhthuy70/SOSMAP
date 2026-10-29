@@ -793,6 +793,185 @@ window.addEventListener('beforeprint', function() {
   if (printFooterDate) printFooterDate.textContent = now;
 });
 
+// Form Validation
+var validators = {
+  required: function(value) {
+    return value && value.trim().length > 0;
+  },
+  
+  email: function(value) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(value);
+  },
+  
+  phone: function(value) {
+    const phoneRegex = /^[0-9+\-\s()]{10,}$/;
+    return phoneRegex.test(value);
+  },
+  
+  minLength: function(value, min) {
+    return value && value.length >= min;
+  },
+  
+  maxLength: function(value, max) {
+    return !value || value.length <= max;
+  },
+  
+  number: function(value) {
+    return !isNaN(parseFloat(value)) && isFinite(value);
+  },
+  
+  positiveNumber: function(value) {
+    return validators.number(value) && parseFloat(value) > 0;
+  },
+  
+  coordinates: function(value) {
+    const num = parseFloat(value);
+    return validators.number(value) && num >= -90 && num <= 90;
+  }
+};
+
+function validateField(field, rules) {
+  const value = field.value;
+  const errors = [];
+  
+  rules.forEach(function(rule) {
+    if (rule.type === 'required' && !validators.required(value)) {
+      errors.push(rule.message || 'Trường này là bắt buộc');
+    } else if (rule.type === 'email' && value && !validators.email(value)) {
+      errors.push(rule.message || 'Email không hợp lệ');
+    } else if (rule.type === 'phone' && value && !validators.phone(value)) {
+      errors.push(rule.message || 'Số điện thoại không hợp lệ');
+    } else if (rule.type === 'minLength' && !validators.minLength(value, rule.value)) {
+      errors.push(rule.message || 'Tối thiểu ' + rule.value + ' ký tự');
+    } else if (rule.type === 'maxLength' && !validators.maxLength(value, rule.value)) {
+      errors.push(rule.message || 'Tối đa ' + rule.value + ' ký tự');
+    } else if (rule.type === 'number' && value && !validators.number(value)) {
+      errors.push(rule.message || 'Phải là số');
+    } else if (rule.type === 'positiveNumber' && value && !validators.positiveNumber(value)) {
+      errors.push(rule.message || 'Phải là số dương');
+    } else if (rule.type === 'coordinates' && value && !validators.coordinates(value)) {
+      errors.push(rule.message || 'Tọa độ không hợp lệ (-90 đến 90)');
+    }
+  });
+  
+  return errors;
+}
+
+function showFieldError(field, errors) {
+  clearFieldError(field);
+  
+  if (errors.length > 0) {
+    field.classList.add('error');
+    
+    const errorElement = document.createElement('div');
+    errorElement.className = 'field-error';
+    errorElement.textContent = errors[0];
+    field.parentNode.appendChild(errorElement);
+    
+    return false;
+  }
+  
+  field.classList.remove('error');
+  field.classList.add('success');
+  return true;
+}
+
+function clearFieldError(field) {
+  field.classList.remove('error', 'success');
+  const errorElement = field.parentNode.querySelector('.field-error');
+  if (errorElement) {
+    errorElement.remove();
+  }
+}
+
+function validateForm(form, validationRules) {
+  let isValid = true;
+  const rules = validationRules || {};
+  
+  Object.keys(rules).forEach(function(fieldName) {
+    const field = form.querySelector('[name="' + fieldName + '"]');
+    if (field) {
+      const errors = validateField(field, rules[fieldName]);
+      if (!showFieldError(field, errors)) {
+        isValid = false;
+      }
+    }
+  });
+  
+  return isValid;
+}
+
+function setupFormValidation(form, validationRules) {
+  const rules = validationRules || {};
+  
+  Object.keys(rules).forEach(function(fieldName) {
+    const field = form.querySelector('[name="' + fieldName + '"]');
+    if (field) {
+      field.addEventListener('blur', function() {
+        const errors = validateField(field, rules[fieldName]);
+        showFieldError(field, errors);
+      });
+      
+      field.addEventListener('input', function() {
+        if (field.classList.contains('error')) {
+          const errors = validateField(field, rules[fieldName]);
+          showFieldError(field, errors);
+        }
+      });
+    }
+  });
+  
+  form.addEventListener('submit', function(event) {
+    if (!validateForm(form, rules)) {
+      event.preventDefault();
+      showNotification('Lỗi', 'Vui lòng kiểm tra lại các trường');
+    }
+  });
+}
+
+// Common validation rules
+var incidentValidationRules = {
+  title: [
+    { type: 'required', message: 'Tiêu đề là bắt buộc' },
+    { type: 'minLength', value: 5, message: 'Tiêu đề tối thiểu 5 ký tự' },
+    { type: 'maxLength', value: 200, message: 'Tiêu đề tối đa 200 ký tự' }
+  ],
+  description: [
+    { type: 'required', message: 'Mô tả là bắt buộc' },
+    { type: 'minLength', value: 10, message: 'Mô tả tối thiểu 10 ký tự' }
+  ],
+  type: [
+    { type: 'required', message: 'Loại sự cố là bắt buộc' }
+  ],
+  latitude: [
+    { type: 'required', message: 'Vĩ độ là bắt buộc' },
+    { type: 'coordinates', message: 'Vĩ độ không hợp lệ (-90 đến 90)' }
+  ],
+  longitude: [
+    { type: 'required', message: 'Kinh độ là bắt buộc' },
+    { type: 'coordinates', message: 'Kinh độ không hợp lệ (-90 đến 90)' }
+  ]
+};
+
+var userValidationRules = {
+  username: [
+    { type: 'required', message: 'Tên đăng nhập là bắt buộc' },
+    { type: 'minLength', value: 3, message: 'Tên đăng nhập tối thiểu 3 ký tự' }
+  ],
+  email: [
+    { type: 'required', message: 'Email là bắt buộc' },
+    { type: 'email', message: 'Email không hợp lệ' }
+  ],
+  password: [
+    { type: 'required', message: 'Mật khẩu là bắt buộc' },
+    { type: 'minLength', value: 6, message: 'Mật khẩu tối thiểu 6 ký tự' }
+  ],
+  phone: [
+    { type: 'phone', message: 'Số điện thoại không hợp lệ' }
+  ]
+};
+
 function saveOfflineData(key, data) {
   try {
     localStorage.setItem('offline_' + key, JSON.stringify(data));
