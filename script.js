@@ -1678,6 +1678,112 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
 });
 
+// Final Polish and Initialization
+function initializeApp() {
+  console.log('SOSMAP Application Initializing...');
+  
+  // Initialize all subsystems
+  initializeDarkMode();
+  initializeLanguage();
+  loadFavorites();
+  initializeKeyboardShortcuts();
+  initializePerformanceOptimizations();
+  initializeSecurity();
+  
+  // Load cached data
+  const cachedIncidents = getCachedIncidents();
+  if (cachedIncidents) {
+    console.log('Loaded ' + cachedIncidents.length + ' cached incidents');
+  }
+  
+  // Update online status
+  updateOnlineStatus();
+  
+  // Setup form validations
+  const incidentForm = document.getElementById('incidentForm');
+  if (incidentForm) {
+    setupFormValidation(incidentForm, incidentValidationRules);
+  }
+  
+  const userForm = document.getElementById('userForm');
+  if (userForm) {
+    setupFormValidation(userForm, userValidationRules);
+  }
+  
+  // Initialize dark mode toggle
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener('click', toggleDarkMode);
+  }
+  
+  console.log('SOSMAP Application Initialized');
+}
+
+// Error recovery
+function handleCriticalError(error) {
+  console.error('Critical error:', error);
+  
+  // Show user-friendly error message
+  const errorContainer = document.getElementById('errorContainer');
+  if (errorContainer) {
+    errorContainer.innerHTML = `
+      <div class="critical-error">
+        <h2>Đã xảy ra lỗi</h2>
+        <p>Ứng dụng gặp lỗi không mong muốn. Vui lòng tải lại trang.</p>
+        <button onclick="location.reload()">Tải lại trang</button>
+      </div>
+    `;
+    errorContainer.style.display = 'block';
+  }
+  
+  // Log error for debugging
+  logSecurityEvent('critical_error', {
+    message: error.message,
+    stack: error.stack
+  });
+}
+
+// Version check
+var APP_VERSION = '1.0.0';
+function checkVersion() {
+  console.log('SOSMAP Version:', APP_VERSION);
+  localStorage.setItem('sosmap_version', APP_VERSION);
+}
+
+// Cleanup on unload
+window.addEventListener('beforeunload', function() {
+  cleanup();
+  clearDomCache();
+});
+
+// Initialize everything on DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    checkVersion();
+    initializeApp();
+  } catch (error) {
+    handleCriticalError(error);
+  }
+});
+
+// Handle unhandled errors
+window.addEventListener('error', function(event) {
+  console.error('Unhandled error:', event.error);
+  logSecurityEvent('unhandled_error', {
+    message: event.error?.message,
+    filename: event.filename,
+    lineno: event.lineno
+  });
+});
+
+// Handle unhandled promise rejections
+window.addEventListener('unhandledrejection', function(event) {
+  console.error('Unhandled promise rejection:', event.reason);
+  logSecurityEvent('unhandled_rejection', {
+    reason: event.reason?.toString()
+  });
+});
+
 function saveOfflineData(key, data) {
   try {
     localStorage.setItem('offline_' + key, JSON.stringify(data));

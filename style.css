@@ -16090,3 +16090,60 @@ body.dark-mode .shortcut-item span {
   background: #004a8a;
 }
 
+/* Critical Error Styles */
+.critical-error {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 500px;
+  margin: 100px auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .critical-error {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+.critical-error h2 {
+  color: #dc3545;
+  margin-bottom: 16px;
+}
+
+.critical-error p {
+  color: #666;
+  margin-bottom: 24px;
+}
+
+body.dark-mode .critical-error p {
+  color: #b0b0b0;
+}
+
+.critical-error button {
+  background: #005BAC;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.critical-error button:hover {
+  background: #004a8a;
+}
+
+#errorContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+}
+
