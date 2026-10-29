@@ -1113,6 +1113,192 @@ function refreshAnalytics() {
   showNotification('Đang cập nhật', 'Đang tải dữ liệu thống kê mới');
 }
 
+// Real-time Incident Updates UI Functions
+function handleRealtimeIncidentUpdate(data) {
+  console.log('Real-time update received:', data);
+
+  if (data.action === 'created') {
+    // Add new incident marker
+    addMarkerForIncident(data.incident);
+    showRealtimeNotification('Sự cố mới', data.incident.title, data.incident.type);
+    playNotificationSound();
+  } else if (data.action === 'updated') {
+    // Update existing incident marker
+    updateIncidentMarkerUI(data.incident);
+    showRealtimeNotification('Cập nhật sự cố', data.incident.title, data.incident.status);
+  } else if (data.action === 'deleted') {
+    // Remove incident marker
+    removeIncidentMarkerUI(data.incidentId);
+    showRealtimeNotification('Sự cố đã xóa', 'Một sự cố đã bị xóa', 'info');
+  }
+}
+
+function addMarkerForIncident(incident) {
+  const color = markerColors[incident.type] || '#666';
+  const icon = createCustomIcon(color);
+
+  const marker = L.marker([incident.latitude, incident.longitude], { icon: icon });
+
+  const popupContent = `
+    <div class="incident-popup realtime">
+      <h3>${incident.title}</h3>
+      <p><strong>Loại:</strong> ${getIncidentTypeName(incident.type)}</p>
+      <p><strong>Mức độ:</strong> ${getSeverityName(incident.severity)}</p>
+      <p><strong>Trạng thái:</strong> ${incident.status}</p>
+      <p><em>Đã thêm ${new Date().toLocaleTimeString('vi-VN')}</em></p>
+    </div>
+  `;
+
+  marker.bindPopup(popupContent);
+  marker.addTo(map);
+
+  // Animate marker appearance
+  animateMarkerAppearance(marker);
+}
+
+function updateIncidentMarkerUI(incident) {
+  // Find and update existing marker
+  map.eachLayer(function(layer) {
+    if (layer instanceof L.Marker) {
+      const popup = layer.getPopup();
+      if (popup) {
+        const content = popup.getContent();
+        if (content.includes(incident.id.toString())) {
+          // Update popup content
+          const newPopupContent = `
+            <div class="incident-popup updated">
+              <h3>${incident.title}</h3>
+              <p><strong>Loại:</strong> ${getIncidentTypeName(incident.type)}</p>
+              <p><strong>Mức độ:</strong> ${getSeverityName(incident.severity)}</p>
+              <p><strong>Trạng thái:</strong> ${incident.status}</p>
+              <p><em>Đã cập nhật ${new Date().toLocaleTimeString('vi-VN')}</em></p>
+            </div>
+          `;
+          layer.setPopupContent(newPopupContent);
+
+          // Animate marker update
+          animateMarkerUpdate(layer);
+        }
+      }
+    }
+  });
+}
+
+function removeIncidentMarkerUI(incidentId) {
+  map.eachLayer(function(layer) {
+    if (layer instanceof L.Marker) {
+      const popup = layer.getPopup();
+      if (popup) {
+        const content = popup.getContent();
+        if (content.includes(incidentId.toString())) {
+          // Animate removal
+          animateMarkerRemoval(layer, function() {
+            map.removeLayer(layer);
+          });
+        }
+      }
+    }
+  });
+}
+
+function animateMarkerAppearance(marker) {
+  marker.setOpacity(0);
+  let opacity = 0;
+  const animate = setInterval(function() {
+    opacity += 0.1;
+    marker.setOpacity(opacity);
+    if (opacity >= 1) {
+      clearInterval(animate);
+    }
+  }, 50);
+}
+
+function animateMarkerUpdate(marker) {
+  const originalOpacity = marker.getOpacity();
+  marker.setOpacity(0.5);
+  setTimeout(function() {
+    marker.setOpacity(originalOpacity);
+  }, 300);
+}
+
+function animateMarkerRemoval(marker, callback) {
+  let opacity = marker.getOpacity();
+  const animate = setInterval(function() {
+    opacity -= 0.1;
+    marker.setOpacity(opacity);
+    if (opacity <= 0) {
+      clearInterval(animate);
+      callback();
+    }
+  }, 50);
+}
+
+function showRealtimeNotification(title, message, type) {
+  const notification = document.createElement('div');
+  notification.className = 'realtime-notification ' + (type || 'info');
+  notification.innerHTML = `
+    <div class="notification-icon">${getNotificationIcon(type)}</div>
+    <div class="notification-content">
+      <h4>${title}</h4>
+      <p>${message}</p>
+    </div>
+    <button class="notification-close" onclick="this.parentElement.remove()">×</button>
+  `;
+
+  document.body.appendChild(notification);
+
+  // Auto remove after 10 seconds
+  setTimeout(function() {
+    notification.remove();
+  }, 10000);
+}
+
+function playNotificationSound() {
+  // Play a gentle notification sound
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  oscillator.frequency.value = 800;
+  oscillator.type = 'sine';
+  gainNode.gain.value = 0.1;
+
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 0.2);
+}
+
+function enableRealtimeUpdates() {
+  if (socket && socket.connected) {
+    showNotification('Real-time updates', 'Đã bật cập nhật thời gian thực');
+  } else {
+    showNotification('Real-time updates', 'Đang kết nối...');
+    initializeWebSocket();
+  }
+}
+
+function disableRealtimeUpdates() {
+  if (socket) {
+    disconnectWebSocket();
+    showNotification('Real-time updates', 'Đã tắt cập nhật thời gian thực');
+  }
+}
+
+function toggleRealtimeUpdates() {
+  if (socket && socket.connected) {
+    disableRealtimeUpdates();
+  } else {
+    enableRealtimeUpdates();
+  }
+}
+
+// Update existing WebSocket handler to use new UI functions
+function handleIncidentUpdate(data) {
+  handleRealtimeIncidentUpdate(data);
+}
+
 function updateAuthUI() {
   const authSection = document.getElementById('authSection');
   const userSection = document.getElementById('userSection');
