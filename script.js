@@ -705,6 +705,92 @@ function updateNotificationBadge(count) {
   }
 }
 
+// Geocoding UI Functions
+async function geocodeAddressUI(address) {
+  try {
+    const result = await apiRequest(`/locations/geocode?address=${encodeURIComponent(address)}`);
+    if (result.details) {
+      updateLocationDisplay(result);
+      if (result.latitude && result.longitude) {
+        map.setView([result.latitude, result.longitude], 15);
+        L.marker([result.latitude, result.longitude]).addTo(map);
+      }
+    }
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    alert('Không tìm thấy địa chỉ');
+  }
+}
+
+async function reverseGeocodeUI(lat, lng) {
+  try {
+    const result = await apiRequest(`/locations/reverse-geocode?lat=${lat}&lng=${lng}`);
+    if (result.details) {
+      updateLocationDisplay(result);
+    }
+  } catch (error) {
+    console.error('Reverse geocoding error:', error);
+  }
+}
+
+function updateLocationDisplay(result) {
+  const addressDisplay = document.getElementById('addressDisplay');
+  if (addressDisplay) {
+    addressDisplay.innerHTML = `
+      <strong>Địa chỉ:</strong> ${result.address || 'N/A'}<br>
+      ${result.city ? `<strong>Thành phố:</strong> ${result.city}<br>` : ''}
+      ${result.state ? `<strong>Tỉnh:</strong> ${result.state}<br>` : ''}
+      ${result.country ? `<strong>Quốc gia:</strong> ${result.country}` : ''}
+    `;
+  }
+}
+
+function calculateDistanceUI(lat1, lon1, lat2, lon2) {
+  apiRequest(`/locations/distance?lat1=${lat1}&lon1=${lon1}&lat2=${lat2}&lon2=${lon2}`)
+    .then(function(result) {
+      alert(`Khoảng cách: ${result.distance.toFixed(2)} km`);
+    })
+    .catch(function(error) {
+      alert('Tính khoảng cách thất bại');
+    });
+}
+
+function handleMapClick(e) {
+  const lat = e.latlng.lat;
+  const lng = e.latlng.lng;
+
+  // Update coordinates display
+  const coordsDisplay = document.getElementById('coordinatesDisplay');
+  if (coordsDisplay) {
+    coordsDisplay.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    coordsDisplay.style.display = 'block';
+  }
+
+  // Reverse geocode
+  reverseGeocodeUI(lat, lng);
+}
+
+function getCurrentLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        map.setView([lat, lng], 15);
+        L.marker([lat, lng]).addTo(map);
+
+        reverseGeocodeUI(lat, lng);
+      },
+      function(error) {
+        alert('Không thể lấy vị trí hiện tại');
+      }
+    );
+  } else {
+    alert('Trình duyệt không hỗ trợ geolocation');
+  }
+}
+
 function updateAuthUI() {
   const authSection = document.getElementById('authSection');
   const userSection = document.getElementById('userSection');
