@@ -977,6 +977,142 @@ function closeProfileModal() {
   }
 }
 
+// Analytics Dashboard UI Functions
+async function loadAnalyticsDashboardUI() {
+  try {
+    const startDate = document.getElementById('analyticsStartDate')?.value;
+    const endDate = document.getElementById('analyticsEndDate')?.value;
+
+    const analytics = await getIncidentAnalytics(startDate, endDate);
+    renderAnalyticsCharts(analytics);
+  } catch (error) {
+    console.error('Load analytics error:', error);
+  }
+}
+
+function renderAnalyticsCharts(analytics) {
+  // Update total incidents counter
+  const totalElement = document.getElementById('totalIncidentsCounter');
+  if (totalElement) {
+    totalElement.textContent = analytics.total || 0;
+  }
+
+  // Update type distribution chart
+  renderTypeChart(analytics.by_type || []);
+
+  // Update severity distribution chart
+  renderSeverityChart(analytics.by_severity || []);
+
+  // Update status distribution chart
+  renderStatusChart(analytics.by_status || []);
+
+  // Update trends chart
+  loadIncidentTrends();
+}
+
+function renderTypeChart(data) {
+  const container = document.getElementById('typeChartContainer');
+  if (!container) return;
+
+  // Simple bar chart rendering
+  const maxCount = Math.max(...data.map(d => d.count), 1);
+
+  container.innerHTML = data.map(item => `
+    <div class="chart-bar">
+      <div class="bar-label">${item.type}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width: ${(item.count / maxCount) * 100}%"></div>
+      </div>
+      <div class="bar-value">${item.count}</div>
+    </div>
+  `).join('');
+}
+
+function renderSeverityChart(data) {
+  const container = document.getElementById('severityChartContainer');
+  if (!container) return;
+
+  const severityColors = {
+    low: '#27ae60',
+    medium: '#f39c12',
+    high: '#e67e22',
+    critical: '#e74c3c'
+  };
+
+  const maxCount = Math.max(...data.map(d => d.count), 1);
+
+  container.innerHTML = data.map(item => `
+    <div class="chart-bar">
+      <div class="bar-label">${item.severity}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width: ${(item.count / maxCount) * 100}%; background-color: ${severityColors[item.severity] || '#666'}"></div>
+      </div>
+      <div class="bar-value">${item.count}</div>
+    </div>
+  `).join('');
+}
+
+function renderStatusChart(data) {
+  const container = document.getElementById('statusChartContainer');
+  if (!container) return;
+
+  const statusColors = {
+    pending: '#95a5a6',
+    verified: '#3498db',
+    in_progress: '#f39c12',
+    resolved: '#27ae60',
+    rejected: '#e74c3c'
+  };
+
+  const maxCount = Math.max(...data.map(d => d.count), 1);
+
+  container.innerHTML = data.map(item => `
+    <div class="chart-bar">
+      <div class="bar-label">${item.status}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width: ${(item.count / maxCount) * 100}%; background-color: ${statusColors[item.status] || '#666'}"></div>
+      </div>
+      <div class="bar-value">${item.count}</div>
+    </div>
+  `).join('');
+}
+
+async function loadIncidentTrends() {
+  try {
+    const trends = await getIncidentTrends();
+    renderTrendsChart(trends);
+  } catch (error) {
+    console.error('Load trends error:', error);
+  }
+}
+
+function renderTrendsChart(trends) {
+  const container = document.getElementById('trendsChartContainer');
+  if (!container) return;
+
+  if (!trends || trends.length === 0) {
+    container.innerHTML = '<p>Không có dữ liệu</p>';
+    return;
+  }
+
+  const maxCount = Math.max(...trends.map(t => t.count), 1);
+
+  container.innerHTML = trends.map(item => `
+    <div class="chart-bar">
+      <div class="bar-label">${new Date(item.date).toLocaleDateString('vi-VN')}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width: ${(item.count / maxCount) * 100}%"></div>
+      </div>
+      <div class="bar-value">${item.count}</div>
+    </div>
+  `).join('');
+}
+
+function refreshAnalytics() {
+  loadAnalyticsDashboardUI();
+  showNotification('Đang cập nhật', 'Đang tải dữ liệu thống kê mới');
+}
+
 function updateAuthUI() {
   const authSection = document.getElementById('authSection');
   const userSection = document.getElementById('userSection');
