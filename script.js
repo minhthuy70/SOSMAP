@@ -791,6 +791,119 @@ function getCurrentLocation() {
   }
 }
 
+// File Upload Functions
+async function uploadIncidentFiles(incidentId, files) {
+  if (!files || files.length === 0) {
+    alert('Vui lòng chọn file để tải lên');
+    return;
+  }
+
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    formData.append('files', files[i]);
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/incidents/${incidentId}/upload`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${API_TOKEN}`
+      },
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      showNotification('Tải lên thành công', `${result.uploadedFiles.length} file đã được tải lên`);
+      return result;
+    } else {
+      throw new Error(result.error?.message || 'Upload failed');
+    }
+  } catch (error) {
+    console.error('File upload error:', error);
+    alert('Tải lên thất bại: ' + error.message);
+    throw error;
+  }
+}
+
+async function deleteIncidentImage(incidentId, filename) {
+  try {
+    const result = await apiRequest(`/incidents/${incidentId}/images/${filename}`, {
+      method: 'DELETE'
+    });
+
+    showNotification('Đã xóa ảnh', 'Ảnh đã được xóa thành công');
+    return result;
+  } catch (error) {
+    console.error('Delete image error:', error);
+    alert('Xóa ảnh thất bại: ' + error.message);
+    throw error;
+  }
+}
+
+function handleFileSelect(event) {
+  const files = event.target.files;
+  const previewContainer = document.getElementById('filePreviewContainer');
+
+  if (previewContainer) {
+    previewContainer.innerHTML = '';
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const preview = document.createElement('div');
+        preview.className = 'file-preview-item';
+
+        if (file.type.startsWith('image/')) {
+          preview.innerHTML = `
+            <img src="${e.target.result}" alt="${file.name}">
+            <button onclick="removeFilePreview(this)" class="remove-btn">×</button>
+          `;
+        } else if (file.type.startsWith('video/')) {
+          preview.innerHTML = `
+            <video src="${e.target.result}" controls></video>
+            <button onclick="removeFilePreview(this)" class="remove-btn">×</button>
+          `;
+        } else {
+          preview.innerHTML = `
+            <div class="file-icon">📄</div>
+            <span>${file.name}</span>
+            <button onclick="removeFilePreview(this)" class="remove-btn">×</button>
+          `;
+        }
+
+        previewContainer.appendChild(preview);
+      };
+
+      reader.readAsDataURL(file);
+    }
+  }
+}
+
+function removeFilePreview(button) {
+  button.parentElement.remove();
+}
+
+function validateFile(file) {
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'video/mp4', 'video/mov', 'video/avi'];
+  const maxSize = 10 * 1024 * 1024; // 10MB
+
+  if (!allowedTypes.includes(file.type)) {
+    alert('Loại file không được hỗ trợ. Chỉ chấp nhận ảnh và video.');
+    return false;
+  }
+
+  if (file.size > maxSize) {
+    alert('File quá lớn. Kích thước tối đa là 10MB.');
+    return false;
+  }
+
+  return true;
+}
+
 function updateAuthUI() {
   const authSection = document.getElementById('authSection');
   const userSection = document.getElementById('userSection');
