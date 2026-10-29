@@ -138,10 +138,147 @@ function hideInlineLoading(containerId, defaultContent = '') {
   }
 }
 
-// Load configuration
-var API_BASE_URL = (typeof API_CONFIG !== 'undefined' ? API_CONFIG.BASE_URL : 'http://localhost:3000/api');
-var API_TOKEN = localStorage.getItem('sosmap_token');
-var CURRENT_USER = JSON.parse(localStorage.getItem('sosmap_user') || 'null');
+// Cache Management with localStorage
+var cacheKeys = {
+  INCIDENTS: 'sosmap_incidents_cache',
+  INCIDENTS_TIMESTAMP: 'sosmap_incidents_timestamp',
+  USER_PREFERENCES: 'sosmap_user_preferences',
+  MAP_STATE: 'sosmap_map_state',
+  SEARCH_HISTORY: 'sosmap_search_history'
+};
+
+var CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+function setCache(key, data, duration = CACHE_DURATION) {
+  try {
+    const cacheData = {
+      data: data,
+      timestamp: Date.now(),
+      duration: duration
+    };
+    localStorage.setItem(key, JSON.stringify(cacheData));
+  } catch (error) {
+    console.error('Cache set error:', error);
+  }
+}
+
+function getCache(key) {
+  try {
+    const cached = localStorage.getItem(key);
+    if (!cached) return null;
+
+    const cacheData = JSON.parse(cached);
+    const now = Date.now();
+
+    // Check if cache is expired
+    if (now - cacheData.timestamp > cacheData.duration) {
+      localStorage.removeItem(key);
+      return null;
+    }
+
+    return cacheData.data;
+  } catch (error) {
+    console.error('Cache get error:', error);
+    return null;
+  }
+}
+
+function clearCache(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    console.error('Cache clear error:', error);
+  }
+}
+
+function clearAllCache() {
+  try {
+    Object.values(cacheKeys).forEach(function(key) {
+      localStorage.removeItem(key);
+    });
+  } catch (error) {
+    console.error('Clear all cache error:', error);
+  }
+}
+
+function cacheIncidents(incidents) {
+  setCache(cacheKeys.INCIDENTS, incidents);
+  localStorage.setItem(cacheKeys.INCIDENTS_TIMESTAMP, Date.now().toString());
+}
+
+function getCachedIncidents() {
+  return getCache(cacheKeys.INCIDENTS);
+}
+
+function saveUserPreferences(preferences) {
+  setCache(cacheKeys.USER_PREFERENCES, preferences, 30 * 24 * 60 * 60 * 1000); // 30 days
+}
+
+function getUserPreferences() {
+  return getCache(cacheKeys.USER_PREFERENCES) || {
+    theme: 'light',
+    language: 'vi',
+    notifications: true,
+    autoRefresh: true,
+    refreshInterval: 60000
+  };
+}
+
+function saveMapState(state) {
+  setCache(cacheKeys.MAP_STATE, state);
+}
+
+function getMapState() {
+  return getCache(cacheKeys.MAP_STATE);
+}
+
+function addToSearchHistory(query) {
+  try {
+    const history = getCache(cacheKeys.SEARCH_HISTORY) || [];
+    // Remove duplicate if exists
+    const filtered = history.filter(function(item) {
+      return item !== query;
+    });
+    // Add new query to beginning
+    filtered.unshift(query);
+    // Keep only last 10 searches
+    const trimmed = filtered.slice(0, 10);
+    setCache(cacheKeys.SEARCH_HISTORY, trimmed, 7 * 24 * 60 * 60 * 1000); // 7 days
+  } catch (error) {
+    console.error('Search history error:', error);
+  }
+}
+
+function getSearchHistory() {
+  return getCache(cacheKeys.SEARCH_HISTORY) || [];
+}
+
+function clearSearchHistory() {
+  clearCache(cacheKeys.SEARCH_HISTORY);
+}
+
+// Cache-aware API calls
+async function loadIncidentsWithCache() {
+  const cached = getCachedIncidents();
+  if (cached) {
+    addMarkers(cached);
+    return cached;
+  }
+
+  // If no cache, load from API
+  const incidents = await getIncidents();
+  cacheIncidents(incidents);
+  return incidents;
+}
+
+function checkCacheFreshness() {
+  const timestamp = localStorage.getItem(cacheKeys.INCIDENTS_TIMESTAMP);
+  if (!timestamp) return false;
+
+  const now = Date.now();
+  const cachedTime = parseInt(timestamp);
+  return (now - cachedTime) < CACHE_DURATION;
+}
 
 // API Helper Functions
 async function apiRequest(endpoint, options = {}) {
