@@ -280,6 +280,65 @@ function checkCacheFreshness() {
   return (now - cachedTime) < CACHE_DURATION;
 }
 
+// Offline Mode Functions
+var isOnline = navigator.onLine;
+
+function updateOnlineStatus() {
+  isOnline = navigator.onLine;
+  const statusElement = document.getElementById('onlineStatus');
+  if (statusElement) {
+    statusElement.textContent = isOnline ? 'Online' : 'Offline';
+    statusElement.className = isOnline ? 'status-online' : 'status-offline';
+  }
+
+  if (!isOnline) {
+    showNotification('Offline mode', 'Bạn đang ở chế độ ngoại tuyến');
+  }
+}
+
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+function saveOfflineData(key, data) {
+  try {
+    localStorage.setItem('offline_' + key, JSON.stringify(data));
+  } catch (error) {
+    console.error('Offline save error:', error);
+  }
+}
+
+function getOfflineData(key) {
+  try {
+    const data = localStorage.getItem('offline_' + key);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Offline load error:', error);
+    return null;
+  }
+}
+
+function syncOfflineData() {
+  if (!isOnline) return;
+
+  // Sync incidents
+  const offlineIncidents = getOfflineData('incidents');
+  if (offlineIncidents && offlineIncidents.length > 0) {
+    offlineIncidents.forEach(function(incident) {
+      createIncident(incident).catch(function(error) {
+        console.error('Sync incident error:', error);
+      });
+    });
+    saveOfflineData('incidents', []);
+  }
+
+  showNotification('Đồng bộ', 'Dữ liệu ngoại tuyến đã được đồng bộ');
+}
+
+// Load configuration
+var API_BASE_URL = (typeof API_CONFIG !== 'undefined' ? API_CONFIG.BASE_URL : 'http://localhost:3000/api');
+var API_TOKEN = localStorage.getItem('sosmap_token');
+var CURRENT_USER = JSON.parse(localStorage.getItem('sosmap_user') || 'null');
+
 // API Helper Functions
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
