@@ -972,6 +972,136 @@ var userValidationRules = {
   ]
 };
 
+// Confirmation Dialogs
+function showConfirmDialog(options) {
+  const defaults = {
+    title: 'Xác nhận',
+    message: 'Bạn có chắc muốn thực hiện hành động này?',
+    confirmText: 'Đồng ý',
+    cancelText: 'Hủy',
+    onConfirm: null,
+    onCancel: null,
+    type: 'warning'
+  };
+  
+  const settings = Object.assign({}, defaults, options);
+  
+  const dialog = document.createElement('div');
+  dialog.className = 'confirm-dialog-overlay';
+  dialog.innerHTML = `
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmDialogTitle">
+      <div class="confirm-dialog-header">
+        <h3 id="confirmDialogTitle">${settings.title}</h3>
+        <button class="close-btn" aria-label="Đóng">&times;</button>
+      </div>
+      <div class="confirm-dialog-body">
+        <p>${settings.message}</p>
+      </div>
+      <div class="confirm-dialog-footer">
+        <button class="btn btn-cancel">${settings.cancelText}</button>
+        <button class="btn btn-confirm">${settings.confirmText}</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(dialog);
+  
+  const confirmBtn = dialog.querySelector('.btn-confirm');
+  const cancelBtn = dialog.querySelector('.btn-cancel');
+  const closeBtn = dialog.querySelector('.close-btn');
+  
+  function closeDialog() {
+    dialog.remove();
+  }
+  
+  function handleConfirm() {
+    closeDialog();
+    if (settings.onConfirm) settings.onConfirm();
+  }
+  
+  function handleCancel() {
+    closeDialog();
+    if (settings.onCancel) settings.onCancel();
+  }
+  
+  confirmBtn.addEventListener('click', handleConfirm);
+  cancelBtn.addEventListener('click', handleCancel);
+  closeBtn.addEventListener('click', handleCancel);
+  
+  dialog.addEventListener('click', function(event) {
+    if (event.target === dialog) {
+      handleCancel();
+    }
+  });
+  
+  // Keyboard support
+  dialog.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      handleCancel();
+    } else if (event.key === 'Enter') {
+      handleConfirm();
+    }
+  });
+  
+  // Focus trap
+  confirmBtn.focus();
+}
+
+function confirmDelete(message, callback) {
+  showConfirmDialog({
+    title: 'Xác nhận xóa',
+    message: message || 'Bạn có chắc muốn xóa mục này?',
+    confirmText: 'Xóa',
+    cancelText: 'Hủy',
+    type: 'danger',
+    onConfirm: callback
+  });
+}
+
+function confirmAction(message, callback) {
+  showConfirmDialog({
+    title: 'Xác nhận hành động',
+    message: message || 'Bạn có chắc muốn thực hiện hành động này?',
+    confirmText: 'Đồng ý',
+    cancelText: 'Hủy',
+    type: 'warning',
+    onConfirm: callback
+  });
+}
+
+function confirmLogout(callback) {
+  showConfirmDialog({
+    title: 'Đăng xuất',
+    message: 'Bạn có chắc muốn đăng xuất?',
+    confirmText: 'Đăng xuất',
+    cancelText: 'Hủy',
+    type: 'info',
+    onConfirm: callback
+  });
+}
+
+function confirmDiscardChanges(callback) {
+  showConfirmDialog({
+    title: 'Hủy thay đổi',
+    message: 'Bạn có các thay đổi chưa lưu. Bạn có chắc muốn hủy?',
+    confirmText: 'Hủy thay đổi',
+    cancelText: 'Tiếp tục chỉnh sửa',
+    type: 'warning',
+    onConfirm: callback
+  });
+}
+
+function confirmNavigation(message, callback) {
+  showConfirmDialog({
+    title: 'Rời trang',
+    message: message || 'Bạn có chắc muốn rời khỏi trang này?',
+    confirmText: 'Rời',
+    cancelText: 'Ở lại',
+    type: 'warning',
+    onConfirm: callback
+  });
+}
+
 function saveOfflineData(key, data) {
   try {
     localStorage.setItem('offline_' + key, JSON.stringify(data));
