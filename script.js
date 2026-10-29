@@ -154,6 +154,63 @@ async function getIncidentAnalytics(startDate, endDate) {
   return result;
 }
 
+// Map Layer Management Functions
+async function getMapLayers() {
+  try {
+    const result = await apiRequest('/layers');
+    return result.layers;
+  } catch (error) {
+    console.error('Failed to load map layers:', error);
+    return [];
+  }
+}
+
+async function getActiveMapLayers() {
+  try {
+    const result = await apiRequest('/layers/active');
+    return result.layers;
+  } catch (error) {
+    console.error('Failed to load active map layers:', error);
+    return [];
+  }
+}
+
+function switchMapLayer(layerUrl, layerName) {
+  // Remove current tile layer
+  map.eachLayer(function(layer) {
+    if (layer instanceof L.TileLayer) {
+      map.removeLayer(layer);
+    }
+  });
+
+  // Add new tile layer
+  L.tileLayer(layerUrl, {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  console.log('Switched to layer:', layerName);
+}
+
+function addCustomLayer(layer) {
+  if (layer.type === 'tile') {
+    L.tileLayer(layer.url, {
+      attribution: layer.attribution || '',
+      maxZoom: layer.options?.maxZoom || 19
+    }).addTo(map);
+  }
+}
+
+async function loadMapLayers() {
+  try {
+    const layers = await getActiveMapLayers();
+    layers.forEach(function(layer) {
+      addCustomLayer(layer);
+    });
+  } catch (error) {
+    console.error('Failed to load map layers:', error);
+  }
+}
+
 async function getUserAnalytics() {
   const result = await apiRequest('/analytics/users');
   return result;
@@ -473,7 +530,31 @@ document.addEventListener('DOMContentLoaded', function() {
       alert('Tính năng đang phát triển');
     });
   }
+
+  // Map layer switching
+  const layerOptions = document.querySelectorAll('.layer-option');
+  layerOptions.forEach(function(option) {
+    option.addEventListener('click', function() {
+      const layerType = this.getAttribute('data-layer');
+      switchMapLayerByType(layerType);
+    });
+  });
+
+  // Load custom map layers from backend
+  loadMapLayers();
 });
+
+function switchMapLayerByType(layerType) {
+  const layerUrls = {
+    street: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    terrain: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
+  };
+
+  if (layerUrls[layerType]) {
+    switchMapLayer(layerUrls[layerType], layerType);
+  }
+}
 
 function updateAuthUI() {
   const authSection = document.getElementById('authSection');
