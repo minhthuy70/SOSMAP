@@ -740,6 +740,59 @@ function showShareDialog(type, data) {
   document.body.appendChild(dialog);
 }
 
+// Print Functionality
+function printPage() {
+  // Update print dates
+  const now = new Date().toLocaleString('vi-VN');
+  const printDate = document.getElementById('printDate');
+  const printFooterDate = document.getElementById('printFooterDate');
+  
+  if (printDate) printDate.textContent = 'Ngày: ' + now;
+  if (printFooterDate) printFooterDate.textContent = now;
+  
+  window.print();
+}
+
+function printIncident(incidentId) {
+  // Generate printable incident view
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html>
+    <head>
+      <title>SOSMAP - Incident Report</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1 { color: #005BAC; }
+        .incident-detail { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .incident-detail p { margin: 10px 0; }
+        @media print { body { background: white; } }
+      </style>
+    </head>
+    <body>
+      <h1>SOSMAP - Incident Report</h1>
+      <p>Printed: ${new Date().toLocaleString('vi-VN')}</p>
+      <div id="incidentContent">Loading...</div>
+      <script>
+        // Load incident data and populate
+        setTimeout(() => {
+          document.getElementById('incidentContent').innerHTML = '<p>Incident ID: ${incidentId}</p>';
+          window.print();
+        }, 500);
+      </script>
+    </body>
+    </html>
+  );
+}
+
+window.addEventListener('beforeprint', function() {
+  const now = new Date().toLocaleString('vi-VN');
+  const printDate = document.getElementById('printDate');
+  const printFooterDate = document.getElementById('printFooterDate');
+  
+  if (printDate) printDate.textContent = 'Ngày: ' + now;
+  if (printFooterDate) printFooterDate.textContent = now;
+});
+
 function saveOfflineData(key, data) {
   try {
     localStorage.setItem('offline_' + key, JSON.stringify(data));
