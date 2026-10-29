@@ -15013,3 +15013,126 @@ body.high-contrast textarea {
   font-size: 12px;
 }
 
+/* Responsive Design Improvements */
+@media (max-width: 768px) {
+  .navbar-nav {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .navbar-nav .nav-link {
+    padding: 10px;
+    text-align: center;
+  }
+
+  .global-loader p {
+    font-size: 14px;
+  }
+
+  .toast-notification,
+  .realtime-notification {
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+
+  .file-preview-item {
+    width: 100px;
+    height: 100px;
+  }
+
+  .chart-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bar-label {
+    width: 100%;
+    text-align: left;
+    padding-right: 0;
+    margin-bottom: 5px;
+  }
+
+  .bar-track {
+    width: 100%;
+  }
+
+  .pagination-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .pagination-info {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar h1 {
+    font-size: 1.2rem;
+  }
+
+  .auth-section {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .auth-btn {
+    width: 100%;
+  }
+
+  .loader-spinner,
+  .spinner {
+    width: 30px;
+    height: 30px;
+  }
+
+  .notification-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .notification-actions {
+    margin-left: 0;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .notification-actions .btn-sm {
+    width: 100%;
+  }
+}
+
+/* Touch-friendly buttons for mobile */
+@media (max-width: 768px) {
+  button,
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px; /* Prevent iOS zoom */
+  }
+}
+
+/* Landscape mobile adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+  .global-loader {
+    padding: 20px;
+  }
+
+  .toast-notification,
+  .realtime-notification {
+    top: 10px;
+    right: 10px;
+    max-width: 300px;
+  }
+}
+
