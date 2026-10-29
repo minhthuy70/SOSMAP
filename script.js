@@ -388,6 +388,93 @@ async function markAllNotificationsReadFromAPI() {
   }
 }
 
+// PDF Export Functions
+async function exportAnalyticsToPDF(startDate, endDate) {
+  try {
+    const params = {};
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
+
+    const queryParams = new URLSearchParams(params).toString();
+    const result = await apiRequest(`/analytics/export/pdf?${queryParams}`);
+
+    if (result.downloadUrl) {
+      // Download the PDF
+      const link = document.createElement('a');
+      link.href = API_BASE_URL.replace('/api', '') + result.downloadUrl;
+      link.download = result.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      showNotification('PDF export thành công', 'Báo cáo đã được tải xuống');
+    }
+  } catch (error) {
+    console.error('PDF export error:', error);
+    alert('Xuất PDF thất bại: ' + error.message);
+  }
+}
+
+// Export incident report to PDF
+async function exportIncidentReportToPDF(filters = {}) {
+  try {
+    // Get incidents with filters
+    const incidents = await getIncidents(filters);
+
+    // Generate PDF (this would typically be done on backend)
+    // For now, show a message
+    alert('Tính năng đang phát triển. Sẽ có trong phiên bản sau.');
+  } catch (error) {
+    console.error('Incident report export error:', error);
+    alert('Xuất báo cáo thất bại: ' + error.message);
+  }
+}
+
+// Download file from URL
+function downloadFile(url, filename) {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Event listeners for PDF export buttons
+document.addEventListener('DOMContentLoaded', function() {
+  // Analytics PDF export
+  const exportPDFBtn = document.getElementById('exportPDFBtn');
+  if (exportPDFBtn) {
+    exportPDFBtn.addEventListener('click', function() {
+      exportAnalyticsToPDF();
+    });
+  }
+
+  // Incident report PDF export
+  const exportIncidentPDFBtn = document.getElementById('exportIncidentsBtn');
+  if (exportIncidentPDFBtn) {
+    exportIncidentPDFBtn.addEventListener('click', function() {
+      exportIncidentReportToPDF();
+    });
+  }
+
+  // Stats PDF export
+  const exportStatsBtn = document.getElementById('exportStatsBtn');
+  if (exportStatsBtn) {
+    exportStatsBtn.addEventListener('click', function() {
+      exportAnalyticsToPDF();
+    });
+  }
+
+  // Rescue PDF export
+  const exportRescuePDFBtn = document.getElementById('exportRescuePDF');
+  if (exportRescuePDFBtn) {
+    exportRescuePDFBtn.addEventListener('click', function() {
+      alert('Tính năng đang phát triển');
+    });
+  }
+});
+
 function updateAuthUI() {
   const authSection = document.getElementById('authSection');
   const userSection = document.getElementById('userSection');
