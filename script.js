@@ -1962,6 +1962,285 @@ async function uploadMultipleFiles(files, incidentId) {
   return results;
 }
 
+// Data Visualization for Analytics
+var charts = {};
+
+function createLineChart(canvasId, labels, data, label, color = '#005BAC') {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  
+  // Destroy existing chart if exists
+  if (charts[canvasId]) {
+    charts[canvasId].destroy();
+  }
+  
+  var ctx = canvas.getContext('2d');
+  charts[canvasId] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: data,
+        borderColor: color,
+        backgroundColor: color + '20',
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+  
+  return charts[canvasId];
+}
+
+function createBarChart(canvasId, labels, data, label, colors = null) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  
+  if (charts[canvasId]) {
+    charts[canvasId].destroy();
+  }
+  
+  var ctx = canvas.getContext('2d');
+  var backgroundColors = colors || ['#005BAC', '#28a745', '#dc3545', '#ffc107', '#17a2b8'];
+  
+  charts[canvasId] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: data,
+        backgroundColor: backgroundColors,
+        borderColor: backgroundColors.map(function(c) { return c; }),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+  
+  return charts[canvasId];
+}
+
+function createPieChart(canvasId, labels, data, colors = null) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  
+  if (charts[canvasId]) {
+    charts[canvasId].destroy();
+  }
+  
+  var ctx = canvas.getContext('2d');
+  var backgroundColors = colors || ['#005BAC', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#6610f2'];
+  
+  charts[canvasId] = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: backgroundColors,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'right'
+        }
+      }
+    }
+  });
+  
+  return charts[canvasId];
+}
+
+function createDoughnutChart(canvasId, labels, data, colors = null) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  
+  if (charts[canvasId]) {
+    charts[canvasId].destroy();
+  }
+  
+  var ctx = canvas.getContext('2d');
+  var backgroundColors = colors || ['#005BAC', '#28a745', '#dc3545', '#ffc107', '#17a2b8'];
+  
+  charts[canvasId] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: backgroundColors,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'right'
+        }
+      }
+    }
+  });
+  
+  return charts[canvasId];
+}
+
+function createMultiLineChart(canvasId, datasets) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  
+  if (charts[canvasId]) {
+    charts[canvasId].destroy();
+  }
+  
+  var ctx = canvas.getContext('2d');
+  charts[canvasId] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: datasets[0].labels,
+      datasets: datasets.map(function(d) {
+        return {
+          label: d.label,
+          data: d.data,
+          borderColor: d.color,
+          backgroundColor: d.color + '20',
+          fill: true,
+          tension: 0.4
+        };
+      })
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+  
+  return charts[canvasId];
+}
+
+function updateChart(canvasId, newData) {
+  if (charts[canvasId]) {
+    charts[canvasId].data = newData;
+    charts[canvasId].update();
+  }
+}
+
+function destroyChart(canvasId) {
+  if (charts[canvasId]) {
+    charts[canvasId].destroy();
+    delete charts[canvasId];
+  }
+}
+
+function destroyAllCharts() {
+  Object.keys(charts).forEach(function(canvasId) {
+    destroyChart(canvasId);
+  });
+}
+
+async function loadAnalyticsCharts() {
+  try {
+    var response = await fetchWithRetry(API_BASE_URL + '/analytics', {
+      headers: {
+        'Authorization': 'Bearer ' + API_TOKEN
+      }
+    });
+    
+    if (response.ok) {
+      var data = await response.json();
+      
+      // Create incident trend chart
+      if (data.incidentTrend) {
+        createLineChart(
+          'incidentTrendChart',
+          data.incidentTrend.labels,
+          data.incidentTrend.values,
+          'Sự cố theo thời gian'
+        );
+      }
+      
+      // Create incident type chart
+      if (data.incidentTypes) {
+        createPieChart(
+          'incidentTypeChart',
+          data.incidentTypes.labels,
+          data.incidentTypes.values
+        );
+      }
+      
+      // Create status distribution chart
+      if (data.statusDistribution) {
+        createDoughnutChart(
+          'statusChart',
+          data.statusDistribution.labels,
+          data.statusDistribution.values
+        );
+      }
+      
+      // Create regional chart
+      if (data.regionalData) {
+        createBarChart(
+          'regionalChart',
+          data.regionalData.labels,
+          data.regionalData.values,
+          'Sự cố theo khu vực'
+        );
+      }
+    }
+  } catch (error) {
+    console.error('Load analytics charts error:', error);
+  }
+}
+
 // Initialize security on load
 document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
