@@ -2241,6 +2241,184 @@ async function loadAnalyticsCharts() {
   }
 }
 
+// Map Layer Controls
+var mapLayers = {};
+var activeLayers = {};
+
+function initializeMapLayers() {
+  if (typeof map === 'undefined') return;
+  
+  // Street layer (OpenStreetMap)
+  mapLayers.street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
+  });
+  
+  // Satellite layer (Esri)
+  mapLayers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '© Esri',
+    maxZoom: 19
+  });
+  
+  // Terrain layer (OpenTopoMap)
+  mapLayers.terrain = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenTopoMap',
+    maxZoom: 17
+  });
+  
+  // Dark layer (CartoDB Dark)
+  mapLayers.dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© CartoDB',
+    maxZoom: 19
+  });
+  
+  // Add default layer
+  mapLayers.street.addTo(map);
+  activeLayers.street = true;
+}
+
+function switchMapLayer(layerName) {
+  if (!mapLayers[layerName]) {
+    console.error('Layer not found:', layerName);
+    return;
+  }
+  
+  // Remove all active layers
+  Object.keys(activeLayers).forEach(function(name) {
+    if (activeLayers[name] && mapLayers[name]) {
+      map.removeLayer(mapLayers[name]);
+      activeLayers[name] = false;
+    }
+  });
+  
+  // Add selected layer
+  mapLayers[layerName].addTo(map);
+  activeLayers[layerName] = true;
+  
+  // Save preference
+  var preferences = getUserPreferences();
+  preferences.mapLayer = layerName;
+  saveUserPreferences(preferences);
+  
+  showNotification('Bản đồ', 'Đã chuyển sang layer: ' + layerName);
+}
+
+function toggleLayer(layerName) {
+  if (!mapLayers[layerName]) return;
+  
+  if (activeLayers[layerName]) {
+    map.removeLayer(mapLayers[layerName]);
+    activeLayers[layerName] = false;
+  } else {
+    mapLayers[layerName].addTo(map);
+    activeLayers[layerName] = true;
+  }
+  
+  // Update UI
+  var layerToggle = document.querySelector('.layer-toggle[data-layer="' + layerName + '"]');
+  if (layerToggle) {
+    layerToggle.classList.toggle('active', activeLayers[layerName]);
+  }
+}
+
+function getActiveLayers() {
+  return Object.keys(activeLayers).filter(function(name) {
+    return activeLayers[name];
+  });
+}
+
+function saveMapLayerState() {
+  var state = {
+    activeLayers: getActiveLayers(),
+    center: map.getCenter(),
+    zoom: map.getZoom()
+  };
+  saveMapState(state);
+}
+
+function restoreMapLayerState() {
+  var state = getMapState();
+  if (!state) return;
+  
+  // Restore active layers
+  if (state.activeLayers) {
+    state.activeLayers.forEach(function(layerName) {
+      if (mapLayers[layerName]) {
+        mapLayers[layerName].addTo(map);
+        activeLayers[layerName] = true;
+      }
+    });
+  }
+  
+  // Restore map position
+  if (state.center && state.zoom) {
+    map.setView(state.center, state.zoom);
+  }
+}
+
+function createLayerControl() {
+  if (typeof map === 'undefined') return;
+  
+  var baseLayers = {
+    'Đường phố': mapLayers.street,
+    'Vệ tinh': mapLayers.satellite,
+    'Địa hình': mapLayers.terrain,
+    'Tối': mapLayers.dark
+  };
+  
+  L.control.layers(baseLayers).addTo(map);
+}
+
+function addCustomLayer(name, url, options = {}) {
+  if (typeof map === 'undefined') return;
+  
+  var defaultOptions = {
+    attribution: 'Custom Layer',
+    maxZoom: 19
+  };
+  
+  var layerOptions = Object.assign({}, defaultOptions, options);
+  mapLayers[name] = L.tileLayer(url, layerOptions);
+  
+  return mapLayers[name];
+}
+
+function removeLayer(name) {
+  if (mapLayers[name]) {
+    if (activeLayers[name]) {
+      map.removeLayer(mapLayers[name]);
+      activeLayers[name] = false;
+    }
+    delete mapLayers[name];
+  }
+}
+
+function getLayerOpacity(layerName) {
+  if (mapLayers[layerName]) {
+    return mapLayers[layerName].getOpacity();
+  }
+  return 1;
+}
+
+function setLayerOpacity(layerName, opacity) {
+  if (mapLayers[layerName]) {
+    mapLayers[layerName].setOpacity(opacity);
+  }
+}
+
+function initializeLayerControls() {
+  initializeMapLayers();
+  
+  // Load saved layer preference
+  var preferences = getUserPreferences();
+  if (preferences.mapLayer) {
+    switchMapLayer(preferences.mapLayer);
+  }
+  
+  // Restore map state
+  restoreMapLayerState();
+}
+
 // Initialize security on load
 document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
