@@ -3571,6 +3571,179 @@ function handleExport(button) {
   }
 }
 
+// Backup and Restore Functionality
+function createBackup() {
+  var backupData = {
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    userPreferences: getUserPreferences(),
+    favorites: Array.from(favoriteIncidents),
+    searchHistory: getSearchHistory(),
+    geofences: geofences.map(function(g) {
+      return {
+        id: g.id,
+        name: g.name,
+        type: g.type || 'polygon',
+        coordinates: g.coordinates,
+        center: g.center,
+        radius: g.radius,
+        options: g.options
+      };
+    }),
+    mapState: getMapState(),
+    activityLog: userActivities
+  };
+  
+  var backupJSON = JSON.stringify(backupData, null, 2);
+  var blob = new Blob([backupJSON], { type: 'application/json' });
+  var link = document.createElement('a');
+  var url = URL.createObjectURL(blob);
+  
+  var filename = 'sosmap_backup_' + new Date().toISOString().split('T')[0] + '.json';
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  showNotification('Sao lưu', 'Đã tạo file sao lưu');
+}
+
+function restoreBackup(file) {
+  var reader = new FileReader();
+  
+  reader.onload = function(event) {
+    try {
+      var backupData = JSON.parse(event.target.result);
+      
+      // Validate backup format
+      if (!backupData.version || !backupData.timestamp) {
+        throw new Error('Định dạng file sao lưu không hợp lệ');
+      }
+      
+      // Restore user preferences
+      if (backupData.userPreferences) {
+        saveUserPreferences(backupData.userPreferences);
+      }
+      
+      // Restore favorites
+      if (backupData.favorites) {
+        favoriteIncidents = new Set(backupData.favorites);
+        saveFavorites();
+      }
+      
+      // Restore search history
+      if (backupData.searchHistory) {
+        localStorage.setItem('sosmap_search_history', JSON.stringify(backupData.searchHistory));
+      }
+      
+      // Restore geofences
+      if (backupData.geofences) {
+        clearGeofences();
+        backupData.geofences.forEach(function(g) {
+          if (g.type === 'circle') {
+            createCircularGeofence(g.name, g.center, g.radius, g.options);
+          } else {
+            createGeofence(g.name, g.coordinates, g.options);
+          }
+        });
+      }
+      
+      // Restore map state
+      if (backupData.mapState) {
+        saveMapState(backupData.mapState);
+      }
+      
+      // Restore activity log
+      if (backupData.activityLog) {
+        userActivities = backupData.activityLog;
+        saveActivityLog();
+      }
+      
+      showNotification('Khôi phục', 'Đã khôi phục dữ liệu thành công');
+      
+      // Reload page to apply changes
+      setTimeout(function() {
+        location.reload();
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Restore backup error:', error);
+      showNotification('Lỗi', 'Không thể khôi phục: ' + error.message);
+    }
+  };
+  
+  reader.readAsText(file);
+}
+
+function showBackupDialog() {
+  var dialog = document.createElement('div');
+  dialog.className = 'backup-dialog';
+  dialog.innerHTML = `
+    <div class="backup-dialog-content">
+      <h3>Sao lưu và Khôi phục</h3>
+      <div class="backup-options">
+        <button onclick="createBackup()">Tạo sao lưu</button>
+        <div class="restore-section">
+          <h4>Khôi phục từ file</h4>
+          <input type="file" id="backupFile" accept=".json" onchange="handleRestoreFile(this)">
+        </div>
+      </div>
+      <button class="close-btn" onclick="this.closest('.backup-dialog').remove()">Đóng</button>
+    </div>
+  `;
+  document.body.appendChild(dialog);
+}
+
+function handleRestoreFile(input) {
+  if (input.files && input.files[0]) {
+    var file = input.files[0];
+    
+    showConfirmDialog({
+      title: 'Xác nhận khôi phục',
+      message: 'Khôi phục sẽ ghi đè dữ liệu hiện tại. Bạn có chắc?',
+      confirmText: 'Khôi phục',
+      cancelText: 'Hủy',
+      type: 'warning',
+      onConfirm: function() {
+        restoreBackup(file);
+        input.closest('.backup-dialog').remove();
+      }
+    });
+  }
+}
+
+function autoBackup() {
+  var preferences = getUserPreferences();
+  if (preferences.autoBackup) {
+    createBackup();
+  }
+}
+
+function scheduleAutoBackup() {
+  var preferences = getUserPreferences();
+  if (preferences.autoBackupInterval) {
+    var interval = preferences.autoBackupInterval * 60 * 60 * 1000; // Convert hours to ms
+    setInterval(autoBackup, interval);
+  }
+}
+
+function getBackupInfo() {
+  return {
+    lastBackup: localStorage.getItem('sosmap_last_backup'),
+    backupCount: localStorage.getItem('sosmap_backup_count') || 0,
+    backupSize: localStorage.getItem('sosmap_backup_size') || '0 KB'
+  };
+}
+
+function updateBackupInfo() {
+  localStorage.setItem('sosmap_last_backup', new Date().toISOString());
+  var count = parseInt(localStorage.getItem('sosmap_backup_count') || '0') + 1;
+  localStorage.setItem('sosmap_backup_count', count.toString());
+}
+
 // Initialize security on load
 document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
