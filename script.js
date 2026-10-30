@@ -2419,6 +2419,176 @@ function initializeLayerControls() {
   restoreMapLayerState();
 }
 
+// Geofencing Features
+var geofences = [];
+var geofenceLayerGroup = null;
+
+function createGeofence(name, coordinates, options = {}) {
+  var defaultOptions = {
+    color: '#ff0000',
+    fillColor: '#ff0000',
+    fillOpacity: 0.2,
+    weight: 2
+  };
+  
+  var geofenceOptions = Object.assign({}, defaultOptions, options);
+  var polygon = L.polygon(coordinates, geofenceOptions);
+  
+  var geofence = {
+    id: 'geofence_' + Date.now(),
+    name: name,
+    polygon: polygon,
+    coordinates: coordinates,
+    options: geofenceOptions
+  };
+  
+  geofences.push(geofence);
+  
+  if (!geofenceLayerGroup) {
+    geofenceLayerGroup = L.layerGroup().addTo(map);
+  }
+  
+  geofenceLayerGroup.addLayer(polygon);
+  
+  return geofence;
+}
+
+function removeGeofence(geofenceId) {
+  var index = geofences.findIndex(function(g) { return g.id === geofenceId; });
+  if (index !== -1) {
+    var geofence = geofences[index];
+    geofenceLayerGroup.removeLayer(geofence.polygon);
+    geofences.splice(index, 1);
+  }
+}
+
+function getGeofences() {
+  return geofences;
+}
+
+function clearGeofences() {
+  if (geofenceLayerGroup) {
+    geofenceLayerGroup.clearLayers();
+  }
+  geofences = [];
+}
+
+function isPointInGeofence(lat, lng, geofence) {
+  var point = L.latLng(lat, lng);
+  return geofence.polygon.getBounds().contains(point);
+}
+
+function isPointInAnyGeofence(lat, lng) {
+  return geofences.some(function(geofence) {
+    return isPointInGeofence(lat, lng, geofence);
+  });
+}
+
+function getGeofencesContainingPoint(lat, lng) {
+  return geofences.filter(function(geofence) {
+    return isPointInGeofence(lat, lng, geofence);
+  });
+}
+
+function createCircularGeofence(name, center, radius, options = {}) {
+  var defaultOptions = {
+    color: '#ff0000',
+    fillColor: '#ff0000',
+    fillOpacity: 0.2,
+    weight: 2
+  };
+  
+  var geofenceOptions = Object.assign({}, defaultOptions, options);
+  var circle = L.circle(center, { radius: radius, ...geofenceOptions });
+  
+  var geofence = {
+    id: 'geofence_' + Date.now(),
+    name: name,
+    type: 'circle',
+    circle: circle,
+    center: center,
+    radius: radius,
+    options: geofenceOptions
+  };
+  
+  geofences.push(geofence);
+  
+  if (!geofenceLayerGroup) {
+    geofenceLayerGroup = L.layerGroup().addTo(map);
+  }
+  
+  geofenceLayerGroup.addLayer(circle);
+  
+  return geofence;
+}
+
+function isPointInCircularGeofence(lat, lng, geofence) {
+  if (geofence.type !== 'circle') return false;
+  
+  var point = L.latLng(lat, lng);
+  var center = L.latLng(geofence.center);
+  var distance = point.distanceTo(center);
+  
+  return distance <= geofence.radius;
+}
+
+function saveGeofences() {
+  var geofenceData = geofences.map(function(g) {
+    return {
+      id: g.id,
+      name: g.name,
+      type: g.type || 'polygon',
+      coordinates: g.coordinates,
+      center: g.center,
+      radius: g.radius,
+      options: g.options
+    };
+  });
+  
+  localStorage.setItem('sosmap_geofences', JSON.stringify(geofenceData));
+}
+
+function loadGeofences() {
+  try {
+    var data = localStorage.getItem('sosmap_geofences');
+    if (data) {
+      var geofenceData = JSON.parse(data);
+      geofenceData.forEach(function(g) {
+        if (g.type === 'circle') {
+          createCircularGeofence(g.name, g.center, g.radius, g.options);
+        } else {
+          createGeofence(g.name, g.coordinates, g.options);
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Load geofences error:', error);
+  }
+}
+
+function alertOnGeofenceEntry(lat, lng, callback) {
+  var containingGeofences = getGeofencesContainingPoint(lat, lng);
+  
+  if (containingGeofences.length > 0) {
+    containingGeofences.forEach(function(geofence) {
+      callback(geofence);
+    });
+  }
+}
+
+function toggleGeofenceVisibility(geofenceId) {
+  var geofence = geofences.find(function(g) { return g.id === geofenceId; });
+  if (geofence) {
+    var layer = geofence.type === 'circle' ? geofence.circle : geofence.polygon;
+    
+    if (map.hasLayer(layer)) {
+      map.removeLayer(layer);
+    } else {
+      map.addLayer(layer);
+    }
+  }
+}
+
 // Initialize security on load
 document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
