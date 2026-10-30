@@ -1491,7 +1491,39 @@ function initializePerformanceOptimizations() {
   window.addEventListener('beforeunload', cleanup);
 }
 
-// Security Improvements
+// Error messages
+var ERROR_MESSAGES = {
+  NETWORK_ERROR: 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng của bạn.',
+  TIMEOUT_ERROR: 'Yêu cầu quá thời gian. Vui lòng thử lại.',
+  UNAUTHORIZED: 'Bạn cần đăng nhập để thực hiện thao tác này.',
+  FORBIDDEN: 'Bạn không có quyền thực hiện thao tác này.',
+  NOT_FOUND: 'Không tìm thấy tài nguyên được yêu cầu.',
+  VALIDATION_ERROR: 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.',
+  SERVER_ERROR: 'Lỗi máy chủ. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.',
+  FILE_TOO_LARGE: 'File quá lớn. Vui lòng chọn file nhỏ hơn.',
+  INVALID_FILE_TYPE: 'Loại file không được phép. Vui lòng chọn file khác.',
+  INCIDENT_NOT_FOUND: 'Không tìm thấy sự cố này.',
+  INCIDENT_CREATE_FAILED: 'Không thể tạo sự cố. Vui lòng thử lại.',
+  INCIDENT_UPDATE_FAILED: 'Không thể cập nhật sự cố. Vui lòng thử lại.',
+  INCIDENT_DELETE_FAILED: 'Không thể xóa sự cố. Vui lòng thử lại.',
+  LOGIN_FAILED: 'Email hoặc mật khẩu không đúng.',
+  REGISTER_FAILED: 'Không thể đăng ký tài khoản. Email có thể đã được sử dụng.',
+  UPLOAD_FAILED: 'Không thể tải file lên. Vui lòng thử lại.',
+  SEARCH_FAILED: 'Không thể tìm kiếm. Vui lòng thử lại.',
+  OFFLINE_MODE: 'Bạn đang ở chế độ ngoại tuyến. Một số tính năng có thể không hoạt động.',
+  GEOCODING_FAILED: 'Không thể tìm địa chỉ. Vui lòng thử lại.',
+  EXPORT_FAILED: 'Không thể xuất dữ liệu. Vui lòng thử lại.',
+  BACKUP_FAILED: 'Không thể tạo bản sao lưu.',
+  RESTORE_FAILED: 'Không thể khôi phục dữ liệu.'
+};
+
+function getErrorMessage(errorType, customMessage) {
+  return customMessage || ERROR_MESSAGES[errorType] || 'Đã xảy ra lỗi không xác định.';
+}
+
+function showFriendlyError(errorType, customMessage) {
+  showNotification('Lỗi', getErrorMessage(errorType, customMessage), 'error');
+}
 function sanitizeHTML(str) {
   var temp = document.createElement('div');
   temp.textContent = str;
