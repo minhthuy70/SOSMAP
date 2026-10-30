@@ -2977,6 +2977,188 @@ function createFilterUI() {
   `;
 }
 
+// Enhanced Notification System
+var notificationQueue = [];
+var maxNotifications = 5;
+var notificationDuration = 5000;
+
+function showNotification(title, message, type = 'info', duration = notificationDuration) {
+  var notification = {
+    id: 'notif_' + Date.now(),
+    title: title,
+    message: message,
+    type: type,
+    timestamp: new Date().toISOString()
+  };
+  
+  notificationQueue.push(notification);
+  
+  // Keep only max notifications
+  if (notificationQueue.length > maxNotifications) {
+    notificationQueue.shift();
+  }
+  
+  // Create notification element
+  var notifElement = createNotificationElement(notification);
+  document.body.appendChild(notifElement);
+  
+  // Auto-dismiss after duration
+  setTimeout(function() {
+    dismissNotification(notification.id);
+  }, duration);
+  
+  // Play sound if enabled
+  if (getUserPreferences().notifications) {
+    playNotificationSound(type);
+  }
+  
+  // Log notification
+  console.log('Notification:', notification);
+}
+
+function createNotificationElement(notification) {
+  var element = document.createElement('div');
+  element.className = 'notification notification-' + notification.type;
+  element.id = notification.id;
+  element.innerHTML = `
+    <div class="notification-content">
+      <div class="notification-title">${notification.title}</div>
+      <div class="notification-message">${notification.message}</div>
+    </div>
+    <button class="notification-close" onclick="dismissNotification('${notification.id}')">&times;</button>
+  `;
+  
+  // Add to top-right corner
+  element.style.position = 'fixed';
+  element.style.top = '20px';
+  element.style.right = '20px';
+  element.style.zIndex = '10004';
+  
+  return element;
+}
+
+function dismissNotification(notificationId) {
+  var element = document.getElementById(notificationId);
+  if (element) {
+    element.classList.add('notification-dismissing');
+    setTimeout(function() {
+      element.remove();
+    }, 300);
+  }
+  
+  // Remove from queue
+  notificationQueue = notificationQueue.filter(function(n) {
+    return n.id !== notificationId;
+  });
+}
+
+function dismissAllNotifications() {
+  notificationQueue.forEach(function(notification) {
+    dismissNotification(notification.id);
+  });
+}
+
+function playNotificationSound(type) {
+  var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  var oscillator = audioContext.createOscillator();
+  var gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  // Different sounds for different types
+  switch (type) {
+    case 'error':
+      oscillator.frequency.value = 200;
+      break;
+    case 'success':
+      oscillator.frequency.value = 800;
+      break;
+    case 'warning':
+      oscillator.frequency.value = 400;
+      break;
+    default:
+      oscillator.frequency.value = 600;
+  }
+  
+  oscillator.type = 'sine';
+  gainNode.gain.value = 0.1;
+  
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 0.2);
+}
+
+function showPersistentNotification(title, message, type = 'info') {
+  var notification = {
+    id: 'persistent_' + Date.now(),
+    title: title,
+    message: message,
+    type: type,
+    persistent: true,
+    timestamp: new Date().toISOString()
+  };
+  
+  var notifElement = createNotificationElement(notification);
+  notifElement.classList.add('notification-persistent');
+  document.body.appendChild(notifElement);
+  
+  return notification.id;
+}
+
+function updateNotification(notificationId, title, message) {
+  var element = document.getElementById(notificationId);
+  if (element) {
+    var titleElement = element.querySelector('.notification-title');
+    var messageElement = element.querySelector('.notification-message');
+    
+    if (titleElement) titleElement.textContent = title;
+    if (messageElement) messageElement.textContent = message;
+  }
+}
+
+function getNotificationHistory() {
+  return notificationQueue;
+}
+
+function clearNotificationHistory() {
+  notificationQueue = [];
+  dismissAllNotifications();
+}
+
+function requestNotificationPermission() {
+  if ('Notification' in window) {
+    Notification.requestPermission().then(function(permission) {
+      if (permission === 'granted') {
+        showNotification('Thông báo', 'Đã bật thông báo hệ thống', 'success');
+      }
+    });
+  }
+}
+
+function sendBrowserNotification(title, body, options = {}) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, {
+      body: body,
+      icon: '/icon-192x192.png',
+      badge: '/icon-192x192.png',
+      ...options
+    });
+  }
+}
+
+function setupNotificationPreferences() {
+  var preferences = getUserPreferences();
+  
+  if (preferences.notifications === undefined) {
+    preferences.notifications = true;
+    saveUserPreferences(preferences);
+  }
+  
+  if (preferences.notifications && 'Notification' in window && Notification.permission === 'default') {
+    requestNotificationPermission();
+  }
+}
+
 // Initialize security on load
 document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
