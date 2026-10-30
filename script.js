@@ -3159,6 +3159,179 @@ function setupNotificationPreferences() {
   }
 }
 
+// User Activity Tracking
+var userActivities = [];
+var sessionStartTime = Date.now();
+
+function trackUserActivity(action, details = {}) {
+  var activity = {
+    id: 'activity_' + Date.now(),
+    userId: CURRENT_USER?.id || 'anonymous',
+    action: action,
+    details: details,
+    timestamp: new Date().toISOString(),
+    page: window.location.pathname,
+    userAgent: navigator.userAgent
+  };
+  
+  userActivities.push(activity);
+  
+  // Keep only last 100 activities
+  if (userActivities.length > 100) {
+    userActivities.shift();
+  }
+  
+  // Send to backend
+  if (API_TOKEN) {
+    sendActivityToBackend(activity);
+  }
+}
+
+function sendActivityToBackend(activity) {
+  fetch(API_BASE_URL + '/analytics/activity', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + API_TOKEN
+    },
+    body: JSON.stringify(activity)
+  }).catch(function(error) {
+    console.error('Send activity error:', error);
+  });
+}
+
+function trackPageView(page) {
+  trackUserActivity('page_view', { page: page });
+}
+
+function trackButtonClick(buttonId, buttonLabel) {
+  trackUserActivity('button_click', {
+    buttonId: buttonId,
+    buttonLabel: buttonLabel
+  });
+}
+
+function trackFormSubmit(formId, formData) {
+  trackUserActivity('form_submit', {
+    formId: formId,
+    fieldCount: Object.keys(formData).length
+  });
+}
+
+function trackMapInteraction(interactionType, coordinates) {
+  trackUserActivity('map_interaction', {
+    type: interactionType,
+    coordinates: coordinates
+  });
+}
+
+function trackSearch(query, resultsCount) {
+  trackUserActivity('search', {
+    query: query,
+    resultsCount: resultsCount
+  });
+}
+
+function trackFilterChange(filterType, filterValue) {
+  trackUserActivity('filter_change', {
+    type: filterType,
+    value: filterValue
+  });
+}
+
+function trackIncidentAction(action, incidentId) {
+  trackUserActivity('incident_action', {
+    action: action,
+    incidentId: incidentId
+  });
+}
+
+function trackLayerChange(layerName) {
+  trackUserActivity('layer_change', {
+    layer: layerName
+  });
+}
+
+function getSessionDuration() {
+  return Date.now() - sessionStartTime;
+}
+
+function getActivityCount() {
+  return userActivities.length;
+}
+
+function getActivitiesByType(actionType) {
+  return userActivities.filter(function(a) {
+    return a.action === actionType;
+  });
+}
+
+function getActivitySummary() {
+  var summary = {
+    totalActivities: userActivities.length,
+    sessionDuration: getSessionDuration(),
+    actionCounts: {},
+    lastActivity: userActivities[userActivities.length - 1]
+  };
+  
+  userActivities.forEach(function(activity) {
+    summary.actionCounts[activity.action] = (summary.actionCounts[activity.action] || 0) + 1;
+  });
+  
+  return summary;
+}
+
+function saveActivityLog() {
+  localStorage.setItem('sosmap_activity_log', JSON.stringify(userActivities));
+}
+
+function loadActivityLog() {
+  try {
+    var saved = localStorage.getItem('sosmap_activity_log');
+    if (saved) {
+      userActivities = JSON.parse(saved);
+    }
+  } catch (error) {
+    console.error('Load activity log error:', error);
+  }
+}
+
+function clearActivityLog() {
+  userActivities = [];
+  localStorage.removeItem('sosmap_activity_log');
+}
+
+function initializeActivityTracking() {
+  loadActivityLog();
+  
+  // Track initial page view
+  trackPageView(window.location.pathname);
+  
+  // Track session start
+  sessionStartTime = Date.now();
+  
+  // Track page visibility changes
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      trackUserActivity('page_hidden', { page: window.location.pathname });
+    } else {
+      trackUserActivity('page_visible', { page: window.location.pathname });
+    }
+  });
+  
+  // Track before unload
+  window.addEventListener('beforeunload', function() {
+    saveActivityLog();
+    trackUserActivity('session_end', {
+      duration: getSessionDuration(),
+      activityCount: getActivityCount()
+    });
+  });
+  
+  // Save activity periodically
+  setInterval(saveActivityLog, 60000); // Every minute
+}
+
 // Initialize security on load
 document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
