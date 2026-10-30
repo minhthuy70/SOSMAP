@@ -1,6 +1,14 @@
 /**
  * Enhanced Logger Utility
  * Provides structured logging with different levels and outputs
+ * 
+ * This module offers comprehensive logging capabilities including:
+ * - Multiple log levels (error, warn, info, debug, trace)
+ * - Colored console output for better readability
+ * - Separate log files per level
+ * - Log rotation based on file size
+ * - Automatic cleanup of old logs
+ * - Structured JSON log format
  */
 
 const fs = require('fs');

@@ -1,6 +1,10 @@
 /**
  * Environment Validation Utility
  * Validates required environment variables and configuration
+ * 
+ * This module ensures that all required environment variables are set
+ * and validates their formats before the application starts.
+ * It also provides default values for optional variables.
  */
 
 const logger = require('./logger');
