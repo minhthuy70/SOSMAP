@@ -71,6 +71,7 @@ app.use('/api/locations', require('./routes/locations'));
 app.use('/api/layers', require('./routes/layers'));
 app.use('/api/roles', require('./routes/roles'));
 app.use('/api/audit', require('./routes/audit'));
+app.use('/api/telemetry', require('./routes/telemetry'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
