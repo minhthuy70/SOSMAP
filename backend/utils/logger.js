@@ -6,16 +6,18 @@
 const fs = require('fs');
 const path = require('path');
 
-// Log levels
+// Log levels with priority
 const LOG_LEVELS = {
-  ERROR: 'error',
-  WARN: 'warn',
-  INFO: 'info',
-  DEBUG: 'debug'
+  ERROR: { level: 0, name: 'error', color: '\x1b[31m' },
+  WARN: { level: 1, name: 'warn', color: '\x1b[33m' },
+  INFO: { level: 2, name: 'info', color: '\x1b[36m' },
+  DEBUG: { level: 3, name: 'debug', color: '\x1b[90m' },
+  TRACE: { level: 4, name: 'trace', color: '\x1b[37m' }
 };
 
 // Current log level from environment
 const CURRENT_LOG_LEVEL = process.env.LOG_LEVEL || 'info';
+const CURRENT_LEVEL_PRIORITY = LOG_LEVELS[CURRENT_LOG_LEVEL.toUpperCase()]?.level || 2;
 
 // Log directory
 const LOG_DIR = path.join(__dirname, '../logs');
@@ -27,6 +29,9 @@ if (!fs.existsSync(LOG_DIR)) {
 
 // Log file paths
 const ERROR_LOG_FILE = path.join(LOG_DIR, 'error.log');
+const WARN_LOG_FILE = path.join(LOG_DIR, 'warn.log');
+const INFO_LOG_FILE = path.join(LOG_DIR, 'info.log');
+const DEBUG_LOG_FILE = path.join(LOG_DIR, 'debug.log');
 const COMBINED_LOG_FILE = path.join(LOG_DIR, 'combined.log');
 
 /**
@@ -36,7 +41,7 @@ function formatLogEntry(level, message, meta = {}) {
   const timestamp = new Date().toISOString();
   const logEntry = {
     timestamp,
-    level,
+    level: level.name,
     message,
     ...meta
   };
@@ -58,19 +63,16 @@ function writeToFile(logFile, entry) {
  * Check if log level should be logged
  */
 function shouldLog(level) {
-  const levels = ['error', 'warn', 'info', 'debug'];
-  const currentIndex = levels.indexOf(CURRENT_LOG_LEVEL);
-  const levelIndex = levels.indexOf(level);
-  return levelIndex <= currentIndex;
+  return level.level <= CURRENT_LEVEL_PRIORITY;
 }
 
 /**
  * Log error
  */
 function error(message, meta = {}) {
-  if (shouldLog('error')) {
+  if (shouldLog(LOG_LEVELS.ERROR)) {
     const entry = formatLogEntry(LOG_LEVELS.ERROR, message, meta);
-    console.error(entry);
+    console.error(LOG_LEVELS.ERROR.color + entry + '\x1b[0m');
     writeToFile(ERROR_LOG_FILE, entry);
     writeToFile(COMBINED_LOG_FILE, entry);
   }
@@ -80,9 +82,10 @@ function error(message, meta = {}) {
  * Log warning
  */
 function warn(message, meta = {}) {
-  if (shouldLog('warn')) {
+  if (shouldLog(LOG_LEVELS.WARN)) {
     const entry = formatLogEntry(LOG_LEVELS.WARN, message, meta);
-    console.warn(entry);
+    console.warn(LOG_LEVELS.WARN.color + entry + '\x1b[0m');
+    writeToFile(WARN_LOG_FILE, entry);
     writeToFile(COMBINED_LOG_FILE, entry);
   }
 }
@@ -91,9 +94,10 @@ function warn(message, meta = {}) {
  * Log info
  */
 function info(message, meta = {}) {
-  if (shouldLog('info')) {
+  if (shouldLog(LOG_LEVELS.INFO)) {
     const entry = formatLogEntry(LOG_LEVELS.INFO, message, meta);
-    console.log(entry);
+    console.log(LOG_LEVELS.INFO.color + entry + '\x1b[0m');
+    writeToFile(INFO_LOG_FILE, entry);
     writeToFile(COMBINED_LOG_FILE, entry);
   }
 }
@@ -102,11 +106,42 @@ function info(message, meta = {}) {
  * Log debug
  */
 function debug(message, meta = {}) {
-  if (shouldLog('debug')) {
+  if (shouldLog(LOG_LEVELS.DEBUG)) {
     const entry = formatLogEntry(LOG_LEVELS.DEBUG, message, meta);
-    console.log(entry);
+    console.log(LOG_LEVELS.DEBUG.color + entry + '\x1b[0m');
+    writeToFile(DEBUG_LOG_FILE, entry);
     writeToFile(COMBINED_LOG_FILE, entry);
   }
+}
+
+/**
+ * Log trace
+ */
+function trace(message, meta = {}) {
+  if (shouldLog(LOG_LEVELS.TRACE)) {
+    const entry = formatLogEntry(LOG_LEVELS.TRACE, message, meta);
+    console.log(LOG_LEVELS.TRACE.color + entry + '\x1b[0m');
+    writeToFile(DEBUG_LOG_FILE, entry);
+    writeToFile(COMBINED_LOG_FILE, entry);
+  }
+}
+
+/**
+ * Set log level dynamically
+ */
+function setLogLevel(level) {
+  const newLevel = LOG_LEVELS[level.toUpperCase()];
+  if (newLevel) {
+    process.env.LOG_LEVEL = level;
+    info('Log level changed', { from: CURRENT_LOG_LEVEL, to: level });
+  }
+}
+
+/**
+ * Get current log level
+ */
+function getLogLevel() {
+  return CURRENT_LOG_LEVEL;
 }
 
 /**
@@ -176,6 +211,35 @@ function logSecurityEvent(event, details) {
 }
 
 /**
+ * Rotate log files
+ */
+function rotateLogs() {
+  const logFiles = [
+    ERROR_LOG_FILE,
+    WARN_LOG_FILE,
+    INFO_LOG_FILE,
+    DEBUG_LOG_FILE,
+    COMBINED_LOG_FILE
+  ];
+  
+  logFiles.forEach(function(logFile) {
+    if (fs.existsSync(logFile)) {
+      const stats = fs.statSync(logFile);
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      
+      if (stats.size > maxSize) {
+        const backupFile = logFile + '.bak';
+        if (fs.existsSync(backupFile)) {
+          fs.unlinkSync(backupFile);
+        }
+        fs.renameSync(logFile, backupFile);
+        info('Log file rotated', { file: logFile });
+      }
+    }
+  });
+}
+
+/**
  * Clean old log files (older than 7 days)
  */
 function cleanOldLogs() {
@@ -198,10 +262,12 @@ function cleanOldLogs() {
   }
 }
 
-// Clean old logs on startup
+// Initialize logging
+rotateLogs();
 cleanOldLogs();
 
-// Schedule log cleanup daily
+// Schedule log rotation daily
+setInterval(rotateLogs, 24 * 60 * 60 * 1000);
 setInterval(cleanOldLogs, 24 * 60 * 60 * 1000);
 
 module.exports = {
@@ -209,11 +275,15 @@ module.exports = {
   warn,
   info,
   debug,
+  trace,
+  setLogLevel,
+  getLogLevel,
   logRequest,
   logQuery,
   logWebSocketEvent,
   logAuthAttempt,
   logSecurityEvent,
   cleanOldLogs,
+  rotateLogs,
   LOG_LEVELS
 };
