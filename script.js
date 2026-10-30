@@ -2773,6 +2773,210 @@ function selectSearchResult(lat, lng, name) {
   showNotification('Tìm kiếm', 'Đã đến: ' + name);
 }
 
+// Advanced Filtering
+var activeFilters = {
+  types: [],
+  status: [],
+  severity: [],
+  dateRange: { start: null, end: null },
+  radius: null,
+  center: null
+};
+
+function setFilterType(type, value) {
+  if (activeFilters[type].includes(value)) {
+    activeFilters[type] = activeFilters[type].filter(function(v) { return v !== value; });
+  } else {
+    activeFilters[type].push(value);
+  }
+  
+  applyFilters();
+  saveFilterState();
+}
+
+function setDateRange(start, end) {
+  activeFilters.dateRange = { start: start, end: end };
+  applyFilters();
+  saveFilterState();
+}
+
+function setRadiusFilter(center, radius) {
+  activeFilters.center = center;
+  activeFilters.radius = radius;
+  applyFilters();
+  saveFilterState();
+}
+
+function clearFilter(type) {
+  if (type === 'all') {
+    activeFilters = {
+      types: [],
+      status: [],
+      severity: [],
+      dateRange: { start: null, end: null },
+      radius: null,
+      center: null
+    };
+  } else if (type === 'dateRange') {
+    activeFilters.dateRange = { start: null, end: null };
+  } else if (type === 'radius') {
+    activeFilters.radius = null;
+    activeFilters.center = null;
+  } else {
+    activeFilters[type] = [];
+  }
+  
+  applyFilters();
+  saveFilterState();
+}
+
+function applyFilters() {
+  var incidents = document.querySelectorAll('.incident-item');
+  
+  incidents.forEach(function(item) {
+    var incidentData = JSON.parse(item.getAttribute('data-incident') || '{}');
+    var isVisible = true;
+    
+    // Filter by type
+    if (activeFilters.types.length > 0) {
+      if (!activeFilters.types.includes(incidentData.type)) {
+        isVisible = false;
+      }
+    }
+    
+    // Filter by status
+    if (activeFilters.status.length > 0) {
+      if (!activeFilters.status.includes(incidentData.status)) {
+        isVisible = false;
+      }
+    }
+    
+    // Filter by severity
+    if (activeFilters.severity.length > 0) {
+      if (!activeFilters.severity.includes(incidentData.severity)) {
+        isVisible = false;
+      }
+    }
+    
+    // Filter by date range
+    if (activeFilters.dateRange.start && activeFilters.dateRange.end) {
+      var incidentDate = new Date(incidentData.created_at);
+      if (incidentDate < activeFilters.dateRange.start || incidentDate > activeFilters.dateRange.end) {
+        isVisible = false;
+      }
+    }
+    
+    // Filter by radius
+    if (activeFilters.radius && activeFilters.center) {
+      var distance = calculateDistance(
+        activeFilters.center.lat,
+        activeFilters.center.lng,
+        incidentData.latitude,
+        incidentData.longitude
+      );
+      if (distance > activeFilters.radius) {
+        isVisible = false;
+      }
+    }
+    
+    item.style.display = isVisible ? '' : 'none';
+  });
+  
+  // Update filter count display
+  updateFilterCount();
+}
+
+function calculateDistance(lat1, lng1, lat2, lng2) {
+  var R = 6371; // Earth's radius in km
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLng = (lng2 - lng1) * Math.PI / 180;
+  var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+          Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function updateFilterCount() {
+  var count = 0;
+  count += activeFilters.types.length;
+  count += activeFilters.status.length;
+  count += activeFilters.severity.length;
+  count += (activeFilters.dateRange.start ? 1 : 0);
+  count += (activeFilters.radius ? 1 : 0);
+  
+  var filterCountElement = document.getElementById('filterCount');
+  if (filterCountElement) {
+    filterCountElement.textContent = count > 0 ? count + ' bộ lọc' : '';
+  }
+}
+
+function saveFilterState() {
+  localStorage.setItem('sosmap_filters', JSON.stringify(activeFilters));
+}
+
+function loadFilterState() {
+  try {
+    var saved = localStorage.getItem('sosmap_filters');
+    if (saved) {
+      activeFilters = JSON.parse(saved);
+      applyFilters();
+    }
+  } catch (error) {
+    console.error('Load filter state error:', error);
+  }
+}
+
+function getActiveFilters() {
+  return activeFilters;
+}
+
+function createFilterUI() {
+  var filterPanel = document.getElementById('filterPanel');
+  if (!filterPanel) return;
+  
+  filterPanel.innerHTML = `
+    <div class="filter-section">
+      <h4>Loại sự cố</h4>
+      <div class="filter-options">
+        <label><input type="checkbox" value="traffic" onchange="setFilterType('types', 'traffic')"> Giao thông</label>
+        <label><input type="checkbox" value="flood" onchange="setFilterType('types', 'flood')"> Ngập lụt</label>
+        <label><input type="checkbox" value="fire" onchange="setFilterType('types', 'fire')"> Cháy nổ</label>
+        <label><input type="checkbox" value="health" onchange="setFilterType('types', 'health')"> Sức khỏe</label>
+      </div>
+    </div>
+    <div class="filter-section">
+      <h4>Trạng thái</h4>
+      <div class="filter-options">
+        <label><input type="checkbox" value="new" onchange="setFilterType('status', 'new')"> Mới</label>
+        <label><input type="checkbox" value="in_progress" onchange="setFilterType('status', 'in_progress')"> Đang xử lý</label>
+        <label><input type="checkbox" value="resolved" onchange="setFilterType('status', 'resolved')"> Đã giải quyết</label>
+        <label><input type="checkbox" value="closed" onchange="setFilterType('status', 'closed')"> Đã đóng</label>
+      </div>
+    </div>
+    <div class="filter-section">
+      <h4>Mức độ nghiêm trọng</h4>
+      <div class="filter-options">
+        <label><input type="checkbox" value="low" onchange="setFilterType('severity', 'low')"> Thấp</label>
+        <label><input type="checkbox" value="medium" onchange="setFilterType('severity', 'medium')"> Trung bình</label>
+        <label><input type="checkbox" value="high" onchange="setFilterType('severity', 'high')"> Cao</label>
+        <label><input type="checkbox" value="critical" onchange="setFilterType('severity', 'critical')"> Nghiêm trọng</label>
+      </div>
+    </div>
+    <div class="filter-section">
+      <h4>Khoảng thời gian</h4>
+      <div class="filter-options">
+        <input type="date" id="filterStartDate" onchange="setDateRange(new Date(this.value), activeFilters.dateRange.end)">
+        <input type="date" id="filterEndDate" onchange="setDateRange(activeFilters.dateRange.start, new Date(this.value))">
+      </div>
+    </div>
+    <div class="filter-actions">
+      <button onclick="clearFilter('all')">Xóa tất cả</button>
+      <button onclick="applyFilters()">Áp dụng</button>
+    </div>
+  `;
+}
+
 // Initialize security on load
 document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
