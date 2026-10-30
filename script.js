@@ -3776,6 +3776,61 @@ function updateBackupInfo() {
   localStorage.setItem('sosmap_backup_count', count.toString());
 }
 
+// Final Review: Initialize all systems
+function initializeAllSystems() {
+  console.log('Initializing SOSMAP Application Systems...');
+  
+  try {
+    // Initialize logging
+    initializeSecurity();
+    
+    // Initialize preferences
+    initializeDarkMode();
+    initializeLanguage();
+    loadFavorites();
+    
+    // Initialize data systems
+    loadFilterState();
+    loadActivityLog();
+    loadGeofences();
+    
+    // Initialize map systems
+    initializeLayerControls();
+    
+    // Initialize notifications
+    setupNotificationPreferences();
+    
+    // Initialize activity tracking
+    initializeActivityTracking();
+    
+    // Initialize telemetry
+    if (typeof Telemetry !== 'undefined' && Telemetry.initializeTelemetry) {
+      Telemetry.initializeTelemetry();
+    }
+    
+    // Initialize autocomplete
+    initializeSearchAutocomplete();
+    
+    // Schedule background tasks
+    scheduleAutoBackup();
+    
+    console.log('SOSMAP Application Systems Initialized Successfully');
+  } catch (error) {
+    console.error('System initialization error:', error);
+    handleCriticalError(error);
+  }
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    checkVersion();
+    initializeAllSystems();
+  } catch (error) {
+    handleCriticalError(error);
+  }
+});
+
 // Initialize security on load
 document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
