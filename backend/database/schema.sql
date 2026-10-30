@@ -24,6 +24,9 @@ CREATE TABLE users (
 -- Indexes for users
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_is_active ON users(is_active);
+CREATE INDEX idx_users_created_at ON users(created_at);
+CREATE INDEX idx_users_phone ON users(phone);
 
 -- Incidents table
 CREATE TABLE incidents (
@@ -50,6 +53,11 @@ CREATE INDEX idx_incidents_severity ON incidents(severity);
 CREATE INDEX idx_incidents_status ON incidents(status);
 CREATE INDEX idx_incidents_created_at ON incidents(created_at);
 CREATE INDEX idx_incidents_location ON incidents(latitude, longitude);
+CREATE INDEX idx_incidents_type_status ON incidents(type, status);
+CREATE INDEX idx_incidents_severity_status ON incidents(severity, status);
+CREATE INDEX idx_incidents_user_created ON incidents(user_id, created_at);
+CREATE INDEX idx_incidents_verified ON incidents(verified_by) WHERE verified_by IS NOT NULL;
+CREATE INDEX idx_incidents_pending ON incidents(status) WHERE status = 'pending';
 
 -- Notifications table
 CREATE TABLE notifications (
@@ -68,6 +76,9 @@ CREATE TABLE notifications (
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX idx_notifications_read ON notifications(read);
 CREATE INDEX idx_notifications_created_at ON notifications(created_at);
+CREATE INDEX idx_notifications_type ON notifications(type);
+CREATE INDEX idx_notifications_user_read ON notifications(user_id, read);
+CREATE INDEX idx_notifications_unread ON notifications(user_id) WHERE read = false;
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -102,6 +113,8 @@ CREATE TABLE map_layers (
 -- Indexes for map_layers
 CREATE INDEX idx_map_layers_type ON map_layers(type);
 CREATE INDEX idx_map_layers_active ON map_layers(is_active);
+CREATE INDEX idx_map_layers_display_order ON map_layers(display_order);
+CREATE INDEX idx_map_layers_active_type ON map_layers(is_active, type);
 
 -- Trigger for map_layers updated_at
 CREATE TRIGGER update_map_layers_updated_at BEFORE UPDATE ON map_layers
@@ -132,6 +145,8 @@ CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
 CREATE INDEX idx_audit_logs_action ON audit_logs(action);
 CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
 CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at);
+CREATE INDEX idx_audit_logs_user_created ON audit_logs(user_id, created_at);
+CREATE INDEX idx_audit_logs_ip_address ON audit_logs(ip_address);
 
 -- Insert sample admin user (password: admin123)
 INSERT INTO users (email, password, name, role) VALUES
