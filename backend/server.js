@@ -12,6 +12,9 @@ const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
+// Initialize Logging
+const logger = require('./utils/logger');
+
 // Initialize WebSocket
 const { initializeWebSocket } = require('./services/websocket');
 const io = initializeWebSocket(server);
@@ -28,9 +31,26 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(helmet());
 app.use(cors());
 app.use(compression());
-app.use(morgan('combined'));
+app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  logger.error('Server error:', {
+    message: err.message,
+    stack: err.stack,
+    url: req.url,
+    method: req.method,
+    ip: req.ip
+  });
+  
+  res.status(err.status || 500).json({
+    success: false,
+    error: err.message || 'Internal server error',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
