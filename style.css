@@ -16157,6 +16157,78 @@ body.dark-mode .upload-progress-text {
   background: #c82333;
 }
 
+/* Search Autocomplete */
+.search-autocomplete {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 0 0 4px 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+body.dark-mode .search-autocomplete {
+  background: #2a2a2a;
+  border-color: #444;
+}
+
+.autocomplete-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+body.dark-mode .autocomplete-item {
+  border-bottom-color: #444;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.selected {
+  background: #f5f5f5;
+}
+
+body.dark-mode .autocomplete-item:hover,
+body.dark-mode .autocomplete-item.selected {
+  background: #3a3a3a;
+}
+
+.suggestion-name {
+  font-weight: 500;
+  color: #333;
+}
+
+body.dark-mode .suggestion-name {
+  color: #e0e0e0;
+}
+
+.suggestion-coords {
+  font-size: 12px;
+  color: #999;
+}
+
+body.dark-mode .suggestion-coords {
+  color: #666;
+}
+
+.autocomplete-item.no-results {
+  color: #999;
+  font-style: italic;
+  justify-content: center;
+}
+
+body.dark-mode .autocomplete-item.no-results {
+  color: #666;
+}
+
 /* Critical Error Styles */
 .critical-error {
   background: white;

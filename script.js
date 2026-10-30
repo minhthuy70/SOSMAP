@@ -2589,6 +2589,190 @@ function toggleGeofenceVisibility(geofenceId) {
   }
 }
 
+// Search with Autocomplete
+var searchSuggestions = [];
+var searchDebounceTimer = null;
+
+function initializeSearchAutocomplete() {
+  var searchInput = document.getElementById('mapSearchInput');
+  if (!searchInput) return;
+  
+  // Create autocomplete dropdown
+  var autocompleteContainer = document.createElement('div');
+  autocompleteContainer.className = 'search-autocomplete';
+  autocompleteContainer.id = 'searchAutocomplete';
+  searchInput.parentNode.appendChild(autocompleteContainer);
+  
+  // Add input event listener
+  searchInput.addEventListener('input', function(e) {
+    var query = e.target.value.trim();
+    
+    // Clear previous timer
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
+    
+    // Debounce search
+    searchDebounceTimer = setTimeout(function() {
+      if (query.length >= 2) {
+        fetchSearchSuggestions(query);
+      } else {
+        hideAutocomplete();
+      }
+    }, 300);
+  });
+  
+  // Handle keyboard navigation
+  searchInput.addEventListener('keydown', function(e) {
+    handleAutocompleteKeydown(e);
+  });
+  
+  // Hide autocomplete on click outside
+  document.addEventListener('click', function(e) {
+    if (!searchInput.contains(e.target) && !autocompleteContainer.contains(e.target)) {
+      hideAutocomplete();
+    }
+  });
+}
+
+async function fetchSearchSuggestions(query) {
+  try {
+    var response = await fetchWithRetry(API_BASE_URL + '/locations/search?q=' + encodeURIComponent(query), {
+      headers: {
+        'Authorization': 'Bearer ' + API_TOKEN
+      }
+    });
+    
+    if (response.ok) {
+      var data = await response.json();
+      searchSuggestions = data.suggestions || [];
+      showAutocomplete(searchSuggestions);
+    }
+  } catch (error) {
+    // Fallback to local suggestions
+    var localSuggestions = getLocalSearchSuggestions(query);
+    showAutocomplete(localSuggestions);
+  }
+}
+
+function getLocalSearchSuggestions(query) {
+  var locations = [
+    { name: 'Quận 1, TP.HCM', lat: 10.7769, lng: 106.7009 },
+    { name: 'Quận 3, TP.HCM', lat: 10.7869, lng: 106.6909 },
+    { name: 'Quận 5, TP.HCM', lat: 10.7569, lng: 106.6809 },
+    { name: 'Quận 7, TP.HCM', lat: 10.7469, lng: 106.6709 },
+    { name: 'Bình Thạnh, TP.HCM', lat: 10.8169, lng: 106.7109 },
+    { name: 'Tân Bình, TP.HCM', lat: 10.8069, lng: 106.6609 },
+    { name: 'Gò Vấp, TP.HCM', lat: 10.8369, lng: 106.6909 },
+    { name: 'Phú Nhuận, TP.HCM', lat: 10.7969, lng: 106.6809 }
+  ];
+  
+  var lowerQuery = query.toLowerCase();
+  return locations.filter(function(loc) {
+    return loc.name.toLowerCase().includes(lowerQuery);
+  });
+}
+
+function showAutocomplete(suggestions) {
+  var autocompleteContainer = document.getElementById('searchAutocomplete');
+  if (!autocompleteContainer) return;
+  
+  if (suggestions.length === 0) {
+    autocompleteContainer.innerHTML = '<div class="autocomplete-item no-results">Không tìm thấy kết quả</div>';
+    autocompleteContainer.style.display = 'block';
+    return;
+  }
+  
+  var html = suggestions.map(function(suggestion, index) {
+    return `
+      <div class="autocomplete-item" data-index="${index}" data-lat="${suggestion.lat}" data-lng="${suggestion.lng}">
+        <span class="suggestion-name">${suggestion.name}</span>
+        <span class="suggestion-coords">${suggestion.lat.toFixed(4)}, ${suggestion.lng.toFixed(4)}</span>
+      </div>
+    `;
+  }).join('');
+  
+  autocompleteContainer.innerHTML = html;
+  autocompleteContainer.style.display = 'block';
+  
+  // Add click handlers
+  autocompleteContainer.querySelectorAll('.autocomplete-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      var lat = parseFloat(this.getAttribute('data-lat'));
+      var lng = parseFloat(this.getAttribute('data-lng'));
+      var name = this.querySelector('.suggestion-name').textContent;
+      
+      selectSearchResult(lat, lng, name);
+    });
+  });
+}
+
+function hideAutocomplete() {
+  var autocompleteContainer = document.getElementById('searchAutocomplete');
+  if (autocompleteContainer) {
+    autocompleteContainer.style.display = 'none';
+  }
+}
+
+var autocompleteSelectedIndex = -1;
+
+function handleAutocompleteKeydown(e) {
+  var autocompleteContainer = document.getElementById('searchAutocomplete');
+  if (!autocompleteContainer || autocompleteContainer.style.display === 'none') return;
+  
+  var items = autocompleteContainer.querySelectorAll('.autocomplete-item');
+  
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    autocompleteSelectedIndex = Math.min(autocompleteSelectedIndex + 1, items.length - 1);
+    updateAutocompleteSelection(items);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    autocompleteSelectedIndex = Math.max(autocompleteSelectedIndex - 1, 0);
+    updateAutocompleteSelection(items);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (autocompleteSelectedIndex >= 0 && items[autocompleteSelectedIndex]) {
+      items[autocompleteSelectedIndex].click();
+    }
+  } else if (e.key === 'Escape') {
+    hideAutocomplete();
+  }
+}
+
+function updateAutocompleteSelection(items) {
+  items.forEach(function(item, index) {
+    if (index === autocompleteSelectedIndex) {
+      item.classList.add('selected');
+    } else {
+      item.classList.remove('selected');
+    }
+  });
+}
+
+function selectSearchResult(lat, lng, name) {
+  var searchInput = document.getElementById('mapSearchInput');
+  if (searchInput) {
+    searchInput.value = name;
+  }
+  
+  hideAutocomplete();
+  
+  // Move map to location
+  if (typeof map !== 'undefined') {
+    map.setView([lat, lng], 15);
+    
+    // Add marker
+    var marker = L.marker([lat, lng]).addTo(map);
+    marker.bindPopup(name).openPopup();
+  }
+  
+  // Add to search history
+  addToSearchHistory(name);
+  
+  showNotification('Tìm kiếm', 'Đã đến: ' + name);
+}
+
 // Initialize security on load
 document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
