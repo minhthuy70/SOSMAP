@@ -3332,6 +3332,245 @@ function initializeActivityTracking() {
   setInterval(saveActivityLog, 60000); // Every minute
 }
 
+// Enhanced Data Export Options
+function exportToCSV(data, filename) {
+  if (!data || data.length === 0) {
+    showNotification('Lỗi', 'Không có dữ liệu để xuất');
+    return;
+  }
+  
+  var headers = Object.keys(data[0]);
+  var csvContent = headers.join(',') + '\n';
+  
+  data.forEach(function(row) {
+    var values = headers.map(function(header) {
+      var value = row[header];
+      // Escape quotes and wrap in quotes if contains comma
+      if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
+        value = '"' + value.replace(/"/g, '""') + '"';
+      }
+      return value;
+    });
+    csvContent += values.join(',') + '\n';
+  });
+  
+  var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  var link = document.createElement('a');
+  var url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename + '.csv');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  showNotification('Xuất dữ liệu', 'Đã xuất file CSV');
+}
+
+function exportToJSON(data, filename) {
+  if (!data) {
+    showNotification('Lỗi', 'Không có dữ liệu để xuất');
+    return;
+  }
+  
+  var jsonContent = JSON.stringify(data, null, 2);
+  var blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+  var link = document.createElement('a');
+  var url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename + '.json');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  showNotification('Xuất dữ liệu', 'Đã xuất file JSON');
+}
+
+function exportToXML(data, filename) {
+  if (!data || data.length === 0) {
+    showNotification('Lỗi', 'Không có dữ liệu để xuất');
+    return;
+  }
+  
+  var xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n<root>\n';
+  
+  data.forEach(function(item) {
+    xmlContent += '  <item>\n';
+    Object.keys(item).forEach(function(key) {
+      xmlContent += '    <' + key + '>' + item[key] + '</' + key + '>\n';
+    });
+    xmlContent += '  </item>\n';
+  });
+  
+  xmlContent += '</root>';
+  
+  var blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8;' });
+  var link = document.createElement('a');
+  var url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename + '.xml');
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  showNotification('Xuất dữ liệu', 'Đã xuất file XML');
+}
+
+async function exportToPDF(data, filename) {
+  try {
+    var response = await fetchWithRetry(API_BASE_URL + '/export/pdf', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + API_TOKEN
+      },
+      body: JSON.stringify({ data: data, filename: filename })
+    });
+    
+    if (response.ok) {
+      var blob = await response.blob();
+      var link = document.createElement('a');
+      var url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename + '.pdf');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showNotification('Xuất dữ liệu', 'Đã xuất file PDF');
+    } else {
+      throw new Error('PDF export failed');
+    }
+  } catch (error) {
+    console.error('Export PDF error:', error);
+    showNotification('Lỗi', 'Không thể xuất PDF: ' + error.message);
+  }
+}
+
+function exportIncidents(format = 'csv') {
+  var incidents = document.querySelectorAll('.incident-item');
+  var data = [];
+  
+  incidents.forEach(function(item) {
+    var incidentData = JSON.parse(item.getAttribute('data-incident') || '{}');
+    data.push(incidentData);
+  });
+  
+  var filename = 'incidents_export_' + new Date().toISOString().split('T')[0];
+  
+  switch (format) {
+    case 'csv':
+      exportToCSV(data, filename);
+      break;
+    case 'json':
+      exportToJSON(data, filename);
+      break;
+    case 'xml':
+      exportToXML(data, filename);
+      break;
+    case 'pdf':
+      exportToPDF(data, filename);
+      break;
+    default:
+      exportToCSV(data, filename);
+  }
+}
+
+function exportAnalytics(format = 'csv') {
+  var analyticsData = {
+    incidents: {
+      total: document.querySelectorAll('.incident-item').length,
+      byType: getIncidentsByType(),
+      byStatus: getIncidentsByStatus()
+    },
+    session: {
+      duration: getSessionDuration(),
+      activities: getActivityCount()
+    },
+    timestamp: new Date().toISOString()
+  };
+  
+  var filename = 'analytics_export_' + new Date().toISOString().split('T')[0];
+  
+  switch (format) {
+    case 'json':
+      exportToJSON(analyticsData, filename);
+      break;
+    case 'xml':
+      exportToXML([analyticsData], filename);
+      break;
+    default:
+      exportToJSON(analyticsData, filename);
+  }
+}
+
+function getIncidentsByType() {
+  var types = {};
+  document.querySelectorAll('.incident-item').forEach(function(item) {
+    var data = JSON.parse(item.getAttribute('data-incident') || '{}');
+    types[data.type] = (types[data.type] || 0) + 1;
+  });
+  return types;
+}
+
+function getIncidentsByStatus() {
+  var statuses = {};
+  document.querySelectorAll('.incident-item').forEach(function(item) {
+    var data = JSON.parse(item.getAttribute('data-incident') || '{}');
+    statuses[data.status] = (statuses[data.status] || 0) + 1;
+  });
+  return statuses;
+}
+
+function showExportDialog() {
+  var dialog = document.createElement('div');
+  dialog.className = 'export-dialog';
+  dialog.innerHTML = `
+    <div class="export-dialog-content">
+      <h3>Xuất dữ liệu</h3>
+      <div class="export-options">
+        <div class="export-section">
+          <h4>Chọn dữ liệu</h4>
+          <label><input type="radio" name="exportData" value="incidents" checked> Sự cố</label>
+          <label><input type="radio" name="exportData" value="analytics"> Analytics</label>
+        </div>
+        <div class="export-section">
+          <h4>Chọn định dạng</h4>
+          <label><input type="radio" name="exportFormat" value="csv" checked> CSV</label>
+          <label><input type="radio" name="exportFormat" value="json"> JSON</label>
+          <label><input type="radio" name="exportFormat" value="xml"> XML</label>
+          <label><input type="radio" name="exportFormat" value="pdf"> PDF</label>
+        </div>
+      </div>
+      <div class="export-actions">
+        <button onclick="this.closest('.export-dialog').remove()">Hủy</button>
+        <button onclick="handleExport(this)">Xuất</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(dialog);
+}
+
+function handleExport(button) {
+  var exportData = document.querySelector('input[name="exportData"]:checked').value;
+  var exportFormat = document.querySelector('input[name="exportFormat"]:checked').value;
+  
+  button.closest('.export-dialog').remove();
+  
+  if (exportData === 'incidents') {
+    exportIncidents(exportFormat);
+  } else if (exportData === 'analytics') {
+    exportAnalytics(exportFormat);
+  }
+}
+
 // Initialize security on load
 document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
