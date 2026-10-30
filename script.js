@@ -1799,6 +1799,169 @@ async function deleteIncidentWithRetry(incidentId) {
   }
 }
 
+// Upload Progress Indicators
+function showUploadProgress() {
+  var progressContainer = document.getElementById('uploadProgressContainer');
+  if (!progressContainer) {
+    progressContainer = document.createElement('div');
+    progressContainer.id = 'uploadProgressContainer';
+    progressContainer.className = 'upload-progress-container';
+    progressContainer.innerHTML = `
+      <div class="upload-progress-bar">
+        <div class="upload-progress-fill" id="uploadProgressFill"></div>
+      </div>
+      <div class="upload-progress-text" id="uploadProgressText">Đang tải lên... 0%</div>
+      <button class="upload-cancel-btn" id="uploadCancelBtn">Hủy</button>
+    `;
+    document.body.appendChild(progressContainer);
+  }
+  
+  progressContainer.style.display = 'flex';
+  return progressContainer;
+}
+
+function hideUploadProgress() {
+  var progressContainer = document.getElementById('uploadProgressContainer');
+  if (progressContainer) {
+    progressContainer.style.display = 'none';
+  }
+}
+
+function updateUploadProgress(percent) {
+  var progressFill = document.getElementById('uploadProgressFill');
+  var progressText = document.getElementById('uploadProgressText');
+  
+  if (progressFill) {
+    progressFill.style.width = percent + '%';
+  }
+  
+  if (progressText) {
+    progressText.textContent = 'Đang tải lên... ' + percent + '%';
+  }
+}
+
+function uploadFileWithProgress(file, url, options = {}) {
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    var formData = new FormData();
+    
+    formData.append('file', file);
+    
+    // Add additional form data if provided
+    if (options.data) {
+      Object.keys(options.data).forEach(function(key) {
+        formData.append(key, options.data[key]);
+      });
+    }
+    
+    var progressContainer = showUploadProgress();
+    var cancelled = false;
+    
+    // Progress handler
+    xhr.upload.addEventListener('progress', function(event) {
+      if (event.lengthComputable) {
+        var percent = Math.round((event.loaded / event.total) * 100);
+        updateUploadProgress(percent);
+      }
+    });
+    
+    // Load handler
+    xhr.addEventListener('load', function() {
+      if (cancelled) {
+        reject(new Error('Upload cancelled'));
+        return;
+      }
+      
+      hideUploadProgress();
+      
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          var response = JSON.parse(xhr.responseText);
+          resolve(response);
+        } catch (error) {
+          reject(new Error('Invalid response format'));
+        }
+      } else {
+        reject(new Error('Upload failed with status ' + xhr.status));
+      }
+    });
+    
+    // Error handler
+    xhr.addEventListener('error', function() {
+      if (!cancelled) {
+        hideUploadProgress();
+        reject(new Error('Upload failed due to network error'));
+      }
+    });
+    
+    // Abort handler
+    xhr.addEventListener('abort', function() {
+      hideUploadProgress();
+      reject(new Error('Upload cancelled'));
+    });
+    
+    // Cancel button handler
+    var cancelBtn = document.getElementById('uploadCancelBtn');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', function() {
+        cancelled = true;
+        xhr.abort();
+      });
+    }
+    
+    // Add authorization header if token exists
+    if (API_TOKEN) {
+      xhr.setRequestHeader('Authorization', 'Bearer ' + API_TOKEN);
+    }
+    
+    // Open and send request
+    xhr.open('POST', url);
+    xhr.send(formData);
+  });
+}
+
+async function uploadIncidentFile(file, incidentId) {
+  try {
+    var url = API_BASE_URL + '/incidents/' + incidentId + '/upload';
+    var response = await uploadFileWithProgress(file, url);
+    showNotification('Thành công', 'Đã tải file lên');
+    return response;
+  } catch (error) {
+    console.error('Upload file error:', error);
+    showNotification('Lỗi', 'Không thể tải file lên: ' + error.message);
+    return null;
+  }
+}
+
+async function uploadMultipleFiles(files, incidentId) {
+  var results = [];
+  var totalFiles = files.length;
+  var completedFiles = 0;
+  
+  showUploadProgress();
+  
+  for (var i = 0; i < files.length; i++) {
+    try {
+      var url = API_BASE_URL + '/incidents/' + incidentId + '/upload';
+      var response = await uploadFileWithProgress(files[i], url);
+      results.push({ success: true, file: files[i].name, response });
+    } catch (error) {
+      results.push({ success: false, file: files[i].name, error: error.message });
+    }
+    
+    completedFiles++;
+    var overallProgress = Math.round((completedFiles / totalFiles) * 100);
+    updateUploadProgress(overallProgress);
+  }
+  
+  hideUploadProgress();
+  
+  var successCount = results.filter(function(r) { return r.success; }).length;
+  showNotification('Hoàn tất', 'Đã tải lên ' + successCount + '/' + totalFiles + ' file');
+  
+  return results;
+}
+
 // Initialize security on load
 document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
