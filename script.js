@@ -1673,6 +1673,132 @@ function initializeSecurity() {
   });
 }
 
+// Retry Mechanism for API Calls
+var retryConfig = {
+  maxRetries: 3,
+  initialDelay: 1000,
+  maxDelay: 10000,
+  backoffMultiplier: 2
+};
+
+function exponentialBackoff(attempt) {
+  var delay = retryConfig.initialDelay * Math.pow(retryConfig.backoffMultiplier, attempt);
+  return Math.min(delay, retryConfig.maxDelay);
+}
+
+async function fetchWithRetry(url, options = {}, retryCount = 0) {
+  try {
+    var response = await fetch(url, options);
+    
+    // Retry on 5xx errors or network errors
+    if (!response.ok && response.status >= 500 && retryCount < retryConfig.maxRetries) {
+      throw new Error('Server error: ' + response.status);
+    }
+    
+    return response;
+  } catch (error) {
+    if (retryCount < retryConfig.maxRetries) {
+      var delay = exponentialBackoff(retryCount);
+      console.log('Retrying request in ' + delay + 'ms (attempt ' + (retryCount + 1) + ')');
+      
+      await new Promise(function(resolve) {
+        setTimeout(resolve, delay);
+      });
+      
+      return fetchWithRetry(url, options, retryCount + 1);
+    }
+    
+    throw error;
+  }
+}
+
+async function getIncidentsWithRetry() {
+  try {
+    var response = await fetchWithRetry(API_BASE_URL + '/incidents', {
+      headers: {
+        'Authorization': 'Bearer ' + API_TOKEN
+      }
+    });
+    
+    if (response.ok) {
+      return await response.json();
+    }
+    
+    throw new Error('Failed to fetch incidents');
+  } catch (error) {
+    console.error('Get incidents error (after retries):', error);
+    showNotification('Lỗi', 'Không thể tải sự cố: ' + error.message);
+    return [];
+  }
+}
+
+async function createIncidentWithRetry(incidentData) {
+  try {
+    var response = await fetchWithRetry(API_BASE_URL + '/incidents', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + API_TOKEN
+      },
+      body: JSON.stringify(incidentData)
+    });
+    
+    if (response.ok) {
+      return await response.json();
+    }
+    
+    throw new Error('Failed to create incident');
+  } catch (error) {
+    console.error('Create incident error (after retries):', error);
+    showNotification('Lỗi', 'Không thể tạo sự cố: ' + error.message);
+    return null;
+  }
+}
+
+async function updateIncidentWithRetry(incidentId, updateData) {
+  try {
+    var response = await fetchWithRetry(API_BASE_URL + '/incidents/' + incidentId, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + API_TOKEN
+      },
+      body: JSON.stringify(updateData)
+    });
+    
+    if (response.ok) {
+      return await response.json();
+    }
+    
+    throw new Error('Failed to update incident');
+  } catch (error) {
+    console.error('Update incident error (after retries):', error);
+    showNotification('Lỗi', 'Không thể cập nhật sự cố: ' + error.message);
+    return null;
+  }
+}
+
+async function deleteIncidentWithRetry(incidentId) {
+  try {
+    var response = await fetchWithRetry(API_BASE_URL + '/incidents/' + incidentId, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': 'Bearer ' + API_TOKEN
+      }
+    });
+    
+    if (response.ok) {
+      return await response.json();
+    }
+    
+    throw new Error('Failed to delete incident');
+  } catch (error) {
+    console.error('Delete incident error (after retries):', error);
+    showNotification('Lỗi', 'Không thể xóa sự cố: ' + error.message);
+    return null;
+  }
+}
+
 // Initialize security on load
 document.addEventListener('DOMContentLoaded', function() {
   initializeSecurity();
