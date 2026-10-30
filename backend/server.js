@@ -61,6 +61,71 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Detailed health check endpoint
+app.get('/health/detailed', async (req, res) => {
+  try {
+    const health = {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      environment: process.env.NODE_ENV || 'development',
+      version: process.env.APP_VERSION || '1.0.0'
+    };
+    
+    // Check database connection
+    try {
+      const db = require('./config/database');
+      await db.query('SELECT 1');
+      health.database = { status: 'connected' };
+    } catch (error) {
+      health.database = { status: 'disconnected', error: error.message };
+      health.status = 'degraded';
+    }
+    
+    // Check WebSocket
+    const { isInitialized, getConnectionStats } = require('./services/websocket');
+    health.websocket = {
+      initialized: isInitialized(),
+      connections: getConnectionStats()
+    };
+    
+    // Check disk space (if available)
+    const fs = require('fs');
+    try {
+      const stats = fs.statSync('.');
+      health.disk = { available: true };
+    } catch (error) {
+      health.disk = { available: false, error: error.message };
+    }
+    
+    res.json(health);
+  } catch (error) {
+    logger.error('Detailed health check error', { error: error.message });
+    res.status(500).json({
+      status: 'error',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Readiness check endpoint
+app.get('/health/ready', (req, res) => {
+  const ready = {
+    status: 'ready',
+    timestamp: new Date().toISOString()
+  };
+  
+  // Add any readiness checks here
+  res.json(ready);
+});
+
+// Liveness check endpoint
+app.get('/health/live', (req, res) => {
+  res.json({ status: 'alive', timestamp: new Date().toISOString() });
+});
+
 // API Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/incidents', require('./routes/incidents'));
