@@ -494,6 +494,79 @@ router.put('/:id/deescalate', auth, async (req, res) => {
   }
 });
 
+// Get incident history/timeline
+router.get('/:id/history', auth, async (req, res) => {
+  try {
+    // Check if incident exists
+    const incidentResult = await pool.query(
+      'SELECT id FROM incidents WHERE id = $1',
+      [req.params.id]
+    );
+
+    if (incidentResult.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Incident not found', status: 404 } });
+    }
+
+    // Get audit logs for this incident
+    const auditResult = await pool.query(
+      `SELECT al.*, u.name as user_name
+       FROM audit_logs al
+       LEFT JOIN users u ON al.user_id = u.id
+       WHERE al.entity_type = 'incident' AND al.entity_id = $1
+       ORDER BY al.created_at DESC
+       LIMIT 100`,
+      [req.params.id]
+    );
+
+    // Get comments for timeline
+    const commentsResult = await pool.query(
+      `SELECT ic.*, u.name as user_name, 'comment' as event_type
+       FROM incident_comments ic
+       LEFT JOIN users u ON ic.user_id = u.id
+       WHERE ic.incident_id = $1
+       ORDER BY ic.created_at DESC`,
+      [req.params.id]
+    );
+
+    // Get status changes from incidents table (we'll need to track this separately)
+    // For now, combine audit logs and comments
+
+    const timeline = [];
+
+    // Add audit logs
+    auditResult.rows.forEach(log => {
+      timeline.push({
+        type: 'audit',
+        action: log.action,
+        description: log.description,
+        user_name: log.user_name,
+        created_at: log.created_at,
+        details: log.details
+      });
+    });
+
+    // Add comments
+    commentsResult.rows.forEach(comment => {
+      timeline.push({
+        type: 'comment',
+        action: 'comment_added',
+        description: comment.comment,
+        user_name: comment.user_name,
+        created_at: comment.created_at,
+        is_internal: comment.is_internal
+      });
+    });
+
+    // Sort by date
+    timeline.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    res.json({ timeline: timeline });
+  } catch (error) {
+    console.error('Get incident history error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
 // Delete incident
 router.delete('/:id', auth, async (req, res) => {
   try {
