@@ -126,6 +126,22 @@ CREATE INDEX idx_incident_relations_incident_id ON incident_relations(incident_i
 CREATE INDEX idx_incident_relations_related_incident_id ON incident_relations(related_incident_id);
 CREATE INDEX idx_incident_relations_type ON incident_relations(relation_type);
 
+-- User achievements table
+CREATE TABLE user_achievements (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  achievement_id VARCHAR(100) NOT NULL,
+  achievement_name VARCHAR(255) NOT NULL,
+  achievement_description TEXT,
+  badge_icon VARCHAR(255),
+  earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, achievement_id)
+);
+
+-- Indexes for user achievements
+CREATE INDEX idx_user_achievements_user_id ON user_achievements(user_id);
+CREATE INDEX idx_user_achievements_achievement_id ON user_achievements(achievement_id);
+
 -- Notifications table
 CREATE TABLE notifications (
   id SERIAL PRIMARY KEY,
