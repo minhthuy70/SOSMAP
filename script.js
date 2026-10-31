@@ -4212,24 +4212,76 @@ async function loadAnalyticsFromAPI() {
 
 // WebSocket Client Integration
 var socket = null;
+var wsReconnectAttempts = 0;
+var wsMaxReconnectAttempts = 10;
+var wsReconnectDelay = 1000;
+var wsReconnectTimer = null;
+
+function exponentialBackoff(attempt) {
+  return Math.min(1000 * Math.pow(2, attempt), 30000);
+}
 
 function initializeWebSocket() {
   if (!FEATURE_FLAGS.ENABLE_BACKEND_API) return;
 
   try {
-    // Use socket.io client
-    socket = io(API_BASE_URL.replace('/api', ''));
+    // Clear any existing reconnection timer
+    if (wsReconnectTimer) {
+      clearTimeout(wsReconnectTimer);
+      wsReconnectTimer = null;
+    }
+
+    // Use socket.io client with reconnection options
+    socket = io(API_BASE_URL.replace('/api', ''), {
+      reconnection: true,
+      reconnectionAttempts: wsMaxReconnectAttempts,
+      reconnectionDelay: wsReconnectDelay,
+      reconnectionDelayMax: 30000,
+      timeout: 10000
+    });
 
     socket.on('connect', () => {
       console.log('WebSocket connected');
+      wsReconnectAttempts = 0;
+      showNotification('Kết nối WebSocket', 'Đã kết nối thành công');
       // Join user room if authenticated
       if (CURRENT_USER) {
         socket.emit('join-user-room', CURRENT_USER.id);
       }
     });
 
-    socket.on('disconnect', () => {
-      console.log('WebSocket disconnected');
+    socket.on('disconnect', (reason) => {
+      console.log('WebSocket disconnected:', reason);
+      if (reason === 'io server disconnect') {
+        // Server initiated disconnect, don't auto-reconnect
+        showNotification('Kết nối WebSocket', 'Máy chủ đã ngắt kết nối');
+      } else {
+        // Try to reconnect
+        attemptWebSocketReconnect();
+      }
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('WebSocket connection error:', error);
+      wsReconnectAttempts++;
+      if (wsReconnectAttempts <= wsMaxReconnectAttempts) {
+        const delay = exponentialBackoff(wsReconnectAttempts);
+        console.log(`Reconnection attempt ${wsReconnectAttempts}/${wsMaxReconnectAttempts} in ${delay}ms`);
+        showNotification('Kết nối WebSocket', `Đang thử kết nối lại (${wsReconnectAttempts}/${wsMaxReconnectAttempts})`);
+      } else {
+        showNotification('Kết nối WebSocket', 'Không thể kết nối sau nhiều lần thử');
+      }
+    });
+
+    socket.on('reconnect', (attemptNumber) => {
+      console.log('WebSocket reconnected after', attemptNumber, 'attempts');
+      showNotification('Kết nối WebSocket', 'Đã kết nối lại thành công');
+      wsReconnectAttempts = 0;
+    });
+
+    socket.on('reconnect_failed', () => {
+      console.error('WebSocket reconnection failed');
+      showNotification('Kết nối WebSocket', 'Thất bại khi kết nối lại');
     });
 
     // Listen for incident updates
@@ -4258,7 +4310,26 @@ function initializeWebSocket() {
 
   } catch (error) {
     console.error('WebSocket initialization error:', error);
+    attemptWebSocketReconnect();
   }
+}
+
+function attemptWebSocketReconnect() {
+  if (wsReconnectAttempts >= wsMaxReconnectAttempts) {
+    console.error('Max reconnection attempts reached');
+    return;
+  }
+
+  if (wsReconnectTimer) {
+    clearTimeout(wsReconnectTimer);
+  }
+
+  const delay = exponentialBackoff(wsReconnectAttempts);
+  wsReconnectTimer = setTimeout(() => {
+    wsReconnectAttempts++;
+    console.log(`Attempting to reconnect WebSocket (${wsReconnectAttempts}/${wsMaxReconnectAttempts})`);
+    initializeWebSocket();
+  }, delay);
 }
 
 function handleIncidentUpdate(data) {
