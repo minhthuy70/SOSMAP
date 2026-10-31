@@ -20477,6 +20477,122 @@ var offlineData = {
   }
 };
 
+// Push Notification System
+var pushNotificationPermission = 'default';
+var pushSubscription = null;
+
+function initializePushNotifications() {
+  if (!('Notification' in window)) {
+    console.log('This browser does not support desktop notification');
+    return;
+  }
+
+  // Check current permission
+  pushNotificationPermission = Notification.permission;
+
+  // Request permission if not granted
+  if (pushNotificationPermission === 'default') {
+    // Show button to request permission
+    var requestPermissionBtn = document.getElementById('requestNotificationPermission');
+    if (requestPermissionBtn) {
+      requestPermissionBtn.style.display = 'block';
+      requestPermissionBtn.addEventListener('click', requestNotificationPermission);
+    }
+  } else if (pushNotificationPermission === 'granted') {
+    // Subscribe to push notifications if Service Worker is available
+    subscribeToPushNotifications();
+  }
+}
+
+function requestNotificationPermission() {
+  Notification.requestPermission().then(function(permission) {
+    pushNotificationPermission = permission;
+
+    if (permission === 'granted') {
+      showNotification('Thông báo', 'Đã bật thông báo đẩy!');
+      subscribeToPushNotifications();
+
+      var requestPermissionBtn = document.getElementById('requestNotificationPermission');
+      if (requestPermissionBtn) {
+        requestPermissionBtn.style.display = 'none';
+      }
+    } else {
+      showNotification('Thông báo', 'Đã từ chối thông báo đẩy');
+    }
+  });
+}
+
+function subscribeToPushNotifications() {
+  if (!('serviceWorker' in navigator)) {
+    console.log('Service Worker not supported');
+    return;
+  }
+
+  navigator.serviceWorker.ready.then(function(registration) {
+    if (!registration.pushManager) {
+      console.log('Push Manager not available');
+      return;
+    }
+
+    // Subscribe to push
+    registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array('YOUR_VAPID_PUBLIC_KEY')
+    }).then(function(subscription) {
+      pushSubscription = subscription;
+      console.log('Push subscription successful:', subscription);
+
+      // Send subscription to backend
+      if (FEATURE_FLAGS.ENABLE_BACKEND_API) {
+        apiRequest('/notifications/subscribe', {
+          method: 'POST',
+          body: JSON.stringify({
+            subscription: subscription
+          })
+        }).then(function(response) {
+          console.log('Subscription saved on server:', response);
+        }).catch(function(error) {
+          console.error('Failed to save subscription:', error);
+        });
+      }
+    }).catch(function(error) {
+      console.error('Push subscription failed:', error);
+    });
+  });
+}
+
+function urlBase64ToUint8Array(base64String) {
+  var padding = '='.repeat((4 - base64String.length % 4) % 4);
+  var base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  var rawData = window.atob(base64);
+  var outputArray = new Uint8Array(rawData.length);
+
+  for (var i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+
+  return outputArray;
+}
+
+function sendPushNotification(title, body, options) {
+  if (pushNotificationPermission !== 'granted') {
+    console.log('Push notification permission not granted');
+    return;
+  }
+
+  var notificationOptions = {
+    body: body,
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    vibrate: [200, 100, 200],
+    tag: 'sosmap-notification',
+    requireInteraction: false,
+    ...options
+  };
+
+  new Notification(title, notificationOptions);
+}
+
 function initializeOfflineSystem() {
   // Load offline data from localStorage
   var savedOffline = localStorage.getItem('sosmap_offline');
@@ -20486,6 +20602,9 @@ function initializeOfflineSystem() {
 
   // Update offline panel
   updateOfflinePanel();
+
+  // Initialize push notifications
+  initializePushNotifications();
 
   // Monitor online/offline status
   window.addEventListener('online', function() {

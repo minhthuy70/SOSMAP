@@ -2,6 +2,16 @@ const express = require('express');
 const router = express.Router();
 const { auth } = require('../middleware/auth');
 const pool = require('../config/database');
+const webpush = require('web-push');
+
+// Configure VAPID keys (should be in environment variables in production)
+const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || 'YOUR_VAPID_PUBLIC_KEY';
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || 'YOUR_VAPID_PRIVATE_KEY';
+const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@sosmap.com';
+
+if (vapidPublicKey !== 'YOUR_VAPID_PUBLIC_KEY' && vapidPrivateKey !== 'YOUR_VAPID_PRIVATE_KEY') {
+  webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+}
 
 // Get user notifications
 router.get('/', auth, async (req, res) => {
@@ -82,5 +92,59 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
   }
 });
+
+// Subscribe to push notifications
+router.post('/subscribe', auth, async (req, res) => {
+  try {
+    const { subscription } = req.body;
+
+    if (!subscription) {
+      return res.status(400).json({ error: { message: 'Subscription data required', status: 400 } });
+    }
+
+    // Save subscription to database (you might want a separate table for this)
+    await pool.query(
+      `UPDATE users
+       SET push_subscription = $1
+       WHERE id = $2`,
+      [JSON.stringify(subscription), req.user.id]
+    );
+
+    res.json({ message: 'Subscription saved successfully' });
+  } catch (error) {
+    console.error('Subscribe error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Send push notification (internal use)
+async function sendPushNotification(userId, title, body, data = {}) {
+  try {
+    const result = await pool.query(
+      'SELECT push_subscription FROM users WHERE id = $1 AND push_subscription IS NOT NULL',
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      console.log('No push subscription found for user:', userId);
+      return;
+    }
+
+    const subscription = JSON.parse(result.rows[0].push_subscription);
+
+    await webpush.sendNotification(subscription, JSON.stringify({
+      title,
+      body,
+      data
+    }));
+
+    console.log('Push notification sent to user:', userId);
+  } catch (error) {
+    console.error('Send push notification error:', error);
+  }
+}
+
+module.exports = router;
+module.exports.sendPushNotification = sendPushNotification;
 
 module.exports = router;

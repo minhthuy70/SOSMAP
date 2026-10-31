@@ -17,6 +17,7 @@ CREATE TABLE users (
   phone VARCHAR(20),
   role VARCHAR(50) DEFAULT 'user' CHECK (role IN ('user', 'admin', 'moderator')),
   is_active BOOLEAN DEFAULT true,
+  push_subscription JSONB,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
