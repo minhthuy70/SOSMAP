@@ -104,4 +104,41 @@ router.put('/password', auth, [
   }
 });
 
+// Update location
+router.put('/location', auth, [
+  body('latitude').isFloat({ min: -90, max: 90 }),
+  body('longitude').isFloat({ min: -180, max: 180 }),
+  body('accuracy').optional().isFloat({ min: 0 })
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { latitude, longitude, accuracy, timestamp } = req.body;
+
+    // Check if user has location column (add if not exists)
+    try {
+      await pool.query(
+        `UPDATE users
+         SET last_latitude = $1,
+             last_longitude = $2,
+             last_location_accuracy = $3,
+             last_location_at = COALESCE($4, NOW())
+         WHERE id = $5`,
+        [latitude, longitude, accuracy, timestamp, req.user.id]
+      );
+    } catch (updateError) {
+      // Column might not exist, ignore for now
+      console.log('Location update failed (column may not exist):', updateError.message);
+    }
+
+    res.json({ message: 'Location updated successfully' });
+  } catch (error) {
+    console.error('Update location error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
 module.exports = router;

@@ -20481,6 +20481,175 @@ var offlineData = {
 var pushNotificationPermission = 'default';
 var pushSubscription = null;
 
+// Real-time Location Tracking
+var locationTrackingEnabled = false;
+var locationWatchId = null;
+var currentLocation = null;
+var locationHistory = [];
+var maxLocationHistory = 100;
+
+function startLocationTracking() {
+  if (!('geolocation' in navigator)) {
+    showNotification('Lỗi', 'Trình duyệt không hỗ trợ định vị');
+    return;
+  }
+
+  if (locationTrackingEnabled) {
+    showNotification('Định vị', 'Đang theo dõi vị trí');
+    return;
+  }
+
+  // Request high accuracy location
+  var options = {
+    enableHighAccuracy: true,
+    timeout: 10000,
+    maximumAge: 0
+  };
+
+  locationWatchId = navigator.geolocation.watchPosition(
+    function(position) {
+      currentLocation = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+        altitude: position.coords.altitude,
+        altitudeAccuracy: position.coords.altitudeAccuracy,
+        heading: position.coords.heading,
+        speed: position.coords.speed,
+        timestamp: position.timestamp
+      };
+
+      // Add to history
+      locationHistory.push({
+        ...currentLocation,
+        recordedAt: new Date().toISOString()
+      });
+
+      // Limit history size
+      if (locationHistory.length > maxLocationHistory) {
+        locationHistory.shift();
+      }
+
+      // Send to backend if authenticated
+      if (FEATURE_FLAGS.ENABLE_BACKEND_API && CURRENT_USER) {
+        updateLocationOnServer(currentLocation);
+      }
+
+      // Update UI
+      updateLocationUI(currentLocation);
+    },
+    function(error) {
+      console.error('Location tracking error:', error);
+      showNotification('Lỗi định vị', getGeolocationErrorMessage(error.code));
+    },
+    options
+  );
+
+  locationTrackingEnabled = true;
+  showNotification('Định vị', 'Đã bật theo dõi vị trí');
+  logActivity('location_tracking_start', 'Bật theo dõi vị trí');
+}
+
+function stopLocationTracking() {
+  if (!locationTrackingEnabled) {
+    return;
+  }
+
+  if (locationWatchId !== null) {
+    navigator.geolocation.clearWatch(locationWatchId);
+    locationWatchId = null;
+  }
+
+  locationTrackingEnabled = false;
+  showNotification('Định vị', 'Đã tắt theo dõi vị trí');
+  logActivity('location_tracking_stop', 'Tắt theo dõi vị trí');
+}
+
+function toggleLocationTracking() {
+  if (locationTrackingEnabled) {
+    stopLocationTracking();
+  } else {
+    startLocationTracking();
+  }
+}
+
+function getCurrentLocation() {
+  return new Promise(function(resolve, reject) {
+    if (!('geolocation' in navigator)) {
+      reject(new Error('Geolocation not supported'));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy
+        });
+      },
+      function(error) {
+        reject(new Error(getGeolocationErrorMessage(error.code)));
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  });
+}
+
+function updateLocationOnServer(locationData) {
+  apiRequest('/users/location', {
+    method: 'PUT',
+    body: JSON.stringify({
+      latitude: locationData.latitude,
+      longitude: locationData.longitude,
+      accuracy: locationData.accuracy,
+      timestamp: locationData.timestamp
+    })
+  }).then(function(response) {
+    console.log('Location updated on server:', response);
+  }).catch(function(error) {
+    console.error('Failed to update location:', error);
+  });
+}
+
+function updateLocationUI(location) {
+  var locationDisplay = document.getElementById('currentLocationDisplay');
+  if (locationDisplay) {
+    locationDisplay.textContent = `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`;
+  }
+
+  var accuracyDisplay = document.getElementById('locationAccuracy');
+  if (accuracyDisplay) {
+    accuracyDisplay.textContent = `Độ chính xác: ${Math.round(location.accuracy)}m`;
+  }
+}
+
+function getGeolocationErrorMessage(code) {
+  switch (code) {
+    case 1:
+      return 'Người dùng từ chối quyền truy cập vị trí';
+    case 2:
+      return 'Không thể xác định vị trí';
+    case 3:
+      return 'Hết thời gian chờ vị trí';
+    default:
+      return 'Lỗi định vị không xác định';
+  }
+}
+
+function getLocationHistory() {
+  return locationHistory;
+}
+
+function clearLocationHistory() {
+  locationHistory = [];
+  showNotification('Lịch sử vị trí', 'Đã xóa lịch sử vị trí');
+}
+
 function initializePushNotifications() {
   if (!('Notification' in window)) {
     console.log('This browser does not support desktop notification');

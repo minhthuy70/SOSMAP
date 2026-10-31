@@ -18,6 +18,10 @@ CREATE TABLE users (
   role VARCHAR(50) DEFAULT 'user' CHECK (role IN ('user', 'admin', 'moderator')),
   is_active BOOLEAN DEFAULT true,
   push_subscription JSONB,
+  last_latitude DECIMAL(10, 8),
+  last_longitude DECIMAL(11, 8),
+  last_location_accuracy DECIMAL(10, 2),
+  last_location_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
