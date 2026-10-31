@@ -140,6 +140,7 @@ app.use('/api/telemetry', require('./routes/telemetry'));
 app.use('/api/monitoring', require('./routes/monitoring'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/ratings', require('./routes/ratings'));
+app.use('/api/relations', require('./routes/relations'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
