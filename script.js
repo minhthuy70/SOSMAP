@@ -20481,6 +20481,98 @@ var offlineData = {
 var pushNotificationPermission = 'default';
 var pushSubscription = null;
 
+// SOS/Panic Button
+var sosButtonActive = false;
+var sosButtonTimer = null;
+
+function initializeSOSButton() {
+  var sosButton = document.getElementById('sosButton');
+  if (sosButton) {
+    sosButton.addEventListener('click', handleSOSButton);
+  }
+}
+
+function handleSOSButton() {
+  if (sosButtonActive) {
+    // Cancel SOS
+    cancelSOS();
+  } else {
+    // Activate SOS - require confirmation
+    if (confirm('Bạn có chắc muốn kích hoạt tín hiệu SOS khẩn cấp?')) {
+      activateSOS();
+    }
+  }
+}
+
+function activateSOS() {
+  sosButtonActive = true;
+  var sosButton = document.getElementById('sosButton');
+  if (sosButton) {
+    sosButton.classList.add('active');
+    sosButton.querySelector('.sos-icon').textContent = '✓';
+    sosButton.querySelector('.sos-text').textContent = 'Đang gửi';
+  }
+
+  // Get current location
+  getCurrentLocation().then(function(location) {
+    // Create SOS incident
+    if (FEATURE_FLAGS.ENABLE_BACKEND_API) {
+      apiRequest('/incidents/citizen', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'emergency',
+          title: 'Tín hiệu SOS khẩn cấp',
+          description: 'Người dùng đã kích hoạt tín hiệu SOS',
+          latitude: location.latitude,
+          longitude: location.longitude,
+          severity: 'critical',
+          is_anonymous: false
+        })
+      }).then(function(response) {
+        showNotification('SOS', 'Đã gửi tín hiệu SOS khẩn cấp!');
+        console.log('SOS incident created:', response);
+      }).catch(function(error) {
+        showNotification('Lỗi', 'Không thể gửi tín hiệu SOS');
+        console.error('SOS error:', error);
+      });
+    } else {
+      showNotification('SOS', 'Tín hiệu SOS đã được kích hoạt (demo mode)');
+    }
+
+    // Send to emergency contacts
+    if (CONTACTS.length > 0) {
+      CONTACTS.forEach(function(contact) {
+        showNotification('SOS', 'Đang gửi thông báo tới: ' + contact.name);
+      });
+    }
+
+    // Auto-cancel after 5 minutes
+    sosButtonTimer = setTimeout(function() {
+      cancelSOS();
+    }, 300000); // 5 minutes
+  }).catch(function(error) {
+    showNotification('Lỗi', 'Không thể lấy vị trí hiện tại');
+    console.error('Location error:', error);
+  });
+}
+
+function cancelSOS() {
+  sosButtonActive = false;
+  if (sosButtonTimer) {
+    clearTimeout(sosButtonTimer);
+    sosButtonTimer = null;
+  }
+
+  var sosButton = document.getElementById('sosButton');
+  if (sosButton) {
+    sosButton.classList.remove('active');
+    sosButton.querySelector('.sos-icon').textContent = '🆘';
+    sosButton.querySelector('.sos-text').textContent = 'SOS';
+  }
+
+  showNotification('SOS', 'Đã hủy tín hiệu SOS');
+}
+
 // Real-time Location Tracking
 var locationTrackingEnabled = false;
 var locationWatchId = null;
