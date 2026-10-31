@@ -251,4 +251,185 @@ router.get('/:id/reputation', async (req, res) => {
   }
 });
 
+// Get user dashboard data
+router.get('/:id/dashboard', auth, async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Only users can view their own dashboard or admins can view any
+    if (req.user.id !== parseInt(userId) && req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized to view this dashboard', status: 403 } });
+    }
+
+    // Get user profile
+    const userResult = await pool.query(
+      'SELECT id, email, name, phone, role, reputation_points, reputation_level, created_at FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'User not found', status: 404 } });
+    }
+
+    const user = userResult.rows[0];
+
+    // Get user's incidents
+    const incidentsResult = await pool.query(
+      `SELECT id, type, title, status, severity, created_at 
+       FROM incidents 
+       WHERE user_id = $1 
+       ORDER BY created_at DESC 
+       LIMIT 10`,
+      [userId]
+    );
+
+    // Get user's comments
+    const commentsResult = await pool.query(
+      `SELECT ic.id, ic.comment, ic.created_at, i.title as incident_title
+       FROM incident_comments ic
+       LEFT JOIN incidents i ON ic.incident_id = i.id
+       WHERE ic.user_id = $1
+       ORDER BY ic.created_at DESC
+       LIMIT 5`,
+      [userId]
+    );
+
+    // Get user's achievements
+    const achievementsResult = await pool.query(
+      'SELECT * FROM user_achievements WHERE user_id = $1 ORDER BY earned_at DESC',
+      [userId]
+    );
+
+    // Get activity stats
+    const statsResult = await pool.query(
+      `SELECT 
+        (SELECT COUNT(*) FROM incidents WHERE user_id = $1) as total_incidents,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1) as total_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1) as total_ratings`,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1) as total_relations`,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1) as total_audit_logs`,
+        (SELECT COUNT(*) FROM incidents WHERE user_id = $1 AND status = 'resolved') as resolved_incidents`,
+        (SELECT COUNT(*) FROM incidents WHERE user_id = $1 AND verified_by IS NOT NULL) as verified_incidents`,
+        (SELECT COUNT(*) FROM incidents WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days') as recent_incidents`,
+        (SELECT COUNT(*) FROM incidents WHERE user_id = $1 AND created_at > NOW() - INTERVAL '7 days') as week_incidents`,
+        (SELECT COUNT(*) FROM incidents WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 day') as today_incidents`,
+        (SELECT COUNT(*) FROM incidents WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_incidents`,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '7 days') as week_comments,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 day') as today_comments,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments`,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '7 days') as week_ratings,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 day') as today_ratings,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings`,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '7 days') as week_relations,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 day') as today_relations,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '7 days') as week_audit_logs,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 day') as today_audit_logs,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs`,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs`,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs`,
+        (SELECT COUNT(*) FROM incident_comments WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_comments,
+        (SELECT COUNT(*) FROM incident_ratings WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_ratings,
+        (SELECT COUNT(*) FROM incident_relations WHERE created_by = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_relations,
+        (SELECT COUNT(*) FROM audit_logs WHERE user_id = $1 AND created_at > NOW() - INTERVAL '1 hour') as hour_audit_logs`
+    `
+    );
+
+    res.json({
+      user: user,
+      recent_incidents: incidentsResult.rows,
+      recent_comments: commentsResult.rows,
+      achievements: achievementsResult.rows,
+      stats: statsResult.rows[0]
+    });
+  } catch (error) {
+    console.error('Get dashboard error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
 module.exports = router;
