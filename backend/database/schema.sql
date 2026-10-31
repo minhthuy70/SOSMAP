@@ -23,6 +23,8 @@ CREATE TABLE users (
   last_longitude DECIMAL(11, 8),
   last_location_accuracy DECIMAL(10, 2),
   last_location_at TIMESTAMP,
+  reputation_points INTEGER DEFAULT 0,
+  reputation_level VARCHAR(50) DEFAULT 'bronze' CHECK (reputation_level IN ('bronze', 'silver', 'gold', 'platinum', 'diamond')),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
