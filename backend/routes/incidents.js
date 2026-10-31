@@ -290,6 +290,101 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
+// Assign incident to user
+router.put('/:id/assign', auth, [
+  body('assigned_to').isInt()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { assigned_to, notes } = req.body;
+
+    // Check if assigned user exists
+    const userResult = await pool.query(
+      'SELECT id, name FROM users WHERE id = $1',
+      [assigned_to]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Assigned user not found', status: 404 } });
+    }
+
+    const result = await pool.query(
+      `UPDATE incidents
+       SET assigned_to = $1,
+           assigned_at = NOW(),
+           assigned_by = $2,
+           notes = COALESCE($3, notes),
+           status = 'in_progress',
+           updated_at = NOW()
+       WHERE id = $4
+       RETURNING *`,
+      [assigned_to, req.user.id, notes, req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Incident not found', status: 404 } });
+    }
+
+    const incident = result.rows[0];
+
+    // Send notification to assigned user
+    const { sendPushNotification } = require('./notifications');
+    sendPushNotification(assigned_to, 'Sự cố mới được phân công', incident.title, {
+      incidentId: incident.id,
+      type: 'incident_assigned'
+    });
+
+    // Broadcast update
+    sendIncidentUpdate(req.params.id, {
+      action: 'assigned',
+      incident: incident
+    });
+
+    res.json({ message: 'Incident assigned successfully', incident: incident });
+  } catch (error) {
+    console.error('Assign incident error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Unassign incident
+router.put('/:id/unassign', auth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `UPDATE incidents
+       SET assigned_to = NULL,
+           assigned_at = NULL,
+           assigned_by = NULL,
+           status = 'pending',
+           updated_at = NOW()
+       WHERE id = $4
+       RETURNING *`,
+      [req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Incident not found', status: 404 } });
+    }
+
+    const incident = result.rows[0];
+
+    // Broadcast update
+    sendIncidentUpdate(req.params.id, {
+      action: 'unassigned',
+      incident: incident
+    });
+
+    res.json({ message: 'Incident unassigned successfully', incident: incident });
+  } catch (error) {
+    console.error('Unassign incident error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
 // Delete incident
 router.delete('/:id', auth, async (req, res) => {
   try {

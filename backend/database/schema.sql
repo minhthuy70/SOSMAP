@@ -47,6 +47,10 @@ CREATE TABLE incidents (
   images JSONB DEFAULT '[]',
   verified_by INTEGER REFERENCES users(id),
   verified_at TIMESTAMP,
+  assigned_to INTEGER REFERENCES users(id),
+  assigned_at TIMESTAMP,
+  assigned_by INTEGER REFERENCES users(id),
+  notes TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
