@@ -230,13 +230,25 @@ router.post('/', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { type, title, description, latitude, longitude, severity, images } = req.body;
+    const { type, title, description, latitude, longitude, severity, images, is_anonymous } = req.body;
+
+    // Check if user allows anonymous reporting
+    if (is_anonymous) {
+      const userResult = await pool.query(
+        'SELECT allow_anonymous_reporting FROM users WHERE id = $1',
+        [req.user.id]
+      );
+
+      if (userResult.rows.length === 0 || !userResult.rows[0].allow_anonymous_reporting) {
+        return res.status(403).json({ error: { message: 'Anonymous reporting not allowed for this user', status: 403 } });
+      }
+    }
 
     const result = await pool.query(
       `INSERT INTO incidents (user_id, type, title, description, latitude, longitude, severity, status, images)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
-      [req.user.id, type, title, description, latitude, longitude, severity, 'pending', images || []]
+      [is_anonymous ? null : req.user.id, type, title, description, latitude, longitude, severity, 'pending', images || []]
     );
 
     const incident = result.rows[0];
@@ -250,6 +262,50 @@ router.post('/', [
     res.status(201).json({ message: 'Incident created successfully', incident: incident });
   } catch (error) {
     console.error('Create incident error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Citizen reporting (without authentication)
+router.post('/citizen', [
+  body('type').notEmpty(),
+  body('title').trim().notEmpty(),
+  body('description').trim().notEmpty(),
+  body('latitude').isFloat(),
+  body('longitude').isFloat(),
+  body('severity').isIn(['low', 'medium', 'high', 'critical']),
+  body('contact_phone').optional().trim()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { type, title, description, latitude, longitude, severity, images, contact_phone } = req.body;
+
+    // For citizen reporting, we don't require authentication
+    // Store contact info in notes if provided
+    const notes = contact_phone ? `Contact: ${contact_phone}` : null;
+
+    const result = await pool.query(
+      `INSERT INTO incidents (user_id, type, title, description, latitude, longitude, severity, status, images, notes)
+       VALUES (NULL, $1, $2, $3, $4, $5, $6, 'pending', $7, $8)
+       RETURNING *`,
+      [type, title, description, latitude, longitude, severity, images || [], notes]
+    );
+
+    const incident = result.rows[0];
+
+    // Broadcast to all connected clients
+    broadcastIncidentUpdate({
+      action: 'created',
+      incident: incident
+    });
+
+    res.status(201).json({ message: 'Incident reported successfully. Thank you for your contribution!', incident: incident });
+  } catch (error) {
+    console.error('Citizen report error:', error);
     res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
   }
 });

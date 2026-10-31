@@ -25,6 +25,7 @@ CREATE TABLE users (
   last_location_at TIMESTAMP,
   reputation_points INTEGER DEFAULT 0,
   reputation_level VARCHAR(50) DEFAULT 'bronze' CHECK (reputation_level IN ('bronze', 'silver', 'gold', 'platinum', 'diamond')),
+  allow_anonymous_reporting BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
