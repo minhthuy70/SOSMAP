@@ -142,6 +142,7 @@ app.use('/api/comments', require('./routes/comments'));
 app.use('/api/ratings', require('./routes/ratings'));
 app.use('/api/relations', require('./routes/relations'));
 app.use('/api/achievements', require('./routes/achievements'));
+app.use('/api/templates', require('./routes/templates'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

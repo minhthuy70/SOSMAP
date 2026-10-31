@@ -142,6 +142,22 @@ CREATE TABLE user_achievements (
 CREATE INDEX idx_user_achievements_user_id ON user_achievements(user_id);
 CREATE INDEX idx_user_achievements_achievement_id ON user_achievements(achievement_id);
 
+-- Incident report templates table
+CREATE TABLE incident_report_templates (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  template_fields JSONB NOT NULL DEFAULT '[]',
+  is_default BOOLEAN DEFAULT false,
+  created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for report templates
+CREATE INDEX idx_report_templates_is_default ON incident_report_templates(is_default);
+CREATE INDEX idx_report_templates_created_by ON incident_report_templates(created_by);
+
 -- Notifications table
 CREATE TABLE notifications (
   id SERIAL PRIMARY KEY,
@@ -183,6 +199,9 @@ CREATE TRIGGER update_incident_comments_updated_at BEFORE UPDATE ON incident_com
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_incident_ratings_updated_at BEFORE UPDATE ON incident_ratings
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_incident_report_templates_updated_at BEFORE UPDATE ON incident_report_templates
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Map Layers table
