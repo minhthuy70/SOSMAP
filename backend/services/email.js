@@ -3,6 +3,79 @@ const nodemailer = require('nodemailer');
 // Email transporter configuration
 let transporter;
 
+// Email templates
+const emailTemplates = {
+  incidentCreated: {
+    subject: 'SOSMAP - Sự cố mới đã được báo cáo',
+    html: (data) => `
+      <h2>Sự cố mới: ${data.title}</h2>
+      <p><strong>Loại:</strong> ${data.type}</p>
+      <p><strong>Mức độ:</strong> ${data.severity}</p>
+      <p><strong>Mô tả:</strong> ${data.description}</p>
+      <p><strong>Vị trí:</strong> ${data.latitude}, ${data.longitude}</p>
+      <p><strong>Thời gian:</strong> ${new Date(data.created_at).toLocaleString('vi-VN')}</p>
+      <p><a href="${process.env.FRONTEND_URL}/incidents/${data.id}">Xem chi tiết</a></p>
+    `
+  },
+  incidentAssigned: {
+    subject: 'SOSMAP - Bạn được phân công xử lý sự cố',
+    html: (data) => `
+      <h2>Sự cố đã được phân công cho bạn</h2>
+      <p><strong>Tiêu đề:</strong> ${data.title}</p>
+      <p><strong>Loại:</strong> ${data.type}</p>
+      <p><strong>Mức độ:</strong> ${data.severity}</p>
+      <p><strong>Ghi chú:</strong> ${data.notes || 'Không có'}</p>
+      <p><strong>Thời gian phân công:</strong> ${new Date(data.assigned_at).toLocaleString('vi-VN')}</p>
+      <p><a href="${process.env.FRONTEND_URL}/incidents/${data.id}">Xem chi tiết</a></p>
+    `
+  },
+  incidentEscalated: {
+    subject: 'SOSMAP - Sự cố đã được nâng cấp',
+    html: (data) => `
+      <h2>Sự cố đã được nâng cấp</h2>
+      <p><strong>Tiêu đề:</strong> ${data.title}</p>
+      <p><strong>Cấp độ mới:</strong> ${data.escalation_level}</p>
+      <p><strong>Lý do:</strong> ${data.reason || 'Không có'}</p>
+      <p><strong>Thời gian:</strong> ${new Date(data.escalated_at).toLocaleString('vi-VN')}</p>
+      <p><a href="${process.env.FRONTEND_URL}/incidents/${data.id}">Xem chi tiết</a></p>
+    `
+  },
+  incidentResolved: {
+    subject: 'SOSMAP - Sự cố đã được giải quyết',
+    html: (data) => `
+      <h2>Sự cố đã được giải quyết</h2>
+      <p><strong>Tiêu đề:</strong> ${data.title}</p>
+      <p><strong>Thời gian giải quyết:</strong> ${new Date(data.updated_at).toLocaleString('vi-VN')}</p>
+      <p><a href="${process.env.FRONTEND_URL}/incidents/${data.id}">Xem chi tiết</a></p>
+    `
+  },
+  welcome: {
+    subject: 'Chào mừng đến với SOSMAP',
+    html: (data) => `
+      <h2>Chào mừng ${data.name} đến với SOSMAP!</h2>
+      <p>Cảm ơn bạn đã đăng ký tham gia hệ thống phản ánh sự cố giao thông.</p>
+      <p>SOSMAP giúp bạn:</p>
+      <ul>
+        <li>Báo cáo sự cố giao thông nhanh chóng</li>
+        <li>Theo dõi tình trạng giao thông theo thời gian thực</li>
+        <li>Nhận thông báo về các sự cố trong khu vực</li>
+        <li>Đóng góp vào việc cải thiện giao thông thành phố</li>
+      </ul>
+      <p><a href="${process.env.FRONTEND_URL}">Truy cập SOSMAP</a></p>
+    `
+  },
+  passwordReset: {
+    subject: 'SOSMAP - Đặt lại mật khẩu',
+    html: (data) => `
+      <h2>Đặt lại mật khẩu</h2>
+      <p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản SOSMAP của mình.</p>
+      <p><strong>Mã đặt lại:</strong> ${data.resetToken}</p>
+      <p>Vui lòng sử dụng mã này để đặt lại mật khẩu của bạn.</p>
+      <p>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.</p>
+    `
+  }
+};
+
 function initializeEmailService() {
   // Check if email configuration is available
   if (process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
@@ -18,6 +91,17 @@ function initializeEmailService() {
   } else {
     console.warn('Email service not configured. Email notifications will be logged only.');
   }
+}
+
+// Send email using template
+async function sendEmailWithTemplate(to, templateName, data) {
+  const template = emailTemplates[templateName];
+  if (!template) {
+    console.error('Email template not found:', templateName);
+    return { success: false, message: 'Template not found' };
+  }
+
+  return sendEmail(to, template.subject, template.html(data));
 }
 
 // Send email
@@ -123,6 +207,8 @@ async function sendNotificationEmail(userEmail, notification) {
 module.exports = {
   initializeEmailService,
   sendEmail,
+  sendEmailWithTemplate,
+  emailTemplates,
   sendIncidentVerificationEmail,
   sendIncidentStatusEmail,
   sendWelcomeEmail,
