@@ -3994,6 +3994,13 @@ async function apiRequest(endpoint, options = {}) {
     headers['Authorization'] = `Bearer ${API_TOKEN}`;
   }
 
+  // Check if offline and queue non-GET requests
+  if (!offlineData.isOnline && options.method && options.method !== 'GET') {
+    console.log('Offline - queuing request:', endpoint);
+    addToOfflineQueue(endpoint, options.method, options.body ? JSON.parse(options.body) : {}, headers);
+    return { success: true, queued: true, message: 'Đã thêm vào hàng đợi đồng bộ' };
+  }
+
   try {
     const response = await fetch(url, {
       ...options,
@@ -4009,6 +4016,14 @@ async function apiRequest(endpoint, options = {}) {
     return data;
   } catch (error) {
     console.error('API Error:', error);
+
+    // If network error and not GET request, queue it
+    if (!offlineData.isOnline && options.method && options.method !== 'GET') {
+      console.log('Network error - queuing request:', endpoint);
+      addToOfflineQueue(endpoint, options.method, options.body ? JSON.parse(options.body) : {}, headers);
+      return { success: true, queued: true, message: 'Đã thêm vào hàng đợi đồng bộ' };
+    }
+
     throw error;
   }
 }
@@ -20476,14 +20491,21 @@ function initializeOfflineSystem() {
   window.addEventListener('online', function() {
     offlineData.isOnline = true;
     updateOfflinePanel();
-    alert('Đã kết nối lại internet!');
+    showNotification('Kết nối mạng', 'Đã kết nối lại internet!');
     logActivity('connection_online', 'Kết nối lại internet');
+
+    // Auto-sync when coming back online
+    if (offlineData.offlineQueue.length > 0) {
+      setTimeout(function() {
+        syncOfflineData();
+      }, 1000);
+    }
   });
 
   window.addEventListener('offline', function() {
     offlineData.isOnline = false;
     updateOfflinePanel();
-    alert('Đã mất kết nối internet. Chuyển sang chế độ offline.');
+    showNotification('Mất kết nối', 'Đã mất kết nối internet. Chuyển sang chế độ offline.');
     logActivity('connection_offline', 'Mất kết nối internet');
   });
 
@@ -20550,6 +20572,7 @@ function saveOfflineData() {
 
 function autoSync() {
   if (offlineData.isOnline && offlineData.offlineQueue.length > 0) {
+    console.log('Auto-syncing offline data...');
     syncOfflineData();
   }
 }
@@ -20574,14 +20597,79 @@ function syncOfflineData() {
     return;
   }
 
-  alert('Đang đồng bộ ' + offlineData.offlineQueue.length + ' mục dữ liệu...');
-  setTimeout(function() {
-    offlineData.offlineQueue = [];
-    saveOfflineData();
-    updateOfflinePanel();
-    alert('Đã đồng bộ thành công!');
-    logActivity('data_sync', 'Đồng bộ dữ liệu offline');
-  }, 2000);
+  showNotification('Đồng bộ dữ liệu', 'Đang đồng bộ ' + offlineData.offlineQueue.length + ' mục dữ liệu...');
+
+  var syncedCount = 0;
+  var failedItems = [];
+
+  function processNextItem() {
+    if (offlineData.offlineQueue.length === 0) {
+      // All items processed
+      saveOfflineData();
+      updateOfflinePanel();
+
+      if (failedItems.length > 0) {
+        showNotification('Đồng bộ dữ liệu', 'Đã đồng bộ ' + syncedCount + ' mục, thất bại ' + failedItems.length + ' mục');
+        offlineData.offlineQueue = failedItems;
+        saveOfflineData();
+      } else {
+        showNotification('Đồng bộ dữ liệu', 'Đã đồng bộ thành công ' + syncedCount + ' mục!');
+        logActivity('data_sync', 'Đồng bộ dữ liệu offline thành công: ' + syncedCount + ' mục');
+      }
+      return;
+    }
+
+    var item = offlineData.offlineQueue.shift();
+    var syncTime = new Date().toISOString();
+
+    apiRequest(item.endpoint, {
+      method: item.method,
+      body: JSON.stringify(item.data),
+      headers: item.headers || {}
+    }).then(function(response) {
+      syncedCount++;
+      // Add to sync history
+      offlineData.syncHistory.unshift({
+        time: new Date().toLocaleString('vi-VN'),
+        action: 'Đã đồng bộ: ' + item.endpoint
+      });
+      if (offlineData.syncHistory.length > 20) {
+        offlineData.syncHistory.pop();
+      }
+      processNextItem();
+    }).catch(function(error) {
+      console.error('Sync failed for item:', item, error);
+      failedItems.push(item);
+      // Add to sync history with error
+      offlineData.syncHistory.unshift({
+        time: new Date().toLocaleString('vi-VN'),
+        action: 'Thất bại: ' + item.endpoint + ' - ' + error.message
+      });
+      if (offlineData.syncHistory.length > 20) {
+        offlineData.syncHistory.pop();
+      }
+      processNextItem();
+    });
+  }
+
+  processNextItem();
+}
+
+function addToOfflineQueue(endpoint, method, data, headers) {
+  var queueItem = {
+    endpoint: endpoint,
+    method: method || 'POST',
+    data: data,
+    headers: headers,
+    timestamp: new Date().toISOString()
+  };
+
+  offlineData.offlineQueue.push(queueItem);
+  saveOfflineData();
+  updateOfflinePanel();
+
+  showNotification('Chế độ offline', 'Đã thêm vào hàng đợi đồng bộ');
+  logActivity('offline_queue_add', 'Thêm vào hàng đợi: ' + endpoint);
 }
 
 function clearOfflineData() {
