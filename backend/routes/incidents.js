@@ -5,6 +5,7 @@ const { auth } = require('../middleware/auth');
 const pool = require('../config/database');
 const upload = require('../middleware/upload');
 const { broadcastIncidentUpdate, sendIncidentUpdate } = require('../services/websocket');
+const { cacheMiddleware, invalidateCache } = require('../middleware/cache');
 
 /**
  * @swagger
@@ -56,7 +57,7 @@ const { broadcastIncidentUpdate, sendIncidentUpdate } = require('../services/web
  */
 
 // Get all incidents with filters
-router.get('/', auth, async (req, res) => {
+router.get('/', auth, cacheMiddleware(60), async (req, res) => {
   try {
     const {
       type,
@@ -253,6 +254,9 @@ router.post('/', [
 
     const incident = result.rows[0];
 
+    // Invalidate cache for incidents
+    invalidateCache('/incidents');
+
     // Broadcast to all connected clients
     broadcastIncidentUpdate({
       action: 'created',
@@ -332,6 +336,9 @@ router.put('/:id', auth, async (req, res) => {
     }
 
     const incident = result.rows[0];
+
+    // Invalidate cache for incidents
+    invalidateCache('/incidents');
 
     // Send update to incident-specific room
     sendIncidentUpdate(req.params.id, {
