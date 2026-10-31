@@ -143,6 +143,7 @@ app.use('/api/ratings', require('./routes/ratings'));
 app.use('/api/relations', require('./routes/relations'));
 app.use('/api/achievements', require('./routes/achievements'));
 app.use('/api/templates', require('./routes/templates'));
+app.use('/api/weather', require('./routes/weather'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
