@@ -89,6 +89,23 @@ CREATE INDEX idx_incident_comments_incident_id ON incident_comments(incident_id)
 CREATE INDEX idx_incident_comments_user_id ON incident_comments(user_id);
 CREATE INDEX idx_incident_comments_created_at ON incident_comments(created_at);
 
+-- Incident ratings table
+CREATE TABLE incident_ratings (
+  id SERIAL PRIMARY KEY,
+  incident_id INTEGER NOT NULL REFERENCES incidents(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(incident_id, user_id)
+);
+
+-- Indexes for incident ratings
+CREATE INDEX idx_incident_ratings_incident_id ON incident_ratings(incident_id);
+CREATE INDEX idx_incident_ratings_user_id ON incident_ratings(user_id);
+CREATE INDEX idx_incident_ratings_rating ON incident_ratings(rating);
+
 -- Notifications table
 CREATE TABLE notifications (
   id SERIAL PRIMARY KEY,
@@ -127,6 +144,9 @@ CREATE TRIGGER update_incidents_updated_at BEFORE UPDATE ON incidents
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_incident_comments_updated_at BEFORE UPDATE ON incident_comments
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_incident_ratings_updated_at BEFORE UPDATE ON incident_ratings
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Map Layers table
