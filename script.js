@@ -20456,6 +20456,7 @@ function rollbackVersion() {
 var offlineData = {
   isOnline: true,
   offlineQueue: [],
+  incidentQueue: [], // Specific queue for incident reports
   downloadedMaps: [
     { area: 'TP. Hồ Chí Minh', size: '45.2 MB', updated: '01/10/2026' }
   ],
@@ -20939,10 +20940,16 @@ function updateOfflinePanel() {
     offlineDataCount.textContent = offlineData.offlineQueue.length;
   }
 
+  var incidentQueueCount = document.getElementById('incidentQueueCount');
+  if (incidentQueueCount) {
+    incidentQueueCount.textContent = offlineData.incidentQueue.length;
+  }
+
   var syncStatus = document.getElementById('syncStatus');
   if (syncStatus) {
-    syncStatus.textContent = offlineData.offlineQueue.length === 0 ? 'Đã đồng bộ' : 'Chờ đồng bộ';
-    syncStatus.className = 'status-value ' + (offlineData.offlineQueue.length === 0 ? 'success' : 'warning');
+    var totalQueue = offlineData.offlineQueue.length + offlineData.incidentQueue.length;
+    syncStatus.textContent = totalQueue === 0 ? 'Đã đồng bộ' : 'Chờ đồng bộ';
+    syncStatus.className = 'status-value ' + (totalQueue === 0 ? 'success' : 'warning');
   }
 }
 
@@ -20951,10 +20958,73 @@ function saveOfflineData() {
 }
 
 function autoSync() {
-  if (offlineData.isOnline && offlineData.offlineQueue.length > 0) {
+  if (offlineData.isOnline && (offlineData.offlineQueue.length > 0 || offlineData.incidentQueue.length > 0)) {
     console.log('Auto-syncing offline data...');
     syncOfflineData();
+    syncIncidentQueue();
   }
+}
+
+function syncIncidentQueue() {
+  if (!offlineData.isOnline) {
+    return;
+  }
+
+  if (offlineData.incidentQueue.length === 0) {
+    return;
+  }
+
+  showNotification('Đồng bộ sự cố', 'Đang đồng bộ ' + offlineData.incidentQueue.length + ' sự cố...');
+
+  var syncedCount = 0;
+  var failedItems = [];
+
+  function processNextIncident() {
+    if (offlineData.incidentQueue.length === 0) {
+      saveOfflineData();
+      updateOfflinePanel();
+
+      if (failedItems.length > 0) {
+        showNotification('Đồng bộ sự cố', 'Đã đồng bộ ' + syncedCount + ' sự cố, thất bại ' + failedItems.length + ' sự cố');
+        offlineData.incidentQueue = failedItems;
+        saveOfflineData();
+      } else {
+        showNotification('Đồng bộ sự cố', 'Đã đồng bộ thành công ' + syncedCount + ' sự cố!');
+        logActivity('incident_sync', 'Đồng bộ sự cố offline thành công: ' + syncedCount + ' sự cố');
+      }
+      return;
+    }
+
+    var incident = offlineData.incidentQueue.shift();
+
+    apiRequest('/incidents/citizen', {
+      method: 'POST',
+      body: JSON.stringify(incident.data)
+    }).then(function(response) {
+      syncedCount++;
+      processNextIncident();
+    }).catch(function(error) {
+      console.error('Sync incident failed:', incident, error);
+      failedItems.push(incident);
+      processNextIncident();
+    });
+  }
+
+  processNextIncident();
+}
+
+function addToIncidentQueue(incidentData) {
+  var queueItem = {
+    data: incidentData,
+    timestamp: new Date().toISOString()
+  };
+
+  offlineData.incidentQueue.push(queueItem);
+  saveOfflineData();
+  updateOfflinePanel();
+
+  showNotification('Chế độ offline', 'Đã thêm sự cố vào hàng đợi');
+  logActivity('incident_queue_add', 'Thêm sự cố vào hàng đợi offline');
 }
 
 // Offline Data Functions
