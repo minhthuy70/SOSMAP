@@ -106,6 +106,7 @@
       <a href="#map" class="nav-link" data-section="map">Bản đồ</a>
       <a href="#report" class="nav-link" data-section="report">Phản ánh</a>
       <a href="#admin" class="nav-link admin-only" data-section="admin" style="display: none;">Quản trị</a>
+      <a href="#dashboard" class="nav-link dashboard-only" data-section="dashboard" style="display: none;">Dashboard</a>
       <a href="#about" class="nav-link" data-section="about">Giới thiệu</a>
     </nav>
     <div class="auth-section" id="authSection">
@@ -8879,6 +8880,20 @@ div class="summary-label">Sự cố tháng này</div>
                 <div class="stat-label">Đã giải quyết</div>
               </div>
             </div>
+            <div class="stat-card">
+              <div class="stat-icon users">👥</div>
+              <div class="stat-info">
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">Người dùng</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon verification">✓</div>
+              <div class="stat-info">
+                <div class="stat-value" id="verifiedIncidents">0</div>
+                <div class="stat-label">Đã xác minh</div>
+              </div>
+            </div>
           </div>
 
           <!-- Filters and Search -->
@@ -8891,6 +8906,37 @@ div class="summary-label">Sự cố tháng này</div>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
               </button>
+            </div>
+            <div class="filter-group">
+              <select id="adminStatusFilter">
+                <option value="">Tất cả trạng thái</option>
+                <option value="pending">Chờ xử lý</option>
+                <option value="verified">Đã xác minh</option>
+                <option value="in_progress">Đang xử lý</option>
+                <option value="resolved">Đã giải quyết</option>
+                <option value="rejected">Đã từ chối</option>
+              </select>
+              <select id="adminSeverityFilter">
+                <option value="">Tất cả mức độ</option>
+                <option value="low">Thấp</option>
+                <option value="medium">Trung bình</option>
+                <option value="high">Cao</option>
+                <option value="critical">Nghiêm trọng</option>
+              </select>
+              <select id="adminTypeFilter">
+                <option value="">Tất cả loại</option>
+                <option value="traffic">Giao thông</option>
+                <option value="accident">Tai nạn</option>
+                <option value="flood">Ngập nước</option>
+                <option value="fire">Cháy nổ</option>
+                <option value="other">Khác</option>
+              </select>
+            </div>
+            <div class="action-buttons">
+              <button class="btn btn-primary" id="refreshAdminData">Làm mới</button>
+              <button class="btn btn-secondary" id="exportAdminData">Xuất dữ liệu</button>
+            </div>
+          </div>
             </div>
             <div class="filter-controls">
               <select id="filterType">
