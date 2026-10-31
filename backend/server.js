@@ -138,6 +138,7 @@ app.use('/api/roles', require('./routes/roles'));
 app.use('/api/audit', require('./routes/audit'));
 app.use('/api/telemetry', require('./routes/telemetry'));
 app.use('/api/monitoring', require('./routes/monitoring'));
+app.use('/api/comments', require('./routes/comments'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

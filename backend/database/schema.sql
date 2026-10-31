@@ -5,6 +5,7 @@
 DROP TABLE IF EXISTS audit_logs CASCADE;
 DROP TABLE IF EXISTS map_layers CASCADE;
 DROP TABLE IF EXISTS notifications CASCADE;
+DROP TABLE IF EXISTS incident_comments CASCADE;
 DROP TABLE IF EXISTS incidents CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
@@ -72,6 +73,22 @@ CREATE INDEX idx_incidents_user_created ON incidents(user_id, created_at);
 CREATE INDEX idx_incidents_verified ON incidents(verified_by) WHERE verified_by IS NOT NULL;
 CREATE INDEX idx_incidents_pending ON incidents(status) WHERE status = 'pending';
 
+-- Incident comments table
+CREATE TABLE incident_comments (
+  id SERIAL PRIMARY KEY,
+  incident_id INTEGER NOT NULL REFERENCES incidents(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE SET NULL,
+  comment TEXT NOT NULL,
+  is_internal BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Indexes for incident comments
+CREATE INDEX idx_incident_comments_incident_id ON incident_comments(incident_id);
+CREATE INDEX idx_incident_comments_user_id ON incident_comments(user_id);
+CREATE INDEX idx_incident_comments_created_at ON incident_comments(created_at);
+
 -- Notifications table
 CREATE TABLE notifications (
   id SERIAL PRIMARY KEY,
@@ -107,6 +124,9 @@ CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_incidents_updated_at BEFORE UPDATE ON incidents
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_incident_comments_updated_at BEFORE UPDATE ON incident_comments
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Map Layers table
