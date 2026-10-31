@@ -567,6 +567,55 @@ router.get('/:id/history', auth, async (req, res) => {
   }
 });
 
+// Verify incident
+router.put('/:id/verify', auth, [
+  body('verified').isBoolean(),
+  body('verification_notes').optional().trim().isLength({ max: 500 })
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { verified, verification_notes } = req.body;
+
+    // Only admins and moderators can verify
+    if (req.user.role !== 'admin' && req.user.role !== 'moderator') {
+      return res.status(403).json({ error: { message: 'Unauthorized to verify incidents', status: 403 } });
+    }
+
+    const result = await pool.query(
+      `UPDATE incidents
+       SET verified_by = $1,
+           verified_at = CASE WHEN $2 = true THEN NOW() ELSE NULL END,
+           status = CASE WHEN $2 = true THEN 'verified' ELSE status END,
+           notes = CASE WHEN $3 IS NOT NULL THEN COALESCE(notes, '') || $3 ELSE notes END,
+           updated_at = NOW()
+       WHERE id = $4
+       RETURNING *`,
+      [req.user.id, verified, verification_notes ? `\n[Verification by ${req.user.name}]: ${verification_notes}` : null, req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Incident not found', status: 404 } });
+    }
+
+    const incident = result.rows[0];
+
+    // Broadcast update
+    sendIncidentUpdate(req.params.id, {
+      action: 'verified',
+      incident: incident
+    });
+
+    res.json({ message: 'Incident verification updated successfully', incident: incident });
+  } catch (error) {
+    console.error('Verify incident error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
 // Delete incident
 router.delete('/:id', auth, async (req, res) => {
   try {
