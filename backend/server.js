@@ -35,6 +35,10 @@ app.use(morgan('combined', { stream: { write: message => logger.info(message.tri
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Add data validation and sanitization middleware
+const { sanitizeInput } = require('./middleware/validation');
+app.use(sanitizeInput);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   logger.error('Server error:', {
