@@ -385,6 +385,115 @@ router.put('/:id/unassign', auth, async (req, res) => {
   }
 });
 
+// Escalate incident
+router.put('/:id/escalate', auth, [
+  body('escalation_level').isInt({ min: 1, max: 5 })
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { escalation_level, reason, auto_escalate_hours } = req.body;
+
+    // Calculate auto-escalate time if specified
+    let auto_escalate_at = null;
+    if (auto_escalate_hours && auto_escalate_hours > 0) {
+      auto_escalate_at = new Date(Date.now() + auto_escalate_hours * 60 * 60 * 1000);
+    }
+
+    const result = await pool.query(
+      `UPDATE incidents
+       SET escalation_level = $1,
+           escalated_at = NOW(),
+           escalated_by = $2,
+           auto_escalate_at = $3,
+           updated_at = NOW()
+       WHERE id = $4
+       RETURNING *`,
+      [escalation_level, req.user.id, auto_escalate_at, req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Incident not found', status: 404 } });
+    }
+
+    const incident = result.rows[0];
+
+    // Add escalation note if reason provided
+    if (reason) {
+      await pool.query(
+        `UPDATE incidents
+         SET notes = COALESCE(notes, '') || $1
+         WHERE id = $2`,
+        [`\n[Escalation L${escalation_level} by ${req.user.name} at ${new Date().toLocaleString()}]: ${reason}`, req.params.id]
+      );
+    }
+
+    // Send notifications to admins for high escalation levels
+    if (escalation_level >= 3) {
+      const { sendPushNotification } = require('./notifications');
+      const adminResult = await pool.query(
+        'SELECT id FROM users WHERE role = $1',
+        ['admin']
+      );
+
+      for (const admin of adminResult.rows) {
+        sendPushNotification(admin.id, 'Sự cố đã được nâng cấp', `${incident.title} - Cấp độ ${escalation_level}`, {
+          incidentId: incident.id,
+          type: 'incident_escalated'
+        });
+      }
+    }
+
+    // Broadcast update
+    sendIncidentUpdate(req.params.id, {
+      action: 'escalated',
+      incident: incident
+    });
+
+    res.json({ message: 'Incident escalated successfully', incident: incident });
+  } catch (error) {
+    console.error('Escalate incident error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// De-escalate incident
+router.put('/:id/deescalate', auth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `UPDATE incidents
+       SET escalation_level = 0,
+           escalated_at = NULL,
+           escalated_by = NULL,
+           auto_escalate_at = NULL,
+           updated_at = NOW()
+       WHERE id = $1
+       RETURNING *`,
+      [req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Incident not found', status: 404 } });
+    }
+
+    const incident = result.rows[0];
+
+    // Broadcast update
+    sendIncidentUpdate(req.params.id, {
+      action: 'deescalated',
+      incident: incident
+    });
+
+    res.json({ message: 'Incident de-escalated successfully', incident: incident });
+  } catch (error) {
+    console.error('De-escalate incident error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
 // Delete incident
 router.delete('/:id', auth, async (req, res) => {
   try {

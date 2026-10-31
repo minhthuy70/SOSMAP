@@ -51,6 +51,10 @@ CREATE TABLE incidents (
   assigned_at TIMESTAMP,
   assigned_by INTEGER REFERENCES users(id),
   notes TEXT,
+  escalation_level INTEGER DEFAULT 0,
+  escalated_at TIMESTAMP,
+  escalated_by INTEGER REFERENCES users(id),
+  auto_escalate_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
