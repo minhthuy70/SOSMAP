@@ -1,25 +1,64 @@
 {
   "name": "SOS MAP - Hệ thống bản đồ tiếp nhận phản ánh sự cố",
   "short_name": "SOS MAP",
-  "description": "Hệ thống bản đồ tương tác giúp tiếp nhận và hiển thị phản ánh về sự cố giao thông và thiên tai",
+  "description": "Hệ thống bản đồ tương tác giúp tiếp nhận và hiển thị phản ánh về sự cố giao thông và thiên tai. Báo cáo sự cố nhanh chóng, theo dõi theo thời gian thực.",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay"],
   "background_color": "#ffffff",
   "theme_color": "#005BAC",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "icons": [
+    {
+      "src": "/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "categories": ["utilities", "navigation", "news"],
+  "categories": ["utilities", "navigation", "news", "public_safety"],
   "lang": "vi",
   "dir": "ltr",
   "scope": "/",
@@ -27,7 +66,72 @@
     {
       "src": "/screenshot1.png",
       "sizes": "1280x720",
-      "type": "image/png"
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshot2.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Báo cáo sự cố",
+      "short_name": "Báo cáo",
+      "description": "Tạo báo cáo sự cố mới",
+      "url": "/report",
+      "icons": [
+        {
+          "src": "/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Xem bản đồ",
+      "short_name": "Bản đồ",
+      "description": "Xem bản đồ sự cố",
+      "url": "/map",
+      "icons": [
+        {
+          "src": "/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Danh sách sự cố",
+      "short_name": "Danh sách",
+      "description": "Xem danh sách sự cố",
+      "url": "/incidents",
+      "icons": [
+        {
+          "src": "/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "SOS khẩn cấp",
+      "short_name": "SOS",
+      "description": "Gửi tín hiệu SOS khẩn cấp",
+      "url": "/sos",
+      "icons": [
+        {
+          "src": "/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  }
 }
