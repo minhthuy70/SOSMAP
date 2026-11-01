@@ -14,6 +14,10 @@ window.onerror = function(message, source, lineno, colno, error) {
       })
     }).catch(e => console.error('Failed to log error:', e));
   }
+  // Show error boundary for critical errors
+  if (error && error.name === 'TypeError' || error.name === 'ReferenceError') {
+    showErrorBoundary(error);
+  }
   return false;
 };
 
@@ -21,6 +25,141 @@ window.onerror = function(message, source, lineno, colno, error) {
 window.onunhandledrejection = function(event) {
   console.error('Unhandled promise rejection:', event.reason);
   showNotification('Lỗi hệ thống', 'Đã xảy ra lỗi không mong muốn');
+  // Show error boundary for critical promise rejections
+  if (event.reason && event.reason.name === 'TypeError') {
+    showErrorBoundary(event.reason);
+  }
+};
+
+// Error Boundary UI
+function showErrorBoundary(error) {
+  // Remove existing error boundary if any
+  const existing = document.getElementById('error-boundary');
+  if (existing) existing.remove();
+
+  // Create error boundary UI
+  const errorBoundary = document.createElement('div');
+  errorBoundary.id = 'error-boundary';
+  errorBoundary.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  `;
+
+  errorBoundary.innerHTML = `
+    <div style="
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 500px;
+      text-align: center;
+      animation: slideIn 0.3s ease-out;
+    ">
+      <div style="
+        font-size: 64px;
+        margin-bottom: 20px;
+      ">⚠️</div>
+      <h2 style="
+        color: #333;
+        margin: 0 0 10px 0;
+        font-size: 24px;
+      ">Đã xảy ra lỗi</h2>
+      <p style="
+        color: #666;
+        margin: 0 0 20px 0;
+        line-height: 1.6;
+      ">
+        Một lỗi không mong muốn đã xảy ra. Chúng tôi đã ghi nhận thông tin này.
+      </p>
+      <div style="
+        background: #f5f5f5;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: left;
+        font-size: 12px;
+        color: #666;
+        max-height: 100px;
+        overflow-y: auto;
+      ">
+        <strong>${error.name || 'Error'}:</strong><br>
+        ${error.message || 'Unknown error'}
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button onclick="window.location.reload()" style="
+          background: #005BAC;
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+          transition: background 0.2s;
+        " onmouseover="this.style.background='#004491'" onmouseout="this.style.background='#005BAC'">
+          🔄 Tải lại trang
+        </button>
+        <button onclick="dismissErrorBoundary()" style="
+          background: #f5f5f5;
+          color: #333;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+          transition: background 0.2s;
+        " onmouseover="this.style.background='#e0e0e0'" onmouseout="this.style.background='#f5f5f5'">
+          ✖️ Đóng
+        </button>
+      </div>
+      <p style="
+        color: #999;
+        margin: 20px 0 0 0;
+        font-size: 12px;
+      ">
+        Mã lỗi: ${Date.now().toString(36)}
+      </p>
+    </div>
+    <style>
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  `;
+
+  document.body.appendChild(errorBoundary);
+}
+
+// Dismiss error boundary
+function dismissErrorBoundary() {
+  const errorBoundary = document.getElementById('error-boundary');
+  if (errorBoundary) {
+    errorBoundary.style.opacity = '0';
+    errorBoundary.style.transition = 'opacity 0.3s ease-out';
+    setTimeout(() => errorBoundary.remove(), 300);
+  }
+}
+
+// Test error boundary (for development)
+window.testErrorBoundary = function() {
+  showErrorBoundary(new Error('This is a test error'));
 };
 
 // API Error Handler
