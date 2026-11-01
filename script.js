@@ -325,6 +325,293 @@ function hideSkeleton(containerId) {
   }
 }
 
+/* Optimistic UI Updates */
+
+// Queue for pending optimistic updates
+const optimisticUpdateQueue = new Map();
+
+// Optimistic update helper
+function optimisticUpdate(updateId, updateFn, rollbackFn, apiCall) {
+  // Apply optimistic update immediately
+  const result = updateFn();
+  
+  // Store rollback function in case of failure
+  optimisticUpdateQueue.set(updateId, {
+    rollback: rollbackFn,
+    data: result
+  });
+
+  // Make API call
+  apiCall()
+    .then(response => {
+      // Success - remove from queue
+      optimisticUpdateQueue.delete(updateId);
+      showNotification('Thành công', 'Cập nhật thành công');
+    })
+    .catch(error => {
+      // Failure - rollback the optimistic update
+      const queued = optimisticUpdateQueue.get(updateId);
+      if (queued && queued.rollback) {
+        queued.rollback();
+        optimisticUpdateQueue.delete(updateId);
+      }
+      handleApiError(error);
+    });
+
+  return result;
+}
+
+// Optimistic incident like/unlike
+function optimisticToggleLike(incidentId) {
+  const updateId = `like-${incidentId}`;
+  const likeButton = document.querySelector(`[data-incident-id="${incidentId}"] .like-button`);
+  
+  if (!likeButton) return;
+
+  const wasLiked = likeButton.classList.contains('liked');
+  const likeCountElement = likeButton.querySelector('.like-count');
+  const currentCount = parseInt(likeCountElement?.textContent || '0');
+
+  // Optimistic update
+  const updateFn = () => {
+    likeButton.classList.toggle('liked');
+    if (likeCountElement) {
+      likeCountElement.textContent = wasLiked ? currentCount - 1 : currentCount + 1;
+    }
+    return { wasLiked, count: wasLiked ? currentCount - 1 : currentCount + 1 };
+  };
+
+  // Rollback function
+  const rollbackFn = () => {
+    likeButton.classList.toggle('liked');
+    if (likeCountElement) {
+      likeCountElement.textContent = currentCount;
+    }
+  };
+
+  // API call
+  const apiCall = () => {
+    return apiRequest(`/incidents/${incidentId}/like`, {
+      method: wasLiked ? 'DELETE' : 'POST'
+    });
+  };
+
+  return optimisticUpdate(updateId, updateFn, rollbackFn, apiCall);
+}
+
+// Optimistic incident delete
+function optimisticDeleteIncident(incidentId) {
+  const updateId = `delete-${incidentId}`;
+  const incidentElement = document.querySelector(`[data-incident-id="${incidentId}"]`);
+  
+  if (!incidentElement) return;
+
+  const originalHTML = incidentElement.outerHTML;
+  const parentElement = incidentElement.parentElement;
+
+  // Optimistic update
+  const updateFn = () => {
+    incidentElement.style.opacity = '0';
+    incidentElement.style.transform = 'translateX(-100%)';
+    incidentElement.style.transition = 'all 0.3s ease-out';
+    setTimeout(() => incidentElement.remove(), 300);
+    return { originalHTML, parentElement };
+  };
+
+  // Rollback function
+  const rollbackFn = () => {
+    if (parentElement) {
+      parentElement.insertAdjacentHTML('afterbegin', originalHTML);
+    }
+  };
+
+  // API call
+  const apiCall = () => {
+    return apiRequest(`/incidents/${incidentId}`, {
+      method: 'DELETE'
+    });
+  };
+
+  return optimisticUpdate(updateId, updateFn, rollbackFn, apiCall);
+}
+
+// Optimistic comment add
+function optimisticAddComment(incidentId, commentText) {
+  const updateId = `comment-${incidentId}-${Date.now()}`;
+  const commentsContainer = document.querySelector(`[data-incident-id="${incidentId}"] .comments-container`);
+  
+  if (!commentsContainer) return;
+
+  const tempId = `temp-${Date.now()}`;
+  const tempCommentHTML = `
+    <div class="comment" data-comment-id="${tempId}" style="opacity: 0.7;">
+      <div class="comment-content">
+        <p>${escapeHtml(commentText)}</p>
+        <small>Vừa xong</small>
+      </div>
+    </div>
+  `;
+
+  // Optimistic update
+  const updateFn = () => {
+    commentsContainer.insertAdjacentHTML('afterbegin', tempCommentHTML);
+    return { tempId };
+  };
+
+  // Rollback function
+  const rollbackFn = () => {
+    const tempElement = commentsContainer.querySelector(`[data-comment-id="${tempId}"]`);
+    if (tempElement) tempElement.remove();
+  };
+
+  // API call
+  const apiCall = () => {
+    return apiRequest(`/incidents/${incidentId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ comment: commentText })
+    });
+  };
+
+  return optimisticUpdate(updateId, updateFn, rollbackFn, apiCall);
+}
+
+// Optimistic status update
+function optimisticUpdateStatus(incidentId, newStatus) {
+  const updateId = `status-${incidentId}`;
+  const statusElement = document.querySelector(`[data-incident-id="${incidentId}"] .status-badge`);
+  
+  if (!statusElement) return;
+
+  const originalStatus = statusElement.textContent;
+  const originalClass = statusElement.className;
+
+  // Optimistic update
+  const updateFn = () => {
+    statusElement.textContent = newStatus;
+    statusElement.className = `status-badge status-${newStatus.toLowerCase()}`;
+    return { originalStatus, originalClass };
+  };
+
+  // Rollback function
+  const rollbackFn = () => {
+    statusElement.textContent = originalStatus;
+    statusElement.className = originalClass;
+  };
+
+  // API call
+  const apiCall = () => {
+    return apiRequest(`/incidents/${incidentId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status: newStatus })
+    });
+  };
+
+  return optimisticUpdate(updateId, updateFn, rollbackFn, apiCall);
+}
+
+// Optimistic rating update
+function optimisticUpdateRating(incidentId, rating) {
+  const updateId = `rating-${incidentId}`;
+  const ratingContainer = document.querySelector(`[data-incident-id="${incidentId}"] .rating-container`);
+  
+  if (!ratingContainer) return;
+
+  const originalRating = ratingContainer.dataset.rating || '0';
+  const stars = ratingContainer.querySelectorAll('.star');
+
+  // Optimistic update
+  const updateFn = () => {
+    stars.forEach((star, index) => {
+      if (index < rating) {
+        star.classList.add('filled');
+      } else {
+        star.classList.remove('filled');
+      }
+    });
+    ratingContainer.dataset.rating = rating;
+    return { originalRating };
+  };
+
+  // Rollback function
+  const rollbackFn = () => {
+    stars.forEach((star, index) => {
+      if (index < parseInt(originalRating)) {
+        star.classList.add('filled');
+      } else {
+        star.classList.remove('filled');
+      }
+    });
+    ratingContainer.dataset.rating = originalRating;
+  };
+
+  // API call
+  const apiCall = () => {
+    return apiRequest(`/incidents/${incidentId}/rating`, {
+      method: 'POST',
+      body: JSON.stringify({ rating })
+    });
+  };
+
+  return optimisticUpdate(updateId, updateFn, rollbackFn, apiCall);
+}
+
+// Optimistic bookmark toggle
+function optimisticToggleBookmark(incidentId) {
+  const updateId = `bookmark-${incidentId}`;
+  const bookmarkButton = document.querySelector(`[data-incident-id="${incidentId}"] .bookmark-button`);
+  
+  if (!bookmarkButton) return;
+
+  const wasBookmarked = bookmarkButton.classList.contains('bookmarked');
+
+  // Optimistic update
+  const updateFn = () => {
+    bookmarkButton.classList.toggle('bookmarked');
+    bookmarkButton.innerHTML = wasBookmarked ? '🔖' : '⭐';
+    return { wasBookmarked };
+  };
+
+  // Rollback function
+  const rollbackFn = () => {
+    bookmarkButton.classList.toggle('bookmarked');
+    bookmarkButton.innerHTML = wasBookmarked ? '⭐' : '🔖';
+  };
+
+  // API call
+  const apiCall = () => {
+    return apiRequest(`/incidents/${incidentId}/bookmark`, {
+      method: wasBookmarked ? 'DELETE' : 'POST'
+    });
+  };
+
+  return optimisticUpdate(updateId, updateFn, rollbackFn, apiCall);
+}
+
+// Helper: Escape HTML to prevent XSS
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Rollback all pending optimistic updates (call on page unload)
+window.addEventListener('beforeunload', () => {
+  optimisticUpdateQueue.forEach((update, id) => {
+    if (update.rollback) {
+      update.rollback();
+    }
+  });
+});
+
+// Cancel specific optimistic update
+function cancelOptimisticUpdate(updateId) {
+  const queued = optimisticUpdateQueue.get(updateId);
+  if (queued && queued.rollback) {
+    queued.rollback();
+    optimisticUpdateQueue.delete(updateId);
+  }
+}
+
 // API Error Handler
 function handleApiError(error) {
   console.error('API Error:', error);
