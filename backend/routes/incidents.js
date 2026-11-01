@@ -6,6 +6,7 @@ const pool = require('../config/database');
 const upload = require('../middleware/upload');
 const { broadcastIncidentUpdate, sendIncidentUpdate } = require('../services/websocket');
 const { cacheMiddleware, invalidateCache } = require('../middleware/cache');
+const { clusterIncidents, detectEmergingHotspots, clusterByTime, getClusterStatistics } = require('../services/clustering');
 
 /**
  * @swagger
@@ -787,6 +788,96 @@ router.delete('/:id/images/:filename', auth, async (req, res) => {
     });
   } catch (error) {
     console.error('Delete image error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Get incident clusters
+router.get('/clusters', auth, async (req, res) => {
+  try {
+    const { distance_threshold = 1, min_incidents = 2 } = req.query;
+
+    const result = await pool.query(
+      'SELECT id, type, title, description, latitude, longitude, severity, status, created_at FROM incidents WHERE latitude IS NOT NULL AND longitude IS NOT NULL'
+    );
+
+    const incidents = result.rows;
+    const clusters = clusterIncidents(
+      incidents,
+      parseFloat(distance_threshold),
+      parseInt(min_incidents)
+    );
+
+    res.json({
+      clusters: clusters,
+      total_incidents: incidents.length,
+      cluster_count: clusters.length
+    });
+  } catch (error) {
+    console.error('Get clusters error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Get emerging hotspots
+router.get('/hotspots', auth, async (req, res) => {
+  try {
+    const { time_window_hours = 24 } = req.query;
+
+    const result = await pool.query(
+      'SELECT id, type, title, description, latitude, longitude, severity, status, created_at FROM incidents WHERE latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY created_at DESC'
+    );
+
+    const incidents = result.rows;
+    const hotspots = detectEmergingHotspots(incidents, parseInt(time_window_hours));
+
+    res.json({
+      hotspots: hotspots,
+      total_recent_incidents: incidents.length,
+      hotspot_count: hotspots.length
+    });
+  } catch (error) {
+    console.error('Get hotspots error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Get temporal clusters
+router.get('/temporal-clusters', auth, async (req, res) => {
+  try {
+    const { time_window_minutes = 60 } = req.query;
+
+    const result = await pool.query(
+      'SELECT id, type, title, description, latitude, longitude, severity, status, created_at FROM incidents ORDER BY created_at ASC'
+    );
+
+    const incidents = result.rows;
+    const temporalClusters = clusterByTime(incidents, parseInt(time_window_minutes));
+
+    res.json({
+      temporal_clusters: temporalClusters,
+      total_incidents: incidents.length,
+      cluster_count: temporalClusters.length
+    });
+  } catch (error) {
+    console.error('Get temporal clusters error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Get cluster statistics
+router.get('/cluster-stats', auth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, type, title, description, latitude, longitude, severity, status, created_at FROM incidents WHERE latitude IS NOT NULL AND longitude IS NOT NULL'
+    );
+
+    const incidents = result.rows;
+    const stats = getClusterStatistics(incidents);
+
+    res.json(stats);
+  } catch (error) {
+    console.error('Get cluster stats error:', error);
     res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
   }
 });
