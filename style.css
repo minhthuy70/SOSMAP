@@ -16347,3 +16347,269 @@ body.dark-mode .critical-error p {
   z-index: 99999;
 }
 
+/* Skeleton Loading Styles */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Skeleton Card */
+.skeleton-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.skeleton-card .skeleton-title {
+  height: 24px;
+  width: 60%;
+  margin-bottom: 12px;
+}
+
+.skeleton-card .skeleton-text {
+  height: 16px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.skeleton-card .skeleton-text-short {
+  height: 16px;
+  width: 40%;
+}
+
+/* Skeleton Incident List Item */
+.skeleton-incident-item {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.skeleton-incident-item .skeleton-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeleton-incident-item .skeleton-content {
+  flex: 1;
+}
+
+.skeleton-incident-item .skeleton-content .skeleton-title {
+  height: 20px;
+  width: 70%;
+  margin-bottom: 8px;
+}
+
+.skeleton-incident-item .skeleton-content .skeleton-text {
+  height: 14px;
+  width: 90%;
+  margin-bottom: 6px;
+}
+
+.skeleton-incident-item .skeleton-content .skeleton-text-short {
+  height: 14px;
+  width: 50%;
+}
+
+/* Skeleton Map Marker */
+.skeleton-map-marker {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin: 5px;
+}
+
+/* Skeleton Dashboard Stats */
+.skeleton-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.skeleton-stat-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.skeleton-stat-card .skeleton-number {
+  height: 40px;
+  width: 80px;
+  margin-bottom: 10px;
+}
+
+.skeleton-stat-card .skeleton-label {
+  height: 16px;
+  width: 60%;
+}
+
+/* Skeleton Table */
+.skeleton-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.skeleton-table thead tr {
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.skeleton-table th {
+  padding: 12px;
+  text-align: left;
+}
+
+.skeleton-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.skeleton-table td {
+  padding: 12px;
+}
+
+.skeleton-table .skeleton-cell {
+  height: 16px;
+  width: 100%;
+}
+
+/* Skeleton Form */
+.skeleton-form-group {
+  margin-bottom: 20px;
+}
+
+.skeleton-form-group .skeleton-label {
+  height: 16px;
+  width: 30%;
+  margin-bottom: 8px;
+}
+
+.skeleton-form-group .skeleton-input {
+  height: 40px;
+  width: 100%;
+}
+
+/* Skeleton Button */
+.skeleton-button {
+  height: 40px;
+  width: 120px;
+  border-radius: 4px;
+}
+
+/* Skeleton Avatar */
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeleton-avatar-large {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+/* Skeleton Image */
+.skeleton-image {
+  width: 100%;
+  height: 200px;
+  border-radius: 8px;
+}
+
+/* Skeleton Badge */
+.skeleton-badge {
+  height: 24px;
+  width: 60px;
+  border-radius: 12px;
+}
+
+/* Loading Container */
+.loading-container {
+  padding: 20px;
+}
+
+.loading-container .skeleton {
+  margin-bottom: 10px;
+}
+
+/* Pulse Animation Alternative */
+.skeleton-pulse {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Skeleton with shimmer effect */
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Responsive Skeleton */
+@media (max-width: 768px) {
+  .skeleton-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .skeleton-incident-item {
+    flex-direction: column;
+  }
+
+  .skeleton-incident-item .skeleton-icon {
+    width: 100%;
+    height: 150px;
+    border-radius: 8px;
+  }
+}
+
+

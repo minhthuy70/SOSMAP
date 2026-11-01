@@ -162,6 +162,169 @@ window.testErrorBoundary = function() {
   showErrorBoundary(new Error('This is a test error'));
 };
 
+/* Skeleton Loading Functions */
+
+// Show skeleton loader for incident list
+function showIncidentListSkeleton(count = 5) {
+  const container = document.getElementById('incidentList');
+  if (!container) return;
+
+  let skeletonHTML = '';
+  for (let i = 0; i < count; i++) {
+    skeletonHTML += `
+      <div class="skeleton-incident-item">
+        <div class="skeleton skeleton-icon"></div>
+        <div class="skeleton-content">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text-short"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = skeletonHTML;
+}
+
+// Show skeleton loader for dashboard stats
+function showDashboardSkeleton() {
+  const container = document.getElementById('dashboardStats');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="skeleton-stats-grid">
+      <div class="skeleton-stat-card">
+        <div class="skeleton skeleton-number"></div>
+        <div class="skeleton skeleton-label"></div>
+      </div>
+      <div class="skeleton-stat-card">
+        <div class="skeleton skeleton-number"></div>
+        <div class="skeleton skeleton-label"></div>
+      </div>
+      <div class="skeleton-stat-card">
+        <div class="skeleton skeleton-number"></div>
+        <div class="skeleton skeleton-label"></div>
+      </div>
+      <div class="skeleton-stat-card">
+        <div class="skeleton skeleton-number"></div>
+        <div class="skeleton skeleton-label"></div>
+      </div>
+    </div>
+  `;
+}
+
+// Show skeleton loader for table
+function showTableSkeleton(rows = 5, cols = 4) {
+  const container = document.getElementById('dataTable');
+  if (!container) return;
+
+  let skeletonHTML = '<table class="skeleton-table"><thead><tr>';
+  for (let i = 0; i < cols; i++) {
+    skeletonHTML += `<th><div class="skeleton skeleton-cell"></div></th>`;
+  }
+  skeletonHTML += '</tr></thead><tbody>';
+
+  for (let r = 0; r < rows; r++) {
+    skeletonHTML += '<tr>';
+    for (let c = 0; c < cols; c++) {
+      skeletonHTML += `<td><div class="skeleton skeleton-cell"></div></td>`;
+    }
+    skeletonHTML += '</tr>';
+  }
+
+  skeletonHTML += '</tbody></table>';
+  container.innerHTML = skeletonHTML;
+}
+
+// Show skeleton loader for form
+function showFormSkeleton() {
+  const container = document.getElementById('formContainer');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="skeleton-form-group">
+      <div class="skeleton skeleton-label"></div>
+      <div class="skeleton skeleton-input"></div>
+    </div>
+    <div class="skeleton-form-group">
+      <div class="skeleton skeleton-label"></div>
+      <div class="skeleton skeleton-input"></div>
+    </div>
+    <div class="skeleton-form-group">
+      <div class="skeleton skeleton-label"></div>
+      <div class="skeleton skeleton-input"></div>
+    </div>
+    <div class="skeleton-button"></div>
+  `;
+}
+
+// Show skeleton loader for card
+function showCardSkeleton(count = 3) {
+  const container = document.getElementById('cardContainer');
+  if (!container) return;
+
+  let skeletonHTML = '';
+  for (let i = 0; i < count; i++) {
+    skeletonHTML += `
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-text"></div>
+        <div class="skeleton skeleton-text-short"></div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = skeletonHTML;
+}
+
+// Show skeleton loader for map markers
+function showMapSkeleton(count = 10) {
+  const container = document.getElementById('mapContainer');
+  if (!container) return;
+
+  let skeletonHTML = '<div style="display: flex; flex-wrap: wrap; gap: 10px; padding: 20px;">';
+  for (let i = 0; i < count; i++) {
+    skeletonHTML += '<div class="skeleton skeleton-map-marker"></div>';
+  }
+  skeletonHTML += '</div>';
+  container.innerHTML = skeletonHTML;
+}
+
+// Generic skeleton loader
+function showSkeleton(type, options = {}) {
+  switch (type) {
+    case 'incident-list':
+      showIncidentListSkeleton(options.count || 5);
+      break;
+    case 'dashboard':
+      showDashboardSkeleton();
+      break;
+    case 'table':
+      showTableSkeleton(options.rows || 5, options.cols || 4);
+      break;
+    case 'form':
+      showFormSkeleton();
+      break;
+    case 'card':
+      showCardSkeleton(options.count || 3);
+      break;
+    case 'map':
+      showMapSkeleton(options.count || 10);
+      break;
+    default:
+      console.warn('Unknown skeleton type:', type);
+  }
+}
+
+// Hide skeleton (revert to loading spinner or empty state)
+function hideSkeleton(containerId) {
+  const container = document.getElementById(containerId);
+  if (container) {
+    container.innerHTML = '<div class="loading-spinner">Đang tải...</div>';
+  }
+}
+
 // API Error Handler
 function handleApiError(error) {
   console.error('API Error:', error);
