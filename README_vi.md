@@ -14,41 +14,81 @@ SOS MAP là hệ thống bản đồ tương tác cho phép người dùng báo 
 - 📱 Responsive design cho mọi thiết bị
 - 🌙 Dark mode support
 - 🌍 Hỗ trợ đa ngôn ngữ (Tiếng Việt, English)
-- 🔍 Tìm kiếm và lọc sự cố
+- 🔍 Tìm kiếm và lọc sự cố với autocomplete
 - ⭐ Yêu thích/bookmark sự cố
 - 📤 Chia sẻ sự cố qua mạng xã hội
 - 🖨️ In báo cáo sự cố
 - ⌨️ Phím tắt nâng cao
-- 🔔 Thông báo real-time
-- 📊 Dashboard analytics
-- 📁 File upload với preview
+- 🔔 Thông báo real-time với push notifications
+- 📊 Dashboard analytics với Chart.js
+- 📁 File upload với preview và progress indicators
 - 📍 Geocoding (địa chỉ ↔ tọa độ)
-- 📄 Export PDF
-- 🚀 Performance optimizations
-- 🔒 Security improvements
-- ♿ Accessibility improvements
-- 📴 Offline mode support
-- 💾 Cache management
+- 📄 Export PDF, CSV, JSON, XML
+- 🚀 Performance optimizations (debounce, throttle, lazy load)
+- 🔒 Security improvements (CSP, CSRF, XSS protection)
+- ♿ Accessibility improvements (ARIA, screen readers)
+- 📴 Offline mode support với queue
+- 💾 Cache management với localStorage
+- 🛡️ Error boundary UI với giao diện đẹp
+- 🦴 Loading skeleton screens
+- ⚡ Optimistic UI updates (like, comment, delete, bookmark)
+- 🔄 WebSocket client connection retry
+- 📴 Offline data synchronization
 
 ### Backend
-- 🔐 JWT Authentication
-- 📡 WebSocket real-time updates
-- 📧 Email notifications
-- 📊 Analytics API
-- 📍 Geocoding service
-- 📁 File upload handling
+- 🔐 JWT Authentication với role-based access control
+- 📡 WebSocket real-time updates với error handling
+- 📧 Email notifications với templates
+- 📊 Analytics API với user dashboard
+- 📍 Geocoding service (OpenStreetMap)
+- 📁 File upload handling với validation
 - 📄 PDF generation
-- 🎯 Role-based access control
-- 📝 Audit logging
+- 🎯 Role-based access control (admin, user, moderator)
+- 📝 Audit logging system
 - 🚦 Rate limiting
 - 📚 Swagger API documentation
 - 🐳 Docker support
+- 🔒 Data validation middleware
+- 💾 API response caching
+- 🤖 Incident clustering algorithm (spatial, temporal, hotspots)
+- 📋 Incident report templates
+- 👥 Citizen reporting integration
+- 🌤️ Weather integration
+- 🆘 SOS signal/panic button
+- 📥 Offline incident queue
+- 🔄 API retry mechanism
+- 🏥 Health check endpoints
+- 📈 Database indexing optimization
+- 🔄 Data migration scripts
+- 📝 Enhanced logging với multiple levels
+- ✅ Environment validation utility
+- 📊 Monitoring dashboard endpoints
+- 📐 System initialization centralized
+
+### Incident Management
+- 📝 Incident assignment workflow
+- ⬆️ Incident escalation system
+- 💬 Incident comments/discussion
+- ⭐ Incident voting/rating
+- 🔗 Related incident linking
+- 📅 Incident timeline/history view
+- ✅ Incident verification workflow
+- 📊 Incident clustering và hotspot detection
+
+### User System
+- 🏆 User reputation/points system
+- 🎖️ User achievements/badges
+- 👤 User dashboard với activity statistics
+- 📍 Real-time location tracking
+- 📊 User activity tracking
 
 ### Database
 - PostgreSQL với schema đầy đủ
 - Indexes cho performance
 - Triggers cho timestamps
 - Vietnamese administrative units data
+- Migration scripts
+- Tables: users, incidents, incident_comments, incident_ratings, incident_relations, incident_assignments, incident_escalations, user_achievements, report_templates, citizen_reports, weather_data, audit_logs
 
 ## Cài đặt
 
