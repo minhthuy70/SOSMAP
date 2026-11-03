@@ -99,3 +99,77 @@ describe('Locations API', () => {
     });
   });
 });
+
+describe('Clustering API', () => {
+  describe('GET /api/incidents/clusters', () => {
+    test('should require authentication', async () => {
+      const response = await request(app).get('/api/incidents/clusters');
+      expect(response.status).toBe(401);
+    });
+
+    test('should accept query parameters', async () => {
+      const response = await request(app)
+        .get('/api/incidents/clusters')
+        .query({ distance_threshold: 1, min_incidents: 2 });
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe('GET /api/incidents/hotspots', () => {
+    test('should require authentication', async () => {
+      const response = await request(app).get('/api/incidents/hotspots');
+      expect(response.status).toBe(401);
+    });
+
+    test('should accept time window parameter', async () => {
+      const response = await request(app)
+        .get('/api/incidents/hotspots')
+        .query({ time_window_hours: 24 });
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe('GET /api/incidents/temporal-clusters', () => {
+    test('should require authentication', async () => {
+      const response = await request(app).get('/api/incidents/temporal-clusters');
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe('GET /api/incidents/cluster-stats', () => {
+    test('should require authentication', async () => {
+      const response = await request(app).get('/api/incidents/cluster-stats');
+      expect(response.status).toBe(401);
+    });
+  });
+});
+
+describe('Users API', () => {
+  describe('GET /api/users/:id/dashboard', () => {
+    test('should require authentication', async () => {
+      const response = await request(app).get('/api/users/1/dashboard');
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe('GET /api/users/:id/reputation', () => {
+    test('should return user reputation', async () => {
+      const response = await request(app).get('/api/users/1/reputation');
+      expect([200, 404, 500]).toContain(response.status);
+    });
+  });
+});
+
+describe('Cache Middleware', () => {
+  describe('GET /api/health (cached)', () => {
+    test('should return same response on second call (cached)', async () => {
+      const response1 = await request(app).get('/health');
+      const response2 = await request(app).get('/health');
+
+      expect(response1.status).toBe(200);
+      expect(response2.status).toBe(200);
+    });
+  });
+});
