@@ -883,4 +883,171 @@ router.get('/cluster-stats', auth, async (req, res) => {
   }
 });
 
+// Get incident timeline with filters
+router.get('/:id/timeline', auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      event_type,
+      start_date,
+      end_date,
+      limit = 50
+    } = req.query;
+
+    // Verify incident exists
+    const incidentResult = await pool.query(
+      'SELECT id FROM incidents WHERE id = $1',
+      [id]
+    );
+
+    if (incidentResult.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Incident not found', status: 404 } });
+    }
+
+    let query = `
+      SELECT 
+        'incident' as event_type,
+        id as event_id,
+        created_at,
+        'created' as action,
+        json_build_object(
+          'title', title,
+          'type', type,
+          'severity', severity,
+          'status', status
+        ) as details
+      FROM incidents WHERE id = $1
+    `;
+    const params = [id];
+    let paramIndex = 2;
+
+    // Add comments
+    query += `
+      UNION ALL
+      SELECT 
+        'comment' as event_type,
+        ic.id as event_id,
+        ic.created_at,
+        'commented' as action,
+        json_build_object(
+          'comment', ic.comment,
+          'user_id', ic.user_id
+        ) as details
+      FROM incident_comments ic WHERE ic.incident_id = $1
+    `;
+
+    // Add ratings
+    query += `
+      UNION ALL
+      SELECT 
+        'rating' as event_type,
+        ir.id as event_id,
+        ir.created_at,
+        'rated' as action,
+        json_build_object(
+          'rating', ir.rating,
+          'user_id', ir.user_id
+        ) as details
+      FROM incident_ratings ir WHERE ir.incident_id = $1
+    `;
+
+    // Add relations
+    query += `
+      UNION ALL
+      SELECT 
+        'relation' as event_type,
+        irel.id as event_id,
+        irel.created_at,
+        'related' as action,
+        json_build_object(
+          'related_incident_id', irel.related_incident_id,
+          'relation_type', irel.relation_type,
+          'created_by', irel.created_by
+        ) as details
+      FROM incident_relations irel WHERE irel.incident_id = $1
+    `;
+
+    // Add assignments
+    query += `
+      UNION ALL
+      SELECT 
+        'assignment' as event_type,
+        ia.id as event_id,
+        ia.created_at,
+        'assigned' as action,
+        json_build_object(
+          'assigned_to', ia.assigned_to,
+          'assigned_by', ia.assigned_by,
+          'status', ia.status
+        ) as details
+      FROM incident_assignments ia WHERE ia.incident_id = $1
+    `;
+
+    // Add escalations
+    query += `
+      UNION ALL
+      SELECT 
+        'escalation' as event_type,
+        ie.id as event_id,
+        ie.created_at,
+        'escalated' as action,
+        json_build_object(
+          'escalated_to', ie.escalated_to,
+          'escalated_by', ie.escalated_by,
+          'reason', ie.reason
+        ) as details
+      FROM incident_escalations ie WHERE ie.incident_id = $1
+    `;
+
+    // Add audit logs
+    query += `
+      UNION ALL
+      SELECT 
+        'audit' as event_type,
+        al.id as event_id,
+        al.created_at,
+        al.action,
+        json_build_object(
+          'entity_type', al.entity_type,
+          'entity_id', al.entity_id,
+          'details', al.details
+        ) as details
+      FROM audit_logs al WHERE al.entity_type = 'incident' AND al.entity_id::text = $1
+    `;
+
+    // Apply filters
+    if (event_type) {
+      query += ` AND event_type = $${paramIndex}`;
+      params.push(event_type);
+      paramIndex++;
+    }
+
+    if (start_date) {
+      query += ` AND created_at >= $${paramIndex}`;
+      params.push(start_date);
+      paramIndex++;
+    }
+
+    if (end_date) {
+      query += ` AND created_at <= $${paramIndex}`;
+      params.push(end_date);
+      paramIndex++;
+    }
+
+    query += ` ORDER BY created_at DESC LIMIT $${paramIndex}`;
+    params.push(parseInt(limit));
+
+    const result = await pool.query(query, params);
+
+    res.json({
+      incident_id: id,
+      timeline: result.rows,
+      total_events: result.rows.length
+    });
+  } catch (error) {
+    console.error('Get timeline error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
 module.exports = router;
