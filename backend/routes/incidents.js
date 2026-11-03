@@ -115,9 +115,10 @@ router.get('/', auth, cacheMiddleware(60), async (req, res) => {
     }
 
     if (search) {
-      query += ` AND (title ILIKE $${paramIndex} OR description ILIKE $${paramIndex})`;
-      params.push(`%${search}%`);
-      paramIndex++;
+      // Full-text search with tsvector
+      query += ` AND (to_tsvector('vietnamese', title || ' ' || description) @@ plainto_tsquery('vietnamese', $${paramIndex}) OR title ILIKE $${paramIndex + 1} OR description ILIKE $${paramIndex + 1})`;
+      params.push(search, `%${search}%`);
+      paramIndex += 2;
     }
 
     // Validate sort_by
