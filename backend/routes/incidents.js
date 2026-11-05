@@ -8,6 +8,7 @@ const { broadcastIncidentUpdate, sendIncidentUpdate } = require('../services/web
 const { cacheMiddleware, invalidateCache } = require('../middleware/cache');
 const { clusterIncidents, detectEmergingHotspots, clusterByTime, getClusterStatistics } = require('../services/clustering');
 const { autoCalculateSeverity, recalculateIncidentSeverity, batchRecalculateSeverity } = require('../services/severityCalculator');
+const { findPotentialDuplicates, markAsDuplicate, getDuplicateIncidents, unmarkDuplicate, scanForDuplicates } = require('../services/duplicateDetection');
 
 /**
  * @swagger
@@ -1085,6 +1086,131 @@ router.post('/batch-calculate-severity', auth, async (req, res) => {
     });
   } catch (error) {
     console.error('Batch calculate severity error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Find potential duplicates for an incident
+router.get('/:id/duplicates', auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { limit = 10 } = req.query;
+
+    const incidentResult = await pool.query(
+      'SELECT * FROM incidents WHERE id = $1',
+      [id]
+    );
+
+    if (incidentResult.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Incident not found', status: 404 } });
+    }
+
+    const incident = incidentResult.rows[0];
+    const duplicates = await findPotentialDuplicates(pool, incident, parseInt(limit));
+
+    res.json({
+      incident_id: id,
+      potential_duplicates: duplicates,
+      count: duplicates.length
+    });
+  } catch (error) {
+    console.error('Find duplicates error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Mark incident as duplicate
+router.post('/:id/mark-duplicate', auth, [
+  body('original_incident_id').notEmpty().isInt()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { id } = req.params;
+    const { original_incident_id } = req.body;
+
+    // Verify original incident exists
+    const originalResult = await pool.query(
+      'SELECT id FROM incidents WHERE id = $1',
+      [original_incident_id]
+    );
+
+    if (originalResult.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Original incident not found', status: 404 } });
+    }
+
+    const result = await markAsDuplicate(pool, id, original_incident_id, req.user.id);
+
+    res.json({
+      message: 'Incident marked as duplicate successfully',
+      result
+    });
+  } catch (error) {
+    console.error('Mark duplicate error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Get all duplicate incidents
+router.get('/duplicates', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const duplicates = await getDuplicateIncidents(pool);
+
+    res.json({
+      duplicates,
+      count: duplicates.length
+    });
+  } catch (error) {
+    console.error('Get duplicates error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Unmark incident as duplicate
+router.post('/:id/unmark-duplicate', auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const result = await unmarkDuplicate(pool, id);
+
+    res.json({
+      message: 'Incident unmarked as duplicate successfully',
+      result
+    });
+  } catch (error) {
+    console.error('Unmark duplicate error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Scan for duplicates
+router.post('/scan-duplicates', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const { time_window_hours = 24 } = req.body;
+
+    const result = await scanForDuplicates(pool, time_window_hours);
+
+    res.json({
+      message: 'Duplicate scan completed',
+      result
+    });
+  } catch (error) {
+    console.error('Scan duplicates error:', error);
     res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
   }
 });
