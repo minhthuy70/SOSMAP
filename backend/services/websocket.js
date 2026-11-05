@@ -2,6 +2,7 @@ const socketIo = require('socket.io');
 const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 const pool = require('../config/database');
+const { setupCollaborationHandlers } = require('./collaboration');
 
 let io;
 let reconnectAttempts = 0;
@@ -138,10 +139,14 @@ function initializeWebSocket(server) {
       socket.emit('pong', { timestamp: Date.now() });
     });
 
+    // Setup collaboration handlers
+    setupCollaborationHandlers(io, socket);
+
     // Handle disconnect
     socket.on('disconnect', (reason) => {
       logger.info('Client disconnected', {
         socketId: socket.id,
+        userId: socket.userId,
         reason
       });
     });
