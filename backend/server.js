@@ -23,6 +23,10 @@ const io = initializeWebSocket(server);
 const { initializeEmailService } = require('./services/email');
 initializeEmailService();
 
+// Initialize APM
+const { apmMiddleware, getMetrics, startPeriodicRecording } = require('./services/apm');
+startPeriodicRecording();
+
 // Swagger Documentation
 const swaggerSpec = require('./swagger');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -34,6 +38,9 @@ app.use(compression());
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// APM Middleware
+app.use(apmMiddleware);
 
 // Add data validation and sanitization middleware
 const { sanitizeInput } = require('./middleware/validation');

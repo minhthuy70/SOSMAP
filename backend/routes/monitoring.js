@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const logger = require('../utils/logger');
+const { getMetrics, resetMetrics } = require('../services/apm');
 
 /**
  * GET /api/monitoring/metrics
@@ -33,6 +34,50 @@ router.get('/metrics', (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to get metrics'
+    });
+  }
+});
+
+/**
+ * GET /api/monitoring/apm
+ * Get APM performance metrics
+ */
+router.get('/apm', (req, res) => {
+  try {
+    const apmMetrics = getMetrics();
+    
+    logger.debug('APM metrics retrieved');
+    res.json({
+      success: true,
+      data: apmMetrics
+    });
+  } catch (error) {
+    logger.error('Failed to get APM metrics', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get APM metrics'
+    });
+  }
+});
+
+/**
+ * POST /api/monitoring/apm/reset
+ * Reset APM metrics
+ */
+router.post('/apm/reset', (req, res) => {
+  try {
+    resetMetrics();
+    
+    logger.info('APM metrics reset');
+    res.json({
+      success: true,
+      message: 'APM metrics reset successfully'
+    });
+  } catch (error) {
+    logger.error('Failed to reset APM metrics', { error: error.message });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to reset APM metrics'
     });
   }
 });
