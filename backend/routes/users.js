@@ -332,4 +332,178 @@ router.get('/:id/dashboard', auth, async (req, res) => {
   }
 });
 
+// Get notification preferences
+router.get('/:id/notification-preferences', auth, async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Only users can view their own preferences or admins
+    if (req.user.id !== parseInt(userId) && req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const result = await pool.query(
+      'SELECT * FROM user_notification_preferences WHERE user_id = $1',
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      // Return default preferences
+      return res.json({
+        user_id: parseInt(userId),
+        email_notifications: true,
+        push_notifications: true,
+        sms_notifications: false,
+        in_app_notifications: true,
+        notify_on_new_incident: true,
+        notify_on_assigned_incident: true,
+        notify_on_incident_update: true,
+        notify_on_comment_reply: true,
+        notify_on_escalation: true,
+        notify_on_nearby_incident: true,
+        nearby_radius_km: 5,
+        notification_frequency: 'realtime'
+      });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Get notification preferences error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Update notification preferences
+router.put('/:id/notification-preferences', auth, [
+  body('email_notifications').optional().isBoolean(),
+  body('push_notifications').optional().isBoolean(),
+  body('sms_notifications').optional().isBoolean(),
+  body('in_app_notifications').optional().isBoolean(),
+  body('notify_on_new_incident').optional().isBoolean(),
+  body('notify_on_assigned_incident').optional().isBoolean(),
+  body('notify_on_incident_update').optional().isBoolean(),
+  body('notify_on_comment_reply').optional().isBoolean(),
+  body('notify_on_escalation').optional().isBoolean(),
+  body('notify_on_nearby_incident').optional().isBoolean(),
+  body('nearby_radius_km').optional().isInt({ min: 1, max: 50 }),
+  body('quiet_hours_start').optional().matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/),
+  body('quiet_hours_end').optional().matches(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/),
+  body('notification_frequency').optional().isIn(['realtime', 'hourly', 'daily', 'weekly'])
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const userId = req.params.id;
+
+    // Only users can update their own preferences or admins
+    if (req.user.id !== parseInt(userId) && req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const {
+      email_notifications,
+      push_notifications,
+      sms_notifications,
+      in_app_notifications,
+      notify_on_new_incident,
+      notify_on_assigned_incident,
+      notify_on_incident_update,
+      notify_on_comment_reply,
+      notify_on_escalation,
+      notify_on_nearby_incident,
+      nearby_radius_km,
+      quiet_hours_start,
+      quiet_hours_end,
+      notification_frequency
+    } = req.body;
+
+    // Check if preferences exist
+    const existing = await pool.query(
+      'SELECT id FROM user_notification_preferences WHERE user_id = $1',
+      [userId]
+    );
+
+    let result;
+    if (existing.rows.length > 0) {
+      // Update existing
+      result = await pool.query(
+        `UPDATE user_notification_preferences
+         SET email_notifications = COALESCE($1, email_notifications),
+             push_notifications = COALESCE($2, push_notifications),
+             sms_notifications = COALESCE($3, sms_notifications),
+             in_app_notifications = COALESCE($4, in_app_notifications),
+             notify_on_new_incident = COALESCE($5, notify_on_new_incident),
+             notify_on_assigned_incident = COALESCE($6, notify_on_assigned_incident),
+             notify_on_incident_update = COALESCE($7, notify_on_incident_update),
+             notify_on_comment_reply = COALESCE($8, notify_on_comment_reply),
+             notify_on_escalation = COALESCE($9, notify_on_escalation),
+             notify_on_nearby_incident = COALESCE($10, notify_on_nearby_incident),
+             nearby_radius_km = COALESCE($11, nearby_radius_km),
+             quiet_hours_start = $12,
+             quiet_hours_end = $13,
+             notification_frequency = COALESCE($14, notification_frequency),
+             updated_at = NOW()
+         WHERE user_id = $15
+         RETURNING *`,
+        [
+          email_notifications,
+          push_notifications,
+          sms_notifications,
+          in_app_notifications,
+          notify_on_new_incident,
+          notify_on_assigned_incident,
+          notify_on_incident_update,
+          notify_on_comment_reply,
+          notify_on_escalation,
+          notify_on_nearby_incident,
+          nearby_radius_km,
+          quiet_hours_start,
+          quiet_hours_end,
+          notification_frequency,
+          userId
+        ]
+      );
+    } else {
+      // Create new
+      result = await pool.query(
+        `INSERT INTO user_notification_preferences
+         (user_id, email_notifications, push_notifications, sms_notifications, in_app_notifications,
+          notify_on_new_incident, notify_on_assigned_incident, notify_on_incident_update,
+          notify_on_comment_reply, notify_on_escalation, notify_on_nearby_incident,
+          nearby_radius_km, quiet_hours_start, quiet_hours_end, notification_frequency)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+         RETURNING *`,
+        [
+          userId,
+          email_notifications !== undefined ? email_notifications : true,
+          push_notifications !== undefined ? push_notifications : true,
+          sms_notifications !== undefined ? sms_notifications : false,
+          in_app_notifications !== undefined ? in_app_notifications : true,
+          notify_on_new_incident !== undefined ? notify_on_new_incident : true,
+          notify_on_assigned_incident !== undefined ? notify_on_assigned_incident : true,
+          notify_on_incident_update !== undefined ? notify_on_incident_update : true,
+          notify_on_comment_reply !== undefined ? notify_on_comment_reply : true,
+          notify_on_escalation !== undefined ? notify_on_escalation : true,
+          notify_on_nearby_incident !== undefined ? notify_on_nearby_incident : true,
+          nearby_radius_km !== undefined ? nearby_radius_km : 5,
+          quiet_hours_start,
+          quiet_hours_end,
+          notification_frequency !== undefined ? notification_frequency : 'realtime'
+        ]
+      );
+    }
+
+    res.json({
+      message: 'Notification preferences updated successfully',
+      preferences: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Update notification preferences error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
 module.exports = router;
