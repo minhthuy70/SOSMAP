@@ -30,6 +30,9 @@ startPeriodicRecording();
 // Initialize Rate Limiting
 const { createUserRateLimiter, createAuthRateLimiter, createUploadRateLimiter } = require('./middleware/rateLimitPerUser');
 
+// Initialize Request Logging
+const { logRequest, logResponse, logError, logSlowRequests } = require('./middleware/requestLogger');
+
 // Swagger Documentation
 const swaggerSpec = require('./swagger');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -42,6 +45,11 @@ app.use(morgan('combined', { stream: { write: message => logger.info(message.tri
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Request Logging Middleware
+app.use(logRequest);
+app.use(logResponse);
+app.use(logSlowRequests(1000)); // Log requests slower than 1 second
+
 // APM Middleware
 app.use(apmMiddleware);
 
@@ -50,6 +58,7 @@ const { sanitizeInput } = require('./middleware/validation');
 app.use(sanitizeInput);
 
 // Error handling middleware
+app.use(logError);
 app.use((err, req, res, next) => {
   logger.error('Server error:', {
     message: err.message,
