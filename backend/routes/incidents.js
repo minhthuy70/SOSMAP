@@ -7,6 +7,7 @@ const upload = require('../middleware/upload');
 const { broadcastIncidentUpdate, sendIncidentUpdate } = require('../services/websocket');
 const { cacheMiddleware, invalidateCache } = require('../middleware/cache');
 const { clusterIncidents, detectEmergingHotspots, clusterByTime, getClusterStatistics } = require('../services/clustering');
+const { autoCalculateSeverity, recalculateIncidentSeverity, batchRecalculateSeverity } = require('../services/severityCalculator');
 
 /**
  * @swagger
@@ -1046,6 +1047,44 @@ router.get('/:id/timeline', auth, async (req, res) => {
     });
   } catch (error) {
     console.error('Get timeline error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Auto-calculate severity for an incident
+router.post('/:id/calculate-severity', auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await recalculateIncidentSeverity(pool, id);
+
+    res.json({
+      message: 'Severity recalculated successfully',
+      result
+    });
+  } catch (error) {
+    console.error('Calculate severity error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Batch calculate severity for multiple incidents
+router.post('/batch-calculate-severity', auth, async (req, res) => {
+  try {
+    const { incident_ids } = req.body;
+
+    if (!Array.isArray(incident_ids) || incident_ids.length === 0) {
+      return res.status(400).json({ error: { message: 'incident_ids must be a non-empty array', status: 400 } });
+    }
+
+    const results = await batchRecalculateSeverity(pool, incident_ids);
+
+    res.json({
+      message: 'Batch severity calculation completed',
+      results
+    });
+  } catch (error) {
+    console.error('Batch calculate severity error:', error);
     res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
   }
 });
