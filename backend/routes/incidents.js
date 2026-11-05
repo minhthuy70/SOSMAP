@@ -9,6 +9,7 @@ const { cacheMiddleware, invalidateCache } = require('../middleware/cache');
 const { clusterIncidents, detectEmergingHotspots, clusterByTime, getClusterStatistics } = require('../services/clustering');
 const { autoCalculateSeverity, recalculateIncidentSeverity, batchRecalculateSeverity } = require('../services/severityCalculator');
 const { findPotentialDuplicates, markAsDuplicate, getDuplicateIncidents, unmarkDuplicate, scanForDuplicates } = require('../services/duplicateDetection');
+const { mergeIncidents, getMergeHistory, unmergeIncident, getAllMergedIncidents } = require('../services/incidentMerge');
 
 /**
  * @swagger
@@ -1211,6 +1212,96 @@ router.post('/scan-duplicates', auth, async (req, res) => {
     });
   } catch (error) {
     console.error('Scan duplicates error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Merge incidents
+router.post('/merge', auth, [
+  body('primary_incident_id').notEmpty().isInt(),
+  body('incident_ids').isArray({ min: 1 })
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const { primary_incident_id, incident_ids } = req.body;
+
+    // Ensure primary is not in the list to merge
+    if (incident_ids.includes(parseInt(primary_incident_id))) {
+      return res.status(400).json({ 
+        error: { message: 'Primary incident cannot be in the list of incidents to merge', status: 400 } 
+      });
+    }
+
+    const result = await mergeIncidents(pool, primary_incident_id, incident_ids, req.user.id);
+
+    res.json({
+      message: 'Incidents merged successfully',
+      result
+    });
+  } catch (error) {
+    console.error('Merge incidents error:', error);
+    res.status(500).json({ error: { message: error.message || 'Internal server error', status: 500 } });
+  }
+});
+
+// Get merge history for an incident
+router.get('/:id/merge-history', auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const history = await getMergeHistory(pool, id);
+
+    res.json(history);
+  } catch (error) {
+    console.error('Get merge history error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Unmerge an incident
+router.post('/:id/unmerge', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const { id } = req.params;
+
+    const result = await unmergeIncident(pool, id, req.user.id);
+
+    res.json({
+      message: 'Incident unmerged successfully',
+      result
+    });
+  } catch (error) {
+    console.error('Unmerge incident error:', error);
+    res.status(500).json({ error: { message: error.message || 'Internal server error', status: 500 } });
+  }
+});
+
+// Get all merged incidents
+router.get('/merged', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const merged = await getAllMergedIncidents(pool);
+
+    res.json({
+      merged_incidents: merged,
+      count: merged.length
+    });
+  } catch (error) {
+    console.error('Get merged incidents error:', error);
     res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
   }
 });
