@@ -5,6 +5,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
 const { sendWelcomeEmail } = require('../services/email');
+const { createAuthRateLimiter } = require('../middleware/rateLimitPerUser');
+
+// Apply strict rate limiting to auth endpoints
+const authLimiter = createAuthRateLimiter();
 
 /**
  * @swagger
@@ -97,7 +101,7 @@ const { sendWelcomeEmail } = require('../services/email');
  */
 
 // Register
-router.post('/register', [
+router.post('/register', authLimiter, [
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 6 }),
   body('name').trim().notEmpty()
@@ -155,7 +159,7 @@ router.post('/register', [
 });
 
 // Login
-router.post('/login', [
+router.post('/login', authLimiter, [
   body('email').isEmail().normalizeEmail(),
   body('password').notEmpty()
 ], async (req, res) => {

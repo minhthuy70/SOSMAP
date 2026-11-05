@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const { auth } = require('../middleware/auth');
 const bcrypt = require('bcryptjs');
 const pool = require('../config/database');
+const { getUserRateLimitStatus, resetUserRateLimit } = require('../middleware/rateLimitPerUser');
 
 // Get user profile
 router.get('/profile', auth, async (req, res) => {
@@ -502,6 +503,70 @@ router.put('/:id/notification-preferences', auth, [
     });
   } catch (error) {
     console.error('Update notification preferences error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Get user rate limit status
+router.get('/:id/rate-limit-status', auth, async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Only users can view their own rate limit or admins
+    if (req.user.id !== parseInt(userId) && req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const userResult = await pool.query(
+      'SELECT id, role FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'User not found', status: 404 } });
+    }
+
+    const user = userResult.rows[0];
+    const status = getUserRateLimitStatus(user.id, user.role);
+
+    res.json({
+      user_id: user.id,
+      role: user.role,
+      rate_limit: status
+    });
+  } catch (error) {
+    console.error('Get rate limit status error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Reset user rate limit (admin only)
+router.post('/:id/reset-rate-limit', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const userId = req.params.id;
+
+    const userResult = await pool.query(
+      'SELECT id, role FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'User not found', status: 404 } });
+    }
+
+    const user = userResult.rows[0];
+    resetUserRateLimit(user.id, user.role);
+
+    res.json({
+      message: 'Rate limit reset successfully',
+      user_id: user.id
+    });
+  } catch (error) {
+    console.error('Reset rate limit error:', error);
     res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
   }
 });

@@ -27,6 +27,9 @@ initializeEmailService();
 const { apmMiddleware, getMetrics, startPeriodicRecording } = require('./services/apm');
 startPeriodicRecording();
 
+// Initialize Rate Limiting
+const { createUserRateLimiter, createAuthRateLimiter, createUploadRateLimiter } = require('./middleware/rateLimitPerUser');
+
 // Swagger Documentation
 const swaggerSpec = require('./swagger');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

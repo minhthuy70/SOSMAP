@@ -10,6 +10,9 @@ const { clusterIncidents, detectEmergingHotspots, clusterByTime, getClusterStati
 const { autoCalculateSeverity, recalculateIncidentSeverity, batchRecalculateSeverity } = require('../services/severityCalculator');
 const { findPotentialDuplicates, markAsDuplicate, getDuplicateIncidents, unmarkDuplicate, scanForDuplicates } = require('../services/duplicateDetection');
 const { mergeIncidents, getMergeHistory, unmergeIncident, getAllMergedIncidents } = require('../services/incidentMerge');
+const { createUploadRateLimiter } = require('../middleware/rateLimitPerUser');
+
+const uploadLimiter = createUploadRateLimiter();
 
 /**
  * @swagger
@@ -710,7 +713,7 @@ router.delete('/:id', auth, async (req, res) => {
 });
 
 // Upload images/videos for incident
-router.post('/:id/upload', [auth, upload.array('files', 5)], async (req, res) => {
+router.post('/:id/upload', [auth, uploadLimiter, upload.array('files', 5)], async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: { message: 'No files uploaded', status: 400 } });
