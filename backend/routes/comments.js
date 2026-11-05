@@ -40,10 +40,59 @@ router.get('/incident/:incidentId', auth, async (req, res) => {
   }
 });
 
+// Get threaded comments for an incident
+router.get('/incident/:incidentId/threaded', auth, async (req, res) => {
+  try {
+    const { limit = 50, offset = 0 } = req.query;
+
+    // Check if incident exists
+    const incidentResult = await pool.query(
+      'SELECT id FROM incidents WHERE id = $1',
+      [req.params.incidentId]
+    );
+
+    if (incidentResult.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Incident not found', status: 404 } });
+    }
+
+    // Get top-level comments (no parent)
+    let query = 'SELECT * FROM incident_comments WHERE incident_id = $1 AND parent_comment_id IS NULL';
+    const params = [req.params.incidentId];
+
+    if (req.user.role !== 'admin' && req.user.role !== 'moderator') {
+      query += ' AND is_internal = false';
+    }
+
+    query += ' ORDER BY created_at ASC LIMIT $2 OFFSET $3';
+    params.push(limit, offset);
+
+    const result = await pool.query(query, params);
+    const topLevelComments = result.rows;
+
+    // Get replies for each top-level comment
+    for (const comment of topLevelComments) {
+      const repliesQuery = `
+        SELECT * FROM incident_comments 
+        WHERE incident_id = $1 AND parent_comment_id = $2
+        ${req.user.role !== 'admin' && req.user.role !== 'moderator' ? 'AND is_internal = false' : ''}
+        ORDER BY created_at ASC
+      `;
+      const repliesResult = await pool.query(repliesQuery, [req.params.incidentId, comment.id]);
+      comment.replies = repliesResult.rows;
+    }
+
+    res.json({ comments: topLevelComments });
+  } catch (error) {
+    console.error('Get threaded comments error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
 // Add comment to incident
 router.post('/incident/:incidentId', auth, [
   body('comment').trim().notEmpty().isLength({ min: 1, max: 2000 }),
-  body('is_internal').optional().isBoolean()
+  body('is_internal').optional().isBoolean(),
+  body('parent_comment_id').optional().isInt()
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -51,7 +100,7 @@ router.post('/incident/:incidentId', auth, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { comment, is_internal } = req.body;
+    const { comment, is_internal, parent_comment_id } = req.body;
 
     // Check if incident exists
     const incidentResult = await pool.query(
@@ -68,11 +117,23 @@ router.post('/incident/:incidentId', auth, [
       return res.status(403).json({ error: { message: 'Only admins can add internal comments', status: 403 } });
     }
 
+    // Verify parent comment exists if provided
+    if (parent_comment_id) {
+      const parentResult = await pool.query(
+        'SELECT id FROM incident_comments WHERE id = $1 AND incident_id = $2',
+        [parent_comment_id, req.params.incidentId]
+      );
+
+      if (parentResult.rows.length === 0) {
+        return res.status(404).json({ error: { message: 'Parent comment not found', status: 404 } });
+      }
+    }
+
     const result = await pool.query(
-      `INSERT INTO incident_comments (incident_id, user_id, comment, is_internal)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO incident_comments (incident_id, user_id, comment, is_internal, parent_comment_id)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [req.params.incidentId, req.user.id, comment, is_internal || false]
+      [req.params.incidentId, req.user.id, comment, is_internal || false, parent_comment_id || null]
     );
 
     const newComment = result.rows[0];
