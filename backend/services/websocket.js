@@ -1,9 +1,58 @@
 const socketIo = require('socket.io');
+const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
+const pool = require('../config/database');
 
 let io;
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
+
+/**
+ * WebSocket authentication middleware
+ */
+async function authenticateSocket(socket, next) {
+  try {
+    const token = socket.handshake.auth.token || socket.handshake.headers.authorization;
+    
+    if (!token) {
+      return next(new Error('Authentication error: No token provided'));
+    }
+    
+    // Remove 'Bearer ' prefix if present
+    const tokenValue = token.startsWith('Bearer ') ? token.slice(7) : token;
+    
+    // Verify JWT token
+    const decoded = jwt.verify(tokenValue, process.env.JWT_SECRET || 'your-secret-key');
+    
+    // Verify user exists
+    const userResult = await pool.query(
+      'SELECT id, email, name, role FROM users WHERE id = $1',
+      [decoded.userId]
+    );
+    
+    if (userResult.rows.length === 0) {
+      return next(new Error('Authentication error: User not found'));
+    }
+    
+    // Attach user to socket
+    socket.user = userResult.rows[0];
+    socket.userId = userResult.rows[0].id;
+    
+    logger.info('WebSocket authenticated', {
+      socketId: socket.id,
+      userId: socket.userId,
+      userRole: socket.user.role
+    });
+    
+    next();
+  } catch (error) {
+    logger.error('WebSocket authentication failed', {
+      socketId: socket.id,
+      error: error.message
+    });
+    next(new Error('Authentication error: Invalid token'));
+  }
+}
 
 function initializeWebSocket(server) {
   io = socketIo(server, {
@@ -16,22 +65,36 @@ function initializeWebSocket(server) {
     transports: ['websocket', 'polling']
   });
 
+  // Apply authentication middleware
+  io.use(authenticateSocket);
+
   io.on('connection', (socket) => {
-    logger.info('Client connected', { socketId: socket.id });
+    logger.info('Client connected', {
+      socketId: socket.id,
+      userId: socket.userId,
+      userRole: socket.user?.role
+    });
 
     // Handle connection errors
     socket.on('error', (error) => {
       logger.error('WebSocket error', {
         socketId: socket.id,
+        userId: socket.userId,
         error: error.message
       });
     });
 
-    // Join user-specific room
+    // Join user-specific room (now uses authenticated userId)
     socket.on('join-user-room', (userId) => {
       try {
+        // Only allow joining own room or admin can join any
+        if (socket.userId !== parseInt(userId) && socket.user?.role !== 'admin') {
+          socket.emit('error', { message: 'Unauthorized to join this room' });
+          return;
+        }
+        
         socket.join(`user-${userId}`);
-        logger.info('User joined room', { userId, socketId: socket.id });
+        logger.info('User joined room', { userId, socketId: socket.id, requestBy: socket.userId });
       } catch (error) {
         logger.error('Failed to join user room', {
           userId,
