@@ -1306,4 +1306,223 @@ router.get('/merged', auth, async (req, res) => {
   }
 });
 
+// Bulk update incident status
+router.post('/bulk-update-status', auth, [
+  body('incident_ids').isArray({ min: 1 }),
+  body('status').isIn(['pending', 'in_progress', 'resolved', 'closed', 'duplicate', 'merged'])
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const { incident_ids, status } = req.body;
+
+    const placeholders = incident_ids.map((_, i) => `$${i + 2}`).join(',');
+    const result = await pool.query(
+      `UPDATE incidents 
+       SET status = $1, updated_at = NOW()
+       WHERE id IN (${placeholders})
+       RETURNING id, status`,
+      [status, ...incident_ids]
+    );
+
+    // Invalidate cache
+    invalidateCache('incidents');
+
+    res.json({
+      message: 'Bulk status update completed',
+      updated_count: result.rowCount,
+      updated_incidents: result.rows
+    });
+  } catch (error) {
+    console.error('Bulk update status error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Bulk assign incidents to users
+router.post('/bulk-assign', auth, [
+  body('incident_ids').isArray({ min: 1 }),
+  body('assigned_to').isInt()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const { incident_ids, assigned_to } = req.body;
+
+    // Verify assignee exists
+    const userResult = await pool.query(
+      'SELECT id, name FROM users WHERE id = $1',
+      [assigned_to]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: { message: 'Assigned user not found', status: 404 } });
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      const assignments = [];
+      for (const incidentId of incident_ids) {
+        // Check if assignment already exists
+        const existing = await client.query(
+          'SELECT id FROM incident_assignments WHERE incident_id = $1',
+          [incidentId]
+        );
+
+        if (existing.rows.length > 0) {
+          // Update existing
+          await client.query(
+            `UPDATE incident_assignments 
+             SET assigned_to = $1, assigned_by = $2, assigned_at = NOW(), updated_at = NOW()
+             WHERE incident_id = $3`,
+            [assigned_to, req.user.id, incidentId]
+          );
+        } else {
+          // Create new
+          await client.query(
+            `INSERT INTO incident_assignments (incident_id, assigned_to, assigned_by, assigned_at, updated_at)
+             VALUES ($1, $2, $3, NOW(), NOW())`,
+            [incidentId, assigned_to, req.user.id]
+          );
+        }
+
+        assignments.push({
+          incident_id: incidentId,
+          assigned_to
+        });
+      }
+
+      await client.query('COMMIT');
+
+      res.json({
+        message: 'Bulk assignment completed',
+        assigned_count: assignments.length,
+        assignments
+      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Bulk assign error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Bulk update incident severity
+router.post('/bulk-update-severity', auth, [
+  body('incident_ids').isArray({ min: 1 }),
+  body('severity').isIn(['low', 'medium', 'high', 'critical'])
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const { incident_ids, severity } = req.body;
+
+    const placeholders = incident_ids.map((_, i) => `$${i + 2}`).join(',');
+    const result = await pool.query(
+      `UPDATE incidents 
+       SET severity = $1, updated_at = NOW()
+       WHERE id IN (${placeholders})
+       RETURNING id, severity`,
+      [severity, ...incident_ids]
+    );
+
+    // Invalidate cache
+    invalidateCache('incidents');
+
+    res.json({
+      message: 'Bulk severity update completed',
+      updated_count: result.rowCount,
+      updated_incidents: result.rows
+    });
+  } catch (error) {
+    console.error('Bulk update severity error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
+// Bulk delete incidents
+router.post('/bulk-delete', auth, [
+  body('incident_ids').isArray({ min: 1 })
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: { message: 'Unauthorized', status: 403 } });
+    }
+
+    const { incident_ids } = req.body;
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Delete related data first
+      for (const incidentId of incident_ids) {
+        await client.query('DELETE FROM incident_comments WHERE incident_id = $1', [incidentId]);
+        await client.query('DELETE FROM incident_ratings WHERE incident_id = $1', [incidentId]);
+        await client.query('DELETE FROM incident_assignments WHERE incident_id = $1', [incidentId]);
+        await client.query('DELETE FROM incident_escalations WHERE incident_id = $1', [incidentId]);
+        await client.query('DELETE FROM incident_relations WHERE incident_id = $1', [incidentId]);
+      }
+
+      // Delete incidents
+      const placeholders = incident_ids.map((_, i) => `$${i + 1}`).join(',');
+      const result = await client.query(
+        `DELETE FROM incidents WHERE id IN (${placeholders}) RETURNING id`,
+        incident_ids
+      );
+
+      await client.query('COMMIT');
+
+      // Invalidate cache
+      invalidateCache('incidents');
+
+      res.json({
+        message: 'Bulk delete completed',
+        deleted_count: result.rowCount,
+        deleted_ids: result.rows.map(r => r.id)
+      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Bulk delete error:', error);
+    res.status(500).json({ error: { message: 'Internal server error', status: 500 } });
+  }
+});
+
 module.exports = router;
